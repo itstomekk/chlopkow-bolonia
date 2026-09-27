@@ -5,6 +5,8 @@ Daylight and a straight-on angle work best, and several angles are better than o
 
 Send them to Tomek. **Photos are never committed to this repo.** They stay on the local machine and are only used as references for image generation.
 
+**Received 2026-09-27:** church front, four interior photos (altar, nave, Mary niche) and the Sołtys → used for the church interior and the Sołtys NPC.
+
 ## Landmarks (each becomes a hand-made sprite)
 
 | # | Element | Now in the game | Best photos |

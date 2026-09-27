@@ -32,6 +32,9 @@ Progress saves automatically in the browser (localStorage).
 
 On the way you can jump over garden fences, hay bales and the Białka river.
 
+**The church can be entered:** walk up to its door and press Space/E. Inside is the nave with its pews, the altar, stained glass,
+Our Lady's niche and the "100" flowers for the parish centenary. The **Sołtys** (village head) waits by the ambo with the harvest bread. Walk out through the door at the bottom.
+
 ### Quiz o Chłopkowie
 **Pani Halina**, the village chronicler, stands near the shop. She introduces a 13-question ABCD quiz about the real history of Chłopków
 (source: [Polish Wikipedia](https://pl.wikipedia.org/wiki/Ch%C5%82opk%C3%B3w_(wojew%C3%B3dztwo_mazowieckie)), CC BY-SA).
@@ -54,6 +57,7 @@ docs/                    ← the game (GitHub Pages serves this folder)
   js/game.js             ← core: input, physics, NPC quests, rendering, extension HOOKS (commented)
   js/features.js         ← quiz UI + Pani Halina + signboards, and the three minigames (plugs into HOOKS)
   js/quiz.js             ← the 13 quiz questions (PL/EN), each bound to a map spot
+  js/church.js           ← church interior room (drawn in code from reference photos, AI sprites auto-load from img/church/) + Sołtys
   map.json               ← map size, y-sortable objects, points of interest, spawn point
   items.json             ← NPC positions, apples, the cap
   img/map_ground.png     ← ground layer (fields, roads, river, fences)

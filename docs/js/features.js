@@ -95,6 +95,7 @@ window.addEventListener('ark-ready', () => {
     return true;
   });
   HOOKS.blocksPlayer.push(() => !!QZ);
+  if (HOOKS.busy) HOOKS.busy.push(() => !!QZ);
   HOOKS.update.push(dt => { if (QZ) QZ.t += dt; });
 
   function drawQuiz(U, W, H) {
@@ -246,6 +247,7 @@ window.addEventListener('ark-ready', () => {
     },
   }))));
   HOOKS.blocksPlayer.push(() => !!MG && MG.phase !== 'run');
+  if (HOOKS.busy) HOOKS.busy.push(() => !!MG);
   HOOKS.key.push(e => {
     if (!MG) return false;
     if (e.code === 'Escape') { MG = null; return true; }

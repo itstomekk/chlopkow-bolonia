@@ -34,7 +34,7 @@
     pl: {
       title: 'AREK W CHŁOPKOWIE', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA',
-      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZBYSZEK', halina: 'PANI HALINA' },
+      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZBYSZEK', halina: 'PANI HALINA', soltys: 'SOŁTYS' },
       church: ['Kościół pw. Narodzenia NMP. Dzwony biją w południe. Arek, jak zwykle, spóźniony.'],
       rectory: ['Plebania. Ksiądz macha z okna. Arek udaje, że poprawia okulary.'],
       cemetery: ['Cmentarz parafialny. Arek zdejmuje okulary. Na chwilę.'],
@@ -60,12 +60,22 @@
       grandpa2: ['Pomogłeś całej ekipie. Dobra robota, Arek.', 'Masz tu kluczyki do mojego Ursusa. Tylko w niedzielę i tylko do wzgórza.', 'I nie mów babci.'],
       apple: 'JABŁKO', cap: 'CZAPKA DAMIANA', gotCap: ['Czapka Damiana! Trochę zakurzona, ale cała.'],
       quests: ['10 jabłek dla Kasi', 'Czapka Damiana', 'Oranżada dla Marcina', 'Pogadaj z dziadkiem Zbyszkiem'],
+      churchIn: ['Wnętrze kościoła. Chłodno, cicho, pachnie woskiem i kwiatami.'],
+      altar: ['Ołtarz w białym obrusie z koronką. Arek niczego nie dotyka. Tym razem.'],
+      mary: ['Matka Boża w marmurowej niszy. Ktoś zostawił świeże kwiaty i wieniec z kłosów.'],
+      glass: ['Witraże świecą jak ekran telefonu. Tylko ładniej.'],
+      flowers: ['Kwiaty ułożone w złote „100”. Sto lat parafii w Chłopkowie!'],
+      confession: ['Konfesjonał. Arek szybko idzie dalej. Nie dziś.'],
+      pew: ['Drewniane ławki. Babcia zawsze siada w trzecim rzędzie, po lewej.'],
+      soltys0: ['Dzień dobry, Arek. Chleb na dożynki już jest, poświęcony.', 'Teraz czekamy tylko na szarlotkę Kasi. Pomożesz jej, prawda?'],
+      soltys1: ['Szarlotka Kasi będzie? To dożynki mamy uratowane.', 'Sołtys wszystko widzi, Arek. Dobra robota.'],
+      churchLabel: 'KOŚCIÓŁ', exitHint: '↓ WYJŚCIE',
       end1: 'MASZ KLUCZYKI DO URSUSA', end2: 'CIĄG DALSZY: GRAND THEFT TRACTOR', end3: 'CZAS', endKey: 'ENTER — GRAJ DALEJ',
     },
     en: {
       title: 'AREK IN CHŁOPKÓW', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP',
-      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZBYSZEK', halina: 'MRS HALINA' },
+      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZBYSZEK', halina: 'MRS HALINA', soltys: 'SOŁTYS (VILLAGE HEAD)' },
       church: ['Church of the Nativity of the Virgin Mary. Bells at noon. Arek is late, as usual.'],
       rectory: ['The rectory. The priest waves from a window. Arek pretends to fix his sunglasses.'],
       cemetery: ['The parish cemetery. Arek takes his sunglasses off. For a moment.'],
@@ -91,6 +101,16 @@
       grandpa2: ['You helped the whole crew. Good job, Arek.', 'Here are the keys to my Ursus. Sundays only, and only to the hill.', "And don't tell Grandma."],
       apple: 'APPLE', cap: "DAMIAN'S CAP", gotCap: ["Damian's cap! A bit dusty, but in one piece."],
       quests: ['10 apples for Kasia', "Damian's cap", 'Orangeade for Marcin', 'Talk to Grandpa Zbyszek'],
+      churchIn: ['Inside the church. Cool, quiet, it smells of wax and flowers.'],
+      altar: ['The altar in its white lace cloth. Arek touches nothing. This time.'],
+      mary: ['Our Lady in a marble niche. Someone left fresh flowers and a wreath of wheat.'],
+      glass: ['The stained glass glows like a phone screen. Only prettier.'],
+      flowers: ['Flowers around a golden "100". The parish of Chłopków turns one hundred!'],
+      confession: ['The confessional. Arek walks on quickly. Not today.'],
+      pew: ['Wooden pews. Grandma always sits in the third row, on the left.'],
+      soltys0: ['Good morning, Arek. The harvest bread is ready, and blessed.', "Now we're only waiting for Kasia's apple pie. You'll help her, right?"],
+      soltys1: ["Kasia's pie is coming? Then the harvest festival is saved.", 'The sołtys sees everything, Arek. Good job.'],
+      churchLabel: 'CHURCH', exitHint: '↓ EXIT',
       end1: 'YOU GOT THE URSUS KEYS', end2: 'TO BE CONTINUED: GRAND THEFT TRACTOR', end3: 'TIME', endKey: 'ENTER — KEEP PLAYING',
     },
   }[LANG];
@@ -106,11 +126,12 @@
      questLog(lines)                          push [text, done] rows into the quest log
      minimap(dot)                             draw markers: dot(x, y, colour)
      blocksPlayer() -> true to freeze normal movement (e.g. countdowns) */
-  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [] };
+  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [], busy: [] };   // busy: a quiz/minigame is running (church door stays shut)
 
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   let MAP, GROUND, OBJ, SOLID, SPR, MINI, NPCIMG, ITEMS;
+  let ROOM = null, OUT = null, trans = null;   // ROOM: the church interior while Arek is inside; OUT: the village to return to
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
@@ -123,7 +144,7 @@
   const keys = new Set();
   const joy = { active: false, id: null, cx: 0, cy: 0, x: 0, y: 0 };
 
-  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ Q, x: P.x, y: P.y })); } catch (e) { } }
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ Q, x: ROOM ? OUT.x : P.x, y: ROOM ? OUT.y : P.y })); } catch (e) { } }
   function loadSave() {
     try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.Q) { Q = Object.assign(Q, s.Q); P.x = s.x; P.y = s.y; return true; } } catch (e) { }
     return false;
@@ -170,15 +191,35 @@
   const endJoy = e => { if (e.pointerId === joy.id) Object.assign(joy, { active: false, x: 0, y: 0 }); };
   cvs.addEventListener('pointerup', endJoy); cvs.addEventListener('pointercancel', endJoy);
 
+  /* ---------- rooms (church interior) ---------- */
+  function fade(fn) { if (!trans) trans = { t: 0, fn, done: false }; }
+  function enterChurch() {
+    fade(() => {
+      const c = window.buildChurch();
+      OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y };
+      ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
+      GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
+      P.x = c.spawn.x; P.y = c.spawn.y; P.dir = 'up'; camX = P.x; camY = P.y; dust = [];
+      if (!Q.churchSeen) { Q.churchSeen = true; save(); say('arek', T.churchIn); }
+    });
+  }
+  function leaveRoom() {
+    fade(() => {
+      ({ MAP, GROUND, OBJ, SOLID } = OUT); P.x = OUT.x; P.y = OUT.y + 6; P.dir = 'down';
+      ROOM = null; unstick(); camX = P.x; camY = P.y; dust = []; save();
+    });
+  }
+  const npcsHere = () => ROOM ? [{ id: 'soltys', x: ROOM.soltys.x, y: ROOM.soltys.y }] : ITEMS.npcs;
+
   /* ---------- dialogue & quests ---------- */
   function say(who, lines, after) { talk = { who, lines, i: 0, after }; talkT = 0; }
   function nearThing() {
     let best = null, bd = 1e9;
-    for (const n of ITEMS.npcs) { const d = Math.hypot(P.x - n.x, P.y - n.y); if (d < 42 && d < bd) { bd = d; best = { npc: n.id, x: n.x, y: n.y }; } }
+    for (const n of npcsHere()) { const d = Math.hypot(P.x - n.x, P.y - n.y); if (d < 42 && d < bd) { bd = d; best = { npc: n.id, x: n.x, y: n.y }; } }
     if (best) return best;
-    for (const f of HOOKS.near) for (const c of f(P)) { const d = Math.hypot(P.x - c.x, P.y - c.y); if (d < (c.r || 30) && d < bd) { bd = d; best = { feat: c, x: c.x, y: c.y }; } }
+    if (!ROOM) for (const f of HOOKS.near) for (const c of f(P)) { const d = Math.hypot(P.x - c.x, P.y - c.y); if (d < (c.r || 30) && d < bd) { bd = d; best = { feat: c, x: c.x, y: c.y }; } }
     if (best) return best;
-    for (const s of MAP.pois) { const r = SPOT_R[s.key] || 50, d = Math.hypot(P.x - s.x, P.y - s.y); if (d < r && d < bd) { bd = d; best = { poi: s.key, x: s.x, y: s.y }; } }
+    for (const s of MAP.pois) { const r = s.r || SPOT_R[s.key] || 50, d = Math.hypot(P.x - s.x, P.y - s.y); if (d < r && d < bd) { bd = d; best = { poi: s.key, x: s.x, y: s.y }; } }
     return best;
   }
   function talkNpc(id) {
@@ -194,6 +235,8 @@
       if (Q.marcin === 0) { Q.marcin = 1; say(id, T.marcin0); }
       else if (Q.marcin === 1) { if (Q.orange) { Q.marcin = 2; say(id, T.marcin2, () => celebrate()); } else say(id, T.marcin1); }
       else say(id, T.marcin3);
+    } else if (id === 'soltys') {
+      say(id, Q.kasia === 2 ? T.soltys1 : T.soltys0);
     } else if (id === 'grandpa') {
       const n = questsDone();
       if (Q.grandpa === 2) say(id, [T.grandpa2[2]]);
@@ -214,6 +257,7 @@
     const s = nearThing(); if (!s) return;
     if (s.npc) { turnTo(s); talkNpc(s.npc); return; }
     if (s.feat) { turnTo(s); s.feat.onInteract(); return; }
+    if (s.poi === 'church') { if (!HOOKS.busy.some(f => f())) enterChurch(); return; }
     if (s.poi === 'shop' && Q.marcin === 1 && !Q.orange) { Q.orange = true; save(); say('arek', T.shopBuy, () => popToast('+ ORANŻADA'.replace('ORANŻADA', LANG === 'pl' ? 'ORANŻADA' : 'ORANGEADE'))); return; }
     say('arek', T[s.poi]);
   }
@@ -257,14 +301,14 @@
   /* ---------- physics ---------- */
   function solidAt(x, y, air) {
     x |= 0; y |= 0;
-    if (x < 4 || y < 40 || x >= MAP.w - 4 || y >= MAP.h - 2) return true;
+    if (x < 4 || y < (MAP.top ?? 40) || x >= MAP.w - 4 || y >= MAP.h - 2) return true;
     const v = SOLID[y * MAP.w + x];
     return air ? v === 2 : v !== 0;   // 2 = tall (walls, trees, ponds), 1 = low (fences, streams, hay) — clearable mid-air
   }
   function blocked(x, y, air = false) {
     const l = x - HIT.w / 2, r = x + HIT.w / 2, t = y - HIT.h;
     if (solidAt(l, y, air) || solidAt(r, y, air) || solidAt(l, t, air) || solidAt(r, t, air) || solidAt(x, y, air) || solidAt(x, t, air)) return true;
-    if (ITEMS) for (const n of ITEMS.npcs) if (Math.abs(x - n.x) < 12 && Math.abs(y - n.y) < 6) return true;
+    if (ITEMS) for (const n of npcsHere()) if (Math.abs(x - n.x) < 12 && Math.abs(y - n.y) < 6) return true;
     return false;
   }
   function unstick() {
@@ -277,6 +321,7 @@
     dust = dust.filter(d => (d.t += dt) < .5);
     fx = fx.filter(f => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 320 * dt; return f.t < 1.2; });
     if (toast && (toast.t += dt) > 1.6) toast = null;
+    if (trans) { trans.t += dt; if (!trans.done && trans.t >= .25) { trans.done = true; trans.fn(); } if (trans.t >= .5) trans = null; else return; }
     if (scene !== 'play') return;
     Q.playTime += dt;
     if (talk) { talkT += dt; P.moving = false; return; }
@@ -307,6 +352,7 @@
       }
     }
     }
+    if (ROOM) { const e = ROOM.exit; if (P.y > e.y && P.x > e.x0 && P.x < e.x1) leaveRoom(); return; }
     // pickups
     ITEMS.apples.forEach((a, i) => {
       if (Q.apples.includes(i) || Math.hypot(P.x - a.x, P.y - a.y) > 14) return;
@@ -393,13 +439,13 @@
   function render() {
     const W = cvs.width, H = cvs.height;
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = '#5f9c3b'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = ROOM ? '#1a1410' : '#5f9c3b'; ctx.fillRect(0, 0, W, H);
     camX += (P.x - camX) * .12; camY += (P.y - 16 - camY) * .12;
     const vw = W / zoom, vh = H / zoom;
-    const cx = Math.max(vw / 2, Math.min(MAP.w - vw / 2, camX)), cy = Math.max(vh / 2, Math.min(MAP.h - vh / 2, camY));
+    const cx = MAP.w < vw ? MAP.w / 2 : Math.max(vw / 2, Math.min(MAP.w - vw / 2, camX)), cy = MAP.h < vh ? MAP.h / 2 : Math.max(vh / 2, Math.min(MAP.h - vh / 2, camY));
     const ox = Math.round(W / 2 - cx * zoom), oy = Math.round(H / 2 - cy * zoom);
     const sx0 = Math.max(0, Math.floor(-ox / zoom)), sy0 = Math.max(0, Math.floor(-oy / zoom));
-    const sw = Math.min(MAP.w - sx0, Math.ceil(W / zoom) + 2), sh = Math.min(MAP.h - sy0, Math.ceil(H / zoom) + 2);
+    const sw = Math.max(1, Math.min(MAP.w - sx0, Math.ceil(W / zoom) + 2)), sh = Math.max(1, Math.min(MAP.h - sy0, Math.ceil(H / zoom) + 2));
     ctx.drawImage(GROUND, sx0, sy0, sw, sh, ox + sx0 * zoom, oy + sy0 * zoom, sw * zoom, sh * zoom);
     const S = (x, y) => [ox + x * zoom, oy + y * zoom];
     for (const d of dust) { const k = d.t / .5; ctx.fillStyle = `rgba(235,220,180,${.55 * (1 - k)})`; const s = (2 + k * 3) * zoom; ctx.fillRect(ox + (d.x - 2 - k * 4) * zoom, oy + (d.y - 2 - k * 3) * zoom, s, s); }
@@ -408,13 +454,22 @@
     const inView = (x, y) => x > sx0 - 60 && x < sx0 + sw + 60 && y > sy0 - 60 && y < sy0 + sh + 80;
     const draw = [];
     for (const o of MAP.objects) if (o.x < sx0 + sw && o.x + o.w > sx0 && o.y < sy0 + sh && o.y + o.h > sy0) draw.push({ base: o.base, fn: () => ctx.drawImage(OBJ, o.x, o.y, o.w, o.h, ox + o.x * zoom, oy + o.y * zoom, o.w * zoom, o.h * zoom) });
+    if (ROOM) draw.push({ base: ROOM.soltys.y, fn: () => { const [a, b] = S(ROOM.soltys.x, ROOM.soltys.y); shadow(a, b, zoom, 8); if (window.CHURCH_ART.soltys) window.fitSprite(ctx, window.CHURCH_ART.soltys, a - 14 * zoom, b - 44 * zoom, 28 * zoom, 44 * zoom); else window.drawSoltys(ctx, a, b, zoom, time); ctx.imageSmoothingEnabled = false; } });
+    else {
     ITEMS.apples.forEach((a, i) => { if (!Q.apples.includes(i) && inView(a.x, a.y)) draw.push({ base: a.y, fn: () => drawApple(...S(a.x, a.y), zoom) }); });
     if (!Q.cap && inView(ITEMS.cap.x, ITEMS.cap.y)) draw.push({ base: ITEMS.cap.y, fn: () => drawCap(...S(ITEMS.cap.x, ITEMS.cap.y), zoom) });
     for (const n of ITEMS.npcs) if (inView(n.x, n.y)) draw.push({ base: n.y, fn: () => drawNpc(n, ...S(n.x, n.y), zoom) });
+    }
     draw.push({ base: P.y, fn: () => drawArek(...S(P.x, P.y), zoom) });
-    HOOKS.world.forEach(f => f((base, fn) => draw.push({ base, fn }), S, inView));
+    if (!ROOM) HOOKS.world.forEach(f => f((base, fn) => draw.push({ base, fn }), S, inView));
     draw.sort((a, b) => a.base - b.base).forEach(d => d.fn());
 
+    if (ROOM) for (const c of ROOM.candles) {   // flickering candle flames
+      const fl = Math.sin(time * 13 + c.x) * .5 + Math.sin(time * 7.3 + c.x * 3) * .5, [a, b] = S(c.x, c.y);
+      ctx.fillStyle = 'rgba(255,210,90,.18)'; ctx.fillRect(a - 3 * zoom, b - 4 * zoom, 6 * zoom, 6 * zoom);
+      ctx.fillStyle = '#ffb02e'; ctx.fillRect(a - zoom, b - (2 + fl * .6) * zoom, 2 * zoom, (3 + fl * .6) * zoom);
+      ctx.fillStyle = '#fff4c0'; ctx.fillRect(a - zoom * .5, b - (1 + fl * .4) * zoom, zoom, 2 * zoom);
+    }
     for (const f of fx) { ctx.globalAlpha = 1 - f.t / 1.2; ctx.fillStyle = f.c; const s = zoom * 2; ctx.fillRect(ox + f.x * zoom - s / 2, oy + f.y * zoom - s / 2, s, s); }
     ctx.globalAlpha = 1;
     if (DEBUG) { ctx.strokeStyle = 'cyan'; for (const s of MAP.pois) { ctx.beginPath(); ctx.arc(ox + s.x * zoom, oy + s.y * zoom, (SPOT_R[s.key] || 50) * zoom, 0, 7); ctx.stroke(); } }
@@ -467,8 +522,13 @@
       wrapText(shown, bw - U * 6).slice(0, 3).forEach((l, i) => ctx.fillText(l, bx + U * 3, by + U * (7.6 + i * 3.1)));
       if (shown.length >= full.length && Math.floor(time * 3) % 2) { ctx.fillStyle = '#ffd21f'; ctx.fillText('▼', bx + bw - U * 4, by + bh - U * 2.8); }
     }
+    if (scene === 'play' && ROOM) {   // room label instead of the village minimap
+      ctx.font = `${U * 1.8}px Silkscreen`; ctx.textAlign = 'right';
+      const txt = `${T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
+      ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(W - tw - U * 2, U * 2, tw, U * 4); ctx.fillStyle = '#ffd21f'; ctx.fillText(txt, W - U * 3, U * 4);
+    }
     // minimap
-    if (scene === 'play') {
+    if (scene === 'play' && !ROOM) {
       const big = showMap, mw = big ? Math.min(W * .8, H * .8 * MAP.w / MAP.h) : U * 16, mh = mw * MAP.h / MAP.w;
       const mx = big ? (W - mw) / 2 : W - mw - U * 2, my = big ? (H - mh) / 2 : U * 2;
       ctx.globalAlpha = big ? 1 : .9; ctx.fillStyle = '#10163a'; ctx.fillRect(mx - U * .5, my - U * .5, mw + U, mh + U);
@@ -494,6 +554,7 @@
       ctx.globalAlpha = .5; ctx.beginPath(); ctx.arc(W * .89, H * .8, U * 5, 0, 7); ctx.fill();
       ctx.globalAlpha = 1; ctx.fillStyle = '#10163a'; ctx.font = `${U * 2.6}px Silkscreen`; ctx.textAlign = 'center'; ctx.fillText('A', W * .89, H * .8);
     }
+    if (trans) { ctx.fillStyle = `rgba(0,0,0,${Math.max(0, 1 - Math.abs(trans.t - .25) / .25)})`; ctx.fillRect(0, 0, W, H); }
     if (scene === 'title') {
       ctx.fillStyle = 'rgba(5,8,25,0.72)'; ctx.fillRect(0, 0, W, H);
       ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 6}px Silkscreen`;
@@ -522,7 +583,10 @@
     const [g, o, c, sheet, meta, npcs] = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
       load('img/arek_sheet.png'), fetch('img/arek_sheet.json').then(r => r.json()), load('img/npcs.png'),
-      document.fonts.load('20px Silkscreen', 'ŁŚĆŻ')]);
+      document.fonts.load('20px Silkscreen', 'ŁŚĆŻ'),
+      // optional AI art for the church; a missing file just keeps the hand-drawn piece
+      fetch('img/church/manifest.json').then(r => r.json()).catch(() => [])
+        .then(names => Promise.all(names.map(k => load(`img/church/${k}.png`).then(i => { window.CHURCH_ART[k] = i; }, () => { }))))]);
     GROUND = g; OBJ = o; SPR = { sheet, meta }; NPCIMG = npcs;
     const tc = document.createElement('canvas'); tc.width = MAP.w; tc.height = MAP.h;
     const tx = tc.getContext('2d', { willReadFrequently: true }); tx.drawImage(c, 0, 0);
@@ -544,7 +608,7 @@
       load,
     };
     window.dispatchEvent(new Event('ark-ready'));
-    window.__game = { P, MAP, ITEMS, blocked, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, get talk() { return talk; } };
+    window.__game = { P, get MAP() { return MAP; }, ITEMS, blocked, enterChurch, get room() { return ROOM; }, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, get talk() { return talk; } };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();
