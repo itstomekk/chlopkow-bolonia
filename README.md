@@ -29,6 +29,9 @@ Progress saves automatically in the browser (localStorage).
 - **Grandpa Zbyszek** (by the Koźlak windmill) hands over the **keys to his Ursus** once the whole crew has been helped.
 
 On the way you can jump over garden fences, hay bales and the Białka river.
+
+**The church can be entered:** walk up to its door and press Space/E. Inside is the nave with its pews, the altar, stained glass,
+Our Lady's niche and the jubilee "100" flowers. The **Sołtys** (village head) waits by the ambo with the harvest bread. Walk out through the door at the bottom.
 You can also read about the church, the rectory, the cemetery, the windmill, the shop, the bus stops and the river.
 
 ## How it's built
@@ -37,6 +40,7 @@ You can also read about the church, the rectory, the cemetery, the windmill, the
 docs/                    ← the game (GitHub Pages serves this folder)
   index.html
   js/game.js             ← the whole game: input, physics, quests, rendering (commented)
+  js/church.js           ← church interior room (drawn in code from reference photos) + Sołtys sprite
   map.json               ← map size, y-sortable objects, points of interest, spawn point
   items.json             ← NPC positions, apples, the cap
   img/map_ground.png     ← ground layer (fields, roads, river, fences)
