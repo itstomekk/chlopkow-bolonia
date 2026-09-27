@@ -24,6 +24,12 @@
    "id": "halina",
    "x": 714,
    "y": 786
+  },
+  {
+   "id": "soltys",
+   "x": 1760,
+   "y": 1600,
+   "secret": true
   }
  ],
  "apples": [

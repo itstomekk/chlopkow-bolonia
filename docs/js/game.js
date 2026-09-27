@@ -69,6 +69,7 @@
       pew: ['Drewniane ławki. Babcia zawsze siada w trzecim rzędzie, po lewej.'],
       soltys0: ['Dzień dobry, Arek. Chleb na dożynki już jest, poświęcony.', 'Teraz czekamy tylko na szarlotkę Kasi. Pomożesz jej, prawda?'],
       soltys1: ['Szarlotka Kasi będzie? To dożynki mamy uratowane.', 'Sołtys wszystko widzi, Arek. Dobra robota.'],
+      soltysSecret: ['Sołtys musi wiedzieć, co dzieje się w każdym zakątku wsi. Nawet w tym.'],
       churchLabel: 'KOŚCIÓŁ', exitHint: '↓ WYJŚCIE',
       end1: 'MASZ KLUCZYKI DO URSUSA', end2: 'CIĄG DALSZY: GRAND THEFT TRACTOR', end3: 'CZAS', endKey: 'ENTER — GRAJ DALEJ',
     },
@@ -110,6 +111,7 @@
       pew: ['Wooden pews. Grandma always sits in the third row, on the left.'],
       soltys0: ['Good morning, Arek. The harvest bread is ready, and blessed.', "Now we're only waiting for Kasia's apple pie. You'll help her, right?"],
       soltys1: ["Kasia's pie is coming? Then the harvest festival is saved.", 'The sołtys sees everything, Arek. Good job.'],
+      soltysSecret: ['A village head must know what is happening in every corner of the village. Even this one.'],
       churchLabel: 'CHURCH', exitHint: '↓ EXIT',
       end1: 'YOU GOT THE URSUS KEYS', end2: 'TO BE CONTINUED: GRAND THEFT TRACTOR', end3: 'TIME', endKey: 'ENTER — KEEP PLAYING',
     },
@@ -236,7 +238,7 @@
       else if (Q.marcin === 1) { if (Q.orange) { Q.marcin = 2; say(id, T.marcin2, () => celebrate()); } else say(id, T.marcin1); }
       else say(id, T.marcin3);
     } else if (id === 'soltys') {
-      say(id, Q.kasia === 2 ? T.soltys1 : T.soltys0);
+      say(id, ROOM ? (Q.kasia === 2 ? T.soltys1 : T.soltys0) : T.soltysSecret);
     } else if (id === 'grandpa') {
       const n = questsDone();
       if (Q.grandpa === 2) say(id, [T.grandpa2[2]]);
@@ -394,6 +396,12 @@
   }
   function drawNpc(n, sx, sy, s) {
     shadow(sx, sy, s, 8);
+    if (n.id === 'soltys') {
+      if (window.CHURCH_ART.soltys) window.fitSprite(ctx, window.CHURCH_ART.soltys, sx - 14 * s, sy - 44 * s, 28 * s, 44 * s);
+      else window.drawSoltys(ctx, sx, sy, s, time);
+      ctx.imageSmoothingEnabled = false;
+      return;
+    }
     const i = NPC_IDX[n.id], h = CHAR_H * s * (n.id === 'grandpa' ? 1.05 : 1);
     const scale = h / (170 - 6 - 14), w = 130 * scale, hh = 170 * scale;
     const bob = Math.sin(time * 2.4 + i) * .6 * s;
@@ -534,7 +542,7 @@
       ctx.globalAlpha = big ? 1 : .9; ctx.fillStyle = '#10163a'; ctx.fillRect(mx - U * .5, my - U * .5, mw + U, mh + U);
       ctx.imageSmoothingEnabled = true; ctx.drawImage(MINI, mx, my, mw, mh); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
       const dot = (x, y, c, r = .5) => { ctx.fillStyle = c; ctx.fillRect(mx + x / MAP.w * mw - U * r, my + y / MAP.h * mh - U * r, U * r * 2, U * r * 2); };
-      for (const n of ITEMS.npcs) { const st = n.id === 'grandpa' ? Q.grandpa : Q[n.id]; if (st !== 2) dot(n.x, n.y, '#7cd0ff', big ? .6 : .4); }
+      for (const n of ITEMS.npcs) if (!n.secret) { const st = n.id === 'grandpa' ? Q.grandpa : Q[n.id]; if (st !== 2) dot(n.x, n.y, '#7cd0ff', big ? .6 : .4); }
       HOOKS.minimap.forEach(f => f((x, y, c) => dot(x, y, c, big ? .45 : .3)));
       dot(P.x, P.y, Math.floor(time * 4) % 2 ? '#ff3b30' : '#fff', big ? .7 : .5);
       if (big) {
@@ -542,7 +550,7 @@
         const label = { church: LANG === 'pl' ? 'KOŚCIÓŁ' : 'CHURCH', windmill: LANG === 'pl' ? 'WIATRAK' : 'WINDMILL', shop: LANG === 'pl' ? 'SKLEP' : 'SHOP', cemetery: LANG === 'pl' ? 'CMENTARZ' : 'CEMETERY', river: 'BIAŁKA' };
         const tag = (x, y, txt, col) => { const qx = mx + x / MAP.w * mw, qy = my + y / MAP.h * mh; const tw = ctx.measureText(txt).width + U; ctx.fillStyle = 'rgba(16,22,58,.85)'; ctx.fillRect(qx - tw / 2, qy - U * 2.4, tw, U * 1.9); ctx.fillStyle = col; ctx.fillText(txt, qx, qy - U * 1.4); };
         for (const q of MAP.pois) if (label[q.key]) tag(q.x, q.y, label[q.key], '#ffd21f');
-        for (const n of ITEMS.npcs) tag(n.x, n.y + 60, T.names[n.id].split(' ')[0], '#7cd0ff');
+        for (const n of ITEMS.npcs) if (!n.secret) tag(n.x, n.y + 60, T.names[n.id].split(' ')[0], '#7cd0ff');
       }
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.75)';
       ctx.fillText('© OPENSTREETMAP CONTRIBUTORS', W - U * 1.5, H - U * 1.2);
