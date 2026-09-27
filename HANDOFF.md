@@ -13,8 +13,10 @@ Last updated: 2026-09-27
 - **New NPC: the Sołtys** (village head), drawn in code from Tomek's photo: grey hair, glasses, brown pinstripe suit, harvest bread. He stands by the ambo and his lines depend on Kasia's quest.
 - `Q.churchSeen` shows the intro line once. Saving while inside stores the outdoor position.
 - Tests: `test/church_test.py` is new. `quest_test.py` and `jump_test.py 1662 1747` still pass.
-- **Not done:** AI (GPT) versions of the interior and the Sołtys. The cloud session can't use Codex (OpenAI returns 403 to cloud IPs) and has no PPQ key. The ready prompts and integration steps are in `gen/PROMPTS-church.md`.
-- The pasted reference photos were not saved as files. Chat images don't reach the container. Tomek must copy them to `references/` locally.
+- **AI art complete:** Codex GPT Image 2 medium generated `backwall`, `altar`, `candles`, `cross`, `ambo`, `banner`, `mary`, `flags`, `flowers100`, `pew`, `confessional`, `font`, and `soltys`. `gen/prep_church_sprite.py` processed them into `docs/img/church/`; the game loads the manifest automatically. Raw outputs are in ignored `gen/raw/`.
+- Visual QA passed in the local room screenshots; the pew was regenerated to fit its wide, low game box. Tests: `church_test.py`, `quest_test.py`, and `jump_test.py 1662 1747` each end with `errors []`.
+- Six church interior photos and the Sołtys photo are in ignored `references/`; never commit them. The Sołtys photo is used only with Codex, not PPQ.
+- Codex did not report USD pricing. Sixteen successful generations (including three replacement drafts) were logged with `cost_usd: null` in Hermes image telemetry; actual cost is unknown.
 - "100" = **100 years of the parish** (confirmed by Tomek). The Sołtys agreed to appear in the game.
 - **AI art hook:** any PNG in `docs/img/church/<name>.png` replaces the hand-drawn piece. The names and boxes are in `CHURCH_PIECES` (`church.js`). `gen/prep_church_sprite.py` keys, crops and saves the images. **Hermes runbook: `gen/HERMES-PROMPT.md`.**
 - Repo skill for adding more rooms: `.claude/skills/add-interior/SKILL.md`.
