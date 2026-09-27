@@ -404,13 +404,14 @@ for k_, (lx, ly) in LM_NODES:
     collide[int(base - ch_):int(base), int(lx - cw / 2):int(lx + cw / 2)] = True
     occupied[max(0, y0):y0 + h, max(0, x0):x0 + w] = True
 
-# The following four sites are deterministic OSM road junctions, not claimed photo GPS locations.
-# The supplied chat photos have no GPS metadata; placements are approximate and can be moved later.
+# The following four sites are deterministic OSM road junctions (paved-dirt crossings).
+# The supplied chat photos have no GPS metadata; placements use the actual junction nodes.
+# Shrines are kept small (~32-36 px) so they sit cleanly on the verge without blocking traffic.
 GENERATED_SHRINES = [
-    ('cross_iron', 1643, 628, 42),
-    ('shrine_stone', 1705, 1284, 68),
-    ('shrine_white', 1457, 2358, 68),
-    ('shrine_fenced', 558, 959, 78),
+    ('cross_iron', 1643, 628, 32),       # tertiary × track/service junction (NW of village)
+    ('shrine_stone', 1671, 1284, 36),    # residential × service junction (by the windmill)
+    ('shrine_white', 1457, 2358, 34),    # residential × track junction (south road)
+    ('shrine_fenced', 558, 959, 32),     # residential × service junction (east edge)
 ]
 
 def add_generated_sprite(name, cx, foot_y, width, block_base=True):
