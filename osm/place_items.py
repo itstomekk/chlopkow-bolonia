@@ -25,6 +25,7 @@ npcs = [
     dict(id='marcin', **dict(zip('xy', near_free(bus_near['x'] + 25, bus_near['y'] + 10)))),
     dict(id='damian', **dict(zip('xy', near_free(631, 150)))),
     dict(id='grandpa', **dict(zip('xy', near_free(poi['windmill']['x'] + 60, poi['windmill']['y'] + 40)))),
+    dict(id='halina', **dict(zip('xy', near_free(m['spawn']['x'] + 70, m['spawn']['y'] + 40)))),
 ]
 # apples: next to tree trunks (objects with small width) in orchard + gardens
 trees = [o for o in m['objects'] if o['w'] < 34]
@@ -44,5 +45,18 @@ for a in apples: a.pop('src')
 ys, xs = np.nonzero((ground[..., 0] > 190) & (ground[..., 1] > 150) & (ground[..., 2] < 110) & ~solid)
 cands = [(x, y) for x, y in zip(xs[::500], ys[::500]) if 900 < math.hypot(x - poi['shop']['x'], y - poi['shop']['y']) < 1600 and free(x, y, 12)]
 cap = dict(zip('xy', map(int, rnd.choice(cands))))
-json.dump(dict(npcs=npcs, apples=apples, cap=cap), open('docs/items.json', 'w'), indent=1)
+# quiz signboards: one per question spot (see docs/js/quiz.js)
+bus_far = max(bus, key=lambda p: math.hypot(p['x'] - poi['shop']['x'], p['y'] - poi['shop']['y']) if p['x'] < W and p['y'] < H else -1)
+# east road: the paved road pixel furthest east inside the map
+road = (ground[..., 0] < 100) & (ground[..., 1] < 100) & (ground[..., 2] < 110) & (np.abs(ground[..., 0] - ground[..., 2]) < 12)
+ry, rx = np.nonzero(road[:, W - 140:W - 60]); er = (W - 100, int(np.median(ry))) if len(ry) else (W - 100, H // 2)
+anchors = {
+    'church': (poi['church']['x'] - 70, poi['church']['y'] + 40), 'rectory': (poi['rectory']['x'] - 30, poi['rectory']['y'] + 40),
+    'cemetery': (poi['cemetery']['x'], poi['cemetery']['y'] + 90), 'windmill': (poi['windmill']['x'] - 60, poi['windmill']['y'] + 40),
+    'shop': (poi['shop']['x'] - 45, poi['shop']['y'] + 30), 'bus1': (bus_near['x'] - 25, bus_near['y'] + 12),
+    'bus2': (bus_far['x'] + 30, bus_far['y'] - 20), 'river': (1300, 1650), 'pitch': (690, 120),
+    'orchard': (1300, 2020), 'woods': (1760, 1600), 'eastroad': (er[0], er[1] - 26),
+}
+boards = [dict(spot=k, x=near_free(*v, r=8)[0], y=near_free(*v, r=8)[1]) for k, v in anchors.items()]
+json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards), open('docs/items.json', 'w'), indent=1)
 print(len(apples), 'apples', npcs, 'cap', cap)

@@ -5,6 +5,24 @@
 (() => {
   const cvs = document.getElementById('game');
   const ctx = cvs.getContext('2d');
+  // Silkscreen has no 'Ć'. Measure it as 'C' and draw 'C' plus a tiny acute accent.
+  const _fill = ctx.fillText.bind(ctx), _measure = ctx.measureText.bind(ctx);
+  ctx.measureText = t => _measure(String(t).replace(/Ć/g, 'C'));
+  ctx.fillText = (t, x, y, mw) => {
+    t = String(t);
+    if (!t.includes('Ć')) return _fill(t, x, y, mw);
+    const plain = t.replace(/Ć/g, 'C'), w = _measure(plain).width, al = ctx.textAlign;
+    let cx = al === 'center' ? x - w / 2 : al === 'right' || al === 'end' ? x - w : x;
+    const fs = parseFloat((ctx.font.match(/([\d.]+)px/) || [0, 16])[1]);
+    ctx.textAlign = 'left';
+    for (const part of t.split(/(Ć)/)) {
+      if (!part) continue;
+      const seg = part === 'Ć' ? 'C' : part; _fill(seg, cx, y);
+      if (part === 'Ć') { const cw = _measure('C').width, u = fs / 8; ctx.fillRect(cx + cw * .45, y - fs * .78, u * 1.4, u); ctx.fillRect(cx + cw * .45 + u, y - fs * .78 - u, u * 1.4, u); }
+      cx += _measure(seg).width;
+    }
+    ctx.textAlign = al;
+  };
   const params = new URLSearchParams(location.search);
   const LANG = params.get('lang') === 'en' ? 'en' : 'pl';
   const DEBUG = params.get('debug') === '1';
@@ -16,7 +34,7 @@
     pl: {
       title: 'AREK W CHŁOPKOWIE', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA',
-      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZBYSZEK' },
+      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZBYSZEK', halina: 'PANI HALINA' },
       church: ['Kościół pw. Narodzenia NMP. Dzwony biją w południe. Arek, jak zwykle, spóźniony.'],
       rectory: ['Plebania. Ksiądz macha z okna. Arek udaje, że poprawia okulary.'],
       cemetery: ['Cmentarz parafialny. Arek zdejmuje okulary. Na chwilę.'],
@@ -47,7 +65,7 @@
     en: {
       title: 'AREK IN CHŁOPKÓW', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP',
-      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZBYSZEK' },
+      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZBYSZEK', halina: 'MRS HALINA' },
       church: ['Church of the Nativity of the Virgin Mary. Bells at noon. Arek is late, as usual.'],
       rectory: ['The rectory. The priest waves from a window. Arek pretends to fix his sunglasses.'],
       cemetery: ['The parish cemetery. Arek takes his sunglasses off. For a moment.'],
@@ -77,7 +95,18 @@
     },
   }[LANG];
   const SPOT_R = { church: 90, rectory: 60, cemetery: 90, windmill: 60, shop: 60, bus: 40, river: 70 };
-  const NPC_IDX = { kasia: 0, marcin: 1, damian: 2, grandpa: 3 };
+  const NPC_IDX = { kasia: 0, marcin: 1, damian: 2, grandpa: 3, halina: 4 };
+  /* Extension hooks used by features.js (quiz, minigames). Each list holds callbacks:
+     near(P) -> [{x,y,r,label,onInteract}]   extra things Arek can interact with
+     npcTalk(id) -> true if handled           dialogue for NPCs defined outside this file
+     update(dt)                               per-frame logic (runs while scene === 'play')
+     world(push, S, inView)                   add y-sorted drawables: push(baseY, drawFn)
+     hud(U, W, H)                             draw on top of the HUD
+     key(e) / pointer(px, py) -> true if consumed (modal UIs)
+     questLog(lines)                          push [text, done] rows into the quest log
+     minimap(dot)                             draw markers: dot(x, y, colour)
+     blocksPlayer() -> true to freeze normal movement (e.g. countdowns) */
+  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [] };
 
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
@@ -89,7 +118,7 @@
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
-  let Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, apples: [], cap: false, orange: false, playTime: 0 };
+  let Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 };
   let hasSave = false;
   const keys = new Set();
   const joy = { active: false, id: null, cx: 0, cy: 0, x: 0, y: 0 };
@@ -104,7 +133,7 @@
 
   /* ---------- input ---------- */
   function startGame(fresh) {
-    if (fresh) { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, apples: [], cap: false, orange: false, playTime: 0 }; P.x = MAP.spawn.x; P.y = MAP.spawn.y; unstick(); camX = P.x; camY = P.y; }
+    if (fresh) { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 }; P.x = MAP.spawn.x; P.y = MAP.spawn.y; unstick(); camX = P.x; camY = P.y; }
     scene = 'play';
   }
   addEventListener('keydown', e => {
@@ -112,6 +141,7 @@
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
     if (scene === 'title') { if (e.code === 'KeyN') startGame(true); else if (e.code === 'Enter' || e.code === 'Space') startGame(false); return; }
     if (scene === 'end') { if (e.code === 'Enter' || e.code === 'Space') scene = 'play'; return; }
+    if (!talk && HOOKS.key.some(f => f(e))) return;
     if (e.code === 'KeyX' || e.code === 'KeyJ') jump();
     else if (e.code === 'Space') { if (talk || nearThing()) interact(); else jump(); }
     else if (e.code === 'KeyE' || e.code === 'Enter') interact();
@@ -124,6 +154,7 @@
     if (scene === 'title') { startGame(false); return; }
     if (scene === 'end') { scene = 'play'; return; }
     const [px, py] = toCanvas(e);
+    if (!talk && HOOKS.pointer.some(f => f(px, py))) return;
     if (px > cvs.width * .78 && py > cvs.height * .6) { if (talk || nearThing()) interact(); else jump(); return; }
     if (px > cvs.width * .78 && py < cvs.height * .3) { showMap = !showMap; return; }
     if (talk) { interact(); return; }
@@ -144,6 +175,8 @@
   function nearThing() {
     let best = null, bd = 1e9;
     for (const n of ITEMS.npcs) { const d = Math.hypot(P.x - n.x, P.y - n.y); if (d < 42 && d < bd) { bd = d; best = { npc: n.id, x: n.x, y: n.y }; } }
+    if (best) return best;
+    for (const f of HOOKS.near) for (const c of f(P)) { const d = Math.hypot(P.x - c.x, P.y - c.y); if (d < (c.r || 30) && d < bd) { bd = d; best = { feat: c, x: c.x, y: c.y }; } }
     if (best) return best;
     for (const s of MAP.pois) { const r = SPOT_R[s.key] || 50, d = Math.hypot(P.x - s.x, P.y - s.y); if (d < r && d < bd) { bd = d; best = { poi: s.key, x: s.x, y: s.y }; } }
     return best;
@@ -167,7 +200,7 @@
       else if (n >= 3) { say(id, T.grandpa2, () => { Q.grandpa = 2; save(); celebrate(); scene = 'end'; }); }
       else if (Q.grandpa === 0) { Q.grandpa = 1; say(id, T.grandpa0); }
       else say(id, T.grandpa1(n));
-    }
+    } else HOOKS.npcTalk.some(f => f(id));
     save();
   }
   function interact() {
@@ -180,6 +213,7 @@
     if (P.air) return;
     const s = nearThing(); if (!s) return;
     if (s.npc) { turnTo(s); talkNpc(s.npc); return; }
+    if (s.feat) { turnTo(s); s.feat.onInteract(); return; }
     if (s.poi === 'shop' && Q.marcin === 1 && !Q.orange) { Q.orange = true; save(); say('arek', T.shopBuy, () => popToast('+ ORANŻADA'.replace('ORANŻADA', LANG === 'pl' ? 'ORANŻADA' : 'ORANGEADE'))); return; }
     say('arek', T[s.poi]);
   }
@@ -246,6 +280,8 @@
     if (scene !== 'play') return;
     Q.playTime += dt;
     if (talk) { talkT += dt; P.moving = false; return; }
+    HOOKS.update.forEach(f => f(dt));
+    if (HOOKS.blocksPlayer.some(f => f())) { P.moving = false; return; }
     P.land = Math.min(1, P.land + dt * 6);
     if (P.air) { updateJump(dt); P.moving = true; P.step += dt * 3; } else {
     let ix = 0, iy = 0;
@@ -322,7 +358,7 @@
     const state = n.id === 'grandpa' ? (Q.grandpa === 2 ? 2 : questsDone() >= 3 ? 'ready' : Q.grandpa) : Q[n.id];
     const ready = (n.id === 'kasia' && Q.kasia === 1 && appleCount() >= APPLES_NEEDED) || (n.id === 'damian' && Q.damian === 1 && Q.cap) || (n.id === 'marcin' && Q.marcin === 1 && Q.orange) || state === 'ready';
     const mark = state === 0 ? '!' : ready ? '?' : null;
-    if (mark) {
+    if (mark && !n.rival) {
       const my = sy - h - 12 * s + Math.sin(time * 5 + i) * 1.5 * s;
       ctx.fillStyle = '#10163a'; ctx.fillRect(sx - 5 * s, my - 6 * s, 10 * s, 11 * s);
       ctx.fillStyle = mark === '!' ? '#ffd21f' : '#7cff6b'; ctx.font = `${9 * s}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -376,6 +412,7 @@
     if (!Q.cap && inView(ITEMS.cap.x, ITEMS.cap.y)) draw.push({ base: ITEMS.cap.y, fn: () => drawCap(...S(ITEMS.cap.x, ITEMS.cap.y), zoom) });
     for (const n of ITEMS.npcs) if (inView(n.x, n.y)) draw.push({ base: n.y, fn: () => drawNpc(n, ...S(n.x, n.y), zoom) });
     draw.push({ base: P.y, fn: () => drawArek(...S(P.x, P.y), zoom) });
+    HOOKS.world.forEach(f => f((base, fn) => draw.push({ base, fn }), S, inView));
     draw.sort((a, b) => a.base - b.base).forEach(d => d.fn());
 
     for (const f of fx) { ctx.globalAlpha = 1 - f.t / 1.2; ctx.fillStyle = f.c; const s = zoom * 2; ctx.fillRect(ox + f.x * zoom - s / 2, oy + f.y * zoom - s / 2, s, s); }
@@ -397,6 +434,7 @@
       if (Q.damian) lines.push([T.quests[1], Q.damian === 2]);
       if (Q.marcin) lines.push([T.quests[2], Q.marcin === 2]);
       if (Q.grandpa || questsDone() >= 3) lines.push([T.quests[3], Q.grandpa === 2]);
+      HOOKS.questLog.forEach(f => f(lines));
       const qh = U * (5.2 + lines.length * 2.6);
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(qx, qy, qw, qh);
       // apple icon + count
@@ -437,6 +475,7 @@
       ctx.imageSmoothingEnabled = true; ctx.drawImage(MINI, mx, my, mw, mh); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
       const dot = (x, y, c, r = .5) => { ctx.fillStyle = c; ctx.fillRect(mx + x / MAP.w * mw - U * r, my + y / MAP.h * mh - U * r, U * r * 2, U * r * 2); };
       for (const n of ITEMS.npcs) { const st = n.id === 'grandpa' ? Q.grandpa : Q[n.id]; if (st !== 2) dot(n.x, n.y, '#7cd0ff', big ? .6 : .4); }
+      HOOKS.minimap.forEach(f => f((x, y, c) => dot(x, y, c, big ? .45 : .3)));
       dot(P.x, P.y, Math.floor(time * 4) % 2 ? '#ff3b30' : '#fff', big ? .7 : .5);
       if (big) {
         ctx.font = `${U * 1.6}px Silkscreen`; ctx.textAlign = 'center';
@@ -448,6 +487,7 @@
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.75)';
       ctx.fillText('© OPENSTREETMAP CONTRIBUTORS', W - U * 1.5, H - U * 1.2);
     }
+    if (scene === 'play') HOOKS.hud.forEach(f => f(U, W, H));
     if (scene === 'play' && matchMedia('(pointer:coarse)').matches) {
       ctx.globalAlpha = .3; ctx.fillStyle = '#fff';
       if (joy.active) { ctx.beginPath(); ctx.arc(joy.cx, joy.cy, 70, 0, 7); ctx.fill(); ctx.globalAlpha = .6; ctx.beginPath(); ctx.arc(joy.cx + joy.x * 70, joy.cy + joy.y * 70, 30, 0, 7); ctx.fill(); }
@@ -494,6 +534,16 @@
     hasSave = loadSave();
     unstick(); camX = P.x; camY = P.y;
     resize(); requestAnimationFrame(loop);
+    // API for features.js
+    window.ARK = {
+      HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
+      get Q() { return Q; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; },
+      save, say, popToast, celebrate, blocked, unstick, drawNpc, shadow, box, wrapText, fmtTime,
+      teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },
+      burst(x, y, colors, n = 16) { for (let k = 0; k < n; k++) fx.push({ x, y, vx: (Math.random() - .5) * 120, vy: -Math.random() * 150, t: 0, c: colors[k % colors.length] }); },
+      load,
+    };
+    window.dispatchEvent(new Event('ark-ready'));
     window.__game = { P, MAP, ITEMS, blocked, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, get talk() { return talk; } };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });

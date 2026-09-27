@@ -16,6 +16,8 @@ It runs in any modern browser, desktop or phone. The game is pure JavaScript wit
 | Run | hold Shift | push the joystick to the edge |
 | Talk / read | Space (next to someone or something) · E · Enter | **A** button |
 | Jump | Space (when nobody is near) · X · J | **A** button |
+| Quiz answer | 1–4 or arrows + Space | tap an answer |
+| Quit a minigame | Esc | — |
 | Map | M | tap the minimap |
 | New game | N on the title screen | — |
 
@@ -29,6 +31,19 @@ Progress saves automatically in the browser (localStorage).
 - **Grandpa Zbyszek** (by the Koźlak windmill) hands over the **keys to his Ursus** once the whole crew has been helped.
 
 On the way you can jump over garden fences, hay bales and the Białka river.
+
+### Quiz o Chłopkowie
+**Pani Halina**, the village chronicler, stands near the shop. She introduces a 13-question ABCD quiz about the real history of Chłopków
+(source: [Polish Wikipedia](https://pl.wikipedia.org/wiki/Ch%C5%82opk%C3%B3w_(wojew%C3%B3dztwo_mazowieckie)), CC BY-SA).
+Question signboards (red **?**) stand at the places they are about: the church, rectory ("cerkwisko"), cemetery, windmill, shop, bus stops,
+the Białka, the pitch, the orchard, the woods and the road east. Each answer reveals a short fact. Finish all 13 and Halina gives you a title based on your score.
+
+### Minigames (flags on the map)
+- 🏁 **Race** (red flag, track in the northern fields): 2 laps against Damian. Run with Shift and jump the hay-bale walls. Shortcuts across the grass don't count, because checkpoints only register on the track.
+- 🐷 **Catch Pepa the piglet** (pink flag, corral below the windmill): 30 seconds. She dodges, so corner her against the fence.
+- 🐕 **Eggs and dogs** (blue flag, meadow south of the main street): collect 6 eggs while 3 dogs chase you. Jump over the dogs to escape.
+
+Best times are saved and shown in the quest log.
 You can also read about the church, the rectory, the cemetery, the windmill, the shop, the bus stops and the river.
 
 ## How it's built
@@ -36,14 +51,17 @@ You can also read about the church, the rectory, the cemetery, the windmill, the
 ```
 docs/                    ← the game (GitHub Pages serves this folder)
   index.html
-  js/game.js             ← the whole game: input, physics, quests, rendering (commented)
+  js/game.js             ← core: input, physics, NPC quests, rendering, extension HOOKS (commented)
+  js/features.js         ← quiz UI + Pani Halina + signboards, and the three minigames (plugs into HOOKS)
+  js/quiz.js             ← the 13 quiz questions (PL/EN), each bound to a map spot
   map.json               ← map size, y-sortable objects, points of interest, spawn point
   items.json             ← NPC positions, apples, the cap
   img/map_ground.png     ← ground layer (fields, roads, river, fences)
   img/map_objects.png    ← buildings, trees, bales, landmarks (drawn y-sorted with the characters)
   img/map_collide.png    ← collisions: 255 = tall (walls, trees, ponds), 128 = low (fences, streams, bales; jumpable)
   img/arek_sheet.png/.json ← Arek's walk-cycle atlas (4 directions; left is right mirrored)
-  img/npcs.png           ← Kasia, Marcin, Damian, Grandpa
+  img/npcs.png           ← Kasia, Marcin, Damian, Grandpa, Pani Halina
+  img/animals.png        ← pig + dog run cycles (side, front, back)
 osm/
   chlopkow.json          ← raw OpenStreetMap extract (Overpass API)
   render_map.py          ← OSM → pixel-art map + collision mask + map.json
@@ -73,7 +91,8 @@ It has to be served over HTTP, because opening `index.html` from disk blocks `fe
 - **Scale:** 1 m = 2 art pixels. Buildings are enlarged around their centre (up to 2.3×) so they read well next to the characters, the usual RPG compromise. Each one shrinks automatically until it overlaps neither a road nor its neighbours.
 - **Depth:** everything standing on the ground (buildings, trees, bales, apples, NPCs, Arek) is sorted by its baseline every frame, so Arek walks behind houses and in front of trees correctly.
 - **Jumping:** a jump is about 0.5 s long and ignores low collisions. If Arek would land on a fence he glides a bit further; if it's still blocked he hops back to where he took off.
-- **Polish text:** dialogue is upper-cased because the Silkscreen pixel font has no lower-case Polish glyphs. It also has no **Ć**, so the Polish strings avoid that letter.
+- **Polish text:** dialogue is upper-cased because the Silkscreen pixel font draws lower-case Polish letters too small. The font also has no **Ć** glyph, so `game.js` draws it as a C plus a hand-drawn accent (a `fillText` wrapper).
+- **Minigame venues** (track, corral, meadow) are drawn by `osm/render_map.py` and exported in `map.json` (`track`, `corral`, `meadow`).
 
 ## Wanted: reference photos
 

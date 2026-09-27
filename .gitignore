@@ -11,3 +11,5 @@ gen/atlas_preview.png
 gen/village_map_v1.png
 __pycache__/
 *.pyc
+gen/check.jpg
+gen/animals_sheet.jpg

@@ -23,6 +23,13 @@ Last updated: 2026-09-27
 - Fallback: PPQ (`gen/ppq_gen.py`, about $0.0115/image). It needs a public URL for references (Blossom upload). **Do not upload real photos of people that way.** The auto-mode classifier blocked it, and Tomek chose Codex for photos.
 - OpenRouter had no credits (HTTP 402) on 2026-09-27.
 
+## 2026-09-27 (later): quiz + minigames
+- `docs/js/quiz.js` holds 13 questions from pl.wikipedia (Chłopków, mazowieckie), each bound to a board spot in `items.json`.
+- `docs/js/features.js` covers Pani Halina (new NPC, `gen/npc_src/halina.png`), the signboards, the quiz modal, and the minigames race/pig/dogs. It plugs into `HOOKS` in game.js.
+- Venues are drawn by render_map.py: TRACK (north oval, bale walls at 200°/330°), CORRAL (below the windmill), MEADOW (south of the street).
+- The windmill sprite was regenerated from a text description of Tomek's photos (the photos came only as chat attachments, not files). The old generic version is `gen/lm_windmill_v1_generic.png`.
+- Tests: `test/features_test.py` (quiz and minigames), `quest_test.py`, and `jump_test.py 1340 1645` (use a river column without a riverside tree).
+
 ## Next ideas
 - Regenerate landmarks from Tomek's photos as they arrive (list in `PHOTOS-WANTED.md`).
 - Add the świetlica (community hall) and wayside shrines as landmarks.

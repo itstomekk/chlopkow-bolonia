@@ -10,7 +10,7 @@ Send them to Tomek. **Photos are never committed to this repo.** They stay on th
 | # | Element | Now in the game | Best photos |
 |---|---|---|---|
 | 1 | **Church** (Kościół pw. Narodzenia NMP) | sprite from 3 existing photos | full front with the tower; one side view; the fence and gate |
-| 2 | **Koźlak windmill** | generic post mill, no photo yet | whole windmill from 2–3 sides; the stairs/tail pole; its surroundings |
+| 2 | **Koźlak windmill** | ✅ redrawn to match Tomek's 3 photos (no sails, plank tower, red roof). The photos arrived in chat only; save them as files for an exact re-render | done; more close-ups welcome |
 | 3 | **Shop** (Sklep spożywczo-przemysłowy) | invented look | front with door, windows and sign; the benches/area in front |
 | 4 | **Świetlica wiejska** (community hall) | *not in the game yet* | front; the square or yard in front |
 | 5 | **Bus stops** (Chłopków 03/06, 07/08) | invisible hotspot | the shelter itself |

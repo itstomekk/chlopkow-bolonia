@@ -289,6 +289,53 @@ for b in buildings:
     fmask = np.array(fm) > 0
     collide |= fmask; occupied |= fmask
 
+# ---------------------------------------------------------------- minigame venues
+TRACK = dict(cx=1080, cy=300, rx=300, ry=150, w=44)
+CORRAL = dict(cx=1490, cy=565, r=100)
+MEADOW = dict(x0=720, y0=1010, x1=1140, y1=1290)
+yy, xx = np.mgrid[0:H, 0:W]
+def ell(dx):  # normalised elliptic radius for an ellipse grown by dx pixels
+    return ((xx - TRACK['cx']) / (TRACK['rx'] + dx)) ** 2 + ((yy - TRACK['cy']) / (TRACK['ry'] + dx)) ** 2
+outer, inner = ell(TRACK['w'] / 2) <= 1, ell(-TRACK['w'] / 2) <= 1
+ring = outer & ~inner
+tn = noise2(W, H, 4, 91)[..., None]
+tcol = np.array(hexc('#c79a62')) * (1 - tn) + np.array(hexc('#b48752')) * tn
+g3 = np.array(ground).astype(np.float32)
+g3[ring] = tcol[ring]
+ang = np.arctan2((yy - TRACK['cy']) / TRACK['ry'], (xx - TRACK['cx']) / TRACK['rx'])
+kerb_o = outer & ~(ell(TRACK['w'] / 2 - 4) <= 1); kerb_i = (ell(-TRACK['w'] / 2 + 4) <= 1) & ~inner
+stripes = (np.floor(ang / (2 * np.pi) * 90) % 2).astype(bool)
+for kb in (kerb_o, kerb_i):
+    g3[kb & stripes] = hexc('#d8262c'); g3[kb & ~stripes] = hexc('#f4f1e6')
+# chequered start/finish line at the bottom of the oval
+sx0 = TRACK['cx'] - 6; sy0, sy1 = TRACK['cy'] + TRACK['ry'] - TRACK['w'] / 2, TRACK['cy'] + TRACK['ry'] + TRACK['w'] / 2
+for i_ in range(int(sy0), int(sy1), 4):
+    for j_ in range(3):
+        g3[i_:i_ + 4, sx0 + j_ * 4:sx0 + j_ * 4 + 4] = (20, 20, 20) if (i_ // 4 + j_) % 2 else (245, 245, 245)
+ground = Image.fromarray(g3.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
+occupied |= outer & ~(ell(-TRACK['w'] / 2 - 25) <= 1)
+TRACK_BALES = []
+for deg in (200, 330):   # two bale walls across the track: jump them!
+    a_ = math.radians(deg)
+    for k_ in (-1, 0, 1):
+        r_ = 1 + k_ * (TRACK['w'] / 2 - 9) / ((TRACK['rx'] + TRACK['ry']) / 2)
+        TRACK_BALES.append((int(TRACK['cx'] + math.cos(a_) * TRACK['rx'] * r_), int(TRACK['cy'] + math.sin(a_) * TRACK['ry'] * r_)))
+# corral fence (low) with a gate on the west side
+for k_ in range(0, 360, 3):
+    if 165 < k_ < 195: continue
+    a_ = math.radians(k_); x_, y_ = int(CORRAL['cx'] + math.cos(a_) * CORRAL['r']), int(CORRAL['cy'] + math.sin(a_) * CORRAL['r'] * .8)
+    gd.rectangle([x_ - 1, y_ - 6, x_ + 1, y_ - 5], fill=(150, 104, 62)); gd.rectangle([x_ - 1, y_ - 3, x_ + 1, y_ - 2], fill=(128, 88, 52))
+    if k_ % 9 == 0: gd.rectangle([x_ - 1, y_ - 8, x_ + 1, y_], fill=(110, 74, 42))
+    low[y_ - 3:y_ + 2, x_ - 2:x_ + 3] = True
+g4 = np.array(ground).astype(np.float32)
+cm_ = (((xx - CORRAL['cx']) / (CORRAL['r'] - 8)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] - 8) * .8)) ** 2) <= 1
+mud = noise2(W, H, 4, 93) > .62
+g4[cm_] = g4[cm_] * .8 + np.array(hexc('#a88a5c')) * .2; g4[cm_ & mud] = g4[cm_ & mud] * .75 + np.array(hexc('#8a6a44')) * .25
+ground = Image.fromarray(g4.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
+occupied |= (((xx - CORRAL['cx']) / (CORRAL['r'] + 20)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] + 20) * .8)) ** 2) <= 1
+occupied[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']] = True
+del yy, xx, ang
+
 # ---------------------------------------------------------------- fences around gardens + hay bales (low, jumpable)
 from PIL import ImageFilter as _IF
 road_near = np.array(Image.fromarray(((pm | dm) * 255).astype(np.uint8)).filter(_IF.MaxFilter(21))) > 0
@@ -307,6 +354,15 @@ for poly_ in classes.get('residential', []):
                 gd.rectangle([xi - 1, yi - 8, xi + 1, yi], fill=(110, 74, 42)); gd.point((xi, yi - 8), fill=(170, 124, 80))
             low[yi - 3:yi + 2, xi - 2:xi + 3] = True
 bales = 0
+def bale(x, y):
+    gd.ellipse([x - 11, y - 2, x + 13, y + 5], fill=(96, 84, 40))
+    od.rectangle([x - 11, y - 16, x + 11, y + 1], fill=(206, 168, 80), outline=(112, 84, 36))
+    od.ellipse([x - 11, y - 20, x + 11, y - 12], fill=(226, 192, 104), outline=(112, 84, 36))
+    od.ellipse([x - 6, y - 18, x + 6, y - 14], outline=(180, 142, 64))
+    for yy_ in (y - 9, y - 4): od.line([(x - 10, yy_), (x + 10, yy_)], fill=(186, 150, 70))
+    objects.append(dict(x=x - 13, y=y - 22, w=27, h=26, base=float(y + 2)))
+    low[y - 6:y + 2, x - 11:x + 12] = True
+for x_, y_ in TRACK_BALES: bale(x_, y_)
 for p_ in classes.get('farmland', []):
     m_ = mask_of([p_]); ys_, xs_ = np.nonzero(m_ & ~occupied)
     if len(xs_) < 4000: continue
@@ -325,7 +381,7 @@ print('hay bales', bales)
 # ---------------------------------------------------------------- landmark sprites
 import sys; sys.path.insert(0, 'gen')
 from slice_sheet import key as chroma_key
-LM_SIZE = {'church': 150, 'windmill': 110, 'shop': 100}   # sprite width in art px
+LM_SIZE = {'church': 150, 'windmill': 84, 'shop': 100}   # sprite width in art px
 for k_, (lx, ly) in LM_NODES:
     a = chroma_key(f'gen/lm_{k_}.png'); im = Image.fromarray(a); im = im.crop(im.getbbox())
     w = LM_SIZE[k_]; h = int(im.height * w / im.width); im = im.resize((w, h), Image.LANCZOS)
@@ -336,6 +392,19 @@ for k_, (lx, ly) in LM_NODES:
     cw, ch_ = w * .55, h * .28
     collide[int(base - ch_):int(base), int(lx - cw / 2):int(lx + cw / 2)] = True
     occupied[max(0, y0):y0 + h, max(0, x0):x0 + w] = True
+
+# Chłopków entrance sign, based on Tomek's reference photo; positioned beside the southern road.
+sign = Image.fromarray(chroma_key('gen/lm_village_sign.png'))
+sign = sign.crop(sign.getbbox())
+sign_w = 110
+sign_h = round(sign.height * sign_w / sign.width)
+sign = sign.resize((sign_w, sign_h), Image.LANCZOS)
+sign_x, sign_base = 1150, 2405
+sign_y = sign_base - sign_h
+objects_img.alpha_composite(sign, (sign_x - sign_w // 2, sign_y))
+objects.append(dict(x=sign_x - sign_w // 2, y=sign_y, w=sign_w, h=sign_h, base=float(sign_base)))
+collide[sign_base - 9:sign_base, sign_x - 4:sign_x + 5] = True
+occupied[max(0, sign_y):sign_base, max(0, sign_x - sign_w // 2):sign_x + sign_w // 2] = True
 
 # ---------------------------------------------------------------- trees
 occ_img = Image.fromarray((occupied * 255).astype(np.uint8))
@@ -425,6 +494,6 @@ objects_img.save('docs/img/map_objects.png')
 cm = np.where(collide, 255, np.where(low, 128, 0)).astype(np.uint8)
 Image.fromarray(cm).save('docs/img/map_collide.png')   # 255 tall, 128 low (jumpable)
 shop = next((p for p in pois if p['key'] == 'shop'), dict(x=W // 2, y=H // 2))
-json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, spawn=dict(x=shop['x'] + 30, y=shop['y'] + 70),
+json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, track=TRACK, corral=CORRAL, meadow=MEADOW, spawn=dict(x=shop['x'] + 30, y=shop['y'] + 70),
                attribution='Map data © OpenStreetMap contributors (ODbL)'), open('docs/map.json', 'w'), indent=0)
 print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois])
