@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-27
 
-## Latest session — 2026-09-27 (cloud, church interior)
+## 2026-09-27 (cloud, church interior)
 - **You can now enter the church.** Space/E at its door fades into `docs/js/church.js`, a 320×440 room drawn in code from Tomek's interior photos:
   - pews, red aisle carpet, marble presbytery and steps;
   - altar with lace cloth, four gold candles (animated flames), ambo and a processional cross;
@@ -24,6 +24,24 @@ Last updated: 2026-09-27
   The church door stays shut while a quiz or minigame runs (`HOOKS.busy`).
 - AI church art loads only the names listed in `docs/img/church/manifest.json`, so there are no 404s. `prep_church_sprite.py` keeps the list updated.
 - `test/features_test.py` reports one 404 that already exists on `main` (not from the church, probably a favicon).
+
+## Latest session — 2026-09-27 (Frodo companion)
+- Frodo's first-pass procedural atlas was replaced with a GPT Image 2 pixel-art sheet based on six supplied local reference photos (`gen/frodo_sheet_raw.png` → `gen/build_frodo.py` → `docs/img/frodo.png`). The reference photos remain outside the repo.
+- Frodo follows Arek with collision-aware movement, appears in the y-sorted scene, and repositions safely when entering or leaving the church. His location is not added to save data.
+- Verified with `test/frodo_test.py` (following, rendering, church transition), `test/quest_test.py`, and `test/jump_test.py 1312 1670`; no browser errors in these runs.
+
+## Latest session — 2026-09-27 (village house + wayside shrines)
+- Generated one generic house sprite plus four distinct cross/shrine sprites with Codex GPT Image 2 (`gen/lm_house_generic.png`, `gen/lm_cross_iron.png`, `gen/lm_shrine_stone.png`, `gen/lm_shrine_white.png`, `gen/lm_shrine_fenced.png`). The house is not a literal copy of any one reference house.
+- `osm/render_map.py` replaces OSM house way 1095382322 with the generic sprite and places shrines at four nearby-road junctions. The user photos have no GPS metadata; these locations are approximate, not verified real sites.
+- Rebuilt the entrance sign from a GPT Image 2 medium pixel-art draft (`gen/lm_village_sign_raw.png`), then keyed the magenta background and overlaid exact `CHŁOPKÓW` bitmap lettering in `gen/build_village_sign.py`. The in-game sign now has the reference's green upper panel, pale lower skyline panel, metal frame, and two posts. Codex did not report a USD cost.
+- Regenerated the map and checked the house, four shrines/crosses, and sign in a local browser at gameplay zoom. The sign is legible and beside the road; the landmarks remain readable and no visible road/player-route obstruction was found. The house remains consistent with nearby rural homes. Shrine locations are still approximate because the photos lack GPS metadata.
+- `test/village_sign_test.py`, `quest_test.py`, `features_test.py`, `church_test.py`, `frodo_test.py`, and `jump_test.py 1312 1670` all pass locally; browser error arrays were empty. No commit or push has been made.
+
+## Latest session — 2026-09-27 (cemetery archive + deploy prep)
+- Generated three respectful cemetery-memory illustrations from the user-supplied old photos with Codex GPT Image 2 medium (all responses reported `low` quality). The scenes avoid recognizable faces and readable inscriptions. `gen/build_cemetery_memories.py` removes the magenta background, crops, palette-reduces and nearest-neighbor pixelates them into `docs/img/memories/`; original photographs are not shipped.
+- After Arek receives the tractor keys, the end screen now shows the illustrations one at a time with short photo-grounded trivia. Enter/Space or tap advances; Escape skips. English and Polish copy are included.
+- `test/cemetery_memories_test.py` drives the actual win transition, verifies all three slides render in order, then verifies return to play. Visual review of the 1280×720 screens found no clipping. Cost was not reported by Codex; it is unknown, not estimated.
+- Along with this archive work, the previously approved generic house and four wayside shrine assets are rendered in the map. Renderer, `features_test.py`, `quest_test.py`, `jump_test.py 1662 1747`, `church_test.py`, `frodo_test.py`, `play_test.py`, and `cemetery_memories_test.py` have passed locally. `git diff --check` passes. No commit or push has been made; several unrelated Frodo changes were already pending and must not be swept in inadvertently.
 
 ## Where things are
 - Live: https://itstomekk.github.io/arek-w-chlopkowie/ (GitHub Pages, branch `main`, folder `/docs`). Every push to `main` redeploys.

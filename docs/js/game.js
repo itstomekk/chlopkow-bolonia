@@ -71,7 +71,14 @@
       soltys1: ['Szarlotka Kasi będzie? To dożynki mamy uratowane.', 'Sołtys wszystko widzi, Arek. Dobra robota.'],
       soltysSecret: ['Sołtys musi wiedzieć, co dzieje się w każdym zakątku wsi. Nawet w tym.'],
       churchLabel: 'KOŚCIÓŁ', exitHint: '↓ WYJŚCIE',
-      end1: 'MASZ KLUCZYKI DO URSUSA', end2: 'CIĄG DALSZY: GRAND THEFT TRACTOR', end3: 'CZAS', endKey: 'ENTER — GRAJ DALEJ',
+      end1: 'MASZ KLUCZYKI DO URSUSA', end2: 'CIĄG DALSZY: GRAND THEFT TRACTOR', end3: 'CZAS',
+      memoryTitle: 'ARCHIWUM CMENTARZA', memoryNext: 'ENTER — NASTĘPNE ZDJĘCIE · ESC — POMIŃ', memoryReturn: 'ENTER — WRÓĆ DO WSI',
+      memoryNames: ['PROCESJA', 'PAMIĘĆ O ZMARŁYCH', 'DREWNIANY KRZYŻ'],
+      memoryFacts: [
+        'NA STARYM ZDJĘCIU MIESZKAŃCY NIOSĄ TRUMNĘ W PROCESJI.',
+        'PRZY GROBIE WIDAĆ KRZYŻ I WIENIEC, A WOKÓŁ STOJĄ ŻAŁOBNICY.',
+        'PROSTY, RĘCZNIE ZROBIONY KRZYŻ Z TABLICZKĄ OZNACZA MOGIŁĘ.',
+      ],
     },
     en: {
       title: 'AREK IN CHŁOPKÓW', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
@@ -113,7 +120,14 @@
       soltys1: ["Kasia's pie is coming? Then the harvest festival is saved.", 'The sołtys sees everything, Arek. Good job.'],
       soltysSecret: ['A village head must know what is happening in every corner of the village. Even this one.'],
       churchLabel: 'CHURCH', exitHint: '↓ EXIT',
-      end1: 'YOU GOT THE URSUS KEYS', end2: 'TO BE CONTINUED: GRAND THEFT TRACTOR', end3: 'TIME', endKey: 'ENTER — KEEP PLAYING',
+      end1: 'YOU GOT THE URSUS KEYS', end2: 'TO BE CONTINUED: GRAND THEFT TRACTOR', end3: 'TIME',
+      memoryTitle: 'CEMETERY ARCHIVE', memoryNext: 'ENTER — NEXT PHOTO · ESC — SKIP', memoryReturn: 'ENTER — RETURN TO THE VILLAGE',
+      memoryNames: ['THE PROCESSION', 'REMEMBERING THE DEAD', 'A WOODEN CROSS'],
+      memoryFacts: [
+        'IN THE OLD PHOTO, VILLAGERS CARRY A COFFIN IN PROCESSION.',
+        'A CROSS AND WREATH MARK THE GRAVE, SURROUNDED BY MOURNERS.',
+        'A HANDMADE WOODEN CROSS WITH A PLAQUE MARKS THE GRAVE.',
+      ],
     },
   }[LANG];
   const SPOT_R = { church: 90, rectory: 60, cemetery: 90, windmill: 60, shop: 60, bus: 40, river: 70 };
@@ -132,17 +146,19 @@
 
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
-  let MAP, GROUND, OBJ, SOLID, SPR, MINI, NPCIMG, ITEMS;
+  const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
+  let MAP, GROUND, OBJ, SOLID, SPR, MINI, NPCIMG, DOGIMG, ITEMS, MEMORY_ART = [];
   let ROOM = null, OUT = null, trans = null;   // ROOM: the church interior while Arek is inside; OUT: the village to return to
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
+  const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0 };
   const JUMP_T = .48, JUMP_H = 15, DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
   let Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 };
-  let hasSave = false;
+  let hasSave = false, memoryIndex = 0;
   const keys = new Set();
   const joy = { active: false, id: null, cx: 0, cy: 0, x: 0, y: 0 };
 
@@ -156,14 +172,21 @@
 
   /* ---------- input ---------- */
   function startGame(fresh) {
-    if (fresh) { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 }; P.x = MAP.spawn.x; P.y = MAP.spawn.y; unstick(); camX = P.x; camY = P.y; }
+    if (fresh) { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 }; P.x = MAP.spawn.x; P.y = MAP.spawn.y; unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; }
     scene = 'play';
   }
   addEventListener('keydown', e => {
     keys.add(e.code);
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
     if (scene === 'title') { if (e.code === 'KeyN') startGame(true); else if (e.code === 'Enter' || e.code === 'Space') startGame(false); return; }
-    if (scene === 'end') { if (e.code === 'Enter' || e.code === 'Space') scene = 'play'; return; }
+    if (scene === 'end') {
+      if (e.code === 'Escape') scene = 'play';
+      else if (e.code === 'Enter' || e.code === 'Space') {
+        if (memoryIndex < T.memoryFacts.length - 1) memoryIndex++;
+        else scene = 'play';
+      }
+      return;
+    }
     if (!talk && HOOKS.key.some(f => f(e))) return;
     if (e.code === 'KeyX' || e.code === 'KeyJ') jump();
     else if (e.code === 'Space') { if (talk || nearThing()) interact(); else jump(); }
@@ -175,7 +198,11 @@
   cvs.addEventListener('pointerdown', e => {
     cvs.setPointerCapture(e.pointerId);
     if (scene === 'title') { startGame(false); return; }
-    if (scene === 'end') { scene = 'play'; return; }
+    if (scene === 'end') {
+      if (memoryIndex < T.memoryFacts.length - 1) memoryIndex++;
+      else scene = 'play';
+      return;
+    }
     const [px, py] = toCanvas(e);
     if (!talk && HOOKS.pointer.some(f => f(px, py))) return;
     if (px > cvs.width * .78 && py > cvs.height * .6) { if (talk || nearThing()) interact(); else jump(); return; }
@@ -202,13 +229,14 @@
       ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
       GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
       P.x = c.spawn.x; P.y = c.spawn.y; P.dir = 'up'; camX = P.x; camY = P.y; dust = [];
+      placeFrodoNearArek();
       if (!Q.churchSeen) { Q.churchSeen = true; save(); say('arek', T.churchIn); }
     });
   }
   function leaveRoom() {
     fade(() => {
       ({ MAP, GROUND, OBJ, SOLID } = OUT); P.x = OUT.x; P.y = OUT.y + 6; P.dir = 'down';
-      ROOM = null; unstick(); camX = P.x; camY = P.y; dust = []; save();
+      ROOM = null; unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; dust = []; save();
     });
   }
   const npcsHere = () => ROOM ? [{ id: 'soltys', x: ROOM.soltys.x, y: ROOM.soltys.y }] : ITEMS.npcs;
@@ -242,7 +270,7 @@
     } else if (id === 'grandpa') {
       const n = questsDone();
       if (Q.grandpa === 2) say(id, [T.grandpa2[2]]);
-      else if (n >= 3) { say(id, T.grandpa2, () => { Q.grandpa = 2; save(); celebrate(); scene = 'end'; }); }
+      else if (n >= 3) { say(id, T.grandpa2, () => { Q.grandpa = 2; save(); celebrate(); memoryIndex = 0; scene = 'end'; }); }
       else if (Q.grandpa === 0) { Q.grandpa = 1; say(id, T.grandpa0); }
       else say(id, T.grandpa1(n));
     } else HOOKS.npcTalk.some(f => f(id));
@@ -318,6 +346,37 @@
     const ox = P.x, oy = P.y;
     for (let r = 4; r < 300; r += 4) for (let a = 0; a < 6.28; a += .4) { const x = ox + Math.cos(a) * r, y = oy + Math.sin(a) * r; if (!blocked(x, y)) { P.x = x; P.y = y; return; } }
   }
+  function placeFrodoNearArek() {
+    const [dx, dy] = DIRV[P.dir] || DIRV.down;
+    const behind = Math.atan2(-dy, -dx);
+    const turns = [0, -.65, .65, -1.3, 1.3, -2, 2, Math.PI];
+    for (let r = 42; r <= 88; r += 8) for (const turn of turns) {
+      const x = P.x + Math.cos(behind + turn) * r, y = P.y + Math.sin(behind + turn) * r;
+      if (!blocked(x, y)) { FRODO.x = x; FRODO.y = y; FRODO.stuck = 0; return; }
+    }
+    FRODO.x = P.x; FRODO.y = P.y; FRODO.stuck = 0;
+  }
+  function updateFrodo(dt) {
+    const [dx, dy] = DIRV[P.dir] || DIRV.down;
+    const tx = P.x - dx * 42, ty = P.y - dy * 42;
+    let vx = tx - FRODO.x, vy = ty - FRODO.y;
+    const dist = Math.hypot(vx, vy);
+    if (dist > 150) { placeFrodoNearArek(); return; }
+    FRODO.moving = dist > 18;
+    if (!FRODO.moving) { FRODO.stuck = 0; return; }
+    FRODO.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
+    const speed = Math.min(190, 110 + Math.max(0, dist - 28) * 1.2);
+    const step = Math.min(dist - 18, speed * dt);
+    vx = vx / dist * step; vy = vy / dist * step;
+    let moved = false;
+    if (!blocked(FRODO.x + vx, FRODO.y + vy)) { FRODO.x += vx; FRODO.y += vy; moved = true; }
+    else {
+      if (Math.abs(vx) > .01 && !blocked(FRODO.x + vx, FRODO.y)) { FRODO.x += vx; moved = true; }
+      if (Math.abs(vy) > .01 && !blocked(FRODO.x, FRODO.y + vy)) { FRODO.y += vy; moved = true; }
+    }
+    if (moved) { FRODO.step += dt * 9; FRODO.stuck = 0; }
+    else if ((FRODO.stuck += dt) > 1.1) placeFrodoNearArek();
+  }
   function update(dt) {
     time += dt;
     dust = dust.filter(d => (d.t += dt) < .5);
@@ -354,6 +413,7 @@
       }
     }
     }
+    updateFrodo(dt);
     if (ROOM) { const e = ROOM.exit; if (P.y > e.y && P.x > e.x0 && P.x < e.x1) leaveRoom(); return; }
     // pickups
     ITEMS.apples.forEach((a, i) => {
@@ -393,6 +453,14 @@
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh);
     ctx.restore(); ctx.imageSmoothingEnabled = false;
+  }
+  function drawFrodo(sx, sy, s) {
+    shadow(sx, sy, s * .78, 6);
+    const row = { down: 0, up: 1, right: 2, left: 3 }[FRODO.dir] || 0;
+    const col = FRODO.moving ? Math.floor(FRODO.step) % 2 : 0;
+    const size = 27 * s, top = sy - size * 29 / 32;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(DOGIMG, col * 32, row * 32, 32, 32, sx - size / 2, top, size, size);
   }
   function drawNpc(n, sx, sy, s) {
     shadow(sx, sy, s, 8);
@@ -469,6 +537,7 @@
     for (const n of ITEMS.npcs) if (inView(n.x, n.y)) draw.push({ base: n.y, fn: () => drawNpc(n, ...S(n.x, n.y), zoom) });
     }
     draw.push({ base: P.y, fn: () => drawArek(...S(P.x, P.y), zoom) });
+    if (scene === 'play' || scene === 'end') draw.push({ base: FRODO.y, fn: () => drawFrodo(...S(FRODO.x, FRODO.y), zoom) });
     if (!ROOM) HOOKS.world.forEach(f => f((base, fn) => draw.push({ base, fn }), S, inView));
     draw.sort((a, b) => a.base - b.base).forEach(d => d.fn());
 
@@ -572,10 +641,22 @@
     }
     if (scene === 'end') {
       ctx.fillStyle = 'rgba(5,8,25,0.8)'; ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 4.6}px Silkscreen`; ctx.fillText(T.end1, W / 2, H * .36);
-      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.6}px Silkscreen`; ctx.fillText(T.end2, W / 2, H * .48);
-      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 2}px Silkscreen`; ctx.fillText(`${T.end3} ${fmtTime(Q.playTime)} · ${appleCount()}/${ITEMS.apples.length}`, W / 2, H * .58);
-      if (Math.floor(time * 2) % 2) ctx.fillText(T.endKey, W / 2, H * .7);
+      ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3.6}px Silkscreen`; ctx.fillText(T.end1, W / 2, H * .075);
+      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillText(T.end2, W / 2, H * .145);
+      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 1.45}px Silkscreen`; ctx.fillText(`${T.end3} ${fmtTime(Q.playTime)} · ${appleCount()}/${ITEMS.apples.length}`, W / 2, H * .205);
+
+      const size = Math.min(U * 32, H * .28, W * .62), x = (W - size) / 2, y = H * .25;
+      ctx.fillStyle = 'rgba(8,12,40,0.94)'; ctx.fillRect(x - U, y - U, size + U * 2, size + U * 2);
+      ctx.strokeStyle = '#f5f0e0'; ctx.lineWidth = Math.max(2, U * .28); ctx.strokeRect(x - U * .7, y - U * .7, size + U * 1.4, size + U * 1.4);
+      if (MEMORY_ART[memoryIndex]) { ctx.imageSmoothingEnabled = false; ctx.drawImage(MEMORY_ART[memoryIndex], x, y, size, size); }
+
+      ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillText(`${T.memoryTitle} · ${memoryIndex + 1}/${T.memoryFacts.length}`, W / 2, H * .59);
+      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.55}px Silkscreen`;
+      ctx.fillText(T.memoryNames[memoryIndex], W / 2, H * .645);
+      const fact = wrapText(T.memoryFacts[memoryIndex], Math.min(W - U * 10, U * 86));
+      fact.slice(0, 3).forEach((line, i) => ctx.fillText(line, W / 2, H * .71 + i * U * 2.15));
+      ctx.fillStyle = '#c8cee0'; ctx.font = `${U * 1.45}px Silkscreen`;
+      ctx.fillText(memoryIndex < T.memoryFacts.length - 1 ? T.memoryNext : T.memoryReturn, W / 2, H * .92);
     }
   }
 
@@ -588,14 +669,18 @@
 
   async function init() {
     [MAP, ITEMS] = await Promise.all([fetch('map.json').then(r => r.json()), fetch('items.json').then(r => r.json())]);
-    const [g, o, c, sheet, meta, npcs] = await Promise.all([
+    const loaded = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
-      load('img/arek_sheet.png'), fetch('img/arek_sheet.json').then(r => r.json()), load('img/npcs.png'),
+      load('img/arek_sheet.png'), fetch('img/arek_sheet.json').then(r => r.json()), load('img/npcs.png'), load('img/frodo.png'),
       document.fonts.load('20px Silkscreen', 'ŁŚĆŻ'),
       // optional AI art for the church; a missing file just keeps the hand-drawn piece
       fetch('img/church/manifest.json').then(r => r.json()).catch(() => [])
-        .then(names => Promise.all(names.map(k => load(`img/church/${k}.png`).then(i => { window.CHURCH_ART[k] = i; }, () => { }))))]);
-    GROUND = g; OBJ = o; SPR = { sheet, meta }; NPCIMG = npcs;
+        .then(names => Promise.all(names.map(k => load(`img/church/${k}.png`).then(i => { window.CHURCH_ART[k] = i; }, () => { })))),
+      Promise.all(MEMORY_PATHS.map(load)),
+    ]);
+    const [g, o, c, sheet, meta, npcs, dog] = loaded;
+    MEMORY_ART = loaded[9];
+    GROUND = g; OBJ = o; SPR = { sheet, meta }; NPCIMG = npcs; DOGIMG = dog;
     const tc = document.createElement('canvas'); tc.width = MAP.w; tc.height = MAP.h;
     const tx = tc.getContext('2d', { willReadFrequently: true }); tx.drawImage(c, 0, 0);
     const d = tx.getImageData(0, 0, MAP.w, MAP.h).data; SOLID = new Uint8Array(MAP.w * MAP.h);
@@ -604,19 +689,19 @@
     const mx = MINI.getContext('2d'); mx.drawImage(g, 0, 0, MINI.width, MINI.height); mx.drawImage(o, 0, 0, MINI.width, MINI.height);
     P.x = MAP.spawn.x; P.y = MAP.spawn.y;
     hasSave = loadSave();
-    unstick(); camX = P.x; camY = P.y;
+    unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y;
     resize(); requestAnimationFrame(loop);
     // API for features.js
     window.ARK = {
       HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
-      get Q() { return Q; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; },
+      get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; },
       save, say, popToast, celebrate, blocked, unstick, drawNpc, shadow, box, wrapText, fmtTime,
       teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },
       burst(x, y, colors, n = 16) { for (let k = 0; k < n; k++) fx.push({ x, y, vx: (Math.random() - .5) * 120, vy: -Math.random() * 150, t: 0, c: colors[k % colors.length] }); },
       load,
     };
     window.dispatchEvent(new Event('ark-ready'));
-    window.__game = { P, get MAP() { return MAP; }, ITEMS, blocked, enterChurch, get room() { return ROOM; }, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, get talk() { return talk; } };
+    window.__game = { P, get FRODO() { return FRODO; }, get MAP() { return MAP; }, ITEMS, blocked, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, get room() { return ROOM; }, get talk() { return talk; }, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

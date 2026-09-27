@@ -29,6 +29,7 @@ Progress saves automatically in the browser (localStorage).
 - **Damian** (at the sports pitch in the north) lost his **cap** somewhere in the wheat.
 - **Marcin** (at the bus stop) wants an **orangeade** from the shop.
 - **Grandpa Zbyszek** (by the Koźlak windmill) hands over the **keys to his Ursus** once the whole crew has been helped.
+- **Frodo**, Arek's black-and-tan dog, follows him around the village and into the church.
 
 On the way you can jump over garden fences, hay bales and the Białka river.
 
@@ -40,6 +41,9 @@ Our Lady's niche and the "100" flowers for the parish centenary. The **Sołtys**
 (source: [Polish Wikipedia](https://pl.wikipedia.org/wiki/Ch%C5%82opk%C3%B3w_(wojew%C3%B3dztwo_mazowieckie)), CC BY-SA).
 Question signboards (red **?**) stand at the places they are about: the church, rectory ("cerkwisko"), cemetery, windmill, shop, bus stops,
 the Białka, the pitch, the orchard, the woods and the road east. Each answer reveals a short fact. Finish all 13 and Halina gives you a title based on your score.
+
+### Cemetery archive (after the main quest)
+After Arek earns Grandpa's tractor keys, a three-page archive presents pixel-art interpretations of the old cemetery photos supplied for the game. Each page pairs one scene with a short visual note; press **Enter/Space** or tap to continue, **Esc** to skip. The illustrations are generated and pixel-processed; the original photographs are not shipped with the game.
 
 ### Minigames (flags on the map)
 - 🏁 **Race** (red flag, track in the northern fields): 2 laps against Damian. Run with Shift and jump the hay-bale walls. Shortcuts across the grass don't count, because checkpoints only register on the track.
@@ -65,6 +69,8 @@ docs/                    ← the game (GitHub Pages serves this folder)
   img/map_collide.png    ← collisions: 255 = tall (walls, trees, ponds), 128 = low (fences, streams, bales; jumpable)
   img/arek_sheet.png/.json ← Arek's walk-cycle atlas (4 directions; left is right mirrored)
   img/npcs.png           ← Kasia, Marcin, Damian, Grandpa, Pani Halina
+  img/frodo.png          ← Frodo's 4-direction, 2-frame walking atlas
+  img/memories/          ← three keyed pixel-art cemetery archive illustrations
   img/animals.png        ← pig + dog run cycles (side, front, back)
 osm/
   chlopkow.json          ← raw OpenStreetMap extract (Overpass API)
@@ -73,8 +79,10 @@ osm/
 gen/
   model_sheet_v1.png, walk_sheet_v1.png ← AI-generated sprite sheets of Arek (GPT Image, magenta background)
   lm_church.png, lm_windmill.png, lm_shop.png ← landmark sprites
+  frodo_sheet_raw.png    ← GPT Image 2 sprite sheet based on local Frodo reference photos
   slice_sheet.py         ← chroma-key + slicing + feet-aligned atlas for Arek
   build_npcs.py          ← NPC atlas
+  build_frodo.py         ← key and pack Frodo's 8-frame atlas into docs/img/frodo.png
   codex_gen.py / ppq_gen.py ← image-generation helpers (local tooling, need the author's accounts)
 ```
 
@@ -85,6 +93,8 @@ python osm/render_map.py      # map layers + map.json  (needs numpy, pillow)
 python osm/place_items.py     # items.json
 python gen/slice_sheet.py     # Arek atlas (needs scipy)
 python gen/build_npcs.py      # NPC atlas
+python gen/build_frodo.py     # Frodo atlas (needs numpy, scipy, pillow)
+python gen/build_cemetery_memories.py  # key and pixel-grid the generated archive art
 ```
 
 Local testing: `python -m http.server 8765 --directory docs`, then open http://127.0.0.1:8765.

@@ -27,5 +27,6 @@ with sync_playwright() as p:
     n = npc['grandpa']; tp(n['x'], n['y'] + 20); pg.screenshot(path="test/q3_grandpa_ready.png"); talk_all(); time.sleep(.5)
     print('final', pg.evaluate("JSON.stringify(__game.Q)"), pg.evaluate("__game.scene"))
     pg.screenshot(path="test/q4_end.png")
-    pg.keyboard.press("Enter"); time.sleep(.2); pg.keyboard.press("KeyM"); time.sleep(.3); pg.screenshot(path="test/q5_map.png")
+    for _ in range(3): pg.keyboard.press("Enter"); time.sleep(.2)  # three archive cards, then resume play
+    pg.keyboard.press("KeyM"); time.sleep(.3); pg.screenshot(path="test/q5_map.png")
     print('errors', errs); b.close()
