@@ -6,6 +6,8 @@ Daylight and a straight-on angle work best, and several angles are better than o
 Send them to Tomek. **Photos are never committed to this repo.** They stay on the local machine and are only used as references for image generation.
 
 **Received 2026-09-27:** church front, four interior photos (altar, nave, Mary niche) and the Sołtys → used for the church interior and the Sołtys NPC.
+**Received 2026-09-27:** four rural house photos and four roadside crosses/chapels. One generic house sprite uses broad house references; the four distinct roadside structures are now represented as sprites. The photos contain no GPS metadata, so shrine positions are approximate OSM-junction placements, not verified locations. Original photos remain outside the repository.
+**Received 2026-09-27:** three old cemetery photos, used as references for three respectful pixel-art memory illustrations shown after the main quest. The original photographs are not included in the game or repository. The cemetery gate and main alley are still wanted as location references.
 
 ## Landmarks (each becomes a hand-made sprite)
 
@@ -17,8 +19,8 @@ Send them to Tomek. **Photos are never committed to this repo.** They stay on th
 | 4 | **Świetlica wiejska** (community hall) | *not in the game yet* | front; the square or yard in front |
 | 5 | **Bus stops** (Chłopków 03/06, 07/08) | invisible hotspot | the shelter itself |
 | 6 | **Rectory** (Plebania) | procedural house | front |
-| 7 | **Cemetery** | procedural gravestones | gate and main alley |
-| 8 | **Wayside shrines / crosses** | *not in the game yet* | each one, plus rough location |
+| 7 | **Cemetery** | procedural gravestones; three archive illustrations shown after the main quest | gate and main alley |
+| 8 | **Wayside shrines / crosses** | four GPT pixel-art sprites, placed at approximate OSM junctions; locations unverified | exact locations if known |
 | 9 | **The bridge over the Białka** | plain road over water | the bridge and the river next to it |
 | 10 | **Sports pitch** (boisko) | procedural | goals and surroundings |
 

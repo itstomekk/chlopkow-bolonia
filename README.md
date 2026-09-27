@@ -49,6 +49,7 @@ After Arek earns Grandpa's tractor keys, a three-page archive presents pixel-art
 - 🏁 **Race** (red flag, track in the northern fields): 2 laps against Damian. Run with Shift and jump the hay-bale walls. Shortcuts across the grass don't count, because checkpoints only register on the track.
 - 🐷 **Catch Pepa the piglet** (pink flag, corral below the windmill): 30 seconds. She dodges, so corner her against the fence.
 - 🐕 **Eggs and dogs** (blue flag, meadow south of the main street): collect 6 eggs while 3 dogs chase you. Jump over the dogs to escape.
+- 🎯 **Skeet shooting** (gold flag, meadow near the river): clay pigeons fly across the range. Aim with mouse/touch, press Space to shoot. Double barrel — reload after two shots. Hit 10 of 15 to win.
 
 Best times are saved and shown in the quest log.
 You can also read about the church, the rectory, the cemetery, the windmill, the shop, the bus stops and the river.

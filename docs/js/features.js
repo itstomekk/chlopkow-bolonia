@@ -29,8 +29,12 @@ window.addEventListener('ark-ready', () => {
     pigIntro: ['Dziadek Zbyszek: „Świnka Pepa znowu wyszła z chlewika! Złap ją w 30 sekund, zanim wlezie babci w ogródek.”'],
     dogsIntro: ['Marcin: „Na pastwisku kury pana Stefana zniosły 6 jajek, ale pilnują ich psy.”', 'Marcin: „Zbierz wszystkie jajka i nie daj się złapać. Psy da się przeskoczyć!”'],
     go: 'START!', lap: 'OKRĄŻENIE', time: 'CZAS', best: 'REKORD', eggs: 'JAJKA', left: 'ZOSTAŁO',
+    hit: 'TRAFIONO',
     raceWin: 'WYGRAŁEŚ Z DAMIANEM!', raceLose: 'DAMIAN BYŁ SZYBSZY...', pigWin: 'MASZ PEPĘ!', pigLose: 'PEPA UCIEKŁA...',
     dogsWin: 'WSZYSTKIE JAJKA ZEBRANE!', dogsLose: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...',
+    skeetIntro: ['Marcin: „Na strzelnicy lecą kurki wodne. Przeładowujesz dwulufę — SPACJA. Celuj myszką/dotykiem, strzelaj SPACJĄ.”', 'Marcin: „Traf 10 z 15. Muszka bywa zdradliwa, ale masz dwie lufy.”'],
+    skeetWin: 'STRZELNY MISTRZ!', skeetLose: 'MUSZKA WYGRALA...',
+    flagSkeet: 'STRZELNICA',
     again: 'SPACJA — ZAMKNIJ', esc: 'ESC — PRZERWIJ',
     mgLog: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy' },
   } : {
@@ -49,8 +53,12 @@ window.addEventListener('ark-ready', () => {
     pigIntro: ['Grandpa Zbyszek: "Pepa the piglet escaped again! Catch her in 30 seconds before she gets into Grandma\'s garden."'],
     dogsIntro: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "Collect every egg and don\'t get caught. You can jump over the dogs!"'],
     go: 'GO!', lap: 'LAP', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT',
+    hit: 'HIT',
     raceWin: 'YOU BEAT DAMIAN!', raceLose: 'DAMIAN WAS FASTER...', pigWin: 'GOT PEPA!', pigLose: 'PEPA GOT AWAY...',
     dogsWin: 'ALL EGGS COLLECTED!', dogsLose: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...',
+    skeetIntro: ['Marcin: "Clay pigeons are flying at the range. Load the double barrel — SPACE. Aim with mouse/touch, shoot with SPACE."', 'Marcin: "Hit 10 out of 15. The clay can be tricky, but you have two barrels."'],
+    skeetWin: 'SHARPSHOOTER!', skeetLose: 'THE CLAY WON...',
+    flagSkeet: 'RANGE',
     again: 'SPACE — CLOSE', esc: 'ESC — QUIT',
     mgLog: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs' },
   };
@@ -209,6 +217,7 @@ window.addEventListener('ark-ready', () => {
     { type: 'race', x: TR.cx - 30, y: TR.cy + TR.ry + TR.w / 2 + 22, color: '#d8262c', label: () => L.flagRace },
     { type: 'pig', x: CO.cx - CO.r - 26, y: CO.cy + 6, color: '#ff8fb8', label: () => L.flagPig },
     { type: 'dogs', x: ME.x0 - 18, y: (ME.y0 + ME.y1) / 2, color: '#2f6fe0', label: () => L.flagDogs },
+    { type: 'skeet', x: 900, y: 1050, color: '#d8a03a', label: () => L.flagSkeet },
   ];
   let MG = null;
 
@@ -252,6 +261,23 @@ window.addEventListener('ark-ready', () => {
     if (!MG) return false;
     if (e.code === 'Escape') { MG = null; return true; }
     if ((MG.phase === 'win' || MG.phase === 'lose') && (e.code === 'Space' || e.code === 'Enter')) { if (MG.t > .6) MG = null; return true; }
+    if (MG.type === 'skeet' && MG.phase === 'run' && e.code === 'Space') {
+      const sk = MG.skeet;
+      if (sk.reload > 0) return true;
+      // find nearest pigeon to crosshair
+      const cx = A.keys.has('PointerX') ? A.keys.PointerX : W / 2;
+      const cy = A.keys.has('PointerY') ? A.keys.PointerY : H * .5;
+      let best = null, bd = 1e9;
+      for (const p of sk.pigeons) if (p.alive) {
+        const [sx, sy] = S(p.x, p.y);
+        const d = Math.hypot(sx - cx, sy - cy);
+        if (d < bd && d < 60) { bd = d; best = p; }
+      }
+      if (best) { best.alive = false; sk.hit++; A.burst(best.x, best.y, ['#ffd21f', '#fff', '#c8c4b8']); A.celebrate(); }
+      sk.barrel = 1 - sk.barrel;
+      if (sk.barrel === 0) sk.reload = 1.2;
+      return true;
+    }
     return false;                        // let Space/X reach the jump handler during the run
   });
   HOOKS.pointer.push(() => { if (MG && (MG.phase === 'win' || MG.phase === 'lose') && MG.t > .6) { MG = null; return true; } return false; });
@@ -352,7 +378,7 @@ window.addEventListener('ark-ready', () => {
     if (!MG) return;
     ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
     // top bar
-    const info = MG.type === 'race' ? `${L.lap} ${MG.lap}/${MG.laps}` : MG.type === 'pig' ? `${L.left} ${Math.max(0, MG.limit - MG.run).toFixed(1)}` : `${L.eggs} ${MG.eggs.filter(e => e.got).length}/6`;
+    const info = MG.type === 'race' ? `${L.lap} ${MG.lap}/${MG.laps}` : MG.type === 'pig' ? `${L.left} ${Math.max(0, MG.limit - MG.run).toFixed(1)}` : MG.type === 'skeet' ? `${L.hit || 'TRAFIONO'} ${MG.skeet.hit}/${MG.skeet.total} ${L.left || 'ZOSTAŁO'} ${MG.skeet.total - MG.skeet.spawned + MG.skeet.pigeons.length}` : `${L.eggs} ${MG.eggs.filter(e => e.got).length}/6`;
     const rec = Q().mg[MG.type];
     const bw = Math.min(W * .5, U * 60), bx = (W - bw) / 2;
     ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(bx, U * 1.5, bw, U * 6);
@@ -365,6 +391,17 @@ window.addEventListener('ark-ready', () => {
       ctx.font = `${U * (14 - k * 5)}px Silkscreen`; ctx.fillStyle = `rgba(255,210,31,${1 - k * .6})`; ctx.fillText(String(n), W / 2, H * .42);
     } else if (MG.phase === 'run' && MG.run < .8) {
       ctx.font = `${U * 9}px Silkscreen`; ctx.fillStyle = `rgba(124,255,107,${1 - MG.run / .8})`; ctx.fillText(L.go, W / 2, H * .42);
+    } else if (MG.phase === 'run' && MG.type === 'skeet') {
+      // crosshair
+      const cx = A.keys.has('PointerX') ? A.keys.PointerX : W / 2;
+      const cy = A.keys.has('PointerY') ? A.keys.PointerY : H * .5;
+      ctx.strokeStyle = '#ffd21f'; ctx.lineWidth = Math.max(2, U * .3);
+      const rs = U * 8; ctx.beginPath(); ctx.moveTo(cx - rs, cy); ctx.lineTo(cx + rs, cy); ctx.moveTo(cx, cy - rs); ctx.lineTo(cx, cy + rs); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, rs * 1.3, 0, 7); ctx.stroke();
+      // barrel indicator
+      const sk = MG.skeet;
+      ctx.font = `${U * 1.6}px Silkscreen`; ctx.fillStyle = sk.barrel === 0 ? '#ffd21f' : '#f5f0e0';
+      ctx.fillText(sk.reload > 0 ? `PRZEŁADOWUJESZ...` : `LUFA ${sk.barrel + 1}/2`, W / 2, H * .15);
     } else if (MG.phase === 'win' || MG.phase === 'lose') {
       const pw = Math.min(W - U * 6, U * 60), ph = U * 18, px = (W - pw) / 2, py = H * .32;
       A.box(px, py, pw, ph, U);

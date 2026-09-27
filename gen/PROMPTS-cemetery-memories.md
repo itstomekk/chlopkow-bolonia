@@ -1,0 +1,19 @@
+# Cemetery archive image prompts
+
+Generated through Hermes `image_generate` using Codex OAuth, requested `gpt-image-2-medium`, square 1024×1024. All three successful responses reported actual/reported quality `low`; cost was not returned by the Codex provider and is unknown per image and in total.
+
+Original user-supplied photographs remain in the local composer-image cache and are not copied into this repository. The prompts requested generalized, respectful scenes, simplified figures without identifiable faces, no readable memorial inscriptions, a limited rural-RPG palette, and an exact magenta exterior. The preparation script replaces the key with transparency and reduces noisy texture to a 160×160 nearest-neighbor pixel grid.
+
+| Source scene | Generated raw source | Shipped game art |
+|---|---|---|
+| Old funeral procession | `gen/cemetery_memories_raw/procession.png` | `docs/img/memories/procession.png` |
+| Memorial ceremony with cross and wreath | `gen/cemetery_memories_raw/memorial_ceremony.png` | `docs/img/memories/memorial.png` |
+| Community gathered around handmade grave cross | `gen/cemetery_memories_raw/wooden_cross_gathering.png` | `docs/img/memories/wooden_cross.png` |
+
+The captions are visual descriptions of the supplied photographs, not claimed dates, names, or village-history facts. The gallery appears only after the player completes the main quest and receives the Ursus keys.
+
+## Prompts used
+
+1. **Procession:** Create a respectful, non-literal pixel-art RPG historical memory illustration inspired by the old black-and-white cemetery procession photo. Show only simplified adult silhouettes carrying a pale coffin with dark ornamental trim, with a crowd and a small child silhouette behind; no identifiable faces, no readable names or dates, no gore, no sentimentality or horror. Match classic crisp 16-bit top-down/three-quarter rural RPG asset style: chunky readable pixel clusters, stepped edges, limited charcoal/cream/sepia palette, warm restrained highlights. Compose as one clear square scene vignette, centered and with a little ground at its base. Outside the scene must be perfectly flat pure magenta #FF00FF for chroma key, no shadow/glow outside sprite, no text, no border.
+2. **Memorial ceremony:** Create a respectful, non-literal pixel-art RPG historical memory illustration inspired by the old cemetery memorial ceremony photo. Focus on the pale stone grave monument and bold cross with a dark evergreen wreath at its base; suggest a prayer-book-holding officiant and a tall dark processional flag with simple silhouettes only. No identifiable faces, no readable inscription, no gore, no horror. Match classic crisp 16-bit top-down/three-quarter rural RPG asset style: chunky readable pixel clusters, stepped edges, limited charcoal, stone gray and sepia palette with restrained highlights. Compose as one clear square scene vignette, centered and grounded. Outside the scene must be perfectly flat pure magenta #FF00FF for chroma key, no shadow/glow outside sprite, no text, no border.
+3. **Wooden cross:** Create a respectful, non-literal pixel-art RPG historical memory illustration inspired by the old rural cemetery gathering photo. Focus on a handmade wooden grave cross with a small blank cream plaque (absolutely no writing), a few simplified family/community silhouettes, and bare trees behind it. No identifiable faces, no readable names/dates, no gore, no horror. Match classic crisp 16-bit top-down/three-quarter rural RPG asset style: chunky readable pixel clusters, stepped edges, limited grayscale, weathered brown and muted winter colors with restrained highlights. Compose as one clear square scene vignette, centered and grounded. Outside the scene must be perfectly flat pure magenta #FF00FF for chroma key, no shadow/glow outside sprite, no text, no border.
