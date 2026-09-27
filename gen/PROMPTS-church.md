@@ -21,9 +21,5 @@ python gen/codex_gen.py --aspect portrait --ref references/soltys.jpg --ref gen/
 
 ## Integration
 
-- Interior: scale `gen/church_interior_v1.png` to 320×440, split it into `docs/img/church_ground.png` (floor and walls) and
-  `docs/img/church_objects.png` (altar, pews and other standing things on transparency). Then in `church.js` draw
-  those images into `ground`/`obj` instead of the hand-drawn rects. Keep the `put()` rects and `block()` collisions in sync
-  with the new art.
-- Sołtys: chroma-key it, append a 5th 130×170 cell to `img/npcs.png` via `gen/build_npcs.py`, add `soltys: 4` to `NPC_IDX`,
-  and replace the `window.drawSoltys` call in `game.js` with `drawNpc`.
+The full step-by-step for Hermes is in `gen/HERMES-PROMPT.md`. In short: `python gen/prep_church_sprite.py gen/raw/<name>.png <name>`
+writes `docs/img/church/<name>.png`, and the game picks it up automatically. There is no code to change.

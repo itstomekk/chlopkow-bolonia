@@ -6,6 +6,21 @@
    rects, collision bytes (0 floor, 2 solid), pois, spawn and exit. 1 unit = 1 art pixel, like map_ground.png.
    A GPT-generated interior can replace ground/objects later; keep the layout constants in sync. */
 'use strict';
+/* Optional AI art: any PNG in docs/img/church/ named after a key of CHURCH_PIECES replaces the hand-drawn piece.
+   Sprites are transparent PNGs cropped to the object, any resolution; they are fitted into the box (keeping
+   aspect, centred, standing on the bottom edge). 'backwall' is stretched to fill its box. Missing files = hand-drawn. */
+window.CHURCH_PIECES = {
+  backwall: [0, 0, 320, 104], altar: [126, 104, 68, 45], candles: [103, 98, 24, 48], cross: [194, 86, 12, 63],
+  ambo: [228, 106, 34, 45], banner: [266, 92, 28, 44], mary: [14, 98, 48, 53], flags: [288, 92, 20, 70],
+  flowers100: [134, 146, 52, 32], pew: null, confessional: [15, 388, 36, 39], font: [195, 405, 14, 17], soltys: null,
+};
+window.CHURCH_ART = {};
+window.fitSprite = function (ctx, img, x, y, w, h, stretch) {
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  if (stretch) { ctx.drawImage(img, x, y, w, h); return; }
+  const k = Math.min(w / img.width, h / img.height), dw = img.width * k, dh = img.height * k;
+  ctx.drawImage(img, x + (w - dw) / 2, y + h - dh, dw, dh);
+};
 window.buildChurch = function buildChurch() {
   const W = 320, H = 440;
   const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
@@ -123,14 +138,22 @@ window.buildChurch = function buildChurch() {
     for (const ex of [x - 2, x + w - 2]) { R(o, ex, y - 3, 4, 18, '#b0712a'); R(o, ex + 1, y - 3, 2, 2, '#e8b060'); }
     put(x - 3, y - 4, w + 6, 20, y + 14); block(x - 2, y + 4, w + 4, 11);
   };
-  for (let i = 0; i < 7; i++) { const y = 190 + i * 28; pew(24, y, 114); pew(182, y, 114); }
+  const pewRects = [];
+  for (let i = 0; i < 7; i++) { const y = 190 + i * 28; pew(24, y, 114); pew(182, y, 114); pewRects.push([21, y - 4, 120, 20], [179, y - 4, 120, 20]); }
   // confessional by the entrance
   R(o, 16, 390, 34, 36, '#9a5f28'); R(o, 18, 392, 30, 4, '#c98a3c'); R(o, 22, 398, 10, 26, '#6b3b16'); R(o, 34, 398, 10, 26, '#7a4a1c');
   R(o, 38, 402, 2, 8, '#e0b23a'); R(o, 36, 404, 6, 2, '#e0b23a'); put(15, 388, 36, 39, 426); block(16, 410, 34, 16);
   // holy water font
   R(o, 196, 406, 12, 5, '#e7e3db'); R(o, 198, 407, 8, 2, '#8fb6d8'); R(o, 200, 411, 4, 10, '#cfcac0'); put(195, 405, 14, 17, 421); block(198, 414, 8, 7);
 
-  const candles = [0, 1, 2, 3].map(i => ({ x: 107.5 + i * 5, y: 103 }));
+  // swap in AI sprites where they exist: clear every replaced box first, then draw, so neighbours stay intact
+  const art = window.CHURCH_ART, boxes = [];
+  for (const [k, r] of Object.entries(window.CHURCH_PIECES)) if (r && k !== 'backwall' && art[k]) boxes.push([art[k], r]);
+  if (art.pew) for (const r of pewRects) boxes.push([art.pew, r]);
+  for (const [, r] of boxes) o.clearRect(...r);
+  for (const [img, r] of boxes) window.fitSprite(o, img, ...r);
+  if (art.backwall) window.fitSprite(g, art.backwall, ...window.CHURCH_PIECES.backwall, true);
+  const candles = art.candles ? [] : [0, 1, 2, 3].map(i => ({ x: 107.5 + i * 5, y: 103 }));
   const pois = [
     { key: 'altar', x: 160, y: 158, r: 30 }, { key: 'mary', x: 38, y: 160, r: 26 }, { key: 'glass', x: 86, y: 118, r: 22 },
     { key: 'flowers', x: 160, y: 186, r: 16 }, { key: 'confession', x: 60, y: 418, r: 20 }, { key: 'pew', x: 160, y: 300, r: 16 },

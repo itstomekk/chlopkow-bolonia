@@ -15,7 +15,8 @@ Last updated: 2026-09-27
 - Tests: `test/church_test.py` is new. `quest_test.py` and `jump_test.py 1662 1747` still pass.
 - **Not done:** AI (GPT) versions of the interior and the Sołtys. The cloud session can't use Codex (OpenAI returns 403 to cloud IPs) and has no PPQ key. The ready prompts and integration steps are in `gen/PROMPTS-church.md`.
 - The pasted reference photos were not saved as files. Chat images don't reach the container. Tomek must copy them to `references/` locally.
-- "100" = a jubilee, inferred from the flowers in the photos. The exact occasion (parish or church centenary?) is unverified.
+- "100" = **100 years of the parish** (confirmed by Tomek). The Sołtys agreed to appear in the game.
+- **AI art hook:** any PNG in `docs/img/church/<name>.png` replaces the hand-drawn piece. The names and boxes are in `CHURCH_PIECES` (`church.js`). `gen/prep_church_sprite.py` keys, crops and saves the images. **Hermes runbook: `gen/HERMES-PROMPT.md`.**
 - Repo skill for adding more rooms: `.claude/skills/add-interior/SKILL.md`.
 - The work is on branch `claude/determined-mccarthy-b9096e`. Merging to `main` makes it live on Pages.
 

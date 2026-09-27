@@ -46,7 +46,7 @@
       altar: ['Ołtarz w białym obrusie z koronką. Arek niczego nie dotyka. Tym razem.'],
       mary: ['Matka Boża w marmurowej niszy. Ktoś zostawił świeże kwiaty i wieniec z kłosów.'],
       glass: ['Witraże świecą jak ekran telefonu. Tylko ładniej.'],
-      flowers: ['Kwiaty ułożone w złote „100”. Jubileusz, o którym mówi cała wieś.'],
+      flowers: ['Kwiaty ułożone w złote „100”. Sto lat parafii w Chłopkowie!'],
       confession: ['Konfesjonał. Arek szybko idzie dalej. Nie dziś.'],
       pew: ['Drewniane ławki. Babcia zawsze siada w trzecim rzędzie, po lewej.'],
       soltys0: ['Dzień dobry, Arek. Chleb na dożynki już jest, poświęcony.', 'Teraz czekamy tylko na szarlotkę Kasi. Pomożesz jej, prawda?'],
@@ -87,7 +87,7 @@
       altar: ['The altar in its white lace cloth. Arek touches nothing. This time.'],
       mary: ['Our Lady in a marble niche. Someone left fresh flowers and a wreath of wheat.'],
       glass: ['The stained glass glows like a phone screen. Only prettier.'],
-      flowers: ['Flowers around a golden "100". A jubilee the whole village talks about.'],
+      flowers: ['Flowers around a golden "100". The parish of Chłopków turns one hundred!'],
       confession: ['The confessional. Arek walks on quickly. Not today.'],
       pew: ['Wooden pews. Grandma always sits in the third row, on the left.'],
       soltys0: ['Good morning, Arek. The harvest bread is ready, and blessed.', "Now we're only waiting for Kasia's apple pie. You'll help her, right?"],
@@ -418,7 +418,7 @@
     const inView = (x, y) => x > sx0 - 60 && x < sx0 + sw + 60 && y > sy0 - 60 && y < sy0 + sh + 80;
     const draw = [];
     for (const o of MAP.objects) if (o.x < sx0 + sw && o.x + o.w > sx0 && o.y < sy0 + sh && o.y + o.h > sy0) draw.push({ base: o.base, fn: () => ctx.drawImage(OBJ, o.x, o.y, o.w, o.h, ox + o.x * zoom, oy + o.y * zoom, o.w * zoom, o.h * zoom) });
-    if (ROOM) draw.push({ base: ROOM.soltys.y, fn: () => { const [a, b] = S(ROOM.soltys.x, ROOM.soltys.y); shadow(a, b, zoom, 8); window.drawSoltys(ctx, a, b, zoom, time); } });
+    if (ROOM) draw.push({ base: ROOM.soltys.y, fn: () => { const [a, b] = S(ROOM.soltys.x, ROOM.soltys.y); shadow(a, b, zoom, 8); if (window.CHURCH_ART.soltys) window.fitSprite(ctx, window.CHURCH_ART.soltys, a - 14 * zoom, b - 44 * zoom, 28 * zoom, 44 * zoom); else window.drawSoltys(ctx, a, b, zoom, time); ctx.imageSmoothingEnabled = false; } });
     else {
     ITEMS.apples.forEach((a, i) => { if (!Q.apples.includes(i) && inView(a.x, a.y)) draw.push({ base: a.y, fn: () => drawApple(...S(a.x, a.y), zoom) }); });
     if (!Q.cap && inView(ITEMS.cap.x, ITEMS.cap.y)) draw.push({ base: ITEMS.cap.y, fn: () => drawCap(...S(ITEMS.cap.x, ITEMS.cap.y), zoom) });
@@ -543,7 +543,9 @@
     const [g, o, c, sheet, meta, npcs] = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
       load('img/arek_sheet.png'), fetch('img/arek_sheet.json').then(r => r.json()), load('img/npcs.png'),
-      document.fonts.load('20px Silkscreen', 'ŁŚĆŻ')]);
+      document.fonts.load('20px Silkscreen', 'ŁŚĆŻ'),
+      // optional AI art for the church; a missing file just keeps the hand-drawn piece
+      ...Object.keys(window.CHURCH_PIECES).map(k => load(`img/church/${k}.png`).then(i => { window.CHURCH_ART[k] = i; }, () => { }))]);
     GROUND = g; OBJ = o; SPR = { sheet, meta }; NPCIMG = npcs;
     const tc = document.createElement('canvas'); tc.width = MAP.w; tc.height = MAP.h;
     const tx = tc.getContext('2d', { willReadFrequently: true }); tx.drawImage(c, 0, 0);
