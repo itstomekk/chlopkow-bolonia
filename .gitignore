@@ -1,0 +1,13 @@
+# Real photos of people and places: NEVER commit
+references/
+# test screenshots and scratch output
+test/*.png
+test/*.jpg
+osm/*.png
+osm/*.jpg
+gen/*.txt
+gen/lm_sheet.jpg
+gen/atlas_preview.png
+gen/village_map_v1.png
+__pycache__/
+*.pyc
