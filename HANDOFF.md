@@ -51,6 +51,7 @@ Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigam
   - village: **krakowiak** (2/4, G major, Góral C# in part B), alternating with a **mazurka** (3/4); the mazurka also plays on the title;
   - minigames: **oberek**;
   - church and memories: **pastorałka**.
+- Global tempo factor `TEMPO = .8` in `music.js` (Tomek asked for 80% speed, 2026-09-28).
 - Every pass is re-arranged at random: section form, a second fiddle in thirds, grace notes, an octave-up part B, drum fills.
 - `celebrate()` plays a "hej!" fanfare and `popToast()` plays a pickup blip; the music ducks under both.
 - **K** mutes the music (remembered in `localStorage`); on touch screens, tap the note icon at the bottom left. `?music=0` disables the music for a session.

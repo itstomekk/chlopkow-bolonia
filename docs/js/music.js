@@ -205,6 +205,7 @@
   const P = { name: null, song: null, arr: null, pass: 0, startT: 0, idx: 0, out: null, want: null };
   let VILLAGE = 'krakowiak', PICK = null;
   const LOOKAHEAD = .25;
+  const TEMPO = .8;   // global tempo factor (Tomek: slow everything to 80%)
   function startSong(name) {
     if (!ac) return;
     const now = ac.currentTime;
@@ -218,7 +219,7 @@
     if (PICK) P.want = PICK();
     if (P.want && P.want !== P.name) startSong(P.want);
     if (!P.song) return;
-    const step = 60 / P.song.bpm / 4, horizon = ac.currentTime + LOOKAHEAD;
+    const step = 60 / (P.song.bpm * TEMPO) / 4, horizon = ac.currentTime + LOOKAHEAD;
     for (; ;) {
       if (P.idx >= P.arr.ev.length) {
         const next = P.startT + P.arr.len * step; if (next > horizon) break;
@@ -269,7 +270,7 @@
   /* ------------------------------------------------------------------ offline render to WAV (previews, videos) */
   let rendering = false;
   async function renderWav(name, passes = 2, rate = 32000) {
-    const song = SONGS[name], step = 60 / song.bpm / 4, arrs = [];
+    const song = SONGS[name], step = 60 / (song.bpm * TEMPO) / 4, arrs = [];
     for (let i = 0; i < passes; i++) arrs.push(arrange(song, i));
     const dur = arrs.reduce((a, r) => a + r.len, 0) * step + 1.5;
     const saved = { ac, master, bus, noiseBuf, waves };
