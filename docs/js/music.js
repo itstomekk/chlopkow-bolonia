@@ -340,8 +340,17 @@
     } else P.pass++;
     P.idx = 0; P.arr = arrange(P.song, P.pass);
   }
+  // The recorded "Polka Dziadek" follows the same walking tempo as the synth band. A recording stretched below
+  // half speed turns to mush (and some browsers mute media under 0.25x), so it bottoms out at 0.5x.
+  const MAIN_RATE_MIN = .5;
+  function syncMainTrackRate() {
+    if (!mainTrack) return;
+    const rate = Math.max(MAIN_RATE_MIN, Math.min(TEMPO.max, tempo));
+    if (Math.abs(mainTrack.playbackRate - rate) > .01) { mainTrack.preservesPitch = true; mainTrack.playbackRate = rate; }
+  }
   function tick() {
     updateTempo();
+    syncMainTrackRate();
     if (!ac || rendering || ac.state !== 'running') return;
     if (PICK) {
       const zone = PICK();
@@ -450,7 +459,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, TEMPO };
+  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, MAIN_RATE_MIN, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
@@ -489,7 +498,7 @@
     setInterval(() => {
       const F = A.FRODO; if (A.scene !== 'play' || !F) { touching = false; return; }
       const d = Math.hypot(A.P.x - F.x, A.P.y - F.y);
-      if (!touching && d < 18 && (!dogLine || performance.now() - dogLine.t > 1800)) { touching = true; bark(); dogLine = { t: performance.now(), text: DOG_LINES[(Math.random() * DOG_LINES.length) | 0] }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
+      if (!touching && d < 18 && (!dogLine || performance.now() - dogLine.t > 1800)) { touching = true; bark(); const raw = DOG_LINES[(Math.random() * DOG_LINES.length) | 0]; dogLine = { t: performance.now(), text: A.heroText ? A.heroText(raw) : raw }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
       else if (touching && d > 28) touching = false;
     }, 50);
     HOOKS.hud.push(U => {
