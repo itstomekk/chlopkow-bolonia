@@ -15,6 +15,14 @@ with sync_playwright() as p:
     print("after start", st)
     assert st[0] == 'running' and st[1] in ('krakowiak', 'mazurka') and not st[2], st
 
+    # tempo follows the player: idle drifts toward 0.5x, running builds it up, standing still calms it again
+    time.sleep(2.5); idle = pg.evaluate("MUSIC.tempo"); print("idle tempo", round(idle, 2)); assert idle < .62, idle
+    pg.keyboard.down("ShiftLeft")
+    for k in ["ArrowLeft", "ArrowRight"] * 3: pg.keyboard.down(k); time.sleep(.8); pg.keyboard.up(k)
+    pg.keyboard.up("ShiftLeft")
+    fast = pg.evaluate("MUSIC.tempo"); print("after running", round(fast, 2)); assert fast > idle + .25, fast
+    time.sleep(4); calm = pg.evaluate("MUSIC.tempo"); print("calmed", round(calm, 2)); assert calm < fast - .2, calm
+
     # church -> pastoralka
     pg.evaluate("__game.enterChurch()"); time.sleep(1.2)
     print("church", pg.evaluate("MUSIC.current")); assert pg.evaluate("MUSIC.current") == 'pastoralka'

@@ -51,7 +51,13 @@ Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigam
   - village: **krakowiak** (2/4, G major, Góral C# in part B), alternating with a **mazurka** (3/4); the mazurka also plays on the title;
   - minigames: **oberek**;
   - church and memories: **pastorałka**.
-- Global tempo factor `TEMPO = .8` in `music.js` (Tomek asked for 80% speed, 2026-09-28).
+- **Adaptive tempo** (the `TEMPO` object in `music.js`):
+  - standing still: 0.5× the written BPM;
+  - moving: the tempo builds up to 1.5× (about 14 s walking, 7 s running with Shift);
+  - after stopping: it calms back to 0.5× in about 4 s;
+  - the church lullaby is capped at 1×;
+  - title and memory screens: a steady 0.8×.
+- The scheduler keeps a time↔step frontier (`P.fT`/`P.fS`), so tempo changes never jump. `MUSIC.tempo` shows the current factor; `renderWav` renders at 0.8×.
 - Every pass is re-arranged at random: section form, a second fiddle in thirds, grace notes, an octave-up part B, drum fills.
 - `celebrate()` plays a "hej!" fanfare and `popToast()` plays a pickup blip; the music ducks under both.
 - **K** mutes the music (remembered in `localStorage`); on touch screens, tap the note icon at the bottom left. `?music=0` disables the music for a session.
