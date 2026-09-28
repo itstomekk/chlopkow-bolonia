@@ -254,4 +254,277 @@ window.QUIZ = [
       fact: 'Disco polo grew out of music played at weddings and village dances in the late 1980s. Best enjoyed on an open-air dance floor!',
     },
   },
+  {
+    id: 'niemira-grant', spot: 'house01', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 1,
+    pl: {
+      q: 'W 1512 roku Zygmunt I Stary nadał Chłopków kolejnej rodzinie. Komu?',
+      a: ['Kiszkóm', 'Niemirom', 'Sedlnickim', 'Kuczyńskim'],
+      fact: 'Mikołaj Niemira herbu Gozdawa został właścicielem wsi w 1512 roku.',
+    },
+    en: {
+      q: 'In 1512, Sigismund I the Old granted Chłopków to another family. Which one?',
+      a: ['The Kiszkas', 'The Niemiras', 'The Sedlnickis', 'The Kuczyńskis'],
+      fact: 'Mikołaj Niemira of the Gozdawa coat of arms became the village owner in 1512.',
+    },
+  },
+  {
+    id: 'niemira-coat', spot: 'house02', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 3,
+    pl: {
+      q: 'Mikołaj Niemira, właściciel Chłopkowa od 1512 roku, nosił herb...',
+      a: ['Korczak', 'Dąbrowa', 'Odrowąż', 'Gozdawa'],
+      fact: 'Niemirowie z Chłopkowa należeli do herbu Gozdawa.',
+    },
+    en: {
+      q: 'Mikołaj Niemira, owner of Chłopków from 1512, bore which coat of arms?',
+      a: ['Korczak', 'Dąbrowa', 'Odrowąż', 'Gozdawa'],
+      fact: 'The Niemira family of Chłopków belonged to the Gozdawa coat of arms.',
+    },
+  },
+  {
+    id: 'kiszka-founder', spot: 'house03', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 0,
+    pl: {
+      q: 'Według części przekazów fundatorem pierwszej cerkwi w Chłopkowie był...',
+      a: ['Mikołaj Kiszka', 'Mikołaj Niemira', 'Karol Sedlnicki', 'Kajetan Kuczyński'],
+      fact: 'To przypuszczenie, nie pewnik: źródło diecezjalne pisze, że „niektórzy twierdzą”, iż fundatorem był Mikołaj Kiszka herbu Dąbrowa.',
+    },
+    en: {
+      q: 'According to some accounts, who founded Chłopków’s first Orthodox church?',
+      a: ['Mikołaj Kiszka', 'Mikołaj Niemira', 'Karol Sedlnicki', 'Kajetan Kuczyński'],
+      fact: 'This is not certain: the diocesan history says that some accounts name Mikołaj Kiszka of the Dąbrowa coat of arms as founder.',
+    },
+  },
+  {
+    id: 'kiszka-era', spot: 'house04', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 2,
+    pl: {
+      q: 'Pierwsza cerkiew w Chłopkowie mogła powstać na przełomie których wieków?',
+      a: ['XIII i XIV', 'XV i XVI', 'XVI i XVII', 'XVIII i XIX'],
+      fact: 'Źródło diecezjalne wskazuje przełom XVI i XVII wieku, z zastrzeżeniem, że fundator i okoliczności nie są całkiem pewne.',
+    },
+    en: {
+      q: 'Around the turn of which centuries may Chłopków’s first Orthodox church have been founded?',
+      a: ['13th and 14th', '15th and 16th', '16th and 17th', '18th and 19th'],
+      fact: 'The diocesan history places it around the turn of the 16th and 17th centuries, while noting that the details are uncertain.',
+    },
+  },
+  {
+    id: '1704-dedication', spot: 'house05', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 1,
+    pl: {
+      q: 'Unicka świątynia wzniesiona w Chłopkowie w 1704 roku była pod wezwaniem...',
+      a: ['Świętego Mikołaja', 'Wniebowzięcia Najświętszej Maryi Panny', 'Świętego Jana Nepomucena', 'Narodzenia Pańskiego'],
+      fact: 'Kolejna unicka świątynia pw. Wniebowzięcia NMP powstała w 1704 roku.',
+    },
+    en: {
+      q: 'The Uniate church built in Chłopków in 1704 was dedicated to...',
+      a: ['Saint Nicholas', 'the Assumption of the Virgin Mary', 'Saint John of Nepomuk', 'the Nativity of Christ'],
+      fact: 'The next Uniate church, dedicated to the Assumption of the Virgin Mary, was built in 1704.',
+    },
+  },
+  {
+    id: '1786-church', spot: 'house06', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 3,
+    pl: {
+      q: 'W którym roku w Chłopkowie wzniesiono następną unicką świątynię po tej z 1704 roku?',
+      a: ['1726', '1775', '1787', '1786'],
+      fact: 'Świątynię wzniesiono w 1786 roku; poświęcono ją rok później, w 1787.',
+    },
+    en: {
+      q: 'In what year was the next Uniate church built in Chłopków after the one from 1704?',
+      a: ['1726', '1775', '1787', '1786'],
+      fact: 'It was built in 1786 and consecrated the following year, in 1787.',
+    },
+  },
+  {
+    id: 'parish-1875', spot: 'house07', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 2,
+    pl: {
+      q: 'Co stało się z greckokatolicką parafią w Chłopkowie po kasacie unii w 1875 roku?',
+      a: ['Została przeniesiona do Sarnak', 'Zmieniono ją w klasztor', 'Zamieniono ją na prawosławną', 'Zamknięto ją na zawsze'],
+      fact: 'W 1875 roku parafia greckokatolicka została zamieniona na prawosławną.',
+    },
+    en: {
+      q: 'What happened to Chłopków’s Greek Catholic parish after the Union was abolished in 1875?',
+      a: ['It moved to Sarnaki', 'It became a monastery', 'It became Orthodox', 'It closed permanently'],
+      fact: 'In 1875 the Greek Catholic parish was converted into an Orthodox parish.',
+    },
+  },
+  {
+    id: 'church-1890-order', spot: 'house08', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 0,
+    pl: {
+      q: 'Co stało się w 1890 roku ze starą, drewnianą świątynią w Chłopkowie?',
+      a: ['Rozebrano ją na rozkaz władz carskich', 'Przeniesiono ją do Łosic', 'Zamieniono ją w szkołę', 'Spłonęła od pioruna'],
+      fact: 'Władze carskie nakazały rozebrać drewnianą świątynię; na jej miejscu powstała murowana cerkiew.',
+    },
+    en: {
+      q: 'What happened to the old wooden church in Chłopków in 1890?',
+      a: ['It was dismantled by order of the tsarist authorities', 'It was moved to Łosice', 'It became a school', 'It burned down after a lightning strike'],
+      fact: 'The tsarist authorities ordered the wooden church dismantled; a brick Orthodox church was built in its place.',
+    },
+  },
+  {
+    id: 'church-style', spot: 'house09', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 3,
+    pl: {
+      q: 'W jakim stylu wzniesiono murowaną cerkiew w Chłopkowie w 1890 roku?',
+      a: ['Gotyckim', 'Klasycystycznym', 'Zakopiańskim', 'Bizantyjskim'],
+      fact: 'Murowaną cerkiew wzniesiono w stylu bizantyjskim.',
+    },
+    en: {
+      q: 'In which style was Chłopków’s brick Orthodox church built in 1890?',
+      a: ['Gothic', 'Neoclassical', 'Zakopane style', 'Byzantine'],
+      fact: 'The brick Orthodox church was built in the Byzantine style.',
+    },
+  },
+  {
+    id: 'przezdziecki', spot: 'house10', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 1,
+    pl: {
+      q: 'Który biskup wydał w 1918 roku rozporządzenie o rewindykacji świątyni dla katolików?',
+      a: ['Józef Kocięcki', 'Henryk Przeździecki', 'Zygmunt Urban', 'Andrzej Jakubowicz'],
+      fact: 'Rozporządzenie nr 65 wydał 11 grudnia 1918 roku biskup Henryk Przeździecki.',
+    },
+    en: {
+      q: 'Which bishop issued the 1918 order returning the church to Catholics?',
+      a: ['Józef Kocięcki', 'Henryk Przeździecki', 'Zygmunt Urban', 'Andrzej Jakubowicz'],
+      fact: 'Bishop Henryk Przeździecki issued decree no. 65 on 11 December 1918.',
+    },
+  },
+  {
+    id: 'parish-restored', spot: 'house11', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 2,
+    pl: {
+      q: 'W którym roku wznowiono w Chłopkowie parafię katolicką obrządku łacińskiego?',
+      a: ['1875', '1890', '1920', '1945'],
+      fact: 'Parafię wznowiono w 1920 roku; dekret wydano 27 marca, a jej istnienie rozpoczęło się 15 kwietnia.',
+    },
+    en: {
+      q: 'In what year was the Latin-rite Catholic parish in Chłopków re-established?',
+      a: ['1875', '1890', '1920', '1945'],
+      fact: 'The parish was re-established in 1920; the decree was issued on 27 March and it began on 15 April.',
+    },
+  },
+  {
+    id: 'parish-territory', spot: 'house12', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 0,
+    pl: {
+      q: 'W 1775 roku część wsi z parafii chłopkowskiej przyłączono do parafii w...',
+      a: ['Sarnakach', 'Łosicach', 'Mielniku', 'Drohiczynie'],
+      fact: 'W 1775 roku obszar parafii chłopkowskiej zmalał; kilka wsi przyłączono do parafii Sarnaki.',
+    },
+    en: {
+      q: 'In 1775, some villages from Chłopków parish were transferred to the parish in...',
+      a: ['Sarnaki', 'Łosice', 'Mielnik', 'Drohiczyn'],
+      fact: 'In 1775 Chłopków parish became smaller; several villages were transferred to Sarnaki parish.',
+    },
+  },
+  {
+    id: 'parish-1797', spot: 'house13', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 3,
+    pl: {
+      q: 'Jakie dwie wsie dołączono do parafii chłopkowskiej w 1797 roku?',
+      a: ['Grzybów i Chlebczyn', 'Lipno i Płosków', 'Mierzwice i Hołowczyce', 'Terlików i Binduga'],
+      fact: 'W 1797 roku z parafii mielnickiej dołączono Mierzwice i Hołowczyce.',
+    },
+    en: {
+      q: 'Which two villages were added to Chłopków parish in 1797?',
+      a: ['Grzybów and Chlebczyn', 'Lipno and Płosków', 'Mierzwice and Hołowczyce', 'Terlików and Binduga'],
+      fact: 'Mierzwice and Hołowczyce were transferred from Mielnik parish in 1797.',
+    },
+  },
+  {
+    id: 'sedlnicki', spot: 'house14', optional: true, source: 'Diecezja Drohiczyńska, rys historyczny: https://drohiczynska.pl/parafie/chlopkow-parafia-narodzenia-nmp/', ok: 1,
+    pl: {
+      q: 'Kto był kolatorem unickiej świątyni w Chłopkowie w 1726 roku?',
+      a: ['Mikołaj Kiszka', 'Karol Józef Hiacynt Sedlnicki', 'Mikołaj Niemira', 'Kajetan Antoni Kuczyński'],
+      fact: 'W 1726 roku kolatorem był Karol Józef Hiacynt Sedlnicki herbu Odrowąż.',
+    },
+    en: {
+      q: 'Who was the patron of the Uniate church in Chłopków in 1726?',
+      a: ['Mikołaj Kiszka', 'Karol Józef Hiacynt Sedlnicki', 'Mikołaj Niemira', 'Kajetan Antoni Kuczyński'],
+      fact: 'In 1726 the church patron was Karol Józef Hiacynt Sedlnicki of the Odrowąż coat of arms.',
+    },
+  },
+  {
+    id: 'hillfort-height', spot: 'house15', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 2,
+    pl: {
+      q: 'Jak wysoko nad doliną strumienia wznosi się wzgórze dawnego grodziska?',
+      a: ['Około 3 metrów', 'Około 6 metrów', 'Około 9 metrów', 'Około 20 metrów'],
+      fact: 'Wzgórze ma około 9 metrów wysokości nad doliną pobliskiego strumienia.',
+    },
+    en: {
+      q: 'How high does the old hillfort mound rise above the stream valley?',
+      a: ['About 3 metres', 'About 6 metres', 'About 9 metres', 'About 20 metres'],
+      fact: 'The mound rises about 9 metres above the nearby stream valley.',
+    },
+  },
+  {
+    id: 'hillfort-platform', spot: 'house16', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 0,
+    pl: {
+      q: 'Jakie wymiary ma w przybliżeniu spłaszczona górna platforma grodziska?',
+      a: ['30 × 28 metrów', '56 × 44 metry', '80 × 60 metrów', '12 × 9 metrów'],
+      fact: 'Górna platforma ma około 30 × 28 metrów; podstawa wzgórza jest większa.',
+    },
+    en: {
+      q: 'What are the approximate dimensions of the hillfort’s flattened upper platform?',
+      a: ['30 × 28 metres', '56 × 44 metres', '80 × 60 metres', '12 × 9 metres'],
+      fact: 'The upper platform is about 30 × 28 metres; the mound’s base is larger.',
+    },
+  },
+  {
+    id: 'hillfort-base', spot: 'house17', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 1,
+    pl: {
+      q: 'Ile mniej więcej mierzy podstawa wzgórza dawnego grodziska?',
+      a: ['30 × 28 metrów', '56 × 44 metry', '12 × 9 metrów', '100 × 80 metrów'],
+      fact: 'Według opisu grodziska podstawa ma około 56 × 44 metry.',
+    },
+    en: {
+      q: 'What are the approximate dimensions of the old hillfort mound’s base?',
+      a: ['30 × 28 metres', '56 × 44 metres', '12 × 9 metres', '100 × 80 metres'],
+      fact: 'The hillfort description gives the base as about 56 × 44 metres.',
+    },
+  },
+  {
+    id: 'hillfort-findings', spot: 'house18', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 3,
+    pl: {
+      q: 'Co znajdowano na terenie chłopkowskiego grodziska?',
+      a: ['Monety rzymskie i szkło', 'Żelazne miecze', 'Kamienne młyny', 'Skorupy naczyń glinianych i węgiel drzewny'],
+      fact: 'Opis wymienia liczne skorupy naczyń glinianych i węgle drzewne.',
+    },
+    en: {
+      q: 'What was found at the Chłopków hillfort site?',
+      a: ['Roman coins and glass', 'Iron swords', 'Stone mills', 'Pottery shards and charcoal'],
+      fact: 'The site description mentions many pottery fragments and pieces of charcoal.',
+    },
+  },
+  {
+    id: 'hillfort-reuse', spot: 'house19', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 2,
+    pl: {
+      q: 'Do budowy czego wykorzystano w XIX wieku piasek i kamienie z wałów grodziska?',
+      a: ['Dworu i stodoły', 'Wiatraka i mostu', 'Cerkwi, plebanii i później drogi', 'Cmentarza i szkoły'],
+      fact: 'Materiał z obwarowań wywożono pod budowę cerkwi i plebanii, a później także drogi.',
+    },
+    en: {
+      q: 'What were sand and fieldstones from the hillfort ramparts reused to build in the 19th century?',
+      a: ['A manor and a barn', 'A windmill and a bridge', 'The church, rectory and later the road', 'The cemetery and a school'],
+      fact: 'Material from the ramparts was taken for the church and rectory, and later for the road.',
+    },
+  },
+  {
+    id: 'hillfort-garden', spot: 'house20', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 0,
+    pl: {
+      q: 'Jak obecnie użytkowane jest wzgórze po dawnym grodzisku?',
+      a: ['Jako ogród', 'Jako boisko', 'Jako parking', 'Jako kamieniołom'],
+      fact: 'Opis podaje, że wzgórze jest obecnie użytkowane jako ogród.',
+    },
+    en: {
+      q: 'How is the old hillfort mound used today?',
+      a: ['As a garden', 'As a sports field', 'As a car park', 'As a quarry'],
+      fact: 'The site description says the mound is now used as a garden.',
+    },
+  },
+  {
+    id: 'hillfort-location', spot: 'house21', optional: true, source: 'Polinow, Chłopków – grodzisko: https://www.polinow.pl/losice_i_okolice-chlopkow', ok: 1,
+    pl: {
+      q: 'Po której stronie strumienia znajdują się ślady wczesnośredniowiecznego grodziska?',
+      a: ['Na prawym brzegu', 'Na lewym brzegu', 'Na wyspie pośrodku', 'Na drugim końcu wsi, przy lesie'],
+      fact: 'Ślady grodziska opisano w pobliżu kościoła, na lewym brzegu strumienia.',
+    },
+    en: {
+      q: 'On which side of the stream are the remains of the early-medieval hillfort?',
+      a: ['On the right bank', 'On the left bank', 'On an island in the middle', 'At the far end of the village by the forest'],
+      fact: 'The hillfort remains are described near the church, on the stream’s left bank.',
+    },
+  },
 ];

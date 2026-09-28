@@ -3,7 +3,7 @@
 Run after osm/render_map.py. Hand-tuned spots use legacy_i() (see osm/geo.py), so they stay on
 the same real-world place when the map is resized. Deterministic (fixed seed).
 """
-import json, math, random, sys
+import json, math, random, re, sys
 import numpy as np
 from PIL import Image
 sys.path.insert(0, 'osm')
@@ -75,6 +75,78 @@ if 'jazz' in m: anchors['jazz'] = (m['jazz']['x'] - 60, m['jazz']['y'] + 20)
 boards = []
 for k, v in anchors.items():
     p = at(*v, r=8); boards.append(dict(spot=k, **p))
+
+# Optional history questions are anchored on distinct house footprints. The ? is drawn over
+# the roof, while x/y remains the nearest reachable doorway interaction point.
+quiz_text = open('docs/js/quiz.js', encoding='utf-8').read()
+house_spots = re.findall(r"spot:\s*'([^']+)',\s*optional:\s*true", quiz_text)
+assert len(house_spots) == 21 and len(set(house_spots)) == 21, 'expected 21 uniquely named optional questions'
+assert not (set(house_spots) & set(anchors)), 'optional house spot overlaps an existing board'
+
+
+def polygon_centroid(poly):
+    area2 = cx = cy = 0.0
+    for i, (x1, y1) in enumerate(poly):
+        x2, y2 = poly[(i + 1) % len(poly)]
+        cross = x1 * y2 - x2 * y1
+        area2 += cross; cx += (x1 + x2) * cross; cy += (y1 + y2) * cross
+    if abs(area2) < 1e-6: return None
+    return cx / (3 * area2), cy / (3 * area2)
+
+
+def inside_polygon(x, y, poly):
+    inside = False
+    for i, (x1, y1) in enumerate(poly):
+        x2, y2 = poly[(i + 1) % len(poly)]
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            inside = not inside
+    return inside
+
+
+def doorway(x, y):
+    for rad in range(0, 76, 3):
+        for a in np.linspace(0, 2 * math.pi, 16, endpoint=False):
+            px, py = x + math.cos(a) * rad, y + math.sin(a) * rad
+            ax, ay = round(px), round(py)
+            if free(ax, ay, 8): return ax, ay
+    return None
+
+
+existing_xy = [(b['x'], b['y']) for b in boards]
+house_types = {'house', 'detached', 'bungalow'}
+house_candidates = []
+osm = json.load(open('osm/chlopkow.json', encoding='utf-8'))
+for e in osm['elements']:
+    tags, geometry = e.get('tags', {}), e.get('geometry', [])
+    if e.get('type') != 'way' or tags.get('building') not in house_types or len(geometry) < 4: continue
+    poly = [P(p['lat'], p['lon']) for p in geometry]
+    if poly[0] == poly[-1]: poly.pop()
+    center = polygon_centroid(poly)
+    if center is None or not inside_polygon(*center, poly): continue
+    if any(math.hypot(center[0] - x, center[1] - y) < 80 for x, y in existing_xy): continue
+    access = doorway(*center)
+    if access is None or math.hypot(center[0] - access[0], center[1] - access[1]) > 55: continue
+    house_candidates.append(dict(building_id=str(e['id']), marker=(round(center[0]), round(center[1])), access=access, poly=poly))
+
+selected = []
+remaining = house_candidates[:]
+while len(selected) < len(house_spots) and remaining:
+    chosen = max(remaining, key=lambda c: (
+        min(math.hypot(c['marker'][0] - x, c['marker'][1] - y)
+            for x, y in existing_xy + [s['marker'] for s in selected]),
+        -int(c['building_id']),
+    ))
+    selected.append(chosen); remaining.remove(chosen)
+assert len(selected) == len(house_spots), f'only {len(selected)} distinct accessible homes available'
+for spot, candidate in zip(house_spots, selected):
+    mx, my = candidate['marker']; ax, ay = candidate['access']
+    assert inside_polygon(mx, my, candidate['poly']), f'{spot} marker is outside its house'
+    assert free(ax, ay, 8), f'{spot} doorway is not reachable'
+    boards.append(dict(spot=spot, x=ax, y=ay, marker=dict(x=mx, y=my, base=round(max(y for _, y in candidate['poly']) + 2)), building_id=candidate['building_id']))
+new_markers = [b['marker'] for b in boards if b.get('marker')]
+new_gaps = [math.hypot(a['x'] - b['x'], a['y'] - b['y']) for i, a in enumerate(new_markers) for b in new_markers[i + 1:]]
+new_old_gaps = [math.hypot(marker['x'] - x, marker['y'] - y) for marker in new_markers for x, y in existing_xy]
+assert min(new_gaps + new_old_gaps) >= 200, 'optional building markers are too close'
 
 # ---------------------------------------------------------------- NPCs
 soltys_spot = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['soltys'])

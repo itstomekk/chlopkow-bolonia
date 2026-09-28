@@ -15,7 +15,7 @@ window.addEventListener('ark-ready', () => {
     names: { halina: 'BABCIA IRENKA' },
     halina0: ['Dzień dobry, młody człowieku! Jestem Irenka, prowadzę kronikę Chłopkowa.', 'Rozstawiłam po okolicy zagadki — szukaj znaków zapytania!', 'Sprawdźmy najpierw, czy uważałeś na lekcjach historii...'],
     halinaProgress: (n, c, all) => [`Rozwiązane zagadki: ${n} z ${all}. Poprawnie: ${c}.`, 'Znaki zapytania unoszą się przy kościele, plebanii, cmentarzu, wiatraku, sklepie, przystankach, rzece, boisku, sadzie, lesie i drodze na wschód.', 'Zajrzyj też do każdej przydrożnej kapliczki i krzyża, a wieczorem do stodoły, gdzie grają jazz.'],
-    halinaEnd: (c, all, title) => [`Wszystkie zagadki rozwiązane! Wynik: ${c} na ${all}.`, `Mianuję cię tytułem: ${title}!`, 'Wpiszę cię do kroniki. Ołówkiem, na razie.'],
+    halinaEnd: (c, all, title) => [`Wszystkie wymagane zagadki rozwiązane! Wynik: ${c} na ${all}.`, `Mianuję cię tytułem: ${title}!`, 'Wpiszę cię do kroniki. Ołówkiem, na razie.'],
     halinaAfter: (c, all, title) => [`${title} — ${c}/${all}. Kronika pamięta!`],
     titles: [[1, 'HONOROWY KRONIKARZ CHŁOPKOWA'], [.75, 'ZNAWCA CHŁOPKOWA'], [.45, 'TURYSTA Z AMBICJAMI'], [0, 'PRZYJEZDNY Z MIASTA']],
     boardDone: ok => [ok ? 'Tę zagadkę już rozwiązałeś — poprawnie!' : 'Tę zagadkę już rozwiązałeś... niestety źle.'],
@@ -25,7 +25,7 @@ window.addEventListener('ark-ready', () => {
     names: { halina: 'GRANNY IRENKA' },
     halina0: ["Good day, young man! I'm Irenka, I keep the chronicle of Chłopków.", 'I left riddles all around the village — look for the floating question marks!', "First, let's see if you paid attention in history class..."],
     halinaProgress: (n, c, all) => [`Riddles solved: ${n} of ${all}. Correct: ${c}.`, 'Question marks float by the church, rectory, cemetery, windmill, shop, bus stops, river, pitch, orchard, woods and the road east.', 'Check every wayside shrine and cross too, and the barn where they play jazz.'],
-    halinaEnd: (c, all, title) => [`All riddles solved! Score: ${c} of ${all}.`, `I hereby name you: ${title}!`, "I'll write you into the chronicle. In pencil, for now."],
+    halinaEnd: (c, all, title) => [`All required riddles solved! Score: ${c} of ${all}.`, `I hereby name you: ${title}!`, "I'll write you into the chronicle. In pencil, for now."],
     halinaAfter: (c, all, title) => [`${title} — ${c}/${all}. The chronicle remembers!`],
     titles: [[1, 'HONORARY CHRONICLER OF CHŁOPKÓW'], [.75, 'CHŁOPKÓW EXPERT'], [.45, 'AMBITIOUS TOURIST'], [0, 'VISITOR FROM THE CITY']],
     boardDone: ok => [ok ? 'You already solved this one — correctly!' : 'You already answered this one... wrongly.'],
@@ -35,10 +35,14 @@ window.addEventListener('ark-ready', () => {
   // only questions that can actually be reached count: Irenka's own + those whose signboard exists in items.json
   const ACTIVE = window.QUIZ.filter(q => q.spot === 'halina' || (ITEMS.boards || []).some(b => b.spot === q.spot));
   const QZ_ALL = ACTIVE.length;
+  const REQUIRED = ACTIVE.filter(q => !q.optional);
+  const QZ_REQUIRED = REQUIRED.length;
   const qById = id => window.QUIZ.find(q => q.id === id);
   const answered = () => ACTIVE.filter(q => Q().quiz[q.id] !== undefined).length;
   const correctN = () => ACTIVE.filter(q => Q().quiz[q.id] === 1).length;
-  const titleFor = c => L.titles.find(([min]) => c >= Math.ceil(min * QZ_ALL))[1];
+  const requiredAnswered = () => REQUIRED.filter(q => Q().quiz[q.id] !== undefined).length;
+  const requiredCorrect = () => REQUIRED.filter(q => Q().quiz[q.id] === 1).length;
+  const titleFor = c => L.titles.find(([min]) => c >= Math.ceil(min * QZ_REQUIRED))[1];
 
   /* =================================================================== quiz modal */
   let QZ = null; // {q, order:[origIdx...], sel, phase:'ask'|'done', pick, rects:[], t}
@@ -55,7 +59,7 @@ window.addEventListener('ark-ready', () => {
   }
   function closeQuiz() {
     QZ = null;
-    if (answered() === QZ_ALL && Q().halina === 1) A.popToast(PL ? 'WRÓĆ DO BABCI IRENKI' : 'GO BACK TO GRANNY IRENKA');
+    if (requiredAnswered() === QZ_REQUIRED && Q().halina === 1) A.popToast(PL ? 'WRÓĆ DO BABCI IRENKI' : 'GO BACK TO GRANNY IRENKA');
   }
   HOOKS.key.push(e => {
     if (!QZ) return false;
@@ -92,7 +96,7 @@ window.addEventListener('ark-ready', () => {
     A.box(bx, by, bw, bh, U);
     ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 2.3}px Silkscreen`;
-    ctx.fillText(`${L.quizTitle} ${Object.keys(Q().quiz).length + (QZ.phase === 'ask' ? 1 : 0)}/${QZ_ALL}`, bx + U * 3, by + U * 3.4);
+    ctx.fillText(`${L.quizTitle} ${answered() + (QZ.phase === 'ask' ? 1 : 0)}/${QZ_ALL}`, bx + U * 3, by + U * 3.4);
     ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.1}px Silkscreen`;
     qLines.forEach((l, i) => ctx.fillText(l, bx + U * 3, by + U * (7 + i * 3)));
     const ay = by + U * 6 + qLines.length * U * 3 + gap;
@@ -133,7 +137,7 @@ window.addEventListener('ark-ready', () => {
   HOOKS.npcTalk.push(id => {
     if (id !== 'halina') return false;
     const q = Q();
-    if (answered() >= QZ_ALL) { q.halina = 2; A.save(); A.say('halina', L.halinaEnd(correctN(), QZ_ALL, titleFor(correctN())), () => A.celebrate()); }
+    if (requiredAnswered() >= QZ_REQUIRED) { q.halina = 2; A.save(); A.say('halina', L.halinaEnd(requiredCorrect(), QZ_REQUIRED, titleFor(requiredCorrect())), () => A.celebrate()); }
     else if (q.halina === 0) {
       q.halina = 1; A.save();
       if (q.quiz.king === undefined) A.say('halina', L.halina0, () => openQuiz('king'));
@@ -141,7 +145,7 @@ window.addEventListener('ark-ready', () => {
     }
     else if (q.halina === 1 && q.quiz.king === undefined) openQuiz('king');
     else if (q.halina === 1) A.say('halina', L.halinaProgress(answered(), correctN(), QZ_ALL));
-    else A.say('halina', L.halinaAfter(correctN(), QZ_ALL, titleFor(correctN())));
+    else A.say('halina', L.halinaAfter(correctN(), QZ_ALL, titleFor(requiredCorrect())));
     return true;
   });
   const spotQuestion = spot => window.QUIZ.find(q => q.spot === spot);
@@ -164,9 +168,12 @@ window.addEventListener('ark-ready', () => {
     ctx.fillText('?', sx, my);
   }
   HOOKS.world.push((push, S, inView) => {
-    for (const b of ITEMS.boards) if (inView(b.x, b.y)) push(b.y - 20, () => drawQuestionMarker(b, ...S(b.x, b.y), A.zoom));
+    for (const b of ITEMS.boards) {
+      const marker = b.marker || b;
+      if (inView(marker.x, marker.y)) push(marker.base || (b.marker ? marker.y + 40 : b.y - 20), () => drawQuestionMarker(b, ...S(marker.x, marker.y), A.zoom));
+    }
   });
-  HOOKS.minimap.push(dot => { if (Q().halina) for (const b of ITEMS.boards) { const q = spotQuestion(b.spot); if (q && Q().quiz[q.id] === undefined) dot(b.x, b.y, '#ffd21f'); } });
+  HOOKS.minimap.push(dot => { if (Q().halina) for (const b of ITEMS.boards) { const q = spotQuestion(b.spot), marker = b.marker || b; if (q && Q().quiz[q.id] === undefined) dot(marker.x, marker.y, '#ffd21f'); } });
   HOOKS.questLog.push(lines => {
     if (Q().halina) lines.push([L.quizLog(correctN(), answered(), QZ_ALL), Q().halina === 2]);
   });
