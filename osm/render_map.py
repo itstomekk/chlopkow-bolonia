@@ -312,7 +312,7 @@ _tc = legacy_i(1080, 300); TRACK = dict(cx=_tc[0], cy=_tc[1], rx=300, ry=150, w=
 _cc = legacy_i(1490, 565); CORRAL = dict(cx=_cc[0], cy=_cc[1], r=100)
 # dog meadow: open grass between the street and the Białka
 _m0, _m1 = legacy_i(680, 1060), legacy_i(1100, 1330); MEADOW = dict(x0=_m0[0], y0=_m0[1], x1=_m1[0], y1=_m1[1])
-_rc = tuple(int(v) for v in P(52.26499, 22.86081)); RANGE = dict(x=_rc[0], y=_rc[1])   # skeet range: riverside meadow, west part of the village
+_rc = tuple(int(v) for v in P(52.26016, 22.87064)); RANGE = dict(x=_rc[0], y=_rc[1])   # shooting range: open wheat by Damian's farmstead (south)
 
 
 def window(cx, cy, rx, ry):
@@ -425,15 +425,40 @@ for k_, (lx, ly) in LM_NODES:
     collide[int(base - ch_):int(base), int(lx - cw / 2):int(lx + cw / 2)] = True
     occupied[max(0, y0):y0 + h, max(0, x0):x0 + w] = True
 
-# The following four sites are deterministic OSM road junctions (paved-dirt crossings).
-# The supplied chat photos have no GPS metadata; placements use the actual junction nodes.
-# Shrines are kept small (~32-36 px) so they sit cleanly on the verge without blocking traffic.
-GENERATED_SHRINES = [(name, *legacy_i(x, y), w) for name, x, y, w in [
-    ('cross_iron', 1643, 628, 32),       # tertiary × track/service junction (east end of the street)
-    ('shrine_stone', 1671, 1284, 36),    # junction on the road to the church
-    ('shrine_white', 1457, 2358, 34),    # residential × track junction (south road)
-    ('shrine_fenced', 558, 959, 32),     # residential × service junction (by the bus stop)
-]]
+# Wayside shrines and crosses stand at real OSM road junctions (nodes shared by two or more roads/tracks).
+# The photos have no GPS, so the four sites are chosen to spread across the whole map: greedy farthest-point
+# selection, at least SHRINE_GAP px from each other and from the landmarks, sign, venues and the start.
+SHRINE_NAMES = [('cross_iron', 32), ('shrine_stone', 36), ('shrine_white', 34), ('shrine_fenced', 32)]
+SHRINE_GAP = 650
+_node_roads = {}
+for e in ways:
+    if 'highway' not in e['tags'] or e['tags']['highway'] in ('footway', 'path', 'bus_stop'): continue
+    for g_ in e['geometry']: _node_roads.setdefault((round(g_['lat'], 7), round(g_['lon'], 7)), set()).add(e['id'])
+junctions = [P(*k) for k, v in _node_roads.items() if len(v) >= 2]
+junctions = [(x, y) for x, y in junctions if 120 < x < W - 120 and 160 < y < H - 80]
+keep_away = [xy for _, xy in LM_NODES] + [legacy_i(1150, 2405), (TRACK['cx'], TRACK['cy']), (CORRAL['cx'], CORRAL['cy']),
+             ((MEADOW['x0'] + MEADOW['x1']) / 2, (MEADOW['y0'] + MEADOW['y1']) / 2), (RANGE['x'], RANGE['y'])]
+cands = [j for j in junctions if all(math.hypot(j[0] - k[0], j[1] - k[1]) > 260 for k in keep_away)]
+chosen = []
+while len(chosen) < len(SHRINE_NAMES) and cands:
+    best = max(cands, key=lambda j: min([math.hypot(j[0] - c[0], j[1] - c[1]) for c in chosen] + [math.hypot(j[0] - k[0], j[1] - k[1]) for k in keep_away]))
+    if chosen and min(math.hypot(best[0] - c[0], best[1] - c[1]) for c in chosen) < SHRINE_GAP * .5: break
+    chosen.append(best); cands = [j for j in cands if math.hypot(j[0] - best[0], j[1] - best[1]) > SHRINE_GAP]
+
+
+def verge(x, y, w):
+    """A spot beside the junction: off the road, not on anything else, closest to the junction."""
+    for r in range(14, 60, 3):
+        for k in range(16):
+            a_ = k / 16 * 2 * math.pi; cx, cy = int(x + math.cos(a_) * r), int(y + math.sin(a_) * r)
+            x0, x1 = cx - w // 2, cx + w // 2
+            if not (10 < x0 and x1 < W - 10 and 60 < cy - w < H - 10): continue
+            if not (road_block[cy - 12:cy + 2, x0:x1].any() or occupied[cy - 12:cy + 2, x0:x1].any()): return cx, cy
+    return int(x + 20), int(y + 20)
+
+
+GENERATED_SHRINES = [(name, *verge(jx, jy, w), w) for (name, w), (jx, jy) in zip(SHRINE_NAMES, chosen)]
+print('shrines', [(n, x, y) for n, x, y, _ in GENERATED_SHRINES])
 
 def add_generated_sprite(name, cx, foot_y, width, block_base=True):
     image = Image.fromarray(chroma_key(f'gen/lm_{name}.png'))

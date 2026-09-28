@@ -39,6 +39,13 @@ Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier p
    - Tests read `ARK_URL`, and `run_all.py` finds a river column for the jump test automatically.
 8. `docs/superpowers/` is untracked planning from another session. It's now in `.gitignore`, so it can't accidentally be published on Pages.
 
+## 2026-09-27 follow-up (Tomek's requests)
+- Frodo "blinked": `gen/build_frodo.py` pasted both walk frames into column 0 (missing `col * TILE`), so frame 2 was empty. Fixed and rebuilt.
+- Positions: Kasia in far-east Kolonia (lat 52.26261, lon 22.88575); Damian far south by the village sign (52.25980, 22.86990); the shooting range sits next to Damian (hosted by Damian); Pani Halina moved to the church. Damian's cap is now placed 150–450 m from him.
+- Wayside shrines/crosses: chosen automatically from real OSM road junctions by farthest-point selection (≥650 px apart, ≥260 px from landmarks/venues). See `SHRINE_NAMES` in render_map.py.
+- A coordinate readout sits bottom-left (map x/y + lat/lon). `?x=..&y=..` starts the game at a position.
+- New shop sprite from Tomek's photo (`references/shop_photo_2026-09-27.*`), with the SKLEP sign, bikes and customers with beer. It was pending on the Codex rate limit; retry with `gen/_retry_shop.sh` if `gen/lm_shop_raw_v2.png` is missing.
+
 ## Minigame tuning (in `minigames.js`)
 - `MEDAL` thresholds (bronze/silver/gold): race — beat Damian / 15.5 s / 14.0 s; pig — 30 s / 15 s / 8 s; dogs — win / 28 s / 18 s; skeet — 10 / 12 / 14 hits.
 - Race: Damian needs 8.1 s per lap (about 16.2 s total). Off-track speed is 0.55× (`HOOKS.speed`). The ghost is `Q.mg.race.ghost`, saved on each new record.

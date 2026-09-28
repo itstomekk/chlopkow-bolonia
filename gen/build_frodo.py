@@ -42,7 +42,7 @@ def main():
             # Hard alpha edges keep the final 32px sprites crisp with smoothing disabled in-game.
             alpha = frame.getchannel("A").point(lambda value: 255 if value >= 96 else 0)
             frame.putalpha(alpha)
-            atlas.alpha_composite(frame, ((TILE - frame.width) // 2, TILE * row + TILE - 3 - frame.height))
+            atlas.alpha_composite(frame, (TILE * col + (TILE - frame.width) // 2, TILE * row + TILE - 3 - frame.height))
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     atlas.save(OUT)

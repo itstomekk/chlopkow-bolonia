@@ -2,7 +2,7 @@
      race   (Damian, north track)      2 laps vs Damian; jump the bale walls; off-track = slow; ghost of your best run
      pig    (Grandpa, corral)          catch Pepa in 30 s; she is fast at first and tires over time
      dogs   (Marcin, south meadow)     collect 6 eggs; dogs growl ("!") before they lunge — jump over them
-     skeet  (Kasia, riverside range)   fairground-style tin moorhens ("kurki wodne") fly across; aim & shoot, 2 barrels
+     skeet  (Damian, range by his farm) fairground-style tin moorhens ("kurki wodne") fly across; aim & shoot, 2 barrels
    Shared: 3-2-1 lights, bronze/silver/gold medals, records and retry. Venues come from map.json (osm/render_map.py).
    Save: Q.mg[type] = { tries, won, best, medal, ghost? }  — best = time (s) or hits (skeet). */
 'use strict';
@@ -21,11 +21,11 @@ window.addEventListener('ark-ready', () => {
       race: ['Damian: „Wyścig! Dwa okrążenia. Bele siana przeskakujesz — SPACJA albo X.”', 'Damian: „Po trawie biegnie się wolno, a skróty się nie liczą. Pobij mnie, a potem swój rekord!”'],
       pig: ['Dziadek Zbyszek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
       dogs: ['Marcin: „Kury pana Stefana zniosły na pastwisku 6 jajek, ale pilnują ich psy.”', 'Marcin: „Kiedy pies warknie „!”, zaraz skoczy. Wtedy przeskocz go albo uciekaj w bok!”'],
-      skeet: ['Kasia: „Jarmarczna strzelnica! Blaszane kurki wodne wylatują z budek po bokach.”', PL && !coarse() ? 'Kasia: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Kasia: „Dotknij kurki, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
+      skeet: ['Damian: „Moja strzelnica! Blaszane kurki wodne wylatują z budek po bokach.”', PL && !coarse() ? 'Damian: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Damian: „Dotknij kurki, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
     },
     win: { race: 'WYGRAŁEŚ Z DAMIANEM!', pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNE OKO!' },
     lose: { race: 'DAMIAN BYŁ SZYBSZY...', pig: 'PEPA UCIEKŁA...', dogs: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...', skeet: 'ZA MAŁO TRAFIEŃ...' },
-    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Strzelnica Kasi' },
+    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Strzelnica Damiana' },
     medal: ['', 'BRĄZ', 'SREBRO', 'ZŁOTO'], next: m => `NASTĘPNY: ${m}`,
     go: 'START!', lap: 'OKRĄŻENIE', time: 'CZAS', best: 'REKORD', eggs: 'JAJKA', left: 'ZOSTAŁO', hits: 'TRAFIENIA', reload: 'PRZEŁADOWANIE...',
     retry: 'SPACJA / R — JESZCZE RAZ', quit: 'ESC — WYJDŹ', esc: 'ESC — PRZERWIJ', record: 'NOWY REKORD!', ghost: 'DUCH REKORDU', offTrack: 'TRAWA — WOLNIEJ!',
@@ -36,11 +36,11 @@ window.addEventListener('ark-ready', () => {
       race: ['Damian: "Race! Two laps. Jump the hay bales — SPACE or X."', 'Damian: "Grass is slow and shortcuts don\'t count. Beat me, then beat your own record!"'],
       pig: ['Grandpa Zbyszek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
       dogs: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "When a dog growls "!", it is about to lunge. Jump over it or dodge sideways!"'],
-      skeet: ['Kasia: "A fairground shooting gallery! Tin moorhens fly out of the booths on both sides."', !coarse() ? 'Kasia: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Kasia: "Tap a moorhen to shoot. Two barrels, then reload. Hit 10 of 15!"'],
+      skeet: ['Damian: "My shooting gallery! Tin moorhens fly out of the booths on both sides."', !coarse() ? 'Damian: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Damian: "Tap a moorhen to shoot. Two barrels, then reload. Hit 10 of 15!"'],
     },
     win: { race: 'YOU BEAT DAMIAN!', pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'SHARPSHOOTER!' },
     lose: { race: 'DAMIAN WAS FASTER...', pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...' },
-    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: "Kasia's shooting gallery" },
+    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: "Damian's shooting gallery" },
     medal: ['', 'BRONZE', 'SILVER', 'GOLD'], next: m => `NEXT: ${m}`,
     go: 'GO!', lap: 'LAP', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT', hits: 'HITS', reload: 'RELOADING...',
     retry: 'SPACE / R — AGAIN', quit: 'ESC — LEAVE', esc: 'ESC — QUIT', record: 'NEW RECORD!', ghost: 'RECORD GHOST', offTrack: 'GRASS — SLOWER!',
@@ -69,7 +69,7 @@ window.addEventListener('ark-ready', () => {
     { type: 'race', host: 'damian', x: TR.cx - 30, y: TR.cy + TR.ry + TR.w / 2 + 22, color: '#d8262c' },
     { type: 'pig', host: 'grandpa', x: CO.cx - CO.r - 26, y: CO.cy + 6, color: '#ff8fb8' },
     { type: 'dogs', host: 'marcin', x: ME.x0 - 18, y: (ME.y0 + ME.y1) / 2, color: '#2f6fe0' },
-    { type: 'skeet', host: 'kasia', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
+    { type: 'skeet', host: 'damian', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
   ];
   let MG = null, ANIM = null;
   A.load('img/animals.png').then(i => { ANIM = i; });

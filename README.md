@@ -21,14 +21,15 @@ It runs in any modern browser, desktop or phone. The game is pure JavaScript wit
 | Minigame: retry / leave | R or Space / Esc | tap left / right half of the result panel |
 | Shooting gallery: aim / shoot | mouse or arrows / Space or click | tap the target |
 | Map | M | tap the minimap |
+| Position | shown bottom-left: map x/y + latitude/longitude; start anywhere with `?x=1243&y=901` | — |
 | New game | N on the title screen | — |
 
 Progress saves automatically in the browser (localStorage).
 
 ## What you do
 
-- **Kasia** (next to the shop) needs **10 apples** for her apple pie. They grow in the orchard in the south and in the gardens along the main street.
-- **Damian** (at the sports pitch in the north) lost his **cap** somewhere in the wheat.
+- **Kasia** (far east, in Chłopków-Kolonia) needs **10 apples** for her apple pie. They grow in the orchard in the south and in the gardens along the main street.
+- **Damian** (far south, at a farmstead by the village sign) lost his **cap** somewhere in the wheat near him.
 - **Marcin** (at the bus stop) wants an **orangeade** from the shop.
 - **Grandpa Zbyszek** (by the Koźlak windmill) hands over the **keys to his Ursus** once the whole crew has been helped.
 - **Frodo**, Arek's black-and-tan dog, follows him around the village and into the church.
@@ -39,7 +40,7 @@ On the way you can jump over garden fences, hay bales and the Białka river.
 Our Lady's niche and the "100" flowers for the parish centenary. The **Sołtys** (village head) waits by the ambo with the harvest bread. Walk out through the door at the bottom.
 
 ### Quiz o Chłopkowie
-**Pani Halina**, the village chronicler, stands near the shop. She introduces a 13-question ABCD quiz about the real history of Chłopków
+**Pani Halina**, the village chronicler, waits by the church. She introduces a 13-question ABCD quiz about the real history of Chłopków
 (source: [Polish Wikipedia](https://pl.wikipedia.org/wiki/Ch%C5%82opk%C3%B3w_(wojew%C3%B3dztwo_mazowieckie)), CC BY-SA).
 Question signboards (red **?**) stand at the places they are about: the church, rectory ("cerkwisko"), cemetery, windmill, shop, bus stops,
 the Białka, the pitch, the orchard, the woods and the road east. Each answer reveals a short fact. Finish all 13 and Halina gives you a title based on your score.
@@ -57,7 +58,7 @@ Your best medal shows on the flag and in the quest log.
   but tires over time (sweat drops = slowing down). Corner her against the fence. Gold under 8 s.
 - 🐕 **Eggs and dogs** (blue flag, meadow south of the main street, host Marcin): collect 6 eggs while 3 dogs guard them.
   A dog growls (**!**) just before it lunges: jump over it or sidestep. Dogs get faster with every egg you take. Gold under 18 s.
-- 🎯 **Kasia's shooting gallery** (gold flag, riverside meadow in the west): fairground-style tin *kurki wodne* (moorhen targets)
+- 🎯 **Damian's shooting gallery** (gold flag, the wheat field next to Damian in the south): fairground-style tin *kurki wodne* (moorhen targets)
   fly out of the striped booths. Aim with the mouse or arrows (touch: tap the target), two barrels, then reload. Hit 10 of 15; gold at 14.
 
 You can also read about the church, the rectory, the cemetery, the windmill, the shop, the bus stops and the river.

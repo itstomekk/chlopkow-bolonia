@@ -43,12 +43,12 @@
       shopBuy: ['Pani ze sklepu: „Oranżada? Ostatnia butelka, dla Marcina.”', 'Arek dostaje oranżadę!'],
       bus: ['Przystanek. Autobus był... albo będzie. W Chłopkowie to jedno i to samo.'],
       river: ['Rzeka Białka. Woda zimna, żaby głośne, a lato jeszcze długie.'],
-      kasia0: ['Arek! Piekę szarlotkę na dożynki, a nie mam jabłek.', 'Przynieś mi 10 jabłek. Rosną w sadzie na południu i przy domach.'],
+      kasia0: ['Arek! Piekę szarlotkę na dożynki, a nie mam jabłek.', 'Przynieś mi 10 jabłek aż tu, na Kolonię. Rosną w sadzie na południu i przy domach.'],
       kasia1: n => [`Masz dopiero ${n}/10 jabłek. Szarlotka sama się nie upiecze!`],
       kasia2: ['10 jabłek! Jesteś niezastąpiony. No, prawie.', 'Szarlotka będzie gotowa wieczorem. Zostawię ci kawałek.'],
       kasia3: ['Szarlotka w piekarniku. Pachnie całą wsią!'],
-      damian0: ['Stary, zgubiłem czapkę! Biegałem przez pszenicę na wschód od drogi...', 'Znajdziesz ją? Bez czapki nie gram.'],
-      damian1: ['Nadal nic? Szukaj w żółtym zbożu za drogą do kościoła.'],
+      damian0: ['Stary, zgubiłem czapkę! Biegałem po polach niedaleko stąd...', 'Znajdziesz ją? Bez czapki nie gram.'],
+      damian1: ['Nadal nic? Szukaj w żółtym zbożu, kilka minut drogi stąd.'],
       damian2: ['MOJA CZAPKA! Arek, jesteś legendą.', 'Stawiam ci kanapkę. No, pół kanapki.'],
       damian3: ['Z czapką gram jak Lewandowski. Prawie.'],
       marcin0: ['Czekam na autobus od godziny. Umieram z pragnienia.', 'Skoczysz do sklepu po oranżadę? Ja pilnuję przystanku.'],
@@ -92,12 +92,12 @@
       shopBuy: ['Shop lady: "Orangeade? Last bottle. For Marcin."', 'Arek got an ORANGEADE!'],
       bus: ['Bus stop. The bus has been... or will be. In Chłopków that is the same thing.'],
       river: ['The Białka river. Cold water, loud frogs, and summer is still long.'],
-      kasia0: ["Arek! I'm baking apple pie for the harvest festival and I have no apples.", 'Bring me 10 apples. They grow in the orchard down south and by the houses.'],
+      kasia0: ["Arek! I'm baking apple pie for the harvest festival and I have no apples.", 'Bring me 10 apples, all the way out here to the Kolonia. They grow in the orchard down south and by the houses.'],
       kasia1: n => [`Only ${n}/10 apples. The pie won't bake itself!`],
       kasia2: ['10 apples! You are irreplaceable. Well, almost.', "The pie will be ready tonight. I'll save you a slice."],
       kasia3: ['Pie is in the oven. The whole village smells of it!'],
-      damian0: ['Dude, I lost my cap! I was running through the wheat east of the road...', "Can you find it? I don't play without it."],
-      damian1: ['Still nothing? Look in the yellow wheat past the church road.'],
+      damian0: ['Dude, I lost my cap! I was running around the fields near here...', "Can you find it? I don't play without it."],
+      damian1: ['Still nothing? Look in the yellow wheat, a few minutes from here.'],
       damian2: ['MY CAP! Arek, you legend.', "I owe you a sandwich. Well, half a sandwich."],
       damian3: ['With the cap on I play like Lewandowski. Almost.'],
       marcin0: ["I've been waiting for the bus for an hour. I'm dying of thirst.", "Could you run to the shop for an orangeade? I'll guard the bus stop."],
@@ -524,6 +524,17 @@
   }
   const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
+  // Small position readout: map pixels (x, y) + real-world lat/lon from map.json's bbox. ?x=..&y=.. in the URL starts there.
+  function drawCoords(U, H) {
+    const b = MAP.bbox, s = MAP.scale || 2; if (!b) return;
+    const lat = b[2] - P.y / (110574 * s), lon = b[1] + P.x / (111320 * Math.cos((b[0] + b[2]) / 2 * Math.PI / 180) * s);
+    const txt = `X ${Math.round(P.x)}  Y ${Math.round(P.y)}   ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+    ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
+    const tw = ctx.measureText(txt).width;
+    ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(U * 1.2, H - U * 2.4, tw + U * .8, U * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(txt, U * 1.6, H - U * 1.35);
+  }
+
   /* ---------- render ---------- */
   function render() {
     const W = cvs.width, H = cvs.height;
@@ -637,6 +648,7 @@
       }
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.75)';
       ctx.fillText('© OPENSTREETMAP CONTRIBUTORS', W - U * 1.5, H - U * 1.2);
+      drawCoords(U, H);
     }
     if (scene === 'play') HOOKS.hud.forEach(f => f(U, W, H));
     if (scene === 'play' && matchMedia('(pointer:coarse)').matches) {
@@ -703,6 +715,7 @@
     const mx = MINI.getContext('2d'); mx.drawImage(g, 0, 0, MINI.width, MINI.height); mx.drawImage(o, 0, 0, MINI.width, MINI.height);
     P.x = MAP.spawn.x; P.y = MAP.spawn.y;
     hasSave = loadSave();
+    if (params.has('x') && params.has('y')) { P.x = +params.get('x'); P.y = +params.get('y'); }   // e.g. ?x=1243&y=901
     unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y;
     resize(); requestAnimationFrame(loop);
     // API for features.js

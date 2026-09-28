@@ -7,7 +7,7 @@ import json, math, random, sys
 import numpy as np
 from PIL import Image
 sys.path.insert(0, 'osm')
-from geo import legacy_i
+from geo import legacy_i, P
 
 m = json.load(open('docs/map.json'))
 W, H = m['w'], m['h']
@@ -69,11 +69,11 @@ for k, v in anchors.items():
 # ---------------------------------------------------------------- NPCs
 woods = next(b for b in boards if b['spot'] == 'woods')
 npcs = [
-    dict(id='kasia', **at(shop['x'] + 55, shop['y'] + 30)),
+    dict(id='kasia', **at(*P(52.26261, 22.88575))),          # far east, by a Chłopków-Kolonia farmstead
     dict(id='marcin', **at(bus_near['x'] + 25, bus_near['y'] + 10)),
-    dict(id='damian', **at(*legacy_i(631, 150))),
+    dict(id='damian', **at(*P(52.25980, 22.86990))),          # far south, farmstead by the shooting range
     dict(id='grandpa', **at(poi['windmill']['x'] + 60, poi['windmill']['y'] + 40)),
-    dict(id='halina', **at(m['spawn']['x'] + 70, m['spawn']['y'] + 40)),
+    dict(id='halina', **at(poi['church']['x'] - 120, poi['church']['y'] + 70)),   # the chronicler waits by the church
     # hidden Sołtys by the Białka, next to (not on top of) the woods signboard: NPCs win interaction priority
     dict(id='soltys', secret=True, **at(woods['x'] - 70, woods['y'] + 30)),
 ]
@@ -103,7 +103,8 @@ add_apples(orchard, 6); add_apples(street, 6); add_apples(outer, 4)
 
 # ---------------------------------------------------------------- Damian's cap: in a yellow wheat field, away from the shop
 ys, xs = np.nonzero((ground[..., 0] > 190) & (ground[..., 1] > 150) & (ground[..., 2] < 110) & ~solid)
-cands = [(x, y) for x, y in zip(xs[::200], ys[::200]) if 900 < math.hypot(x - shop['x'], y - shop['y']) < 1600 and free(x, y, 12)]
+dam = next(n for n in npcs if n['id'] == 'damian')   # "I was running through the wheat" -> within ~150-450 m of Damian
+cands = [(x, y) for x, y in zip(xs[::200], ys[::200]) if 300 < math.hypot(x - dam['x'], y - dam['y']) < 900 and free(x, y, 12)]
 cap = dict(zip('xy', map(int, rnd.choice(cands))))
 
 json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards), open('docs/items.json', 'w'), indent=1)
