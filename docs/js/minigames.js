@@ -23,8 +23,8 @@ window.addEventListener('ark-ready', () => {
       race: ['Damian: „Wyścig! Dwa okrążenia. Bele siana przeskakujesz — SPACJA albo X.”', 'Damian: „Po trawie biegnie się wolno, a skróty się nie liczą. Pobij mnie, a potem swój rekord!”'],
       pig: ['Dziadek Zdzisiek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
       dogs: ['Marcin: „Kury pana Stefana zniosły na pastwisku 6 jajek, ale pilnują ich psy.”', 'Marcin: „Kiedy pies warknie „!”, zaraz skoczy. Wtedy przeskocz go albo uciekaj w bok!”'],
-      skeet: ['Michał: „Tu jest tarcza, nie gra w kurki. Sprawdź oko na PPM Strzelectwie.”', !coarse() ? 'Michał: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Michał: „Dotknij tarczy, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
-      ducks: ['Michał: „Grę w kaczki przeniosłem na południowy wschód, nad mokradła.”', 'Michał: „Kaczki lecą łukiem nad polami. Traf 10 z 15, ale nie strzelaj w nic poza tarczą.”'],
+      skeet: ['Bukała: „Tu jest tarcza, nie gra w kurki. Sprawdź oko na PPM Strzelectwie.”', !coarse() ? 'Bukała: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Bukała: „Dotknij tarczy, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
+      ducks: ['Bukała: „Grę w kaczki przeniosłem na południowy wschód, nad mokradła.”', 'Bukała: „Kaczki lecą łukiem nad polami. Traf 10 z 15, ale nie strzelaj w nic poza tarczą.”'],
       mowing: ['Damian: „Boisko zarosło po deszczu. Pomożesz je skosić?”', 'Damian: „Przejdź po każdym pasie murawy. Spacja uruchamia kosiarkę, ale liczy się dokładność.”'],
     },
     win: { race: 'WYGRAŁEŚ Z DAMIANEM!', pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNA TARCZA!', ducks: 'KACZKI TRAFIONE!', mowing: 'BOISKO SKOSZONE!' },
@@ -40,13 +40,13 @@ window.addEventListener('ark-ready', () => {
       race: ['Damian: "Race! Two laps. Jump the hay bales — SPACE or X."', 'Damian: "Grass is slow and shortcuts don\'t count. Beat me, then beat your own record!"'],
       pig: ['Grandpa Zdzisiek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
       dogs: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "When a dog growls "!", it is about to lunge. Jump over it or dodge sideways!"'],
-      skeet: ['Michał: "This is a target, not a moorhen game. Test your aim at the PPM range."', !coarse() ? 'Michał: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Michał: "Tap the target to shoot. Two barrels, then reload. Hit 10 of 15!"'],
-      ducks: ['Michał: "The duck game moved south-east, out by the wetlands."', 'Michał: "Ducks fly in arcs over the fields. Hit 10 of 15, and keep your aim on the targets."'],
+      skeet: ['Bukała: "This is a target, not a moorhen game. Test your aim at Bukała\'s PPM range."', !coarse() ? 'Bukała: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Bukała: "Tap the target to shoot. Two barrels, then reload. Hit 10 of 15!"'],
+      ducks: ['Bukała: "The duck game moved south-east, out by the wetlands."', 'Bukała: "Ducks fly in arcs over the fields. Hit 10 of 15, and keep your aim on the targets."'],
       mowing: ['Damian: "The pitch has grown wild after the rain. Can you mow it?"', 'Damian: "Walk every strip of grass. SPACE starts the mower, but accuracy matters."'],
     },
     win: { race: 'YOU BEAT DAMIAN!', pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'TARGET MASTER!', ducks: 'DUCKS HIT!', mowing: 'PITCH MOWN!' },
     lose: { race: 'DAMIAN WAS FASTER...', pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...', ducks: 'THE DUCKS FLEW OFF...', mowing: 'THE PITCH IS STILL WILD...' },
-    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: 'Target at Michał\'s range', ducks: 'Duck game', mowing: 'Mow the football pitch' },
+    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: 'Target at Bukała\'s range', ducks: 'Duck game', mowing: 'Mow the football pitch' },
     medal: ['', 'BRONZE', 'SILVER', 'GOLD'], next: m => `NEXT: ${m}`,
     go: 'GO!', lap: 'LAP', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT', hits: 'HITS', reload: 'RELOADING...',
     retry: 'SPACE / R — AGAIN', quit: 'ESC — LEAVE', esc: 'ESC — QUIT', record: 'NEW RECORD!', ghost: 'RECORD GHOST', offTrack: 'GRASS — SLOWER!',
@@ -113,7 +113,7 @@ window.addEventListener('ark-ready', () => {
       Object.assign(MG, { eggs, dogs });
     } else if (type === 'mowing') {
       A.teleport(MAP.football_pitch.cx, MAP.football_pitch.cy); P.dir = 'up';
-      Object.assign(MG, { cut: new Set(), cellsX: 7, cellsY: 10, target: 70, mower: false, limit: 45 });
+      Object.assign(MG, { cut: new Set(), cellsX: PITCH_CELLS.x, cellsY: PITCH_CELLS.y, target: 70, mower: false, limit: 45 });
     } else {
       A.teleport(RG.x, RG.y); P.dir = 'up';
       if (type === 'ducks') { A.teleport(DUCKS_SITE.x, DUCKS_SITE.y); P.dir = 'up'; }
@@ -354,11 +354,48 @@ window.addEventListener('ark-ready', () => {
     ctx.fillStyle = '#d8262c'; ctx.beginPath(); ctx.arc(sx, sy - h * .61, 2 * s, 0, 7); ctx.fill();
   }
   function drawMower(sx, sy, s) {
-    ctx.fillStyle = '#68bd52'; ctx.fillRect(sx - 8 * s, sy - 10 * s, 16 * s, 9 * s);
+    ctx.fillStyle = '#c8342c'; ctx.fillRect(sx - 8 * s, sy - 10 * s, 16 * s, 9 * s);   // red mower, reads on both turf shades
     ctx.fillStyle = '#2b542d'; ctx.fillRect(sx - 5 * s, sy - 13 * s, 10 * s, 3 * s);
     ctx.fillStyle = '#24232b'; ctx.fillRect(sx - 7 * s, sy - 1 * s, 4 * s, 3 * s); ctx.fillRect(sx + 3 * s, sy - 1 * s, 4 * s, 3 * s);
   }
+  // Football pitch: the map shows it unmown (plain light green, no lines). Mown cells turn into darker striped turf
+  // and only there the white lines appear; once the minigame is won the whole pitch stays mown with full markings.
+  const PITCH_CELLS = { x: 7, y: 10 };
+  function drawPitch(cut, S, s) {
+    const fp = MAP.football_pitch; if (!fp) return;
+    const x0 = fp.cx - fp.w / 2, y0 = fp.cy - fp.h / 2, cw = fp.w / PITCH_CELLS.x, ch = fp.h / PITCH_CELLS.y;
+    const cells = []; for (let cy = 0; cy < PITCH_CELLS.y; cy++) for (let cx = 0; cx < PITCH_CELLS.x; cx++) if (cut === 'all' || cut.has(`${cx},${cy}`)) cells.push([cx, cy]);
+    if (!cells.length) return;
+    const [ox, oy] = S(x0, y0), R = (x, y, w, h) => ctx.fillRect(Math.round(ox + x * s), Math.round(oy + y * s), Math.ceil(w * s), Math.ceil(h * s));
+    ctx.save();
+    ctx.beginPath(); for (const [cx, cy] of cells) ctx.rect(Math.round(ox + cx * cw * s), Math.round(oy + cy * ch * s), Math.ceil(cw * s), Math.ceil(ch * s)); ctx.clip();
+    // mown turf: darker green, alternating mower stripes across the pitch
+    const stripe = fp.h / 10;
+    for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? '#3f8f38' : '#4c9f42'; R(0, i * stripe, fp.w, stripe + .5); }
+    // markings (1 map px): touch lines, halfway line, centre circle + spot, penalty and goal boxes at both ends
+    ctx.fillStyle = '#f4f7ee'; ctx.strokeStyle = '#f4f7ee'; ctx.lineWidth = Math.max(1, s);
+    const m = 4, W = fp.w - 2 * m, H = fp.h - 2 * m;
+    R(m, m, W, 1); R(m, fp.h - m - 1, W, 1); R(m, m, 1, H); R(fp.w - m - 1, m, 1, H); R(m, fp.h / 2 - .5, W, 1);
+    ctx.beginPath(); ctx.arc(ox + fp.w / 2 * s, oy + fp.h / 2 * s, 15 * s, 0, Math.PI * 2); ctx.stroke();
+    R(fp.w / 2 - 1, fp.h / 2 - 1, 2, 2);
+    const pb = { w: Math.min(W - 10, 64), d: 26 }, gb = { w: 30, d: 10 };
+    for (const top of [true, false]) {
+      const yEdge = top ? m : fp.h - m, dir = top ? 1 : -1;
+      for (const b of [pb, gb]) {
+        const bx = (fp.w - b.w) / 2, by = top ? yEdge : yEdge - b.d;
+        R(bx, by, 1, b.d); R(bx + b.w - 1, by, 1, b.d); R(bx, top ? by + b.d - 1 : by, b.w, 1);
+      }
+      R(fp.w / 2 - 1, yEdge + dir * 18 - 1, 2, 2);   // penalty spot
+    }
+    ctx.restore();
+  }
+  window.__pitchState = () => (MG && MG.type === 'mowing' ? 'mowing' : Q().mg.mowing && Q().mg.mowing.won ? 'mown' : 'unmown');   // tests
   HOOKS.world.push((push, S, inView) => {
+    const fp = MAP.football_pitch, rec = Q().mg.mowing;
+    if (fp && inView(fp.cx, fp.cy)) {
+      if (MG && MG.type === 'mowing') drawPitch(MG.cut, S, A.zoom);
+      else if (rec && rec.won) drawPitch('all', S, A.zoom);
+    }
     for (const f of FLAGS) if (inView(f.x, f.y) && !(MG && MG.type === f.type)) push(f.y, () => drawFlag(f, ...S(f.x, f.y), A.zoom));
     const host = FLAGS[3];
     if (inView(host.x + 28, host.y - 25)) push(host.y - 25, () => {
@@ -385,8 +422,7 @@ window.addEventListener('ark-ready', () => {
         if (d.st === 'windup') bubble(sx, sy - 30 * s, s, '!', '#ff4b3e');
       });
     } else if (MG.type === 'mowing') {
-      const fp = MAP.football_pitch, s0 = A.zoom, x0 = fp.cx - fp.w / 2, y0 = fp.cy - fp.h / 2;
-      for (const key of MG.cut) { const [cx, cy] = key.split(',').map(Number); const [sx, sy] = S(x0 + (cx + .5) * fp.w / MG.cellsX, y0 + (cy + .5) * fp.h / MG.cellsY); ctx.fillStyle = '#68bd52'; ctx.fillRect(sx - fp.w / MG.cellsX * s0 / 2, sy - fp.h / MG.cellsY * s0 / 2, fp.w / MG.cellsX * s0, fp.h / MG.cellsY * s0); }
+      const s0 = A.zoom;   // the mown turf itself is drawn by drawPitch() above
       if (MG.mower) { const [sx, sy] = S(P.x, P.y); push(P.y, () => drawMower(sx, sy, s0)); }
     } else {
       for (const t of MG.targets) if (t.alive) push(t.y + 400, () => {

@@ -123,8 +123,7 @@ for p in classes.get('cemetery', []):
                 g[int(yy) - 3:int(yy) + 1, int(xx):int(xx) + 3] = hexc('#bdbdb8'); g[int(yy) - 3, int(xx):int(xx) + 3] = hexc('#dcdcd6')
                 g[int(yy) + 1, int(xx):int(xx) + 3] = hexc('#3c5a32')
 for p in classes.get('pitch', []):
-    m = mask_of([p]); fill(m, '#4fae4a', '#45a042', seed=41)
-    im_ = Image.fromarray(g.clip(0, 255).astype(np.uint8)); d_ = ImageDraw.Draw(im_); d_.polygon(p, outline=(240, 240, 235)); g = np.array(im_).astype(np.float32)
+    m = mask_of([p]); fill(m, '#8fcf63', '#86c65d', seed=41)
 
 # ---------------------------------------------------------------- water
 river_lines, ponds = [], []
@@ -308,7 +307,7 @@ for b in buildings:
 
 # ---------------------------------------------------------------- minigame venues
 # Sept 28 moves/additions, given as CURRENT map art pixels (the in-game coordinate readout), meaning "near here".
-CUR_SITES = dict(pig=(3487, 3308), dogs=(1321, 888), jazz=(2953, 2657), gravel=(873, 2322))
+CUR_SITES = dict(pig=(3487, 3308), dogs=(1321, 888), jazz=tuple(int(round(v)) for v in P(52.27757, 22.87983)), gravel=(873, 2322))
 
 
 def clear_rect(cx, cy, w, h, block, soft=None, search=600, step=10):
@@ -403,15 +402,7 @@ ground = Image.fromarray(g3.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(
 fp = FOOTBALL_PITCH
 fx0, fx1 = int(fp['cx'] - fp['w'] / 2), int(fp['cx'] + fp['w'] / 2)
 fy0, fy1 = int(fp['cy'] - fp['h'] / 2), int(fp['cy'] + fp['h'] / 2)
-gd.rectangle([fx0, fy0, fx1, fy1], fill=hexc('#4fae4a'), outline=hexc('#e9efdc'), width=3)
-gd.line([(fx0, fp['cy']), (fx1, fp['cy'])], fill=hexc('#e9efdc'), width=2)
-gd.ellipse([fp['cx'] - 18, fp['cy'] - 18, fp['cx'] + 18, fp['cy'] + 18], outline=hexc('#e9efdc'), width=2)
-box_w, box_h = 58, 42
-gd.rectangle([fp['cx'] - box_w / 2, fy0, fp['cx'] + box_w / 2, fy0 + box_h], outline=hexc('#e9efdc'), width=2)
-gd.rectangle([fp['cx'] - box_w / 2, fy1 - box_h, fp['cx'] + box_w / 2, fy1], outline=hexc('#e9efdc'), width=2)
-goal_w, goal_depth = 34, 8
-gd.rectangle([fp['cx'] - goal_w / 2, fy0 - goal_depth, fp['cx'] + goal_w / 2, fy0], outline=hexc('#e9efdc'), width=2)
-gd.rectangle([fp['cx'] - goal_w / 2, fy1, fp['cx'] + goal_w / 2, fy1 + goal_depth], outline=hexc('#e9efdc'), width=2)
+gd.rectangle([fx0, fy0, fx1, fy1], fill=hexc('#8fcf63'))
 del g3, yy, xx, ang, sub
 for k_ in range(0, 360, 3):
     if 165 < k_ < 195: continue
@@ -545,8 +536,8 @@ for poly_ in classes.get('residential', []):
             if k % 3 == 0:
                 gd.rectangle([xi - 1, yi - 8, xi + 1, yi], fill=(110, 74, 42)); gd.point((xi, yi - 8), fill=(170, 124, 80))
             low[yi - 3:yi + 2, xi - 2:xi + 3] = True
-bales = 0
-def bale(x, y):
+bales = []
+def draw_bale(x, y):
     gd.ellipse([x - 11, y - 2, x + 13, y + 5], fill=(96, 84, 40))
     od.rectangle([x - 11, y - 16, x + 11, y + 1], fill=(206, 168, 80), outline=(112, 84, 36))
     od.ellipse([x - 11, y - 20, x + 11, y - 12], fill=(226, 192, 104), outline=(112, 84, 36))
@@ -554,8 +545,8 @@ def bale(x, y):
     for yy_ in (y - 9, y - 4): od.line([(x - 10, yy_), (x + 10, yy_)], fill=(186, 150, 70))
     objects.append(dict(x=x - 13, y=y - 22, w=27, h=26, base=float(y + 2)))
     low[y - 6:y + 2, x - 11:x + 12] = True
-    occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # keep trees and other props off the bale
-for x_, y_ in TRACK_BALES: bale(x_, y_)
+    occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # keep trees and other props off static track bales
+for x_, y_ in TRACK_BALES: draw_bale(x_, y_)
 for p_ in classes.get('farmland', []):
     ox_, oy_, m_ = mask_win(p_)
     if not m_.size: continue
@@ -564,8 +555,9 @@ for p_ in classes.get('farmland', []):
     for _ in range(3):
         i_ = rnd.randrange(len(xs_)); x, y = int(xs_[i_]), int(ys_[i_])
         if not (20 < x < W - 20 and 60 < y < H - 20): continue
-        bale(x, y); bales += 1
-print('hay bales', bales)
+        bales.append(dict(x=x, y=y))
+        occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # reserve the dynamic bale footprint
+print('hay bales', len(bales))
 
 # ---------------------------------------------------------------- landmark sprites
 LM_SIZE = {'church': 150, 'windmill': 84, 'shop': 140}   # sprite width in art px
@@ -657,20 +649,107 @@ occ_img = Image.fromarray((occupied * 255).astype(np.uint8))
 occ_d = np.array(occ_img.filter(ImageFilter.MaxFilter(15))) > 0
 
 
-def tree(x, y, r, dark=False):
+tree_stats = {'conifer': 0, 'oak': 0, 'deciduous': 0}
+
+
+def tree(x, y, r, kind='deciduous'):
+    """Draw one y-sorted village tree; its trunk collision footprint stays unchanged."""
     x, y, r = int(x), int(y), int(r)
+    if kind == 'oak':
+        # Oaks are broad-canopied hardwoods; scale the crown and trunk, not the foot.
+        r = int(r * 1.25)
     gd.ellipse([x - r * .9, y - 3, x + r * .9, y + 4], fill=(52, 80, 36))
-    od.rectangle([x - 2, y - r * .7, x + 2, y], fill=(98, 66, 40), outline=(58, 38, 24))
-    base = hexc('#2e7a33') if not dark else hexc('#276a2c')
+    trunk_top = y - int(r * (.42 if kind == 'oak' else .7))
+    trunk = (116, 82, 48) if kind == 'oak' else (98, 66, 40)
+    if kind == 'deciduous':
+        trunk = (218, 211, 176)  # birch-like pale bark
+    od.rectangle([x - 2, trunk_top, x + 2, y], fill=trunk, outline=(58, 38, 24))
+    if kind == 'deciduous':
+        for mark_y in range(trunk_top + 4, y, 7): od.point((x - 1, mark_y), fill=(74, 62, 45))
+
     cy = y - r * 1.25
-    od.ellipse([x - r, cy - r, x + r, cy + r], fill=shade(base, .75), outline=(24, 52, 26))
-    od.ellipse([x - r * .85, cy - r * .95, x + r * .7, cy + r * .6], fill=base)
-    od.ellipse([x - r * .6, cy - r * .8, x + r * .15, cy - r * .1], fill=shade(base, 1.35))
-    for _ in range(4):
-        px, py = x + rnd.uniform(-r * .6, r * .5), cy + rnd.uniform(-r * .7, r * .5)
-        od.point((px, py), fill=shade(base, 1.6))
-    objects.append(dict(x=x - r - 2, y=int(cy - r) - 2, w=2 * r + 4, h=int(y - cy + r) + 6, base=float(y)))
+    if kind == 'conifer':
+        # Three stepped, pointed tiers in deep blue-green; hard polygon edges keep it crisp.
+        colors = [hexc('#183d3d'), hexc('#205448'), hexc('#2b6950')]
+        for i, (top, bottom, half) in enumerate(((cy - r * 1.05, cy + r * .15, r * .9),
+                                                  (cy - r * .48, cy + r * .62, r * 1.15),
+                                                  (cy + r * .05, cy + r * 1.05, r * 1.4))):
+            od.polygon([(x, int(top)), (x - int(half), int(bottom)), (x + int(half), int(bottom))],
+                       fill=colors[i], outline=(17, 43, 38))
+            od.line([(x, int(top) + 3), (x - int(half * .72), int(bottom) - 2)], fill=shade(colors[i], 1.28), width=1)
+        half_width, top_y = r * 1.4, cy - r * 1.05
+    elif kind == 'oak':
+        # Broad, low oak crown: separated leaf-cluster silhouettes over a deep olive
+        # canopy make the lobes read as an oak rather than a round shrub.
+        base = hexc('#465b25')
+        dark_rim = (25, 38, 20)
+        crown_y = cy - r * .06
+        od.ellipse([x - r * 1.62, crown_y - r * .69, x + r * 1.62, crown_y + r * .62],
+                   fill=(34, 48, 22), outline=dark_rim)
+        # Thick trunk and visible root flares; two branches show through deliberate
+        # gaps between the clusters. Keep the foot at y for unchanged collision/sort.
+        trunk_top = int(crown_y + r * .12)
+        trunk_col = (105, 71, 39)
+        od.polygon([(x - r * .20, y), (x - r * .39, y + 1), (x - r * .48, y + 3),
+                    (x - r * .12, y + 2), (x + r * .08, y + 2), (x + r * .42, y + 3),
+                    (x + r * .34, y + 1), (x + r * .17, y)], fill=trunk_col, outline=(55, 38, 23))
+        od.rectangle([x - r * .20, trunk_top, x + r * .20, y + 1], fill=trunk_col)
+        od.line([(x, trunk_top + 2), (x - r * .42, crown_y + r * .48)], fill=(66, 48, 29), width=2)
+        od.line([(x, trunk_top + 2), (x + r * .43, crown_y + r * .44)], fill=(66, 48, 29), width=2)
+        clusters = [(-1.03, .03, .58), (-.60, -.43, .59), (-.10, -.55, .61),
+                    (.51, -.47, .62), (1.02, -.12, .55), (.65, .34, .57),
+                    (.08, .39, .58), (-.58, .34, .56)]
+        for i, (dx, dy, size) in enumerate(clusters):
+            rr = r * size
+            cx_, cy_ = x + r * dx, crown_y + r * dy
+            tint = [0.96, 1.12, 1.04, .91, .88, 1.02, 1.08, .98][i]
+            col = shade(hexc('#52692b'), tint)
+            od.ellipse([cx_ - rr, cy_ - rr * .78, cx_ + rr, cy_ + rr * .78],
+                       fill=col, outline=dark_rim, width=1)
+        # A small broken highlight on upper-left leaves, not a smooth disk.
+        for dx, dy, rw, rh in [(-.84, -.57, .32, .17), (-.35, -.80, .29, .16),
+                                (-.78, -.16, .22, .13)]:
+            hx, hy = x + r * dx, crown_y + r * dy
+            od.ellipse([hx - r * rw, hy - r * rh, hx + r * rw, hy + r * rh],
+                       fill=(112, 132, 57))
+        # Foreground trunk/branches cross the foliage like a small classic oak
+        # branching structure; warm bark highlights keep them visible at game scale.
+        fork_y = trunk_top + r * .06
+        branch_width = max(4, int(r * .38))
+        highlight_width = max(2, int(r * .20))
+        od.line([(x, y), (x, trunk_top), (x - r * .76, crown_y + r * .10)], fill=(49, 35, 22), width=branch_width)
+        od.line([(x, fork_y), (x + r * .78, crown_y + r * .08)], fill=(49, 35, 22), width=branch_width)
+        od.line([(x, y - 1), (x, trunk_top), (x - r * .76, crown_y + r * .10)], fill=(153, 105, 57), width=highlight_width)
+        od.line([(x, fork_y), (x + r * .78, crown_y + r * .08)], fill=(153, 105, 57), width=highlight_width)
+        od.polygon([(x - r * .20, y - 1), (x - r * .39, y + 1), (x - r * .48, y + 3),
+                    (x - r * .12, y + 2), (x + r * .08, y + 2), (x + r * .42, y + 3),
+                    (x + r * .34, y + 1), (x + r * .17, y - 1)], fill=(123, 83, 45), outline=(49, 35, 22))
+        # Two tiny capped acorns make the broadleaf species unmistakably oak.
+        for dx, dy in [(-.84, .16), (.80, .22)]:
+            ax_, ay_ = x + r * dx, crown_y + r * dy
+            od.ellipse([ax_ - 2, ay_ - 1, ax_ + 2, ay_ + 4], fill=(198, 151, 63), outline=(61, 47, 27))
+            od.rectangle([ax_ - 2, ay_ - 2, ax_ + 2, ay_], fill=(74, 54, 31))
+        half_width, top_y = r * 1.82, crown_y - r * 1.15
+    else:
+        base = hexc('#2e7a33')
+        od.ellipse([x - r, cy - r, x + r, cy + r], fill=shade(base, .75), outline=(24, 52, 26))
+        od.ellipse([x - r * .85, cy - r * .95, x + r * .7, cy + r * .6], fill=base)
+        od.ellipse([x - r * .6, cy - r * .8, x + r * .15, cy - r * .1], fill=shade(base, 1.35))
+        half_width, top_y = r, cy - r
+    # Keep the renderer RNG stream stable across visual species variants.
+    highlights = [(x + rnd.uniform(-r * .6, r * .5), cy + rnd.uniform(-r * .7, r * .5)) for _ in range(4)]
+    if kind == 'deciduous':
+        for px, py in highlights: od.point((px, py), fill=shade(base, 1.6))
+    tree_stats[kind] += 1
+    # Preserve foot/base sorting while bounding the wider crowns for renderer culling.
+    objects.append(dict(x=int(x - half_width - 2), y=int(top_y) - 2,
+                        w=int(2 * half_width + 4), h=int(y - top_y) + 8, base=float(y), kind='tree', species=kind))
     collide[max(0, y - 3):y + 1, max(0, x - 3):x + 4] = True
+
+
+def village_tree_type(x, y):
+    """Stable spatial variation without consuming the renderer's layout RNG stream."""
+    return 'oak' if ((int(x) * 73856093) ^ (int(y) * 19349663)) % 100 < 24 else 'deciduous'
 
 
 res_mask = mask_of(classes.get('residential', []) + classes.get('religious', []) + classes.get('cemetery', []))
@@ -681,7 +760,7 @@ tree_pts = []
 for _ in range(9000):
     x, y = rnd.uniform(8, W - 8), rnd.uniform(20, H - 4)
     xi, yi = int(x), int(y)
-    if res_mask[yi, xi] and not occ_d[yi, xi] and rnd.random() < .35: tree_pts.append((x, y, rnd.uniform(8, 13), False))
+    if res_mask[yi, xi] and not occ_d[yi, xi] and rnd.random() < .35: tree_pts.append((x, y, rnd.uniform(8, 13), village_tree_type(x, y)))
 # river banks
 for l, w in river_lines:
     for a_, b_ in zip(l, l[1:]):
@@ -690,28 +769,83 @@ for l, w in river_lines:
             t_ = rnd.random(); side = rnd.choice([-1, 1])
             ex, ey = (b_[0] - a_[0]) / L, (b_[1] - a_[1]) / L
             x, y = a_[0] + (b_[0] - a_[0]) * t_ - ey * side * (w / 2 + 12), a_[1] + (b_[1] - a_[1]) * t_ + ex * side * (w / 2 + 12)
-            if 0 < x < W and 20 < y < H and not occ_d[int(y), int(x)] and rnd.random() < .55: tree_pts.append((x, y, rnd.uniform(10, 15), False))
+            if 0 < x < W and 20 < y < H and not occ_d[int(y), int(x)] and rnd.random() < .55: tree_pts.append((x, y, rnd.uniform(10, 15), village_tree_type(x, y)))
 # orchards
 for p in orch:
     m = mask_of([p]); arr = np.array(p); x0, y0 = arr.min(0); x1, y1 = arr.max(0)
     for y in np.arange(y0 + 10, y1, 22):
         for x in np.arange(x0 + 10, x1, 22):
-            if m[int(y), int(x)] and not occ_d[int(y), int(x)]: tree_pts.append((x, y, 8, False))
+            if m[int(y), int(x)] and not occ_d[int(y), int(x)]: tree_pts.append((x, y, 8, 'deciduous'))
 # thin out overlaps
 tree_pts.sort(key=lambda t: t[1]); kept = []
 for t_ in tree_pts:
     if all(math.hypot(t_[0] - k_[0], t_[1] - k_[1]) > (t_[2] + k_[2]) * .9 for k_ in kept[-60:]): kept.append(t_)
-for x, y, r, dk in kept: tree(x, y, r, dk)
+for x, y, r, kind in kept: tree(x, y, r, kind)
 
-# forests: dense canopy drawn on ground layer; trunks remain solid, forest floor is walkable
+# forests: species are mixed on the ground layer, preserving walkable forest-floor collision.
 fy, fx = np.nonzero(forest_mask)
 g2 = np.array(ground).astype(np.float32); g2[forest_mask] = hexc('#1f4f24'); ground = Image.fromarray(g2.astype(np.uint8)); gd = ImageDraw.Draw(ground)
 cand = list(zip(fx[::37], fy[::37])); rnd.shuffle(cand); cand = sorted(cand[:2600], key=lambda v: v[1])
+forest_tree_stats = {'conifer': 0, 'oak': 0, 'deciduous': 0}
 for x, y in cand:
-    r = rnd.uniform(7, 12); base = hexc(rnd.choice(['#2c6e30', '#2a6430', '#357a38', '#24592a']))
-    gd.ellipse([x - r, y - r, x + r, y + r], fill=shade(base, .75), outline=(20, 44, 22))
-    gd.ellipse([x - r * .8, y - r * .9, x + r * .6, y + r * .5], fill=base)
-    gd.ellipse([x - r * .55, y - r * .75, x + r * .1, y - r * .15], fill=shade(base, 1.3))
+    r = int(rnd.uniform(7, 12))
+    roll = rnd.random()
+    kind = 'conifer' if roll < .60 else 'oak' if roll < .85 else 'deciduous'
+    if kind == 'oak':
+        r = int(r * 1.3)
+    if kind == 'conifer':
+        # Layered, pointed blue-green tiers: visibly narrower and sharper than the broad crowns.
+        for top, bottom, half, color in ((y - 2 * r, y - r, r // 2, '#173b42'),
+                                         (y - int(1.5 * r), y - r // 3, int(.8 * r), '#205248'),
+                                         (y - r, y + 2, r, '#2d6950')):
+            gd.polygon([(x, top), (x - half, bottom), (x + half, bottom)], fill=hexc(color), outline=(18, 43, 39))
+        gd.line([(x, y - 2 * r + 2), (x - r // 3, y - r)], fill=hexc('#4b8261'), width=1)
+    elif kind == 'oak':
+        # Forest oaks get the same wide, broken olive crown as garden oaks,
+        # with pixel-scale trunk/root and fork marks kept visible below the canopy.
+        oak = hexc(rnd.choice(['#4c6329', '#556b2e', '#465e2a']))
+        crown_y = y - int(.35 * r)
+        trunk_top = int(crown_y + .22 * r)
+        gd.polygon([(x - 2, y + 4), (x - int(.43 * r), y + 5), (x - int(.52 * r), y + 7),
+                    (x - 1, y + 6), (x + 1, y + 6), (x + int(.48 * r), y + 7),
+                    (x + int(.38 * r), y + 5), (x + 2, y + 4)], fill=(83, 57, 34), outline=(43, 34, 23))
+        gd.rectangle([x - 2, trunk_top, x + 2, y + 5], fill=(105, 71, 39))
+        gd.line([(x, trunk_top + 1), (x - int(.55 * r), crown_y + int(.5 * r))], fill=(66, 48, 29), width=1)
+        gd.line([(x, trunk_top + 1), (x + int(.55 * r), crown_y + int(.48 * r))], fill=(66, 48, 29), width=1)
+        gd.ellipse([x - int(1.62 * r), crown_y - int(.68 * r), x + int(1.62 * r), crown_y + int(.62 * r)],
+                   fill=(34, 48, 22), outline=(25, 38, 20))
+        clusters = [(-1.02, .02, .58, .96), (-.60, -.43, .59, 1.12), (-.10, -.55, .61, 1.04),
+                    (.51, -.47, .62, .91), (1.02, -.12, .55, .88), (.65, .34, .57, 1.02),
+                    (.08, .39, .58, 1.08), (-.58, .34, .56, .98)]
+        for dx, dy, size, light in clusters:
+            rr = max(3, int(r * size))
+            cx_, cy_ = x + int(r * dx), crown_y + int(r * dy)
+            col = shade(oak, light)
+            gd.ellipse([cx_ - rr, cy_ - int(rr * .78), cx_ + rr, cy_ + int(rr * .78)],
+                       fill=col, outline=(25, 38, 20), width=1)
+        for dx, dy, rw, rh in [(-.84, -.57, .32, .17), (-.35, -.80, .29, .16)]:
+            hx, hy = x + int(r * dx), crown_y + int(r * dy)
+            gd.ellipse([hx - max(2, int(r * rw)), hy - max(1, int(r * rh)),
+                        hx + max(2, int(r * rw)), hy + max(1, int(r * rh))], fill=(112, 132, 57))
+        gd.line([(x, y + 5), (x, trunk_top), (x - int(.72 * r), crown_y + int(.10 * r))], fill=(49, 35, 22), width=3)
+        gd.line([(x, trunk_top), (x + int(.74 * r), crown_y + int(.08 * r))], fill=(49, 35, 22), width=3)
+        gd.line([(x, y + 5), (x, trunk_top), (x - int(.72 * r), crown_y + int(.10 * r))], fill=(153, 105, 57), width=1)
+        gd.line([(x, trunk_top), (x + int(.74 * r), crown_y + int(.08 * r))], fill=(153, 105, 57), width=1)
+        gd.polygon([(x - 2, y + 3), (x - int(.43 * r), y + 5), (x - int(.52 * r), y + 7),
+                    (x - 1, y + 6), (x + 1, y + 6), (x + int(.48 * r), y + 7),
+                    (x + int(.38 * r), y + 5), (x + 2, y + 3)], fill=(123, 83, 45), outline=(49, 35, 22))
+        # Visible acorn-and-cap marks are an oak-specific cue at game scale.
+        for dx, dy in [(-.84, .16), (.80, .22)]:
+            ax_, ay_ = x + int(r * dx), crown_y + int(r * dy)
+            gd.ellipse([ax_ - 2, ay_ - 1, ax_ + 2, ay_ + 4], fill=(198, 151, 63), outline=(61, 47, 27))
+            gd.rectangle([ax_ - 2, ay_ - 2, ax_ + 2, ay_], fill=(74, 54, 31))
+    else:
+        base = hexc(rnd.choice(['#5ca04a', '#519343', '#68ad52', '#478a3e']))
+        gd.ellipse([x - r, y - r, x + r, y + r], fill=shade(base, .75), outline=(20, 44, 22))
+        gd.ellipse([x - int(.8 * r), y - int(.9 * r), x + int(.6 * r), y + int(.5 * r)], fill=base)
+        gd.ellipse([x - int(.55 * r), y - int(.75 * r), x + int(.1 * r), y - int(.15 * r)], fill=shade(base, 1.3))
+    tree_stats[kind] += 1
+    forest_tree_stats[kind] += 1
 
 # ---------------------------------------------------------------- POIs + named real-world landmarks
 pois = []
@@ -786,6 +920,49 @@ cm_free = (cm == 0)
 py_, px_ = np.nonzero(dm[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150] & cm_free[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150])
 k_ = int(np.argmin((px_ - 150) ** 2 + (py_ - 60) ** 2)) if len(px_) else None
 spawn = dict(x=int(shop['x'] - 150 + px_[k_]), y=int(shop['y'] + py_[k_])) if k_ is not None else dict(x=shop['x'], y=shop['y'] + 60)
-json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, landmarks=landmarks, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, jazz=JAZZ, gravel=GRAVEL, shrines=SHRINES, spawn=spawn,
+# Sample standable banks alongside OSM water features, at roughly 40 px spacing.
+water = []
+def add_water_point(x, y):
+    if len(water) >= 400: return
+    x, y = int(round(x)), int(round(y))
+    if not (8 <= x < W - 8 and 40 <= y < H - 8) or cm[y, x] != 0 or wm[y, x]: return
+    if any((x - p['x']) ** 2 + (y - p['y']) ** 2 < 30 ** 2 for p in water): return
+    water.append(dict(x=x, y=y))
+for line, width in river_lines:
+    for a_, b_ in zip(line, line[1:]):
+        dx, dy = b_[0] - a_[0], b_[1] - a_[1]
+        length = math.hypot(dx, dy)
+        if length < 1: continue
+        nx_, ny_ = -dy / length, dx / length
+        for d_ in np.arange(20, length, 40):
+            t_ = d_ / length; px_ = a_[0] + dx * t_; py_ = a_[1] + dy * t_
+            for side_ in (-1, 1):
+                for extra_ in (0, 10, 20, 30):
+                    add_water_point(px_ + nx_ * side_ * (width / 2 + 4 + extra_), py_ + ny_ * side_ * (width / 2 + 4 + extra_))
+                    if water and water[-1]['x'] == round(px_ + nx_ * side_ * (width / 2 + 4 + extra_)) and water[-1]['y'] == round(py_ + ny_ * side_ * (width / 2 + 4 + extra_)): break
+for poly in ponds:
+    center_ = np.mean(np.asarray(poly), axis=0)
+    for a_, b_ in zip(poly, poly[1:] + poly[:1]):
+        dx, dy = b_[0] - a_[0], b_[1] - a_[1]; length = math.hypot(dx, dy)
+        if length < 1: continue
+        nx_, ny_ = -dy / length, dx / length
+        mid_ = ((a_[0] + b_[0]) / 2, (a_[1] + b_[1]) / 2)
+        if (mid_[0] - center_[0]) * nx_ + (mid_[1] - center_[1]) * ny_ < 0: nx_, ny_ = -nx_, -ny_
+        for d_ in np.arange(0, length, 40):
+            t_ = d_ / length; px_ = a_[0] + dx * t_; py_ = a_[1] + dy * t_
+            for extra_ in (4, 14, 24, 34):
+                add_water_point(px_ + nx_ * extra_, py_ + ny_ * extra_)
+                if water and math.hypot(water[-1]['x'] - (px_ + nx_ * extra_), water[-1]['y'] - (py_ + ny_ * extra_)) < 2: break
+            if len(water) >= 400: break
+        if len(water) >= 400: break
+    if len(water) >= 400: break
+water = water[:400]
+json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, bales=bales, water=water, pois=pois, landmarks=landmarks, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, jazz=JAZZ, gravel=GRAVEL, shrines=SHRINES, spawn=spawn, tree_stats=tree_stats, forest_tree_stats=forest_tree_stats,
                attribution='Map data © OpenStreetMap contributors (ODbL)'), open('docs/map.json', 'w'), indent=0)
+print('tree types', tree_stats)
 print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois], 'landmarks', [(p['key'], p['x'], p['y']) for p in landmarks])
+
+# Keep full-map downloads small on every regeneration, with decoded-pixel
+# equality checks before optimized files replace the renderer output.
+from optimize_map_pngs import main as optimize_map_pngs
+optimize_map_pngs()

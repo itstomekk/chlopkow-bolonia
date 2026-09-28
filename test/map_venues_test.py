@@ -6,6 +6,7 @@ from PIL import Image
 from scipy import ndimage
 
 Image.MAX_IMAGE_PIXELS = None
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'osm'))
 ROOT = pathlib.Path(__file__).resolve().parents[1] / 'docs'
 m = json.loads((ROOT / 'map.json').read_text(encoding='utf-8'))
 items = json.loads((ROOT / 'items.json').read_text(encoding='utf-8'))
@@ -22,7 +23,26 @@ def check(name, x, y, near=None, within=None):
     if near and math.hypot(x - near[0], y - near[1]) > within: fails.append(f'{name} at {x},{y} is {math.hypot(x - near[0], y - near[1]):.0f}px from {near}, want <= {within}')
 
 
-check('jazz', m['jazz']['x'], m['jazz']['y'], (2471, 1091), 250)
+from geo import P, BBOX as GEO_BBOX, W as GEO_W, H as GEO_H
+jazz_target = P(52.27757, 22.87983)
+check('jazz', m['jazz']['x'], m['jazz']['y'], jazz_target, 150)
+# Kuba is near the requested real-world coordinate, on a free, spawn-connected pixel.
+kuba = next(n for n in items['npcs'] if n['id'] == 'kuba')
+kuba_target = P(52.26902, 22.88978)
+check('kuba target', kuba['x'], kuba['y'], kuba_target, 80)
+if solid[kuba['y'], kuba['x']]: fails.append('kuba stands on a blocked map pixel')
+if tuple(m['bbox']) != GEO_BBOX or (m['w'], m['h']) != (GEO_W, GEO_H): fails.append('map bbox/size differs from geo.py')
+if m['bbox'][0] != 52.252935 or m['bbox'][3] != 22.896352: fails.append(f'unexpected extended bbox {m["bbox"]}')
+if len(m.get('bales', [])) == 0: fails.append('no dynamic field bales exported')
+if not m.get('water'): fails.append('no water stand points exported')
+if len(m.get('water', [])) > 400: fails.append(f'too many water points: {len(m["water"])}')
+for i, p in enumerate(m.get('water', [])):
+    if not (0 <= p['x'] < m['w'] and 0 <= p['y'] < m['h']) or solid[p['y'], p['x']]: fails.append(f'water point {i} is not standable')
+    elif lab[p['y'], p['x']] != home: fails.append(f'water point {i} is disconnected from spawn')
+for i, p in enumerate(m.get('bales', [])):
+    if not (0 <= p['x'] < m['w'] and 0 <= p['y'] < m['h']) or solid[p['y'], p['x']]: fails.append(f'field bale {i} is not walkable')
+# Exactly six static bale objects belong to the race track; field bales are data-only.
+if sum(o['w'] == 27 and o['h'] == 26 for o in m['objects']) != 6: fails.append('expected only six baked race-track bales')
 check('gravel', m['gravel']['x'], m['gravel']['y'], (873, 2322), 250)
 check('corral', m['corral']['cx'], m['corral']['cy'], (3487, 3308), 250)
 M = m['meadow']
@@ -40,7 +60,7 @@ T = m['track']
 d = math.hypot(npc['damian']['x'] - T['cx'], npc['damian']['y'] - T['cy'])
 if d > 400: fails.append(f'damian is {d:.0f}px from the race track')
 R = m['range']
-for i in ('michal', 'kuba'):
+for i in ('michal',):
     if math.hypot(npc[i]['x'] - R['x'], npc[i]['y'] - R['y']) > 130: fails.append(f'{i} is not by the range')
     if math.hypot(npc[i]['x'] - R['x'] - 40, npc[i]['y'] - R['y'] - 22) < 40: fails.append(f'{i} stands on the skeet flag')
 if 'patryk' in npc and math.hypot(npc['patryk']['x'] - m['jazz']['x'], npc['patryk']['y'] - m['jazz']['y']) > m['jazz']['r']: fails.append('patryk not in the jazz yard')
@@ -61,8 +81,15 @@ for s in m['shrines']:
 lm = {l['key']: l for l in items['landmarks']}
 for k in ('jazz', 'wapnica'):
     if k not in lm: fails.append(f'missing landmark {k}')
+if 'jazz' in lm and (lm['jazz']['x'], lm['jazz']['y']) != (m['jazz']['x'], m['jazz']['y']): fails.append('jazz landmark != venue')
 fp = m['football_pitch']
 if (lm['football_pitch']['x'], lm['football_pitch']['y']) != (fp['cx'], fp['cy']): fails.append('football landmark != pitch centre')
+for section in ('npcs', 'apples', 'boards', 'trash'):
+    for i, item in enumerate(items.get(section, [])):
+        check(f'{section}[{item.get("id", item.get("spot", i))}]', item['x'], item['y'])
+check('cap', items['cap']['x'], items['cap']['y'])
+for item in items.get('landmarks', []):
+    if 'access' in item: check('landmark ' + item['key'], item['access']['x'], item['access']['y'])
 
 print('\n'.join(fails) or 'map venues OK')
 sys.exit(1 if fails else 0)

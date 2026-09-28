@@ -16,11 +16,14 @@ if os.path.exists('gen/npc_src/renik_raw.png'):
         a[..., 3] = np.where(sizes[lab] >= max(60, sizes.max() * .01), a[..., 3], 0)
     im = Image.fromarray(a); im.crop(im.getbbox()).save('gen/npc_src/renik.png')
 # Fifth atlas slot retains the saved NPC id 'halina', but displays Irenka; Kuba hosts the range.
-ORDER = ['kasia', 'marcin', 'damian', 'grandpa', 'irenka', 'kuba', 'michal', 'mateusz', 'patryk', 'zbyszek', 'wesoly_swiat', 'edytka', 'renik']
+ORDER = ['kasia', 'marcin', 'damian', 'grandpa', 'irenka', 'kuba', 'michal', 'mateusz', 'patryk', 'zbyszek', 'wesoly_swiat', 'edytka', 'renik', 'soltys']
 CELL_W, CELL_H, FOOT, TARGET_H = 130, 170, 6, 150
 atlas = Image.new('RGBA', (CELL_W * len(ORDER), CELL_H), (0, 0, 0, 0))
 for i, n in enumerate(ORDER):
-    im = Image.open(f'gen/npc_src/{n}.png').convert('RGBA')
+    # Keep the stable internal NPC id `michal` for save data and map references;
+    # the in-world display name and source sprite are now Bukała.
+    source_name = 'bukala' if n == 'michal' else n
+    im = Image.open(f'gen/npc_src/{source_name}.png').convert('RGBA')
     if n in {'zbyszek', 'wesoly_swiat'}:
         im = remove_checker_background(im)
     im = im.crop(im.getbbox())

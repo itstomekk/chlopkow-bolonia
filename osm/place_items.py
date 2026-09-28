@@ -34,16 +34,16 @@ def free(x, y, r=10):
     return reach[min(hh - 1, y // C), min(ww - 1, x // C)] and not solid[y - r:y + 3, x - r:x + r].any()
 
 
-def near_free(x, y, r=10):
-    for rad in range(0, 200, 3):
+def near_free(x, y, r=10, max_dist=197):
+    for rad in range(0, max_dist + 1, 3):
         for a in np.linspace(0, 2 * math.pi, 16, endpoint=False):
             px, py = x + math.cos(a) * rad, y + math.sin(a) * rad
             if free(px, py, r): return round(px), round(py)
     return round(x), round(y)
 
 
-def at(x, y, r=10):
-    px, py = near_free(x, y, r); return dict(x=px, y=py)
+def at(x, y, r=10, max_dist=197):
+    px, py = near_free(x, y, r, max_dist); return dict(x=px, y=py)
 
 
 landmarks = []
@@ -164,12 +164,13 @@ npcs = [
     # hidden Sołtys at the supplied preceding-map coordinate, away from every quiz board
     dict(id='soltys', secret=True, **at(*soltys_spot)),
     dict(id='michal', **at(RG['x'] - 44, RG['y'] + 26)),      # owner of the PPM range
-    dict(id='kuba', **at(RG['x'] - 90, RG['y'] + 40)),        # regular at the range
+    dict(id='kuba', **at(*P(52.26902, 22.88978), max_dist=60)),  # near the requested spot, snapped to reachable ground
 ]
 if 'jazz' in m: npcs.append(dict(id='patryk', **at(m['jazz']['x'] + 50, m['jazz']['y'] - 5)))
-# Edytka: the game puts her at a random reachable spot on every new game (NPC_ZONE_RADIUS covers the whole map);
-# this is only her default, somewhere quiet south-east of the shop.
-npcs.append(dict(id='edytka', **at(shop['x'] + 420, shop['y'] + 380)))
+# Fixed spots requested by Tomek (Sept 28): the forest drunk, DJ Renik by the football pitch, Edytka in the west.
+npcs.append(dict(id='wesoly_swiat', **at(1692, 650)))
+if 'football_pitch' in m: npcs.append(dict(id='renik', **at(m['football_pitch']['cx'] + 80, m['football_pitch']['cy'])))
+npcs.append(dict(id='edytka', **at(120, 3869)))
 for n in npcs:
     for b in boards:
         assert math.hypot(n['x'] - b['x'], n['y'] - b['y']) > 45, f"{n['id']} blocks the {b['spot']} signboard"
@@ -177,7 +178,7 @@ for n in npcs:
         assert o is n or math.hypot(n['x'] - o['x'], n['y'] - o['y']) > 38, f"{n['id']} overlaps {o['id']}"
 
 # ---------------------------------------------------------------- apples: next to tree trunks, spread over the village
-trees = [o for o in m['objects'] if o['w'] < 34]
+trees = [o for o in m['objects'] if o.get('kind') == 'tree' or o['w'] < 34]
 oc = legacy_i(1343, 2171)
 orchard = [t for t in trees if abs(t['x'] - oc[0]) < 90 and abs(t['base'] - oc[1]) < 260]
 street = [t for t in trees if t not in orchard and abs(t['base'] - (shop['y'] + 150)) < 450]

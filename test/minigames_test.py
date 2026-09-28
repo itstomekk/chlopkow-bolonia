@@ -15,7 +15,7 @@ def check(cond, msg):
 
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1280, "height": 720})
-    errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" and "wss://" not in m.text else None)   # public Nostr relays (global chat) being down is not a game error
     pg.goto(URL); pg.wait_for_function("!!(window.__game && window.__features && window.__features.startMG)")
     pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_function("!!(window.__features && window.__features.startMG)")
     pg.keyboard.press("KeyN")

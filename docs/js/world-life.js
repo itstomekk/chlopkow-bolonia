@@ -6,9 +6,8 @@
   const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35;
   // Keep domestic birds out of the forest; wild animals are selected by terrain.
   const CHICKENS = 12, DOGS = 7, BOARS = 4, MICE = 10, HARES = 6, PIGS = 5, BUTTERFLIES = 8, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, TRACTORS = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
-  // docs/img/critters.png rows (64px cells, drawn facing right): hen, stray, bird, stork, fox.
-  // `px` = tallest sprite in that row in sheet pixels (critters.json h), `h` = its on-screen height in map px.
-  const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 }, boar: { row: 5, px: 44, h: 21 }, mouse: { row: 6, px: 18, h: 9 }, hare: { row: 7, px: 28, h: 15 }, pig: { row: 8, px: 42, h: 18 } };
+  // docs/img/critters.png rows (64px cells, facing right); px = sheet height, h = map height.
+  const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 }, boar: { row: 5, px: 44, h: 21 }, mouse: { row: 6, px: 18, h: 9 }, hare: { row: 7, px: 28, h: 15 }, pig: { row: 8, px: 42, h: 18 }, butterfly: { row: 9, px: 21, h: 5 } };
   const READY = () => {
     const A = window.ARK;
     if (!A || A.__worldLifeInstalled) return;
@@ -17,9 +16,25 @@
     const { HOOKS, P, MAP, ITEMS, ctx } = A;
     const Q = () => A.Q;
     const PL = A.LANG === 'pl';
-    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, critters: null };
+    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, vehicleImage: null, critters: null, waterPoints: [] };
+    const lastInteraction = Object.create(null), interactionCooldown = Object.create(null);
     A.load('img/car_red.png').then(image => { state.carImage = image; }, () => {});
+    A.load('img/vehicles.png').then(image => { state.vehicleImage = image; }, () => {});
     A.load('img/critters.png').then(image => { state.critters = image; }, () => {});
+    A.load('img/map_collide.png').then(image => {
+      if (Array.isArray(MAP.water) && MAP.water.length) state.waterPoints = MAP.water;
+      else {
+        const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+        const cx = canvas.getContext('2d', { willReadFrequently: true }); cx.drawImage(image, 0, 0);
+        const data = cx.getImageData(0, 0, image.width, image.height).data, sx = MAP.w / image.width, sy = MAP.h / image.height;
+        const stride = Math.max(2, Math.floor(Math.sqrt(image.width * image.height / 120000)));
+        for (let y = 0; y < image.height && state.waterPoints.length < 5000; y += stride) for (let x = 0; x < image.width && state.waterPoints.length < 5000; x += stride) {
+          const v = data[(y * image.width + x) * 4];
+          if (v >= 112 && v <= 144 && ((x + y) % (stride * 5) < stride)) state.waterPoints.push({ x: x * sx, y: y * sy });
+        }
+      }
+      if (state.q) { state.q = null; syncState(); }
+    }, () => {});
     const text = PL ? {
       car: 'SAMOCHÓD: 10 JABŁEK = 15 SEK. SZYBKIEJ JAZDY',
       noApples: 'Potrzebujesz 10 jabłek w bilansie.',
@@ -176,9 +191,13 @@
       const found = emptySite(extra, allowed);
       if (found) return found;
       if (kind === 'stork') {
-        // Never use randomSite's generic last-resort point for storks: that
-        // fallback is deliberately global and would violate the river rule.
-        for (const s of reachableSites()) if (allowed(s) && standable(s, [], true)) return { x: s.x, y: s.y };
+        for (const s of reachableSites()) if (allowed(s) && standable(s.x, s.y, extra, true)) return { x: s.x, y: s.y };
+        const waters = waterSources(), radii = [24, 42, 60, 78, 96];
+        for (const water of waters) for (const radius of radii) for (let angle = 0; angle < Math.PI * 2; angle += .55) {
+          const s = { x: water.x + Math.cos(angle) * radius, y: water.y + Math.sin(angle) * radius };
+          if (allowed(s) && standable(s.x, s.y, extra, true)) return s;
+        }
+        return null;
       }
       return randomSite(extra, 150, s => wildlifeAllowed(kind, s));
     }
@@ -201,13 +220,22 @@
       }
       return standable(home.x, home.y, extra, true) ? { x: home.x, y: home.y } : null;
     }
-    // The bridge POI is the stable, exported reference for the river. Never use
-    // emptiness as a fallback here: that used to put storks in arbitrary fields.
-    const nearRiver = s => (MAP.pois || []).some(p => p.key === 'river' && Math.hypot(p.x - s.x, p.y - s.y) < 720);
+    const waterSources = () => Array.isArray(MAP.water) && MAP.water.length ? MAP.water : state.waterPoints;
+    const nearRiver = s => {
+      const points = waterSources();
+      if (points.length) {
+        for (const p of points) if (Math.hypot(p.x - s.x, p.y - s.y) <= 100) return true;
+        return false;
+      }
+      return (MAP.pois || []).some(p => p.key === 'river' && Math.hypot(p.x - s.x, p.y - s.y) <= 100);
+    };
     function makeAnimals() {
       const extra = state.cars.slice();
       const animals = [];
-      const add = (kind, site) => { const a = newAnimal(kind, extra.concat(animals), site || undefined); animals.push(a); return a; };
+      const add = (kind, site) => {
+        if (kind === 'stork' && !site) return null;
+        const a = newAnimal(kind, extra.concat(animals), site || undefined); animals.push(a); return a;
+      };
       for (let i = 0; i < CHICKENS; i++) add('chicken', animalSite('chicken', extra.concat(animals)));
       for (let i = 0; i < DOGS; i++) add('dog', animalSite('dog', extra.concat(animals)));
       for (let i = 0; i < BOARS; i++) add('boar', animalSite('boar', extra.concat(animals)));
@@ -225,7 +253,10 @@
         const b = animalSite('butterfly', extra.concat(animals), s => wildlifeAllowed('butterfly', s));
         if (b) { const a = add('butterfly', b); a.mood = Math.random() < .5 ? -1 : 1; a.color = ['#ff5a8a', '#ffd21f', '#6fd0ff', '#a67cff'][i % 4]; }
       }
-      for (let i = 0; i < STORKS; i++) add('stork', animalSite('stork', extra.concat(animals), nearRiver));
+      for (let i = 0; i < STORKS; i++) {
+        const site = animalSite('stork', extra.concat(animals), nearRiver);
+        if (site) add('stork', site);
+      }
       for (let i = 0; i < FOXES; i++) { const b = buildingSpots(); add('fox', animalSite('fox', extra.concat(animals), s => b.length && b.some(v => Math.hypot(v.x - s.x, v.y - s.y) < 90))); }
       for (let f = 0; f < BIRD_FLOCKS; f++) {   // small flocks of sparrows, half of them in the empty north
         const c = f % 2 ? animalSite('bird', extra.concat(animals), s => s.y < MAP.h * .4) : animalSite('bird', extra.concat(animals));
@@ -286,6 +317,7 @@
       for (let i = 0; i < 18; i++) {
         const a = Math.random() * Math.PI * 2, d = Math.random() * radius;
         const x = o.homeX + Math.cos(a) * d, y = o.homeY + Math.sin(a) * d;
+        if (!wildlifeAllowed(o.kind, { x, y })) continue;
         if (standable(x, y, o.kind === 'bird' ? [] : state.cars.concat(state.animals.filter(a2 => a2 !== o && a2.kind !== 'bird')))) { o.tx = x; o.ty = y; return; }
       }
       o.tx = o.homeX; o.ty = o.homeY;
@@ -304,7 +336,108 @@
       }
       return false;
     }
-    // birds: take off when Arek comes close, fly in an arc to a new spot and land (flying ignores walls)
+    function rememberInteraction(o, label) {
+      lastInteraction[o.kind] = label;
+      o.say = label; o.sayT = 1.5;
+    }
+    const frodoDistance = o => Math.hypot(o.x - A.FRODO.x, o.y - A.FRODO.y);
+    let chaseAfter = 0, chaseTarget = null;
+    function syncFrodoChase(dt) {
+      const f = A.FRODO;
+      if (chaseTarget) {
+        chaseTarget.chaseT -= dt;
+        if (chaseTarget.chaseT <= 0 || Math.hypot(f.x - P.x, f.y - P.y) > 260) {
+          f.chase = null; chaseTarget = null;
+        } else f.chase = { x: chaseTarget.x, y: chaseTarget.y, t: chaseTarget.chaseT };
+      }
+    }
+    function startFrodoChase(o, seconds = 2.8) {
+      if (chaseTarget || A.time < chaseAfter || Math.hypot(A.FRODO.x - P.x, A.FRODO.y - P.y) > 260) return false;
+      chaseTarget = o; o.chaseT = seconds; chaseAfter = A.time + 20;
+      rememberInteraction(o, 'hau!'); return true;
+    }
+    function flee(o, fromX, fromY, distance, speed, dt, zig = false) {
+      let angle = Math.atan2(o.y - fromY, o.x - fromX);
+      if (zig) angle += Math.sin(A.time * 11 + o.homeX) * .75;
+      const ux = Math.cos(angle), uy = Math.sin(angle);
+      if (tryMove(o, ux, uy, speed, dt)) { o.tx = o.x + ux * distance; o.ty = o.y + uy * distance; return true; }
+      return false;
+    }
+    function updateInteraction(o, dt) {
+      o.sayT = Math.max(0, (o.sayT || 0) - dt);
+      if (o.hiddenT > 0) { o.hiddenT = Math.max(0, o.hiddenT - dt); return; }
+      const fd = frodoDistance(o), pd = distance(o, P);
+      if (o.kind === 'mouse') {
+        if (fd < 120 && !chaseTarget && A.time >= chaseAfter) startFrodoChase(o, 2.4);
+        if (fd < 110 || pd < 68) {
+          if (!o.fleeT) { o.fleeT = 1.6; rememberInteraction(o, 'squeak!'); }
+          o.fleeT = Math.max(0, o.fleeT - dt);
+          flee(o, fd < 110 ? A.FRODO.x : P.x, fd < 110 ? A.FRODO.y : P.y, 160, 62, dt);
+          if (o.fleeT === 0) { o.hiddenT = 2; o.tx = o.homeX; o.ty = o.homeY; }
+        }
+      } else if (o.kind === 'hare') {
+        if (fd < 120 || pd < 115) {
+          if (!o.fleeT) { o.fleeT = 1.8; rememberInteraction(o, 'hop!'); }
+          o.fleeT = Math.max(0, o.fleeT - dt);
+          if (fd < 105 && o.chaseTry !== Math.floor(A.time / 20)) { o.chaseTry = Math.floor(A.time / 20); if (Math.random() < .28) startFrodoChase(o, 1.8); }
+          flee(o, fd < 120 ? A.FRODO.x : P.x, fd < 120 ? A.FRODO.y : P.y, 130, 66, dt, true);
+        }
+      } else if (o.kind === 'chicken') {
+        if (fd < 75 || pd < 65) {
+          if (!o.scatterT) { o.scatterT = .9; o.z = 5; rememberInteraction(o, 'bok!'); }
+          o.scatterT = Math.max(0, o.scatterT - dt); o.z = Math.max(0, o.z - dt * 7);
+          flee(o, fd < 75 ? A.FRODO.x : P.x, fd < 75 ? A.FRODO.y : P.y, 80, 78, dt);
+        }
+      } else if (o.kind === 'dog') {
+        if (fd < 95 && !o.sniffT && !o.leaveT) { o.sniffT = 2.2; rememberInteraction(o, 'hau!'); }
+        if (o.sniffT > 0) {
+          o.sniffT = Math.max(0, o.sniffT - dt);
+          const orbit = A.time * 2.5, tx = A.FRODO.x + Math.cos(orbit) * 24, ty = A.FRODO.y + Math.sin(orbit) * 18;
+          const d = Math.hypot(tx - o.x, ty - o.y); if (d > 4) tryMove(o, (tx-o.x)/d, (ty-o.y)/d, 26, dt);
+          if (!o.sniffT) { o.leaveT = 5; o.tx = o.x + (o.x - A.FRODO.x) * 5; o.ty = o.y + (o.y - A.FRODO.y) * 5; }
+          return;
+        }
+        if (o.leaveT > 0) {
+          o.leaveT = Math.max(0, o.leaveT - dt);
+          const dx=o.tx-o.x, dy=o.ty-o.y, d=Math.hypot(dx,dy); if(d>4) tryMove(o,dx/d,dy/d,24,dt);
+        } else if (fd < 180) { const d = fd || 1; tryMove(o, (A.FRODO.x-o.x)/d, (A.FRODO.y-o.y)/d, 18, dt); }
+      } else if (o.kind === 'pig') {
+        if (pd < 120 && !o.curiosityT) { o.curiosityT = 3.2; rememberInteraction(o, 'chrum!'); }
+        if (o.curiosityT > 0) {
+          o.curiosityT = Math.max(0, o.curiosityT - dt);
+          const d = pd || 1; if (d > 34) tryMove(o, (P.x-o.x)/d, (P.y-o.y)/d, 18, dt);
+          if (!o.curiosityT) { o.tx = o.homeX; o.ty = o.homeY; }
+        }
+      } else if (o.kind === 'boar') {
+        if (pd < 90 && !o.chargeT && o.phase !== 'retreat') {
+          o.chargeT = 1.2; o.phase = 'charge'; rememberInteraction(o, 'PRR!');
+          const d = pd || 1, stop = 48; o.tx = P.x + (o.x-P.x) / d * stop; o.ty = P.y + (o.y-P.y) / d * stop;
+        }
+        if (o.chargeT > 0) {
+          o.chargeT = Math.max(0, o.chargeT - dt);
+          const dx=o.tx-o.x,dy=o.ty-o.y,d=Math.hypot(dx,dy); if (d>4) tryMove(o,dx/d,dy/d,72,dt);
+          if (!o.chargeT) { o.phase='retreat'; o.homeX=o.x; o.homeY=o.y; chooseTarget(o); }
+        }
+      } else if (o.kind === 'fox') {
+        if (fd < 150) {
+          if (!o.fleeT) { o.fleeT = 1.4; rememberInteraction(o, 'yip!'); }
+          o.fleeT = Math.max(0, o.fleeT - dt); flee(o, A.FRODO.x, A.FRODO.y, 170, 88, dt);
+          if (fd < 110 && !chaseTarget && A.time >= chaseAfter) startFrodoChase(o, 1.8);
+        }
+      } else if (o.kind === 'stork') {
+        if (pd < 105 && !o.clatterT) { o.clatterT=2.4; rememberInteraction(o,'kle-kle'); }
+        if (o.clatterT > 0) { o.clatterT=Math.max(0,o.clatterT-dt); flee(o,P.x,P.y,90,34,dt); }
+      } else if (o.kind === 'bird') {
+        if (fd < 85 && o.fly <= 0) rememberInteraction(o,'flutter');
+      } else if (o.kind === 'butterfly') {
+        if (pd < 145) {
+          if (!o.following) { o.following=true; rememberInteraction(o,'flutter'); }
+          if (pd < 32 && !o.landed && Math.random() < .018) { o.landed=true; o.landT=1.8; }
+        }
+        if (o.landed) { o.landT-=dt; o.x=P.x; o.y=P.y-22; o.z=0; if(o.landT<=0)o.landed=false; }
+      }
+    }
+    // birds: take off when Arek or Frodo comes close, fly in an arc (walls are ignored)
     function updateBird(o, dt) {
       if (o.fly > 0) {
         const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy), st = Math.min(d, 120 * dt);
@@ -314,9 +447,10 @@
         if (d < 2) { o.fly = 0; o.z = 0; o.homeX = o.x; o.homeY = o.y; o.wait = 1 + Math.random() * 2; }
         return;
       }
-      const pd = Math.hypot(o.x - P.x, o.y - P.y);
-      if (pd < 70) {   // scatter away from Arek
-        const away = Math.atan2(o.y - P.y, o.x - P.x);
+      const pd = Math.hypot(o.x - P.x, o.y - P.y), fd = frodoDistance(o);
+      if (Math.min(pd, fd) < 78) {   // scatter away from Arek or Frodo
+        const source = pd <= fd ? P : A.FRODO;
+        const away = Math.atan2(o.y - source.y, o.x - source.x);
         for (let i = 0; i < 16; i++) {
           const a = away + (Math.random() - .5) * 1.6, r = 160 + Math.random() * 180, x = o.x + Math.cos(a) * r, y = o.y + Math.sin(a) * r;
           if (standable(x, y, [], true)) { o.tx = x; o.ty = y; o.fly = 1; o.flyLen = Math.hypot(x - o.x, y - o.y); window.__worldLife.takeoffs = (window.__worldLife.takeoffs || 0) + 1; return; }
@@ -331,16 +465,20 @@
       } else o.z = 0;
     }
     function updateAnimal(o, dt) {
+      updateInteraction(o, dt);
+      if (o.hiddenT > 0) return;
       if (o.kind === 'bird') return updateBird(o, dt);
       if (o.kind === 'butterfly') return updateButterfly(o, dt);
       o.peck += dt; o.moving = Math.max(0, (o.moving || 0) - dt);
+      if (o.kind === 'boar' && o.chargeT > 0) return;
+      if (o.kind === 'mouse' && o.fleeT > 0 || o.kind === 'hare' && o.fleeT > 0 || o.kind === 'chicken' && o.scatterT > 0 || o.kind === 'fox' && o.fleeT > 0 || o.kind === 'stork' && o.clatterT > 0 || o.kind === 'pig' && o.curiosityT > 0 || o.kind === 'dog' && (o.sniffT > 0 || o.leaveT > 0)) return;
       const pdx = o.x - P.x, pdy = o.y - P.y, pd = Math.hypot(pdx, pdy);
       const shy = o.kind === 'fox' ? 150 : o.kind === 'stork' ? 110 : 78;
       if (pd < shy) {
         const d = pd || 1;
         if (tryMove(o, pdx / d, pdy / d, { dog: 30, boar: 44, mouse: 24, hare: 38, pig: 25, fox: 85, stork: 26 }[o.kind] || 22, dt)) return;
       }
-      if (o.kind === 'fox' && Math.hypot(o.tx - o.x, o.ty - o.y) < 8) {   // sniff around the building for a moment
+      if (o.kind === 'fox' && Math.hypot(o.tx - o.x, o.ty - o.y) < 8) {
         if (!o.rest) o.rest = 2 + Math.random() * 4;
         if ((o.rest -= dt) > 0) return;
         o.rest = 0; chooseTarget(o);
@@ -350,11 +488,12 @@
       if (d > 3) tryMove(o, dx / d, dy / d, { dog: 18, boar: 28, mouse: 16, hare: 24, pig: 16, fox: 48, stork: 9 }[o.kind] || 12, dt);
     }
     function updateButterfly(o, dt) {
+      if (o.landed) { o.x=P.x; o.y=P.y-22; o.z=0; o.step+=dt*8; return; }
       const pdx = P.x - o.x, pdy = P.y - o.y, pd = Math.hypot(pdx, pdy);
       let ux = Math.cos(A.time * 1.7 + o.homeX) * .7, uy = Math.sin(A.time * 1.4 + o.homeY) * .7;
       if (pd < 150) { const sign = o.mood > 0 ? 1 : -1, d = pd || 1; ux += sign * pdx / d * 1.8; uy += sign * pdy / d * 1.8; }
       const d = Math.hypot(ux, uy) || 1;
-      tryMove(o, ux / d, uy / d, 22, dt);
+      tryMove(o, ux / d, uy / d, 13, dt);
       o.z = 5 + Math.sin(A.time * 8 + o.homeX) * 3; o.step += dt * 8; o.moving = .2;
     }
 
@@ -368,6 +507,8 @@
     }
 
     function updateTractor(t, dt) {
+      t.moving = false;
+      if (t.puffT > 0) t.puffT = Math.max(0, t.puffT - dt);
       if (Math.hypot(P.x - t.x, P.y - t.y) < 150) {
         const away = Math.atan2(t.y - P.y, t.x - P.x);
         t.tx = t.homeX + Math.cos(away) * 180; t.ty = t.homeY + Math.sin(away) * 180;
@@ -378,7 +519,8 @@
       if (d < 2) return;
       const speed = 22, nx = t.x + dx / d * speed * dt, ny = t.y + dy / d * speed * dt;
       if (A.terrainAt(nx, ny) !== 'field' || !standable(nx, ny, state.cars.concat(state.tractors.filter(v => v !== t)))) { chooseTractorTarget(t); return; }
-      t.x = nx; t.y = ny; t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'); t.step += dt * 5;
+      t.x = nx; t.y = ny; t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'); t.step += dt * 5; t.moving = true;
+      if (!t.puffT) t.puffT = .7;
     }
 
     // sprite frames per kind (see CRIT / critters.json): walk cycle while moving, an idle pose otherwise
@@ -394,19 +536,27 @@
         case 'mouse': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
         case 'hare': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
         case 'pig': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
+        case 'butterfly': return Math.floor(A.time * 8 + o.homeX) % 4;
       }
       return 0;
     }
     function drawCritter(o, sx, sy, s) {
-      if (o.kind === 'butterfly') return drawButterfly(o, sx, sy, s);
+      if (o.hiddenT > 0) return;
       const c = CRIT[o.kind], img = state.critters;
       if (!img || !c) return (o.kind === 'dog' ? drawDog : o.kind === 'chicken' ? drawChicken : drawSmallWildlife)(o, sx, sy, s);
       const size = 64 * c.h * s / c.px, f = critterFrame(o), z = (o.z || 0) * s;
-      A.shadow(sx, sy, s * (o.kind === 'stork' ? 1 : o.kind === 'bird' ? .4 : .8) * (z ? .7 : 1), o.kind === 'bird' ? 3 : 7);
+      A.shadow(sx, sy, s * (o.kind === 'stork' ? 1 : o.kind === 'bird' ? .4 : .8) * (z ? .7 : 1), o.kind === 'bird' || o.kind === 'butterfly' ? 3 : 7);
       ctx.save(); ctx.imageSmoothingEnabled = false; ctx.translate(sx, sy - z);
       if ((o.face || o.dir) === 'left') ctx.scale(-1, 1);
       ctx.drawImage(img, f * 64, c.row * 64, 64, 64, -size / 2, -size + 2 * size / 64, size, size);
       ctx.restore();
+      if (o.sayT > 0 && o.say) {
+        const w = Math.max(26 * s, o.say.length * 6 * s + 8 * s), h = 13 * s, y = sy - size - z - h;
+        ctx.fillStyle = '#fff4d6'; ctx.fillRect(sx - w / 2, y, w, h);
+        ctx.strokeStyle = '#282433'; ctx.lineWidth = Math.max(1, s); ctx.strokeRect(sx - w / 2, y, w, h);
+        ctx.fillStyle = '#282433'; ctx.font = `bold ${Math.max(6, 7 * s)}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.say, sx, y + h / 2);
+        ctx.textAlign = 'left';
+      }
     }
     function drawButterfly(o, sx, sy, s) {
       const flap = Math.sin(A.time * 9 + o.homeX) > 0 ? 1 : .55, c = o.color || '#ff5a8a';
@@ -461,30 +611,54 @@
     }
     function drawCar(car, sx, sy, s) {
       A.shadow(sx, sy, s, 14);
-      if (state.carImage) {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(state.carImage, sx - 28 * s, sy - 29 * s, 56 * s, 38 * s);
-        return;
+      ctx.imageSmoothingEnabled = false;
+      if (state.vehicleImage) ctx.drawImage(state.vehicleImage, 0, 3 * 64, 64, 64, sx - 30 * s, sy - 32 * s, 60 * s, 38 * s);
+      else if (state.carImage) ctx.drawImage(state.carImage, sx - 28 * s, sy - 29 * s, 56 * s, 38 * s);
+      else {
+        px(sx, sy, s, -21, -16, 42, 14, '#a91f27'); px(sx, sy, s, -16, -22, 25, 8, '#c72a2e');
+        px(sx, sy, s, -12, -20, 9, 5, '#24354a'); px(sx, sy, s, 0, -20, 9, 5, '#24354a');
+        px(sx, sy, s, -20, -11, 40, 7, '#c72a2e'); px(sx, sy, s, -22, -7, 4, 3, '#f1c35b'); px(sx, sy, s, 18, -8, 4, 3, '#7d141e');
+        px(sx, sy, s, -15, -4, 8, 6, '#24232b'); px(sx, sy, s, 9, -4, 8, 6, '#24232b');
       }
-      px(sx, sy, s, -21, -16, 42, 14, '#a91f27'); px(sx, sy, s, -16, -22, 25, 8, '#c72a2e');
-      px(sx, sy, s, -12, -20, 9, 5, '#24354a'); px(sx, sy, s, 0, -20, 9, 5, '#24354a');
-      px(sx, sy, s, -20, -11, 40, 7, '#c72a2e'); px(sx, sy, s, -22, -7, 4, 3, '#f1c35b'); px(sx, sy, s, 18, -8, 4, 3, '#7d141e');
-      px(sx, sy, s, -15, -4, 8, 6, '#24232b'); px(sx, sy, s, 9, -4, 8, 6, '#24232b');
-      px(sx, sy, s, -19, -12, 5, 2, '#ee5050'); px(sx, sy, s, -8, -24, 10, 2, '#8a181e');
-      px(sx, sy, s, 13, -15, 3, 2, '#6e171c'); px(sx, sy, s, -15, -8, 2, 2, '#e2664c');
- }
- function drawTractor(t, sx, sy, s) {
- A.shadow(sx, sy, s * 1.2, 15);
- ctx.save(); ctx.translate(sx, sy); if (t.dir === 'left') ctx.scale(-1, 1);
- const bob = Math.sin(t.step * 2) * .5;
- px(0, 0, s, -22, -9 + bob, 30, 12, '#2e6ea7'); px(0, 0, s, -2, -22 + bob, 15, 14, '#3b82bd');
- px(0, 0, s, 1, -20 + bob, 10, 8, '#9ed2e8'); px(0, 0, s, -18, -1, 9, 8, '#171923'); px(0, 0, s, 12, -2, 7, 7, '#171923');
- px(0, 0, s, -25, -16 + bob, 5, 3, '#f0a62f'); px(0, 0, s, -5, -28 + bob, 3, 8, '#1f2937');
- ctx.restore();
- }
+    }
+    function drawTractor(t, sx, sy, s) {
+      A.shadow(sx, sy, s * 1.2, 15);
+      ctx.imageSmoothingEnabled = false;
+      const row = t.dir === 'up' ? 2 : t.dir === 'down' ? 1 : 0;
+      const frame = t.moving ? Math.floor(t.step) % 4 : 0;
+      if (state.vehicleImage) {
+        ctx.save(); ctx.translate(sx, sy);
+        if (row === 0 && t.dir === 'left') ctx.scale(-1, 1);
+        ctx.drawImage(state.vehicleImage, frame * 64, row * 64, 64, 64, -30 * s, -38 * s, 60 * s, 42 * s);
+        ctx.restore();
+      } else {
+        ctx.save(); ctx.translate(sx, sy); if (t.dir === 'left') ctx.scale(-1, 1);
+        const bob = Math.sin(t.step * 2) * .5;
+        px(0, 0, s, -22, -9 + bob, 30, 12, '#2e6ea7'); px(0, 0, s, -2, -22 + bob, 15, 14, '#3b82bd');
+        px(0, 0, s, 1, -20 + bob, 10, 8, '#9ed2e8'); px(0, 0, s, -18, -1, 9, 8, '#171923'); px(0, 0, s, 12, -2, 7, 7, '#171923');
+        px(0, 0, s, -25, -16 + bob, 5, 3, '#f0a62f'); px(0, 0, s, -5, -28 + bob, 3, 8, '#1f2937');
+        ctx.restore();
+      }
+      if (t.moving && Math.floor(A.time * 3) % 2 === 0) {
+        const dx = t.dir === 'left' ? -8 : t.dir === 'right' ? 8 : 0;
+        ctx.fillStyle = 'rgba(215,220,214,.8)'; ctx.fillRect(sx + (dx - 8) * s, sy - 49 * s, 3 * s, 3 * s);
+        ctx.fillStyle = 'rgba(180,190,190,.7)'; ctx.fillRect(sx + (dx - 11) * s, sy - 54 * s, 2 * s, 2 * s);
+      }
+    }
 
     HOOKS.near.push(() => state.cars.map((car, i) => ({ x: car.x, y: car.y, r: 34, onInteract: () => buyRide(i) })));
     HOOKS.speed.push(() => state.ride > 0 ? RIDE_SPEED : 1);
+    function animalNeedsUpdate(o) {
+      const camera = A.camera;
+      if (!camera) return true;
+      const margin = 120, left = -camera.ox / camera.zoom - margin, top = -camera.oy / camera.zoom - margin;
+      const right = (ctx.canvas.width - camera.ox) / camera.zoom + margin;
+      const bottom = (ctx.canvas.height - camera.oy) / camera.zoom + margin;
+      if (o.x >= left && o.x <= right && o.y >= top && o.y <= bottom) return true;
+      // Off-screen wildlife resumes as soon as it enters the camera or either character's interaction range.
+      return Math.abs(o.x - P.x) < 260 && Math.abs(o.y - P.y) < 260 ||
+        Math.abs(o.x - A.FRODO.x) < 260 && Math.abs(o.y - A.FRODO.y) < 260;
+    }
     HOOKS.update.push(dt => {
       syncState();
       if (state.ride > 0) {
@@ -493,7 +667,8 @@
       }
       if (A.scene !== 'play') return;
       for (const t of state.tractors) updateTractor(t, dt);
-      for (const o of state.animals) updateAnimal(o, dt);
+      for (const o of state.animals) if (animalNeedsUpdate(o)) updateAnimal(o, dt);
+      syncFrodoChase(dt);
     });
     HOOKS.world.push((push, S, inView) => {
       syncState();
@@ -522,7 +697,15 @@
       get cars() { return state.cars; },
       get tractors() { return state.tractors; },
       get animals() { return state.animals; },
+      get waterPoints() { return waterSources(); },
+      get lastInteraction() { return { ...lastInteraction }; },
+      get vehicleSpritesLoaded() { return !!state.vehicleImage; },
       get rideSeconds() { return state.ride; },
+      stepInteractions(dt = .05) { for (const o of state.animals) updateAnimal(o, dt); syncFrodoChase(dt); },
+      resetInteractionCooldown(kind) {
+        delete lastInteraction[kind]; interactionCooldown[kind] = 0; chaseAfter = 0;
+        if (chaseTarget && chaseTarget.kind === kind) { A.FRODO.chase = null; chaseTarget = null; }
+      },
       balance: appleBalance,
       buyRide,
       resetCars() {

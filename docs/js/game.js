@@ -28,7 +28,7 @@
   const DEBUG = params.get('debug') === '1';
   const SAVE_KEY = 'arek-chlopkow-save-v1';
   const CHARACTER_KEY = 'arek-chlopkow-character-v1';
-  const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 12;
+  const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 5;
   const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik'];
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
   if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) selectedCharacter = 'arek';
@@ -38,14 +38,14 @@
     pl: {
       title: 'CHŁOPKÓW BOLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
+      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
       edytkaWait: ['Ciii... Frodo jest teraz u mnie.'],
       edytkaDone: ['Trzy razy! Frodo chyba jednak woli ciebie. Ale i tak go kocham.', 'Dziękuję, Arek.'],
       edytkaAfter: ['Pozdrów Frodo. I podrap go za uchem ode mnie.'],
-      edytkaBack: 'FRODO UCIEKŁ DO AREKA!',
+      edytkaBack: 'AREK, FRODO WRÓCIŁ DO CIEBIE!',
       edytkaQuest: 'Przyprowadź Frodo do Edytki',
       wesoly0: ['Ho ho... spokojnie, to nie kolęda, tylko mój marsz przez las.', 'Widziałeś gdzieś renifera? Albo chociaż żabę w czapce?', 'Idę dalej. Jak się zgubię, będę udawał, że to plan.'],
       renik: [
@@ -104,7 +104,7 @@
     en: {
       title: 'CHŁOPKÓW BOLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
+      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -202,8 +202,10 @@
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
-  const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0, idleAnim: 0, action: 'idle', wander: 0, wanderX: 0, wanderY: 0, wanderWait: 4, returning: false, returningT: 0 };
+  const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0, idleAnim: 0, action: 'idle', wander: 0, wanderX: 0, wanderY: 0, wanderWait: 4, returning: false, returningT: 0, trailI: -1, chase: null };
   const BALES = [];
+  const BALE_ACTORS = [P, FRODO];
+  const trail = [];   // Arek's recent footsteps: Frodo walks them when the direct way is blocked (he never teleports in view)
   const JUMP_T = .48, JUMP_H = 15, DIRV = { up: [0, -1], up_right: [.707, -.707], right: [1, 0], down_right: [.707, .707], down: [0, 1], down_left: [-.707, .707], left: [-1, 0], up_left: [-.707, -.707] };
   const DIR8 = ['right', 'down_right', 'down', 'down_left', 'left', 'up_left', 'up', 'up_right'];
   const DIR4 = { down: 'down', down_right: 'right', right: 'right', up_right: 'up', up: 'up', up_left: 'left', left: 'left', down_left: 'down' };
@@ -218,7 +220,7 @@
     return Array.from(String(value || '').normalize('NFC').replace(/[^\p{L}\p{N} _'-]/gu, '').replace(/\s+/g, ' ').trim()).slice(0, 20).join('');
   }
   let Q = freshQ();
-  let hasSave = false, memoryIndex = 0;
+  let hasSave = false, memoryIndex = 0, savedDog = null;
   const keys = new Set();
   const joy = { active: false, id: null, cx: 0, cy: 0, x: 0, y: 0 };
   const pointer = { x: 0, y: 0, seen: false };   // last mouse/touch position in canvas pixels (used for aiming)
@@ -228,7 +230,7 @@
   function npcSavePositions() {
     return ITEMS && ITEMS.npcs ? ITEMS.npcs.filter(n => !n.secret).map(n => ({ id: n.id, x: n.x, y: n.y })) : [];
   }
-  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ Q, x: ROOM ? OUT.x : P.x, y: ROOM ? OUT.y : P.y, npcs: npcSavePositions() })); } catch (e) { } }
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ Q, x: ROOM ? OUT.x : P.x, y: ROOM ? OUT.y : P.y, dog: ROOM ? OUT.dog : { x: FRODO.x, y: FRODO.y }, npcs: npcSavePositions() })); } catch (e) { } }
   function loadSave() {
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
@@ -238,6 +240,7 @@
         if (Q.playerName.toUpperCase() === 'AREK') Q.playerName = '';
         if (!Q.playerName) return false;
         P.x = s.x; P.y = s.y;
+        if (s.dog && Number.isFinite(s.dog.x) && Number.isFinite(s.dog.y)) savedDog = { x: s.dog.x, y: s.dog.y };
         if (Array.isArray(s.npcs) && ITEMS && ITEMS.npcs) for (const saved of s.npcs) {
           const n = ITEMS.npcs.find(v => v.id === saved.id && !v.secret && !NPC_FIXED.has(v.id));
           if (n && Number.isFinite(saved.x) && Number.isFinite(saved.y)) { n.x = saved.x; n.y = saved.y; }
@@ -335,6 +338,7 @@
   // Trash bags: a plain collectible like apples and mushrooms. The fixed litter spots from items.json
   // (by the cemetery and the southern shop) come first, the rest are scattered by roads and on grass.
   function ensureTrash() {
+    if (Array.isArray(Q.trashSpots) && Q.trashSpots.length > TRASH_TOTAL) Q.trashSpots = Q.trashSpots.slice(0, TRASH_TOTAL);   // old saves had 12 bags
     const ok = Array.isArray(Q.trashSpots) && Q.trashSpots.length === TRASH_TOTAL && Q.trashSpots.every(p => p && Number.isFinite(p.x) && Number.isFinite(p.y));
     if (ok) {
       Q.trash = Array.isArray(Q.trash) ? Q.trash.filter(i => Number.isInteger(i) && i >= 0 && i < TRASH_TOTAL).filter((i, n, a) => a.indexOf(i) === n) : [];
@@ -562,6 +566,22 @@
     return best && bd <= Math.max(180, Math.min(MAP.w, MAP.h) * .045) ? best : null;
   }
   const mapPlaceName = (x, y) => { const p = mapPlaceAt(Number(x), Number(y)); return p ? p.name : null; };
+  const TERRAIN_NAMES = LANG === 'pl'
+    ? { grass: 'ŁĄKA', road: 'DROGA', track: 'DROGA POLNA', field: 'POLE', forest: 'LAS' }
+    : { grass: 'MEADOW', road: 'ROAD', track: 'DIRT TRACK', field: 'FIELD', forest: 'FOREST' };
+  // Hover label for the big map: the player, Frodo, people, then named places, then the ground type.
+  function mapHoverLabel(x, y, pickR) {
+    const near = (px, py) => Math.hypot(x - px, y - py) <= pickR;
+    if (near(P.x, P.y)) return heroName().toUpperCase();
+    if (near(FRODO.x, FRODO.y)) return 'FRODO';
+    let best = null, bd = pickR;
+    for (const n of ITEMS.npcs || []) if (!n.secret && T.names[n.id]) { const d = Math.hypot(x - n.x, y - n.y); if (d <= bd) { bd = d; best = T.names[n.id]; } }
+    if (best) return String(best).toUpperCase();
+    const place = mapPlaceAt(x, y);
+    if (place) return place.name;
+    const t = terrainAt(x, y);
+    return TERRAIN_NAMES[t] || null;
+  }
   function mapCoordinateText(x, y) {
     const b = MAP.bbox, s = MAP.scale || 2;
     const lat = b[2] - y / (110574 * s), lon = b[1] + x / (111320 * Math.cos((b[0] + b[2]) / 2 * Math.PI / 180) * s);
@@ -598,6 +618,7 @@
     if (showMap) {
       const point = mapPoint(px, py);
       if (point) { mapCursor.seen = true; mapCursor.x = point.x; mapCursor.y = point.y; copyMapCoordinates(point); }
+      else { showMap = false; mapCursor.seen = false; cancelClickMove(); }   // click outside the map closes it
       return;
     }
     if (px > cvs.width * .78 && py > cvs.height * .6) { if (talk || nearThing()) interact(); else jump(); return; }
@@ -612,7 +633,7 @@
   });
   cvs.addEventListener('pointermove', e => {
     [pointer.x, pointer.y] = toCanvas(e); pointer.seen = true;
-    if (showMap && e.pointerType === 'mouse') { const point = mapPoint(pointer.x, pointer.y); if (point) { mapCursor.seen = true; mapCursor.x = point.x; mapCursor.y = point.y; } }
+    if (showMap && e.pointerType === 'mouse') { const point = mapPoint(pointer.x, pointer.y); if (point) { mapCursor.seen = true; mapCursor.x = point.x; mapCursor.y = point.y; } else mapCursor.seen = false; }
     if (!joy.active || e.pointerId !== joy.id) return;
     const [px, py] = toCanvas(e);
     let dx = px - joy.cx, dy = py - joy.cy; const d = Math.hypot(dx, dy), max = 70;
@@ -627,7 +648,7 @@
   function enterChurch() {
     fade(() => {
       const c = window.buildChurch();
-      OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y };
+      OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y, dog: { x: FRODO.x, y: FRODO.y } };
       ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
       GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
       P.x = c.spawn.x; P.y = c.spawn.y; P.dir = 'up'; camX = P.x; camY = P.y; dust = [];
@@ -640,7 +661,7 @@
     fade(() => {
       const c = window.buildShop();
       c.kind = 'shop';
-      OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y };
+      OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y, dog: { x: FRODO.x, y: FRODO.y } };
       ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
       GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
       P.x = c.spawn.x; P.y = c.spawn.y; P.dir = 'up'; camX = P.x; camY = P.y; dust = [];
@@ -668,14 +689,20 @@
   function leaveRoom() {
     fade(() => {
       ({ MAP, GROUND, OBJ, SOLID } = OUT); P.x = OUT.x; P.y = OUT.y + 6; P.dir = 'down';
-      ROOM = null; unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; dust = []; save();
+      ROOM = null; unstick(); trail.length = 0;
+      if (OUT.dog && !blocked(OUT.dog.x, OUT.dog.y)) { FRODO.x = OUT.dog.x; FRODO.y = OUT.dog.y; } else placeFrodoNearArek();   // he waited by the door
+      camX = P.x; camY = P.y; dust = []; save();
     });
   }
   const npcsHere = () => ROOM ? (ROOM.soltys ? [{ id: 'soltys', x: ROOM.soltys.x, y: ROOM.soltys.y }] : []) : ITEMS.npcs;
 
   /* ---------- dialogue & quests ---------- */
   function heroName() { return sanitizePlayerName(Q.playerName) || (LANG === 'pl' ? 'GRACZ' : 'PLAYER'); }
-  function heroText(value) { return String(value).replace(/\bAREK\b/gi, heroName()); }
+  // The hero is whoever the player named: every "Arek" in dialogue/toasts (incl. Polish forms Areka/Arkowi/Arkiem/Arku) becomes that name.
+  function heroText(value) {
+    const name = heroName();
+    return String(value).replace(/(?<![\p{L}\-_])(arek|areka|arkowi|arkiem|arku)(?![\p{L}\-_])/giu, m => m === m.toUpperCase() ? name.toUpperCase() : name);
+  }
   function say(who, lines, after) { talk = { who, lines: lines.map(heroText), i: 0, after }; talkT = 0; }
   function nearThing() {
     let best = null, bd = 1e9;
@@ -751,7 +778,7 @@
     const tx = e.x + 22, ty = e.y + 6, vx = tx - FRODO.x, vy = ty - FRODO.y, d = Math.hypot(vx, vy);
     if (d > 4) {
       const st = Math.min(d, 120 * dt), nx = FRODO.x + vx / d * st, ny = FRODO.y + vy / d * st;
-      if (!blocked(nx, ny)) { FRODO.x = nx; FRODO.y = ny; } else { FRODO.x = tx; FRODO.y = ty; }
+      FRODO.x = nx; FRODO.y = ny;   // walks through yard clutter instead of popping onto her feet
       FRODO.moving = true; FRODO.step += dt * 9; FRODO.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
     } else {   // happy at her feet: pant / sit / lick
       FRODO.moving = false; FRODO.idleAnim += dt; FRODO.dir = 'left';
@@ -780,7 +807,7 @@
     say('arek', T[s.poi]);
   }
   function turnTo(s) { const dx = s.x - P.x, dy = s.y - P.y; P.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'); }
-  function popToast(text) { toast = { text, t: 0 }; if (window.MUSIC) MUSIC.ding(); }
+  function popToast(text) { toast = { text: heroText(text), t: 0 }; if (window.MUSIC) MUSIC.ding(); }
   function jump() {
     if (scene !== 'play' || talk || P.air || time - talkClosedAt < .3) return;   // don't jump when mashing Space through dialogue
     cancelClickMove();
@@ -827,15 +854,27 @@
   }
   function baleAt(x, y) { return BALES.some(b => Math.hypot(x - b.x, y - b.y) < 22); }
   function updateBales(dt) {
+    // Stationary bales need no per-frame physics until a walker gets close; moving bales keep rolling anywhere.
     for (const b of BALES) {
-      const dx = b.x - P.x, dy = b.y - P.y, d = Math.hypot(dx, dy);
-      if (!P.air && P.moving && d < 30) {
-        const v = DIRV[P.dir] || DIRV.down;
-        b.vx += v[0] * 120 * dt; b.vy += v[1] * 120 * dt; b.angle += (v[0] - v[1]) * dt * 2;
+      const nearPlayer = P.moving && Math.abs(P.x - b.x) < 38 && Math.abs(P.y - b.y) < 38;
+      const nearFrodo = FRODO.moving && Math.abs(FRODO.x - b.x) < 34 && Math.abs(FRODO.y - b.y) < 34;
+      if (Math.abs(b.vx) < .01 && Math.abs(b.vy) < .01 && !nearPlayer && !nearFrodo) continue;
+      for (const who of BALE_ACTORS) {
+        if (!who.moving || (who === P && P.air)) continue;
+        let dx = b.x - who.x, dy = b.y - who.y; const d = Math.hypot(dx, dy), reach = who === P ? 16 : 12;
+        if (d >= reach) continue;
+        if (d < .01) { const v = DIRV[who.dir] || DIRV.down; dx = v[0]; dy = v[1]; } else { dx /= d; dy /= d; }
+        const nx = who.x + dx * reach, ny = who.y + dy * reach;   // shove it out in front of the walker...
+        if (!solidAt(nx, ny, false)) { b.x = nx; b.y = ny; }
+        const kick = who === P ? 95 : 60; b.vx = dx * kick; b.vy = dy * kick;   // ...and let it roll on a bit
       }
-      b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= Math.max(0, 1 - dt * 4.2); b.vy *= Math.max(0, 1 - dt * 4.2);
-      b.angle += (b.vx + b.vy) * dt * .012;
-      b.x = Math.max(30, Math.min(MAP.w - 30, b.x)); b.y = Math.max((MAP.top || 40) + 20, Math.min(MAP.h - 20, b.y));
+      const sp = Math.hypot(b.vx, b.vy);
+      if (sp > 150) { b.vx *= 150 / sp; b.vy *= 150 / sp; }
+      const nx = b.x + b.vx * dt, ny = b.y + b.vy * dt;
+      if (solidAt(nx - 11, b.y, false) || solidAt(nx + 11, b.y, false) || nx < 30 || nx > MAP.w - 30) b.vx *= -.25; else b.x = nx;
+      if (solidAt(b.x, ny, false) || solidAt(b.x, ny - 8, false) || ny < (MAP.top || 40) + 20 || ny > MAP.h - 20) b.vy *= -.25; else b.y = ny;
+      b.roll += (Math.abs(b.vx) + Math.abs(b.vy)) * dt * .35;
+      b.vx *= Math.max(0, 1 - dt * 3.2); b.vy *= Math.max(0, 1 - dt * 3.2);
     }
   }
   function blocked(x, y, air = false) {
@@ -868,12 +907,34 @@
       else if (FRODO.visitReady !== false && d < EDYTKA_NEAR && !ROOM && !talk) { FRODO.visitReady = false; startFrodoVisit(); }
     }
     if (updateFrodoVisit(dt)) return;
+    // footsteps: one crumb every ~14 px of Arek's walk
+    const lastCrumb = trail[trail.length - 1];
+    if (!lastCrumb || Math.hypot(P.x - lastCrumb.x, P.y - lastCrumb.y) > 14) { trail.push({ x: P.x, y: P.y }); if (trail.length > 240) trail.shift(); }
     const [dx, dy] = DIRV[P.dir] || DIRV.down;
-    const tx = P.x - dx * 42, ty = P.y - dy * 42;
+    let tx = P.x - dx * 42, ty = P.y - dy * 42;
+    const toArek = Math.hypot(P.x - FRODO.x, P.y - FRODO.y);
+    // world-life.js asks him to chase a mouse / hare / fox: FRODO.chase = { x, y, t }; he gives up when Arek gets too far
+    const chase = FRODO.chase && FRODO.chase.t > 0 && toArek < 260 && Number.isFinite(FRODO.chase.x) ? FRODO.chase : null;
+    if (chase) { tx = chase.x; ty = chase.y; FRODO.wander = 0; FRODO.trailI = -1; }
+    // Arek teleported (minigame start, debug): the whole view changed, so the dog can rejoin without anyone seeing a jump
+    if (!chase && toArek > 450 && !dogOnScreen() && !FRODO.visit) { placeFrodoNearArek(); FRODO.trailI = -1; trail.length = 0; return; }
     const followDist = Math.hypot(tx - FRODO.x, ty - FRODO.y);
     if (FRODO.returning) { FRODO.returningT += dt; if (followDist < 42) { FRODO.returning = false; FRODO.returningT = 0; } }
+    // walking Arek's footsteps (set when he got stuck behind a wall)
+    if (FRODO.trailI >= 0 && !chase) {
+      if (toArek < 60 || FRODO.trailI >= trail.length) FRODO.trailI = -1;
+      else {
+        const c = trail[FRODO.trailI], vx = c.x - FRODO.x, vy = c.y - FRODO.y, d = Math.hypot(vx, vy);
+        if (d < 6) { FRODO.trailI++; return; }
+        const st = Math.min(d, 190 * dt);
+        FRODO.x += vx / d * st; FRODO.y += vy / d * st;   // Arek walked (or hopped) here, so the dog can too
+        FRODO.moving = true; FRODO.step += dt * 9; FRODO.routine = null; FRODO.action = 'idle'; FRODO.idleAnim = 0; FRODO.stuck = 0;
+        FRODO.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
+        return;
+      }
+    }
     if (followDist > 75) FRODO.wander = 0;
-    if (!FRODO.wander && followDist < 68 && (FRODO.wanderWait -= dt) <= 0) {
+    if (!chase && !FRODO.wander && followDist < 68 && (FRODO.wanderWait -= dt) <= 0) {
       for (let i = 0; i < 8; i++) {
         const a = Math.random() * Math.PI * 2, r = 20 + Math.random() * 30, x = P.x + Math.cos(a) * r, y = P.y + Math.sin(a) * r;
         if (!blocked(x, y)) { FRODO.wander = 2.4 + Math.random() * 1.8; FRODO.wanderX = x; FRODO.wanderY = y; break; }
@@ -883,7 +944,7 @@
     let vx = (FRODO.wander ? FRODO.wanderX : tx) - FRODO.x, vy = (FRODO.wander ? FRODO.wanderY : ty) - FRODO.y;
     const dist = Math.hypot(vx, vy);
     if (FRODO.wander && (FRODO.wander -= dt) <= 0) { FRODO.wander = 0; vx = tx - FRODO.x; vy = ty - FRODO.y; }
-    FRODO.moving = dist > 18;
+    FRODO.moving = dist > (chase ? 4 : 18);
     if (!FRODO.moving) {
       FRODO.stuck = 0; FRODO.idleAnim += dt;
       // random idle routine while Arek stands still: sit / pant, lick himself, scratch, sniff around, lie down
@@ -898,8 +959,8 @@
     }
     FRODO.routine = null;
     FRODO.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
-    const speed = FRODO.wander ? 28 : Math.min(190, 110 + Math.max(0, dist - 28) * 1.2);
-    const step = Math.min(dist - 18, speed * dt);
+    const speed = chase ? 215 : FRODO.wander ? 28 : Math.min(190, 110 + Math.max(0, dist - 28) * 1.2);
+    const step = Math.min(dist - (chase ? 0 : 18), speed * dt);
     vx = vx / dist * step; vy = vy / dist * step;
     let moved = false;
     if (!blocked(FRODO.x + vx, FRODO.y + vy)) { FRODO.x += vx; FRODO.y += vy; moved = true; }
@@ -907,16 +968,26 @@
       if (Math.abs(vx) > .01 && !blocked(FRODO.x + vx, FRODO.y)) { FRODO.x += vx; moved = true; }
       if (Math.abs(vy) > .01 && !blocked(FRODO.x, FRODO.y + vy)) { FRODO.y += vy; moved = true; }
     }
-    if (moved) { FRODO.step += dt * (FRODO.wander ? 4 : 9); FRODO.stuck = 0; FRODO.idleAnim = 0; FRODO.action = 'idle'; }
-    else if ((FRODO.stuck += dt) > (FRODO.returning ? 2.5 : dist > 100 ? 1.0 : 2.0)) {
-      // After Edytka's visit Frodo must visibly travel back. Give him a short
-      // side-step around the obstacle instead of teleporting immediately.
-      if (FRODO.returning && FRODO.returningT < 10) {
+    if (moved) { FRODO.step += dt * (FRODO.wander ? 4 : chase ? 12 : 9); FRODO.stuck = 0; FRODO.idleAnim = 0; FRODO.action = 'idle'; }
+    else if ((FRODO.stuck += dt) > (chase ? .6 : FRODO.returning ? 2.5 : dist > 100 ? 1.0 : 2.0)) {
+      FRODO.stuck = 0; FRODO.wanderWait = .5;
+      if (chase) { FRODO.chase = null; return; }   // the mouse slipped under a fence
+      // Continuity: never pop next to Arek. Walk back along his footsteps from the crumb closest to the dog.
+      let best = -1, bd = 1e9;
+      for (let i = 0; i < trail.length; i++) { const d = Math.hypot(trail[i].x - FRODO.x, trail[i].y - FRODO.y); if (d < bd) { bd = d; best = i; } }
+      if (best >= 0 && bd < 90) { FRODO.trailI = best; FRODO.wander = 0; }
+      else {
         const side = Math.atan2(ty - FRODO.y, tx - FRODO.x) + (Math.random() < .5 ? 1 : -1) * Math.PI / 2;
         FRODO.wander = .8; FRODO.wanderX = FRODO.x + Math.cos(side) * 55; FRODO.wanderY = FRODO.y + Math.sin(side) * 55;
-      } else if (dist > 100) { placeFrodoNearArek(); }
-      FRODO.wander = FRODO.wander || 0; FRODO.wanderWait = .5; FRODO.stuck = 0;
+        // Last resort (e.g. Arek was teleported by a minigame): only relocate while the dog is off-screen, so nobody sees a jump.
+        if (dist > 100 && !dogOnScreen()) placeFrodoNearArek();
+      }
     }
+  }
+  function dogOnScreen() {
+    if (!lastCam) return false;
+    const [x, y] = lastCam.S(FRODO.x, FRODO.y);
+    return x > -40 && y > -40 && x < cvs.width + 40 && y < cvs.height + 40;
   }
   function update(dt) {
     time += dt;
@@ -1039,13 +1110,22 @@
     ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
     ctx.imageSmoothingEnabled = true; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
+  // Round straw bale lying on its side (23x10 art px), end face with rings on the right. Mirrored every few px of
+  // rolling so it visibly tumbles when pushed.
+  const BALE_PX = [[4,0,15,"q"],[3,1,1,"q"],[4,1,4,"y"],[8,1,1,"N"],[9,1,5,"y"],[14,1,1,"N"],[15,1,3,"y"],[18,1,3,"q"],[2,2,1,"q"],[3,2,1,"y"],[4,2,1,"Y"],[5,2,3,"y"],[8,2,1,"N"],[9,2,3,"y"],[12,2,1,"Y"],[13,2,1,"y"],[14,2,1,"N"],[15,2,2,"y"],[17,2,1,"q"],[18,2,1,"N"],[19,2,1,"x"],[20,2,1,"N"],[21,2,1,"q"],[1,3,1,"q"],[2,3,4,"y"],[6,3,1,"Y"],[7,3,1,"y"],[8,3,1,"N"],[9,3,1,"y"],[10,3,1,"Y"],[11,3,3,"y"],[14,3,1,"N"],[15,3,1,"y"],[16,3,1,"Y"],[17,3,1,"q"],[18,3,1,"x"],[19,3,2,"Y"],[21,3,1,"x"],[22,3,1,"q"],[1,4,1,"q"],[2,4,2,"Y"],[4,4,1,"y"],[5,4,3,"Y"],[8,4,1,"N"],[9,4,3,"Y"],[12,4,1,"y"],[13,4,1,"Y"],[14,4,1,"N"],[15,4,2,"Y"],[17,4,1,"q"],[18,4,1,"N"],[19,4,1,"Y"],[20,4,1,"n"],[21,4,1,"Y"],[22,4,1,"q"],[1,5,1,"q"],[2,5,1,"Y"],[3,5,1,"n"],[4,5,3,"Y"],[7,5,1,"n"],[8,5,1,"N"],[9,5,2,"Y"],[11,5,1,"n"],[12,5,2,"Y"],[14,5,1,"N"],[15,5,1,"Y"],[16,5,1,"n"],[17,5,1,"q"],[18,5,1,"x"],[19,5,1,"n"],[20,5,1,"N"],[21,5,1,"n"],[22,5,1,"q"],[1,6,1,"q"],[2,6,1,"n"],[3,6,2,"Y"],[5,6,1,"n"],[6,6,2,"Y"],[8,6,1,"N"],[9,6,1,"Y"],[10,6,1,"n"],[11,6,2,"Y"],[13,6,1,"n"],[14,6,1,"N"],[15,6,2,"Y"],[17,6,1,"q"],[18,6,1,"N"],[19,6,1,"Y"],[20,6,1,"n"],[21,6,1,"Y"],[22,6,1,"q"],[1,7,1,"q"],[2,7,6,"n"],[8,7,1,"N"],[9,7,5,"n"],[14,7,1,"N"],[15,7,2,"n"],[17,7,1,"q"],[18,7,1,"x"],[19,7,2,"Y"],[21,7,1,"x"],[22,7,1,"q"],[1,8,1,"q"],[2,8,1,"n"],[3,8,1,"N"],[4,8,2,"n"],[6,8,1,"N"],[7,8,1,"n"],[8,8,1,"N"],[9,8,2,"n"],[11,8,1,"N"],[12,8,2,"n"],[14,8,1,"N"],[15,8,1,"n"],[16,8,1,"N"],[17,8,2,"q"],[19,8,1,"N"],[20,8,1,"x"],[21,8,1,"N"],[22,8,1,"q"],[2,9,20,"q"]];
   function drawBale(bale, sx, sy, s) {
-    shadow(sx, sy, s * .9, 10);
-    ctx.save(); ctx.translate(sx, sy - 5 * s); ctx.rotate(bale.angle);
-    ctx.fillStyle = '#c58b3a'; ctx.fillRect(-12 * s, -5 * s, 24 * s, 10 * s);
-    ctx.fillStyle = '#f0c15b'; ctx.fillRect(-10 * s, -3 * s, 20 * s, 2 * s);
-    ctx.fillStyle = '#7b4b24'; ctx.fillRect(-4 * s, -5 * s, 2 * s, 10 * s); ctx.fillRect(7 * s, -5 * s, 2 * s, 10 * s);
-    ctx.restore();
+    shadow(sx, sy, s * 1.1, 13);
+    const u = s, flip = Math.floor(bale.roll / 5) % 2;
+    ctx.save(); ctx.translate(Math.round(sx), 0); if (flip) ctx.scale(-1, 1);
+    drawPixels(BALE_PX, -11.5 * u, sy - 10 * u, u); ctx.restore();
+  }
+  const DIRECTION_SIGNS = { left: '← DUŃCY', right: 'WIELKIE KSIĘSTWO LITEWSKIE →' };
+  function directionSignEdges(W) {   // screen x of the map's west/east edge and how visible each sign is (0..1)
+    if (!lastCam || !MAP) return { left: 0, right: 0, leftX: 0, rightX: W };
+    const leftX = lastCam.S(0, 0)[0], rightX = lastCam.S(MAP.w, 0)[0];
+    const fade = x => Math.max(0, Math.min(1, x));
+    // the camera stops at the edge (leftX = 0 / rightX = W); the sign fades in over the last quarter screen before it
+    return { leftX: Math.max(0, leftX), rightX: Math.min(W, rightX), left: fade((leftX + W * .25) / (W * .25)), right: fade((W * 1.25 - rightX) / (W * .25)) };
   }
   function drawClouds(ox, oy, zoom, sx0, sy0, sw, sh) {
     // Visual-only weather: drifting translucent cloud shadows and soft puffs.
@@ -1123,18 +1203,38 @@
       ctx.fillText(mark, sx, my);
     }
   }
+  // Pickup pixel art (12x12 / 13x12 px), one palette; drawn as merged runs so each sprite is ~50 fillRects.
+  const PICK_PAL = {"C": "#e9e1cf", "D": "#bfb39a", "G": "#2f7a33", "R": "#d8262c", "T": "#d6ccb6", "c": "#fffdf5", "g": "#5dbb4a", "h": "#ff7a70", "o": "#3a1216", "r": "#a3161d", "s": "#6b3b1a", "t": "#f3ecdd", "w": "#fff1ea"};
+  const APPLE_PX = [[7,0,1,"s"],[8,0,2,"g"],[6,1,1,"s"],[7,1,1,"g"],[8,1,1,"G"],[9,1,1,"g"],[3,2,3,"o"],[6,2,1,"s"],[7,2,4,"o"],[2,3,1,"o"],[3,3,2,"h"],[5,3,5,"R"],[10,3,1,"r"],[11,3,1,"o"],[1,4,1,"o"],[2,4,1,"h"],[3,4,1,"w"],[4,4,1,"h"],[5,4,6,"R"],[11,4,1,"r"],[12,4,1,"o"],[1,5,1,"o"],[2,5,2,"h"],[4,5,7,"R"],[11,5,1,"r"],[12,5,1,"o"],[1,6,1,"o"],[2,6,9,"R"],[11,6,1,"r"],[12,6,1,"o"],[1,7,1,"o"],[2,7,8,"R"],[10,7,2,"r"],[12,7,1,"o"],[2,8,1,"o"],[3,8,6,"R"],[9,8,2,"r"],[11,8,1,"o"],[2,9,1,"o"],[3,9,1,"r"],[4,9,4,"R"],[8,9,3,"r"],[11,9,1,"o"],[3,10,1,"o"],[4,10,6,"r"],[10,10,1,"o"],[4,11,3,"o"],[8,11,2,"o"]];
+  const MUSH_PX = [[4,0,5,"o"],[2,1,2,"o"],[4,1,4,"c"],[8,1,1,"C"],[9,1,2,"o"],[1,2,1,"o"],[2,2,8,"c"],[10,2,1,"C"],[11,2,1,"o"],[0,3,1,"o"],[1,3,2,"c"],[3,3,1,"w"],[4,3,5,"c"],[9,3,2,"C"],[11,3,1,"D"],[12,3,1,"o"],[0,4,1,"o"],[1,4,9,"c"],[10,4,1,"C"],[11,4,1,"D"],[12,4,1,"o"],[0,5,1,"o"],[1,5,1,"C"],[2,5,7,"c"],[9,5,2,"C"],[11,5,1,"D"],[12,5,1,"o"],[1,6,1,"o"],[2,6,8,"C"],[10,6,1,"D"],[11,6,1,"o"],[2,7,2,"o"],[4,7,1,"D"],[5,7,3,"T"],[8,7,1,"D"],[9,7,2,"o"],[3,8,1,"o"],[4,8,3,"t"],[7,8,2,"T"],[9,8,1,"o"],[3,9,1,"o"],[4,9,3,"t"],[7,9,2,"T"],[9,9,1,"o"],[3,10,1,"o"],[4,10,3,"t"],[7,10,2,"T"],[9,10,1,"o"],[4,11,5,"o"]];
+  Object.assign(PICK_PAL,   // hay bale colours
+    {"x": "#c9913c", "n": "#b07b30", "Y": "#dcaa4a", "y": "#f4d27a", "N": "#8a5a22", "q": "#5a3a17"});
+  const PIXEL_CACHE = new WeakMap();
+  function drawPixels(runs, x, y, u) {   // cache run-based art once per effective zoom; draws one image instead of ~50 fillRects
+    let scales = PIXEL_CACHE.get(runs);
+    if (!scales) PIXEL_CACHE.set(runs, scales = new Map());
+    const key = Math.round(u * 1000) / 1000;
+    let sprite = scales.get(key);
+    if (!sprite) {
+      let width = 0, height = 0;
+      for (const [rx, ry, rw] of runs) { width = Math.max(width, rx + rw); height = Math.max(height, ry + 1); }
+      sprite = document.createElement('canvas');
+      sprite.width = Math.max(1, Math.ceil(width * key)); sprite.height = Math.max(1, Math.ceil(height * key));
+      const px = sprite.getContext('2d');
+      for (const [rx, ry, rw, c] of runs) { px.fillStyle = PICK_PAL[c]; px.fillRect(Math.round(rx * key), Math.round(ry * key), Math.ceil(rw * key), Math.ceil(key)); }
+      scales.set(key, sprite);
+    }
+    ctx.drawImage(sprite, Math.round(x), Math.round(y));
+  }
   function drawApple(sx, sy, s) {
-    const b = Math.sin(time * 3 + sx) * s * .8;
-    ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 3 * s, sy + 1 * s, 6 * s, 1.5 * s);
-    const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s - b, w * s, h * s); };
-    px(-3, -6, 6, 5, '#d8262c'); px(-2, -7, 4, 7, '#d8262c'); px(-2, -6, 2, 2, '#ff8a80'); px(2, -3, 1, 2, '#9a1a1f'); px(-1, -2, 3, 1, '#9a1a1f');
-    px(0, -9, 1, 2, '#6b3b1a'); px(1, -9, 2, 1, '#4fa34a');
+    const b = Math.sin(time * 3 + sx * .1) * s * .45, u = s * .85;
+    ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 4 * s, sy + .5 * s, 8 * s, 1.5 * s);
+    drawPixels(APPLE_PX, sx - 6.5 * u, sy - 12 * u - b, u);
   }
   function drawMushroom(sx, sy, s) {
-    const b = Math.sin(time * 3 + sx * .1) * s * .45;
-    const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s - b, w * s, h * s); };
-    px(-1, -5, 2, 5, '#fffdf2'); px(-4, -7, 8, 3, '#fffdf2'); px(-3, -9, 6, 2, '#ffffff'); px(-2, -8, 1, 1, '#d9d3c3'); px(1, -8, 1, 1, '#d9d3c3');
-    ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 3 * s, sy + 1 * s, 6 * s, 1.5 * s);
+    const b = Math.sin(time * 3 + sx * .1) * s * .45, u = s * .8;
+    ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 3.5 * s, sy + .5 * s, 7 * s, 1.5 * s);
+    drawPixels(MUSH_PX, sx - 6.5 * u, sy - 12 * u - b, u);
   }
   function drawTrashBag(sx, sy, s) {   // tied black bag, cell 2 of img/trash.png (32 px); pixel fallback until it loads
     const b = Math.sin(time * 2.4 + sx * .07) * s * .35;
@@ -1265,7 +1365,7 @@
     // everything that stands on the ground, sorted by baseline
     const inView = (x, y) => x > sx0 - 60 && x < sx0 + sw + 60 && y > sy0 - 60 && y < sy0 + sh + 80;
     const draw = [];
-    for (const o of MAP.objects) if (!BALES.some(b => b.source === o) && o.x < sx0 + sw && o.x + o.w > sx0 && o.y < sy0 + sh && o.y + o.h > sy0) draw.push({ base: o.base, fn: () => ctx.drawImage(OBJ, o.x, o.y, o.w, o.h, ox + o.x * zoom, oy + o.y * zoom, o.w * zoom, o.h * zoom) });
+    for (const o of MAP.objects) if (o.x < sx0 + sw && o.x + o.w > sx0 && o.y < sy0 + sh && o.y + o.h > sy0) draw.push({ base: o.base, fn: () => ctx.drawImage(OBJ, o.x, o.y, o.w, o.h, ox + o.x * zoom, oy + o.y * zoom, o.w * zoom, o.h * zoom) });
     if (ROOM && ROOM.soltys) draw.push({ base: ROOM.soltys.y, fn: () => { const [a, b] = S(ROOM.soltys.x, ROOM.soltys.y); shadow(a, b, zoom, 8); if (window.CHURCH_ART.soltys) window.fitSprite(ctx, window.CHURCH_ART.soltys, a - 14 * zoom, b - 44 * zoom, 28 * zoom, 44 * zoom); else window.drawSoltys(ctx, a, b, zoom, time); ctx.imageSmoothingEnabled = false; } });
     else if (!ROOM) {
     ITEMS.apples.forEach((a, i) => { if (!Q.apples.includes(i) && inView(a.x, a.y)) draw.push({ base: a.y, fn: () => drawApple(...S(a.x, a.y), zoom) }); });
@@ -1316,11 +1416,11 @@
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(qx, qy, qw, qh);
       // Apple and mushroom counters share one compact line.
       const ax = qx + U * 2.4, ay = qy + U * 2.8;
-      ctx.save(); ctx.translate(ax, ay + U * .8); const us = U * .32; ctx.fillStyle = '#d8262c'; ctx.fillRect(-3 * us, -6 * us, 6 * us, 6 * us); ctx.fillStyle = '#4fa34a'; ctx.fillRect(0, -9 * us, 2 * us, 2 * us); ctx.restore();
+      drawPixels(APPLE_PX, ax - U * 1.3, ay - U * 1.95, U * .2);   // same pixel art as on the map
       ctx.font = `${U * 2}px Silkscreen`; ctx.fillStyle = '#f5f0e0'; ctx.textAlign = 'left';
       ctx.fillText(`× ${appleCount()}`, ax + U * 2, ay);
       const mxh = qx + U * 13.8, myh = ay;
-      ctx.fillStyle = '#fffdf2'; ctx.fillRect(mxh - U * .35, myh - U * 1.1, U * .7, U * 1.4); ctx.fillStyle = '#ffffff'; ctx.fillRect(mxh - U * 1.3, myh - U * 1.8, U * 2.6, U * .75);
+      drawPixels(MUSH_PX, mxh - U * 1.3, myh - U * 1.95, U * .2);
       ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${mushroomCount()}/${MUSHROOMS_TOTAL}`, mxh + U * 2, myh);
       const txh = qx + U * 24.6;   // trash-bag counter: small black bag icon
       ctx.fillStyle = '#1c1f27'; ctx.fillRect(txh - U * 1, myh - U * 1.1, U * 2, U * 1.6); ctx.fillRect(txh - U * .3, myh - U * 1.6, U * .6, U * .5);
@@ -1370,7 +1470,7 @@
         if (mapCursor.seen) {
           dot(mapCursor.x, mapCursor.y, '#ffd21f', .65);
           ctx.strokeStyle = '#ffd21f'; ctx.lineWidth = Math.max(1, U * .18); ctx.strokeRect(mx + mapCursor.x / MAP.w * mw - U * 1.1, my + mapCursor.y / MAP.h * mh - U * 1.1, U * 2.2, U * 2.2);
-          const place = mapPlaceAt(mapCursor.x, mapCursor.y);
+          const label = mapHoverLabel(mapCursor.x, mapCursor.y, U * 2.2 / mw * MAP.w), place = label && { name: label };
           if (place) {
             ctx.font = `${U * 1.65}px Silkscreen`; ctx.textAlign = 'left';
             const labelW = ctx.measureText(place.name).width + U * 3, sx = mx + mapCursor.x / MAP.w * mw + U * 2.5;
@@ -1385,14 +1485,13 @@
       ctx.fillText('© OPENSTREETMAP CONTRIBUTORS', W - U * 1.5, H - U * 1.2);
       drawCoords(U, H, big, mx, my, mw, mh);
     }
-    // Direction signs belong to the playable board, not the map overlay.
-    if (scene === 'play' && !ROOM && !showMap) {
-      ctx.save();
-      ctx.font = `${U * 1.5}px Silkscreen`; ctx.textBaseline = 'middle';
-      ctx.textAlign = 'left'; ctx.fillStyle = '#fff7d6'; ctx.shadowColor = '#10163a'; ctx.shadowBlur = U * .7;
-      ctx.fillText('← DUŃCY', W * .28, H * .52);
-      ctx.textAlign = 'right'; ctx.font = `${U * 1.15}px Silkscreen`;
-      ctx.fillText('WIELKIE KSIĘSTWO LITEWSKIE →', W * .72, H * .52);
+    // Direction signs sit only at the board's edges: "← DUŃCY" when the west edge of the map is in view,
+    // "WIELKIE KSIĘSTWO LITEWSKIE →" when the east edge is. They fade in as the edge comes on screen.
+    if (scene === 'play' && !ROOM && !showMap && lastCam) {
+      const edge = directionSignEdges(W);
+      ctx.save(); ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff7d6'; ctx.shadowColor = '#10163a'; ctx.shadowBlur = U * .7;
+      if (edge.left > 0) { ctx.globalAlpha = edge.left; ctx.textAlign = 'left'; ctx.font = `${U * 1.5}px Silkscreen`; ctx.fillText(DIRECTION_SIGNS.left, edge.leftX + U * 1.5, H * .52); }
+      if (edge.right > 0) { ctx.globalAlpha = edge.right; ctx.textAlign = 'right'; ctx.font = `${U * 1.15}px Silkscreen`; ctx.fillText(DIRECTION_SIGNS.right, edge.rightX - U * 1.5, H * .52); }
       ctx.restore();
     }
     if (scene === 'play') HOOKS.hud.forEach(f => f(U, W, H));
@@ -1441,8 +1540,9 @@
       const seenNpcIds = new Set();
       ITEMS.npcs = ITEMS.npcs.filter(n => !seenNpcIds.has(n.id) && seenNpcIds.add(n.id));
     }
-    BALES.splice(0, BALES.length, ...MAP.objects.filter(o => o.w === 23 && o.h === 11).map(source => ({
-      source, x: source.x + source.w / 2, y: source.base, vx: 0, vy: 0, angle: 0,
+    // Field hay bales are exported by render_map.py as MAP.bales (not baked into the ground), so they can be pushed around.
+    BALES.splice(0, BALES.length, ...(MAP.bales || []).filter(b => Number.isFinite(b.x) && Number.isFinite(b.y)).map(b => ({
+      x: b.x, y: b.y, hx: b.x, hy: b.y, vx: 0, vy: 0, angle: 0, roll: 0,
     })));
     PLAYER_SHEETS = Object.fromEntries(await Promise.all(PLAYABLE_CHARACTERS.map(async character => {
       const sheetName = `${character}_sheet`;
@@ -1489,14 +1589,16 @@
     const newMush = ensureMushrooms(), newTrash = ensureTrash();   // old saves get trash bags on load
     if ((newMush || newTrash) && hasSave) save();
     if (params.has('x') && params.has('y')) { P.x = +params.get('x'); P.y = +params.get('y'); }   // e.g. ?x=1243&y=901
-    unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y;
+    unstick(); placeFrodoNearArek();
+    if (savedDog && !blocked(savedDog.x, savedDog.y) && Math.hypot(savedDog.x - P.x, savedDog.y - P.y) < 400) { FRODO.x = savedDog.x; FRODO.y = savedDog.y; }
+    camX = P.x; camY = P.y;
     resize(); requestAnimationFrame(loop);
     // API for features.js
     window.ARK = {
       HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
       get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; }, get room() { return ROOM; },
       pointer, clickTarget, mapCursor, copyMapCoordinates, get camera() { return lastCam; },
-      save, say, popToast, celebrate, blocked, unstick, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
+      save, say, popToast, heroText, celebrate, blocked, unstick, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
       terrainSpeed: (x, y) => TERRAIN_SPEED[terrainAt(x, y)] || 1,
       teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },
       burst(x, y, colors, n = 16) { for (let k = 0; k < n; k++) fx.push({ x, y, vx: (Math.random() - .5) * 120, vy: -Math.random() * 150, t: 0, c: colors[k % colors.length] }); },
@@ -1506,7 +1608,7 @@
     window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
-    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: { left: '← DUŃCY', right: 'WIELKIE KSIĘSTWO LITEWSKIE →' }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

@@ -8,10 +8,10 @@ and back into the current map, so the map can be resized without re-tuning anyth
 import math
 
 A = 2.0                                           # art pixels per metre
-BBOX = (52.25585, 22.8586, 52.2850, 22.89292)    # minlat, minlon, maxlat, maxlon  (village + northern forest)
-# 2026-09-28: extended 10% south (52.2585 -> 52.25585) and 20% east (22.8872 -> 22.89292).
-# The north-west corner (maxlat, minlon) is the pixel origin and did not move, so every art coordinate stays valid.
-PRE_SE_BBOX = (52.2585, 22.8586, 52.2850, 22.8872)   # the map before that extension (3896 x 5860)
+BBOX = (52.252935, 22.8586, 52.2850, 22.896352)  # minlat, minlon, maxlat, maxlon (10% south + 10% east extension)
+# The north-west corner (maxlat, minlon) is the pixel origin and did not move, so every existing art coordinate stays valid.
+PRE_SE_BBOX = (52.2585, 22.8586, 52.2850, 22.8872)  # legacy bbox before the earlier extension; kept unchanged
+PRE_EXTENSION_BBOX = (52.25585, 22.8586, 52.2850, 22.89292)  # bbox immediately before the 2026-09-28 10% east/south extension (4675 x 6446)
 LEGACY_BBOX = (52.2588, 22.8630, 52.2700, 22.8800)  # the first map (2316 x 2476 px)
 
 # Named sites supplied for the expanded map. Keep these as coordinates, rather than

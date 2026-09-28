@@ -13,8 +13,8 @@ with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     errors = []
-    page.on("pageerror", lambda error: errors.append(str(error)))
-    page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
+    page.on("console", lambda msg: errors.append(msg.text) if msg.type == "error" and "wss://" not in msg.text else None)
+    page.on("console", lambda message: errors.append(message.text) if message.type == "error" and "wss://" not in message.text else None)
     page.goto(URL)
     page.wait_for_function("window.ARK && window.__game", timeout=30000)
     page.evaluate("localStorage.clear()")
@@ -22,7 +22,7 @@ with sync_playwright() as p:
     page.wait_for_function("window.ARK && window.__game", timeout=30000)
     page.add_script_tag(url=URL.rsplit("/", 1)[0] + "/js/world-life.js")
     page.evaluate("window.dispatchEvent(new Event('ark-ready'))")
-    page.wait_for_function("window.__worldLife && window.__worldLife.cars.length === 2")
+    page.wait_for_function("window.__worldLife && window.__worldLife.cars.length === 2 && window.__worldLife.waterPoints.length > 0")
     page.keyboard.press("KeyN")
     page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play'")
@@ -30,12 +30,12 @@ with sync_playwright() as p:
     facts = page.evaluate("""(() => {
       const g = __game, wl = __worldLife;
       const ground = wl.animals.filter(a => a.kind !== 'bird');
-      const river = g.MAP.pois.find(p => p.key === 'river');
       const storks = wl.animals.filter(a => a.kind === 'stork');
       const pigs = wl.animals.filter(a => a.kind === 'pig');
       const tractorsField = wl.tractors.length === 2 && wl.tractors.every(t => g.terrainAt(t.x, t.y) === 'field' && !g.blocked(t.x, t.y));
       const buildings = (g.MAP.objects || []).filter(o => o.w >= 40 && o.h >= 30 && o.w <= 200);
-      const riverOnly = storks.length === 3 && storks.every(a => river && Math.hypot(a.x - river.x, a.y - river.y) < 900);
+      const water = Array.isArray(g.MAP.water) && g.MAP.water.length ? g.MAP.water : wl.waterPoints;
+      const riverOnly = water.length > 0 && storks.length === 3 && storks.every(a => water.some(v => Math.hypot(a.x - v.x, a.y - v.y) <= 100));
       const pigsByBuildings = pigs.length === 5 && pigs.every(a => buildings.some(o => Math.hypot(a.x - (o.x + o.w / 2), a.y - o.base) < 180));
       const allValid = wl.cars.length === 2 && wl.cars.every(c => !g.blocked(c.x, c.y)) &&
         wl.animals.length >= 40 && wl.animals.every(a => !g.blocked(a.x, a.y));

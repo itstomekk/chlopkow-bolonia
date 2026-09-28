@@ -282,7 +282,7 @@
      advances it at the current tempo, so a tempo change never makes the music jump. */
   const P = { name: null, song: null, arr: null, pass: 0, idx: 0, fT: 0, fS: 0, out: null, want: null };
   let VILLAGE = 'krakowiak', PICK = null, ACTIVITY = null;
-  const MAIN_TRACK = 'audio/Polka_Dziadek_true_chiptune_NES.wav';
+  const MAIN_TRACK = 'audio/Polka_Dziadek_true_chiptune_NES.ogg';
   let mainTrack = null, mainTrackOn = false;
   const LOOKAHEAD = .25;
   const TEMPO = { idle: .2, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen

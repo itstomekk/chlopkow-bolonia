@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 URL = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1280, "height": 720})
-    errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" and "wss://" not in m.text else None)   # public Nostr relays (global chat) being down is not a game error
     pg.goto(URL); pg.wait_for_function("window.__game && window.__features")
     pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_function("window.__game && window.__features")
     pg.keyboard.press("KeyN")

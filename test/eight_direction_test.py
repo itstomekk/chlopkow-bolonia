@@ -25,7 +25,9 @@ with sync_playwright() as p:
 
     page.keyboard.down("ArrowRight")
     page.keyboard.down("ArrowDown")
-    page.wait_for_timeout(180)
+    # read the facing while both keys are still held: under a loaded full-suite run a fixed 180 ms wait
+    # sometimes elapsed before the first game frame processed the input
+    page.wait_for_function("__game.P.dir === 'down_right'", timeout=3000)
     page.keyboard.up("ArrowRight")
     page.keyboard.up("ArrowDown")
     assert page.evaluate("__game.P.dir") == "down_right"
