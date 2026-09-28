@@ -1,4 +1,12 @@
-# HANDOFF — Arek w Chłopkowie
+# HANDOFF — Arek w Chłopkowie (→ renaming to CHŁOPKÓW BOLONIA)
+
+## ▶ START HERE (2026-09-28, planning session, nothing built or deployed)
+- Tomek asked for a batch of changes: rename the game to **CHŁOPKÓW BOLONIA** (and the repo); the river becomes **Melioranka**; Halina becomes **Babcia Irenka** with a new sprite from his photos; the quiz starts without visiting her; slower dogs; lat/lon on the M map; "DUŃCY" on the east edge; the big forest in the north; 5 real points from Google Maps; a gamification plan.
+- **Everything is planned in `PLAN-2026-09-28-bolonia.md`** (verified facts, 9 open questions, 4 phases). Read it first. It lives on branch `claude/gifted-goodall-12f9jo`; **`main` is untouched and nothing is deployed.**
+- New skill: `.claude/skills/add-real-poi/SKILL.md` (Google link → lat/lon → map).
+- **Blocking:** Tomek's answers to Q1–Q9 in the plan. The Irenka photos were given in chat only. Tomek must save them locally to `references/irenka/` (gitignored, never commit, never upload to PPQ).
+- Cloud limits hit: Overpass is blocked (use the OSM API or fetch locally); Codex image generation runs only on Tomek's PC.
+
 
 Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigame overhaul). The earlier per-session notes are in
 `_archive/2026-09-27_HANDOFF-before-audit.md`.
