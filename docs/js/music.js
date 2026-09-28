@@ -201,39 +201,63 @@
     hat: (e, t) => noise(e.out, t, .03, .06 * (e.v ?? 1), 'highpass', 7500),
   };
 
-  /* ------------------------------------------------------------------ scheduler */
-  const P = { name: null, song: null, arr: null, pass: 0, startT: 0, idx: 0, out: null, want: null };
-  let VILLAGE = 'krakowiak', PICK = null;
+  /* ------------------------------------------------------------------ scheduler
+     Tempo follows the player: standing still -> 0.5x the written BPM, moving -> the "energy" builds up and the band
+     slowly speeds up to 1.5x (faster build-up while running), stopping -> it relaxes back to 0.5x over a few seconds.
+     Because the tempo changes while playing, the scheduler keeps a frontier (audio time fT <-> song step fS) and
+     advances it at the current tempo, so a tempo change never makes the music jump. */
+  const P = { name: null, song: null, arr: null, pass: 0, idx: 0, fT: 0, fS: 0, out: null, want: null };
+  let VILLAGE = 'krakowiak', PICK = null, ACTIVITY = null;
   const LOOKAHEAD = .25;
-  const TEMPO = .8;   // global tempo factor (Tomek: slow everything to 80%)
+  const TEMPO = { idle: .5, max: 1.5, still: .8,   // x written BPM; `still` is used on the title and memory screens
+    rampUp: 14, rampRun: 7, rampDown: 4,            // seconds of walking / running to reach max, seconds to calm down
+    capChurch: 1 };                                 // the church lullaby never goes above 1x
+  let energy = 0, tempo = TEMPO.still, lastTick = performance.now();
+  function updateTempo() {
+    const now = performance.now(), dt = Math.min(.25, (now - lastTick) / 1000); lastTick = now;
+    const a = ACTIVITY ? ACTIVITY() : null;   // null = not playing (title/end), else { moving, running }
+    let target;
+    if (!a) target = TEMPO.still;
+    else {
+      if (a.moving) energy = Math.min(1, energy + dt / (a.running ? TEMPO.rampRun : TEMPO.rampUp));
+      else energy = Math.max(0, energy - dt / TEMPO.rampDown);
+      target = TEMPO.idle + energy * (TEMPO.max - TEMPO.idle);
+      if (P.name === 'pastoralka') target = Math.min(target, TEMPO.capChurch);
+    }
+    tempo += (target - tempo) * Math.min(1, dt * 2.5);   // glide, no sudden jumps
+  }
   function startSong(name) {
     if (!ac) return;
     const now = ac.currentTime;
     if (P.out) { const old = P.out; old.gain.cancelScheduledValues(now); old.gain.setValueAtTime(old.gain.value, now); old.gain.linearRampToValueAtTime(0, now + .5); setTimeout(() => { try { old.disconnect(); } catch (e) { } }, 900); }
     P.name = name; P.song = SONGS[name]; P.pass = 0; P.idx = 0;
     P.out = ac.createGain(); P.out.gain.value = 1; P.out.connect(bus);
-    P.arr = arrange(P.song, 0); P.startT = now + .15;
+    P.arr = arrange(P.song, 0); P.fT = now + .15; P.fS = 0;
+  }
+  function nextPass() {
+    // the village alternates between the krakowiak and the mazurka every couple of passes
+    if ((P.name === 'krakowiak' || P.name === 'mazurka') && P.want === P.name && P.pass % 2 === 1) {
+      const other = P.name === 'krakowiak' ? 'mazurka' : 'krakowiak';
+      P.want = other; P.name = other; P.song = SONGS[other]; P.pass = 0; VILLAGE = other;
+    } else P.pass++;
+    P.idx = 0; P.arr = arrange(P.song, P.pass);
   }
   function tick() {
+    updateTempo();
     if (!ac || rendering || ac.state !== 'running') return;
     if (PICK) P.want = PICK();
     if (P.want && P.want !== P.name) startSong(P.want);
     if (!P.song) return;
-    const step = 60 / (P.song.bpm * TEMPO) / 4, horizon = ac.currentTime + LOOKAHEAD;
-    for (; ;) {
-      if (P.idx >= P.arr.ev.length) {
-        const next = P.startT + P.arr.len * step; if (next > horizon) break;
-        // the village alternates between the krakowiak and the mazurka every couple of passes
-        if ((P.name === 'krakowiak' || P.name === 'mazurka') && P.want === P.name && P.pass % 2 === 1) {
-          const other = P.name === 'krakowiak' ? 'mazurka' : 'krakowiak';
-          P.want = other; P.name = other; P.song = SONGS[other]; P.pass = 0; VILLAGE = other;
-        } else P.pass++;
-        P.startT = next; P.idx = 0; P.arr = arrange(P.song, P.pass); continue;
+    const step = 60 / (P.song.bpm * tempo) / 4, horizon = ac.currentTime + LOOKAHEAD;
+    if (P.fT < ac.currentTime - .5) P.fT = ac.currentTime;   // after a suspend: resume from now instead of catching up
+    while (P.fT < horizon) {
+      const endS = P.fS + (horizon - P.fT) / step;
+      for (; P.idx < P.arr.ev.length && P.arr.ev[P.idx].t < Math.min(endS, P.arr.len); P.idx++) {
+        const e = P.arr.ev[P.idx], t = P.fT + (e.t - P.fS) * step;
+        if (t >= ac.currentTime - .02) { e.out = P.out; try { VOICE[e.ch](e, t, (e.d || 1) * step, P.song); } catch (err) { } }
       }
-      const e = P.arr.ev[P.idx], t = P.startT + e.t * step;
-      if (t > horizon) break;
-      if (t >= ac.currentTime - .02) { e.out = P.out; try { VOICE[e.ch](e, t, (e.d || 1) * step, P.song); } catch (err) { } }
-      P.idx++;
+      if (endS < P.arr.len) { P.fS = endS; P.fT = horizon; break; }
+      P.fT += (P.arr.len - P.fS) * step; P.fS = 0; nextPass();   // pass ends before the horizon: continue into the next one
     }
   }
   setInterval(tick, 50);
@@ -270,7 +294,7 @@
   /* ------------------------------------------------------------------ offline render to WAV (previews, videos) */
   let rendering = false;
   async function renderWav(name, passes = 2, rate = 32000) {
-    const song = SONGS[name], step = 60 / (song.bpm * TEMPO) / 4, arrs = [];
+    const song = SONGS[name], step = 60 / (song.bpm * TEMPO.still) / 4, arrs = [];
     for (let i = 0; i < passes; i++) arrs.push(arrange(song, i));
     const dur = arrs.reduce((a, r) => a + r.len, 0) * step + 1.5;
     const saved = { ac, master, bus, noiseBuf, waves };
@@ -292,7 +316,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, get state() { return ac ? ac.state : 'none'; } };
+  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
@@ -304,6 +328,7 @@
       if (A.minigame && A.minigame()) return 'oberek';
       return VILLAGE;
     };
+    ACTIVITY = () => A.scene === 'play' ? { moving: !!A.P.moving, running: A.keys.has('ShiftLeft') || A.keys.has('ShiftRight') } : null;
     PICK = pick;   // polled by tick(): HOOKS.update does not run on the title, end screen or during dialogue
     const pt = A.popToast;   // game.js itself calls MUSIC.jingle() in celebrate() and MUSIC.ding() in popToast()
     addEventListener('keydown', e => {   // a plain listener, so K also works on the title and during dialogue
