@@ -18,7 +18,10 @@ with sync_playwright() as p:
     errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.goto(URL); pg.wait_for_function("!!(window.__game && window.__features && window.__features.startMG)")
     pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_function("!!(window.__features && window.__features.startMG)")
-    pg.keyboard.press("KeyN"); time.sleep(.2)
+    pg.keyboard.press("KeyN")
+    pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+    time.sleep(.2)
     ev = pg.evaluate
     mg = lambda: ev("__features.MG && {phase: __features.MG.phase, type: __features.MG.type, medal: __features.MG.medal, msg: __features.MG.msg}")
 
@@ -42,7 +45,9 @@ with sync_playwright() as p:
     pg.screenshot(path="test/m2_race_ghost.png")
     pg.keyboard.press("Escape"); time.sleep(.2)
     # race lose: stand still
-    ev("__features.startMG('race')"); time.sleep(3.2 + 20.0)
+    # The rival completes two laps at 0.7x the legacy pace, which takes just
+    # over 26 seconds after the countdown.
+    ev("__features.startMG('race')"); time.sleep(3.2 + 27.5)
     r = mg(); check(r and r['phase'] == 'lose', f"race idle -> lose ({r and r['msg']})"); pg.keyboard.press("Escape")
 
     # ---- pig: catch → medal by time; timeout → lose

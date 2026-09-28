@@ -307,15 +307,52 @@ for b in buildings:
     collide |= fmask; occupied |= fmask
 
 # ---------------------------------------------------------------- minigame venues
+# Sept 28 moves/additions, given as CURRENT map art pixels (the in-game coordinate readout), meaning "near here".
+CUR_SITES = dict(pig=(3487, 3308), dogs=(1321, 888), jazz=(2471, 1091), gravel=(873, 2322))
+
+
+def clear_rect(cx, cy, w, h, block, soft=None, search=600, step=10):
+    """Top-left (x0, y0) of the w x h rectangle nearest to centre (cx, cy) with no `block` pixel; `soft` pixels cost distance."""
+    wx0, wy0 = max(0, int(cx - w / 2 - search)), max(60, int(cy - h / 2 - search))
+    wx1, wy1 = min(W, int(cx + w / 2 + search)), min(H, int(cy + h / 2 + search))
+    def integral(mask):
+        ii = np.zeros((wy1 - wy0 + 1, wx1 - wx0 + 1), np.int64); ii[1:, 1:] = mask[wy0:wy1, wx0:wx1].cumsum(0).cumsum(1); return ii
+    ib, isf = integral(block), integral(soft) if soft is not None else None
+    best = None
+    for y0 in range(wy0, wy1 - h, step):
+        for x0 in range(wx0, wx1 - w, step):
+            a, b = y0 - wy0, x0 - wx0
+            if ib[a + h, b + w] - ib[a, b + w] - ib[a + h, b] + ib[a, b]: continue
+            cost = math.hypot(x0 + w / 2 - cx, y0 + h / 2 - cy)
+            if isf is not None: cost += (isf[a + h, b + w] - isf[a, b + w] - isf[a + h, b] + isf[a, b]) * .05
+            if best is None or cost < best[0]: best = (cost, x0, y0)
+    assert best, f'no clear {w}x{h} area near {cx},{cy}'
+    return best[1], best[2]
+
+
+_forest_early = mask_of(classes.get('forest', []) + classes.get('wood', []))   # the forest is walkable but reads as woods, not a clearing
+_venue_block = collide | wm | placed | _forest_early
+_venue_soft = pm | dm | mask_of(classes.get('farmland', []) + classes.get('orchard', []))
+
 # The race oval is at the supplied coordinate on the preceding map.
 _tc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['race_oval'])
 # Keep the complete oval inside the southern edge while staying within the requested vicinity.
 TRACK = dict(cx=_tc[0], cy=min(_tc[1], H - 220), rx=300, ry=150, w=44)
-_cc = legacy_i(1490, 565); CORRAL = dict(cx=_cc[0], cy=_cc[1], r=100)
-# dog meadow: open grass between the street and the Białka
-_m0, _m1 = legacy_i(680, 1060), legacy_i(1100, 1330); MEADOW = dict(x0=_m0[0], y0=_m0[1], x1=_m1[0], y1=_m1[1])
+_ox, _oy = clear_rect(*CUR_SITES['pig'], 260, 220, _venue_block, _venue_soft); CORRAL = dict(cx=_ox + 130, cy=_oy + 110, r=100)
+# dog meadow (twice the old 420x270): open grass cleared near the requested spot
+_mx0, _my0 = clear_rect(*CUR_SITES['dogs'], 840, 540, _venue_block, _venue_soft)
+MEADOW = dict(x0=_mx0, y0=_my0, x1=_mx0 + 840, y1=_my0 + 540)
+# JAZZ W STODOLE: barn sprite (~150 x 120) with an open yard in front of the door
+_jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 190, 230, _venue_block | pm, dm)
+BARN = dict(cx=_jx0 + 95, foot=_jy0 + 135, w=150)
+JAZZ = dict(x=BARN['cx'], y=BARN['foot'] + 45, r=170)
+# Wapnica: gravel pit / village dump
+_gx0, _gy0 = clear_rect(*CUR_SITES['gravel'], 300, 220, _venue_block, _venue_soft)
+PIT = dict(cx=_gx0 + 150, cy=_gy0 + 110, rx=140, ry=100)
+GRAVEL = dict(x=PIT['cx'] + 40, y=PIT['cy'] + 42, r=60)
+print('venues', dict(corral=CORRAL, meadow=MEADOW, barn=BARN, jazz=JAZZ, pit=PIT, gravel=GRAVEL))
 _rc = tuple(int(round(v)) for v in P(52.2736642, 22.867767)); RANGE = dict(x=_rc[0], y=_rc[1])   # PPM Strzelectwo
-_pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0], cy=_pc[1], w=190, h=110)
+_pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0] + 200, cy=_pc[1] + 200, w=110, h=190)
 
 
 def window(cx, cy, rx, ry):
@@ -360,17 +397,20 @@ sub = g3[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
 sub[cm_] = sub[cm_] * .8 + np.array(hexc('#a88a5c')) * .2; sub[cm_ & mud] = sub[cm_ & mud] * .75 + np.array(hexc('#8a6a44')) * .25
 occupied[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]] |= (((xx - CORRAL['cx']) / (CORRAL['r'] + 20)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] + 20) * .8)) ** 2) <= 1
 ground = Image.fromarray(g3.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
-# A procedural football pitch at the supplied old-map coordinate. It is deliberately
+# A procedural football pitch at the shifted preceding-map coordinate. It is deliberately
 # simple pixel art, not a fabricated photographic sprite, and remains fully walkable.
 fp = FOOTBALL_PITCH
 fx0, fx1 = int(fp['cx'] - fp['w'] / 2), int(fp['cx'] + fp['w'] / 2)
 fy0, fy1 = int(fp['cy'] - fp['h'] / 2), int(fp['cy'] + fp['h'] / 2)
 gd.rectangle([fx0, fy0, fx1, fy1], fill=hexc('#4fae4a'), outline=hexc('#e9efdc'), width=3)
-gd.line([(fp['cx'], fy0), (fp['cx'], fy1)], fill=hexc('#e9efdc'), width=2)
+gd.line([(fx0, fp['cy']), (fx1, fp['cy'])], fill=hexc('#e9efdc'), width=2)
 gd.ellipse([fp['cx'] - 18, fp['cy'] - 18, fp['cx'] + 18, fp['cy'] + 18], outline=hexc('#e9efdc'), width=2)
-box_w, box_h = 42, 58
-gd.rectangle([fx0, fp['cy'] - box_h / 2, fx0 + box_w, fp['cy'] + box_h / 2], outline=hexc('#e9efdc'), width=2)
-gd.rectangle([fx1 - box_w, fp['cy'] - box_h / 2, fx1, fp['cy'] + box_h / 2], outline=hexc('#e9efdc'), width=2)
+box_w, box_h = 58, 42
+gd.rectangle([fp['cx'] - box_w / 2, fy0, fp['cx'] + box_w / 2, fy0 + box_h], outline=hexc('#e9efdc'), width=2)
+gd.rectangle([fp['cx'] - box_w / 2, fy1 - box_h, fp['cx'] + box_w / 2, fy1], outline=hexc('#e9efdc'), width=2)
+goal_w, goal_depth = 34, 8
+gd.rectangle([fp['cx'] - goal_w / 2, fy0 - goal_depth, fp['cx'] + goal_w / 2, fy0], outline=hexc('#e9efdc'), width=2)
+gd.rectangle([fp['cx'] - goal_w / 2, fy1, fp['cx'] + goal_w / 2, fy1 + goal_depth], outline=hexc('#e9efdc'), width=2)
 del g3, yy, xx, ang, sub
 for k_ in range(0, 360, 3):
     if 165 < k_ < 195: continue
@@ -385,6 +425,105 @@ for k_ in range(-18, 19, 6): gd.line([(sx + k_, sy - 10), (sx + k_, sy + 6)], fi
 for k_ in range(-22, 23, 8): gd.ellipse([sx + k_ - 4, sy - 16, sx + k_ + 4, sy - 10], fill=(176, 160, 118), outline=(110, 96, 64))
 occupied[sy - 160:sy + 30, sx - 80:sx + 80] = True
 occupied[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']] = True
+# the dog meadow: crop rows / orchard inside it become mown meadow grass (roads stay), with a ragged, dithered edge
+g6 = np.array(ground).astype(np.float32); mn = noise2(840, 540, 6, 96)[..., None]
+_my, _mx = np.mgrid[0:540, 0:840]
+_edge = np.minimum.reduce([_mx, 839 - _mx, _my, 539 - _my]).astype(np.float32)
+_keep = (_edge > 10 + 60 * noise2(840, 540, 48, 95)) & ~(pm | dm)[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']]
+_sub6 = g6[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']]
+_sub6[_keep] = (np.array(hexc('#80bb50')) * (1 - mn) + np.array(hexc('#70ab46')) * mn)[_keep]
+ground = Image.fromarray(g6.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g6, _sub6
+# Wapnica (gravel pit + village dump): pale excavated floor, walkable; heaps, spoil and the skip are solid.
+x0_, y0_, yy, xx = window(PIT['cx'], PIT['cy'], PIT['rx'] + 20, PIT['ry'] + 20)
+g4 = np.array(ground).astype(np.float32); sub = g4[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
+pr = np.hypot((xx - PIT['cx']) / PIT['rx'], (yy - PIT['cy']) / PIT['ry'])
+pit_rim, pit_floor = (pr <= 1.08) & (pr > .96), pr <= .96
+gn = noise2(xx.shape[1], xx.shape[0], 5, 97)[..., None]
+sub[pit_rim] = np.array(hexc('#9a8a66'))
+sub[pit_floor] = (np.array(hexc('#d9cfb4')) * (1 - gn) + np.array(hexc('#bfb398')) * gn)[pit_floor]
+pebble = (np.random.RandomState(98).rand(*pr.shape) > .93) & pit_floor
+sub[pebble] = np.array(hexc('#8e8a82'))
+# excavated look: the north wall of the pit is in shadow, the south edge catches the light
+wall_n = (pr <= 1.0) & (pr > .78) & (yy < PIT['cy'] - PIT['ry'] * .35)
+sub[wall_n] = sub[wall_n] * .72 + np.array(hexc('#6e6048')) * .28
+lip_s = (pr <= 1.0) & (pr > .9) & (yy > PIT['cy'] + PIT['ry'] * .4)
+sub[lip_s] = sub[lip_s] * .7 + np.array(hexc('#efe6cc')) * .3
+ground = Image.fromarray(g4.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g4, sub
+for i_ in range(2):       # two tyre ruts across the floor
+    ry_ = PIT['cy'] + 40 + i_ * 9
+    gd.line([(PIT['cx'] - PIT['rx'] + 10, ry_), (PIT['cx'] + PIT['rx'] - 10, ry_ - 20)], fill=hexc('#a89c80'), width=3)
+occupied[PIT['cy'] - PIT['ry'] - 30:PIT['cy'] + PIT['ry'] + 25, PIT['cx'] - PIT['rx'] - 25:PIT['cx'] + PIT['rx'] + 25] = True
+
+
+def gravel_heap(cx, cy, r, col='#a9a296'):
+    base = hexc(col)
+    rs = random.Random(cx * 7 + cy)
+    gd.ellipse([cx - r - 4, cy - 5, cx + r + 6, cy + 7], fill=hexc('#8f8674'))
+    # lumpy conical silhouette: a jagged outline instead of a smooth dome
+    prof = [(cx - r, cy)]
+    for k in range(1, 12):
+        t = k / 12; hgt = r * 1.25 * (1 - abs(2 * t - 1)) ** .8 * rs.uniform(.82, 1.08)
+        prof.append((cx - r + 2 * r * t, cy - hgt))
+    prof.append((cx + r, cy))
+    od.polygon(prof, fill=shade(base, .92), outline=shade(base, .5))
+    od.polygon([prof[0]] + prof[1:7] + [(cx - r * .05, cy)], fill=shade(base, 1.12))   # sunlit west face
+    for _ in range(int(r * 5)):
+        px, py = cx + rs.uniform(-r, r), cy - rs.uniform(0, r * 1.15)
+        if py > cy - r * 1.25 * (1 - abs((px - cx) / r)) ** .8 * .85: od.rectangle([px, py, px + 1, py], fill=shade(base, rs.choice([.62, 1.3, .8, 1.05])))
+    objects.append(dict(x=int(cx - r - 3), y=int(cy - r * 1.3 - 3), w=int(2 * r + 8), h=int(r * 1.3 + 10), base=float(cy + 2)))
+    collide[int(cy - r * .45):int(cy + 2), int(cx - r * .8):int(cx + r * .8)] = True
+
+
+gravel_heap(PIT['cx'] - 78, PIT['cy'] - 30, 30)
+gravel_heap(PIT['cx'] - 22, PIT['cy'] - 56, 24, '#c2b58f')
+gravel_heap(PIT['cx'] + 70, PIT['cy'] - 48, 20, '#9d9486')
+# rusty skip container with rubbish next to the drop-off point
+kx_, ky_ = GRAVEL['x'] + 34, GRAVEL['y'] - 6
+gd.rectangle([kx_ - 22, ky_ - 1, kx_ + 26, ky_ + 5], fill=hexc('#7d735c'))
+od.polygon([(kx_ - 24, ky_ - 20), (kx_ + 24, ky_ - 20), (kx_ + 20, ky_), (kx_ - 20, ky_)], fill=hexc('#3f6b3a'), outline=hexc('#1f3520'))
+od.rectangle([kx_ - 24, ky_ - 22, kx_ + 24, ky_ - 19], fill=hexc('#5a8a4a'), outline=hexc('#1f3520'))
+for rx_, ry_, c_ in [(-16, -24, '#1c1c1c'), (-6, -26, '#e8e2d0'), (3, -24, '#3a78c8'), (12, -25, '#9a6a3a'), (18, -23, '#c8c8c8'), (-11, -27, '#c84a3a')]:
+    od.rectangle([kx_ + rx_, ky_ + ry_, kx_ + rx_ + 5, ky_ + ry_ + 3], fill=hexc(c_))
+for rx_ in (-18, -6, 6, 18): od.line([(kx_ + rx_, ky_ - 18), (kx_ + rx_ * .85, ky_ - 2)], fill=hexc('#2c4c2a'))
+od.rectangle([kx_ - 20, ky_ - 12, kx_ - 10, ky_ - 8], fill=hexc('#8a4a2a'))   # rust patch
+objects.append(dict(x=kx_ - 26, y=ky_ - 30, w=54, h=36, base=float(ky_)))
+collide[ky_ - 8:ky_ + 1, kx_ - 22:kx_ + 22] = True
+# wooden sign post "WAPNICA" (the game draws the readable label; the board is pixel art)
+sx_, sy_ = PIT['cx'] - PIT['rx'] + 18, PIT['cy'] + 20
+od.rectangle([sx_ - 1, sy_ - 22, sx_ + 1, sy_], fill=hexc('#6a4a2a'))
+od.rectangle([sx_ - 16, sy_ - 30, sx_ + 16, sy_ - 18], fill=hexc('#c9a46a'), outline=hexc('#5a3a1a'))
+for lx_ in range(sx_ - 12, sx_ + 12, 4): od.rectangle([lx_, sy_ - 26, lx_ + 2, sy_ - 22], fill=hexc('#5a3a1a'))
+objects.append(dict(x=sx_ - 18, y=sy_ - 32, w=36, h=34, base=float(sy_)))
+collide[sy_ - 3:sy_ + 1, sx_ - 2:sx_ + 3] = True
+
+# JAZZ W STODOLE: barn sprite (generated pixel art) on a farmyard, lit yard with benches in front.
+yx0, yy0, yx1, yy1 = BARN['cx'] - 95, BARN['foot'] - 10, BARN['cx'] + 95, BARN['foot'] + 95
+g5 = np.array(ground).astype(np.float32); yn = noise2(yx1 - yx0, yy1 - yy0, 4, 99)[..., None]
+_yy, _yx = np.mgrid[0:yy1 - yy0, 0:yx1 - yx0]
+_ye = np.minimum.reduce([_yx, yx1 - yx0 - 1 - _yx, yy1 - yy0 - 1 - _yy]).astype(np.float32)   # ragged edge, open to the barn
+_ym = _ye > 12 * np.random.RandomState(94).rand(*_ye.shape)
+_ys = g5[yy0:yy1, yx0:yx1]; _ys[_ym] = (np.array(hexc('#b89a6c')) * (1 - yn) + np.array(hexc('#a8895e')) * yn)[_ym]
+ground = Image.fromarray(g5.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g5, _ys
+barn = Image.fromarray(chroma_key('gen/lm_barn.png')); barn = barn.crop(barn.getbbox())
+bw_ = BARN['w']; bh_ = round(barn.height * bw_ / barn.width); barn = barn.resize((bw_, bh_), Image.Resampling.LANCZOS)
+bx0_, by0_ = BARN['cx'] - bw_ // 2, BARN['foot'] - bh_
+objects_img.alpha_composite(barn, (bx0_, by0_))
+objects.append(dict(x=bx0_, y=by0_, w=bw_, h=bh_, base=float(BARN['foot'] - 8)))
+collide[max(0, by0_ + int(bh_ * .45)):BARN['foot'] - 8, bx0_ + 8:bx0_ + bw_ - 8] = True
+occupied[max(0, by0_ - 10):yy1 + 20, yx0 - 20:yx1 + 20] = True
+for bxx in (-60, 44):   # benches
+    by_ = BARN['foot'] + 62
+    od.rectangle([BARN['cx'] + bxx, by_ - 7, BARN['cx'] + bxx + 20, by_ - 4], fill=hexc('#8a5a30'), outline=hexc('#4a2a10'))
+    for lg in (2, 17): od.rectangle([BARN['cx'] + bxx + lg, by_ - 4, BARN['cx'] + bxx + lg + 1, by_], fill=hexc('#4a2a10'))
+    objects.append(dict(x=BARN['cx'] + bxx - 1, y=by_ - 9, w=23, h=11, base=float(by_)))
+    low[by_ - 5:by_ + 1, BARN['cx'] + bxx:BARN['cx'] + bxx + 21] = True
+for lx_ in (yx0 + 10, yx1 - 10):   # two lantern posts at the front corners of the yard
+    ly_ = yy1 - 12
+    od.rectangle([lx_ - 1, ly_ - 26, lx_ + 1, ly_], fill=hexc('#3a2a1a'))
+    od.rectangle([lx_ - 3, ly_ - 32, lx_ + 3, ly_ - 25], fill=hexc('#ffd86a'), outline=hexc('#5a3a1a'))
+    od.point((lx_ - 1, ly_ - 30), fill=hexc('#fff6c8'))
+    objects.append(dict(x=lx_ - 4, y=ly_ - 33, w=9, h=35, base=float(ly_)))
+    collide[ly_ - 2:ly_ + 1, lx_ - 2:lx_ + 3] = True
 
 # ---------------------------------------------------------------- fences around gardens + hay bales (low, jumpable)
 road_near = np.array(Image.fromarray(((pm | dm) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(21))) > 0
@@ -452,7 +591,8 @@ for e in ways:
 junctions = [P(*k) for k, v in _node_roads.items() if len(v) >= 2]
 junctions = [(x, y) for x, y in junctions if 120 < x < W - 120 and 160 < y < H - 80]
 keep_away = [xy for _, xy in LM_NODES] + [legacy_i(1150, 2405), (TRACK['cx'], TRACK['cy']), (CORRAL['cx'], CORRAL['cy']),
-             ((MEADOW['x0'] + MEADOW['x1']) / 2, (MEADOW['y0'] + MEADOW['y1']) / 2), (RANGE['x'], RANGE['y'])]
+             ((MEADOW['x0'] + MEADOW['x1']) / 2, (MEADOW['y0'] + MEADOW['y1']) / 2), (RANGE['x'], RANGE['y']),
+             (JAZZ['x'], JAZZ['y']), (PIT['cx'], PIT['cy'])]
 cands = [j for j in junctions if all(math.hypot(j[0] - k[0], j[1] - k[1]) > 260 for k in keep_away)]
 chosen = []
 while len(chosen) < len(SHRINE_NAMES) and cands:
@@ -562,9 +702,8 @@ for t_ in tree_pts:
     if all(math.hypot(t_[0] - k_[0], t_[1] - k_[1]) > (t_[2] + k_[2]) * .9 for k_ in kept[-60:]): kept.append(t_)
 for x, y, r, dk in kept: tree(x, y, r, dk)
 
-# forests: dense canopy drawn on ground layer, solid
+# forests: dense canopy drawn on ground layer; trunks remain solid, forest floor is walkable
 fy, fx = np.nonzero(forest_mask)
-collide |= forest_mask
 g2 = np.array(ground).astype(np.float32); g2[forest_mask] = hexc('#1f4f24'); ground = Image.fromarray(g2.astype(np.uint8)); gd = ImageDraw.Draw(ground)
 cand = list(zip(fx[::37], fy[::37])); rnd.shuffle(cand); cand = sorted(cand[:2600], key=lambda v: v[1])
 for x, y in cand:
@@ -590,8 +729,17 @@ for landmark in REAL_POIS:
 
 for key, name, kind in [('bus_budka', 'BUDKA', 'bus_stop'), ('football_pitch', 'Boisko', 'football_pitch')]:
     lx, ly = pre_expansion_i(*PRE_EXPANSION_ADDITIONS[key])
+    if key == 'football_pitch':
+        lx, ly = FOOTBALL_PITCH['cx'], FOOTBALL_PITCH['cy']
     lat, lon = to_latlon(lx, ly)
     add_landmark(key, name, lat, lon, kind)
+for key, name, kind, (lx, ly) in [('jazz', 'JAZZ W STODOLE', 'jazz', (JAZZ['x'], JAZZ['y'])), ('wapnica', 'Wapnica', 'gravel', (PIT['cx'], PIT['cy'] + PIT['ry'] + 12))]:
+    add_landmark(key, name, *to_latlon(lx, ly), kind)
+# every wayside figure/cross gets a quiz board: shrine1..4 are the generated junction sprites, shrine5 the real Kapliczka
+SHRINES = [dict(spot=f'shrine{i + 1}', kind=n, x=int(x), y=int(y)) for i, (n, x, y, _) in enumerate(GENERATED_SHRINES)]
+_kap = next(l for l in landmarks if l['key'] == 'kapliczka')
+SHRINES.append(dict(spot=f'shrine{len(SHRINES) + 1}', kind='kapliczka', x=_kap['x'], y=_kap['y']))
+print('shrine boards', SHRINES)
 
 
 def add_poi(key, lat, lon, **kw):
@@ -624,12 +772,19 @@ low &= ~(pm | dm)   # roads and tracks cross the Białka on bridges: walkable, n
 collide &= ~(pm | dm)   # nothing solid on roads/tracks (woods and bridges included)
 cm = np.where(collide, 255, np.where(low, 128, 0)).astype(np.uint8)
 Image.fromarray(cm).save('docs/img/map_collide.png')   # 255 tall, 128 low (jumpable)
+# terrain classes for walking speed, 1/4 scale: 0 grass, 60 paved road, 100 dirt road, 160 crop field, 220 forest floor
+terr = np.zeros((H, W), np.uint8)
+terr[forest_mask] = 220
+terr[mask_of(classes.get('farmland', []))] = 160
+terr[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']] = 0
+terr[dm] = 100; terr[pm] = 60
+Image.fromarray(terr[2::4, 2::4]).save('docs/img/map_terrain.png', optimize=True)
 shop = next((p for p in pois if p['key'] == 'shop'), dict(x=W // 2, y=H // 2))
 # spawn: the walkable dirt-path pixel nearest to the spot just below the shop door (never inside a fenced garden)
 cm_free = (cm == 0)
 py_, px_ = np.nonzero(dm[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150] & cm_free[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150])
 k_ = int(np.argmin((px_ - 150) ** 2 + (py_ - 60) ** 2)) if len(px_) else None
 spawn = dict(x=int(shop['x'] - 150 + px_[k_]), y=int(shop['y'] + py_[k_])) if k_ is not None else dict(x=shop['x'], y=shop['y'] + 60)
-json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, landmarks=landmarks, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, spawn=spawn,
+json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, landmarks=landmarks, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, jazz=JAZZ, gravel=GRAVEL, shrines=SHRINES, spawn=spawn,
                attribution='Map data © OpenStreetMap contributors (ODbL)'), open('docs/map.json', 'w'), indent=0)
 print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois], 'landmarks', [(p['key'], p['x'], p['y']) for p in landmarks])

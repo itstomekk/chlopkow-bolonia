@@ -22,6 +22,7 @@ with sync_playwright() as p:
     page.reload()
     page.wait_for_function("window.__game")
     page.keyboard.press("KeyN")
+    page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play'")
 
     initial = page.evaluate("__game.FRODO && [__game.FRODO.x, __game.FRODO.y]")

@@ -4,7 +4,11 @@
 'use strict';
 (() => {
   const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35;
-  const CHICKENS = 5, DOGS = 3, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
+  // ~3x the old 5 hens + 3 dogs; extra ones prefer empty parts of the map (the northern fields)
+  const CHICKENS = 15, DOGS = 7, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
+  // docs/img/critters.png rows (64px cells, drawn facing right): hen, stray, bird, stork, fox.
+  // `px` = tallest sprite in that row in sheet pixels (critters.json h), `h` = its on-screen height in map px.
+  const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 } };
   const READY = () => {
     const A = window.ARK;
     if (!A || A.__worldLifeInstalled) return;
@@ -13,8 +17,9 @@
     const { HOOKS, P, MAP, ITEMS, ctx } = A;
     const Q = () => A.Q;
     const PL = A.LANG === 'pl';
-    const state = { q: null, cars: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null };
+    const state = { q: null, cars: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, critters: null };
     A.load('img/car_red.png').then(image => { state.carImage = image; }, () => {});
+    A.load('img/critters.png').then(image => { state.critters = image; }, () => {});
     const text = PL ? {
       car: 'SAMOCHÓD: 10 JABŁEK = 15 SEK. SZYBKIEJ JAZDY',
       noApples: 'Potrzebujesz 10 jabłek w bilansie.',
@@ -121,15 +126,55 @@
       return cars;
     }
 
-    function newAnimal(kind, extra) {
-      const p = randomSite(extra, 150); p.kind = kind;
-      return { kind, x: p.x, y: p.y, homeX: p.x, homeY: p.y, tx: p.x, ty: p.y, dir: Math.random() < .5 ? 'left' : 'right', step: Math.random() * 4, peck: Math.random() * 2, wait: Math.random() * 2 };
+    function newAnimal(kind, extra, site) {
+      const p = site || randomSite(extra, 150); p.kind = kind;
+      return { kind, x: p.x, y: p.y, homeX: p.x, homeY: p.y, tx: p.x, ty: p.y, dir: Math.random() < .5 ? 'left' : 'right', step: Math.random() * 4, peck: Math.random() * 2, wait: Math.random() * 2, z: 0, fly: 0 };
     }
+    // How "empty" a site is: few map objects / POIs / landmarks nearby. Used to send extra wildlife to the quiet fields.
+    function emptiness(s) {
+      let n = 0;
+      for (const o of MAP.objects || []) if (Math.abs(o.x + o.w / 2 - s.x) < 260 && Math.abs(o.base - s.y) < 260) n++;
+      return n;
+    }
+    function emptySite(extra, pred) {
+      const pool = reachableSites();
+      if (!pool.length) return null;
+      let best = null;
+      for (let i = 0, tries = 0; i < 24 && tries < 400; tries++) {
+        const s = pool[(Math.random() * pool.length) | 0];
+        if ((pred && !pred(s)) || tooCloseToStatic(s.x, s.y, extra) || !standable(s.x, s.y, extra)) continue;
+        i++; const e = emptiness(s) + Math.random() * 2; if (!best || e < best.e) best = { x: s.x, y: s.y, e };
+      }
+      return best;
+    }
+    // building spots for the foxes: map objects that are buildings (wide sprites), reduced to a standable point in front
+    function buildingSpots() {
+      if (state.buildings) return state.buildings;
+      const out = [];
+      for (const o of MAP.objects || []) if (o.w >= 40 && o.h >= 30 && o.w <= 200) {
+        const x = o.x + o.w / 2, y = o.base + 14;
+        if (standable(x, y, [], true)) out.push({ x, y });
+      }
+      return (state.buildings = out);
+    }
+    const nearRiver = s => (MAP.pois || []).some(p => p.key === 'river' && Math.hypot(p.x - s.x, p.y - s.y) < 900) || emptiness(s) < 2;
     function makeAnimals() {
       const extra = state.cars.slice();
       const animals = [];
-      for (let i = 0; i < CHICKENS; i++) { const a = newAnimal('chicken', extra.concat(animals)); animals.push(a); }
-      for (let i = 0; i < DOGS; i++) { const a = newAnimal('dog', extra.concat(animals)); animals.push(a); }
+      const add = (kind, site) => { const a = newAnimal(kind, extra.concat(animals), site || undefined); animals.push(a); return a; };
+      for (let i = 0; i < CHICKENS; i++) add('chicken', i >= 5 && i % 2 ? emptySite(extra.concat(animals)) : null);
+      for (let i = 0; i < DOGS; i++) add('dog', i >= 3 ? emptySite(extra.concat(animals)) : null);
+      for (let i = 0; i < STORKS; i++) add('stork', emptySite(extra.concat(animals), nearRiver));
+      for (let i = 0; i < FOXES; i++) { const b = buildingSpots(); add('fox', b.length ? Object.assign({}, b[(Math.random() * b.length) | 0]) : null); }
+      for (let f = 0; f < BIRD_FLOCKS; f++) {   // small flocks of sparrows, half of them in the empty north
+        const c = f % 2 ? emptySite(extra.concat(animals), s => s.y < MAP.h * .4) : emptySite(extra.concat(animals));
+        if (!c) continue;
+        for (let k = 0; k < 3 + (f % 3); k++) {
+          const b = newAnimal('bird', [], { x: c.x + (Math.random() - .5) * 40, y: c.y + (Math.random() - .5) * 30 });
+          if (!standable(b.x, b.y, [], true)) { b.x = c.x; b.y = c.y; }
+          b.homeX = c.x; b.homeY = c.y; animals.push(b);
+        }
+      }
       return animals;
     }
 
@@ -171,34 +216,97 @@
 
     function chooseTarget(o) {
       o.wait = 1.5 + Math.random() * 3.5;
-      const radius = o.kind === 'chicken' ? 90 : 150;
+      if (o.kind === 'fox') {   // trots from one building to another
+        const b = buildingSpots().filter(s => { const d = Math.hypot(s.x - o.x, s.y - o.y); return d > 120 && d < 700; });
+        if (b.length) { const s = b[(Math.random() * b.length) | 0]; o.tx = s.x; o.ty = s.y; o.wait = 14; return; }
+      }
+      const radius = { chicken: 90, dog: 150, stork: 90, bird: 40, fox: 200 }[o.kind] || 120;
       for (let i = 0; i < 18; i++) {
         const a = Math.random() * Math.PI * 2, d = Math.random() * radius;
         const x = o.homeX + Math.cos(a) * d, y = o.homeY + Math.sin(a) * d;
-        if (standable(x, y, state.cars.concat(state.animals.filter(a2 => a2 !== o)))) { o.tx = x; o.ty = y; return; }
+        if (standable(x, y, o.kind === 'bird' ? [] : state.cars.concat(state.animals.filter(a2 => a2 !== o && a2.kind !== 'bird')))) { o.tx = x; o.ty = y; return; }
       }
       o.tx = o.homeX; o.ty = o.homeY;
     }
     function tryMove(o, ux, uy, speed, dt) {
       const turns = [0, .55, -.55, 1.1, -1.1, 1.7, -1.7];
+      const others = o.kind === 'bird' ? [] : state.cars.concat(state.animals.filter(a => a !== o && a.kind !== 'bird' && Math.abs(a.x - o.x) < 40 && Math.abs(a.y - o.y) < 40));
       for (const turn of turns) {
         const c = Math.cos(turn), s = Math.sin(turn), vx = ux * c - uy * s, vy = ux * s + uy * c;
         const nx = o.x + vx * speed * dt, ny = o.y + vy * speed * dt;
-        if (!standable(nx, ny, state.cars.concat(state.animals.filter(a => a !== o))) || Math.hypot(P.x - nx, P.y - ny) < MIN_PLAYER_GAP) continue;
-        o.x = nx; o.y = ny; o.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down'); o.step += dt * (o.kind === 'dog' ? 7 : 5); return true;
+        if (!standable(nx, ny, others) || Math.hypot(P.x - nx, P.y - ny) < MIN_PLAYER_GAP) continue;
+        o.x = nx; o.y = ny; o.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
+        if (Math.abs(vx) > .2) o.face = vx < 0 ? 'left' : 'right';
+        o.step += dt * ({ dog: 7, fox: 10, stork: 3, bird: 8 }[o.kind] || 5); o.moving = .15; return true;
       }
       return false;
     }
-    function updateAnimal(o, dt) {
+    // birds: take off when Arek comes close, fly in an arc to a new spot and land (flying ignores walls)
+    function updateBird(o, dt) {
+      if (o.fly > 0) {
+        const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy), st = Math.min(d, 120 * dt);
+        o.x += dx / (d || 1) * st; o.y += dy / (d || 1) * st; o.step += dt * 12;
+        if (Math.abs(dx) > 1) o.face = dx < 0 ? 'left' : 'right';
+        o.z = Math.min(26, Math.sin(Math.min(1, 1 - d / Math.max(1, o.flyLen)) * Math.PI) * 30 + 4);
+        if (d < 2) { o.fly = 0; o.z = 0; o.homeX = o.x; o.homeY = o.y; o.wait = 1 + Math.random() * 2; }
+        return;
+      }
+      const pd = Math.hypot(o.x - P.x, o.y - P.y);
+      if (pd < 70) {   // scatter away from Arek
+        const away = Math.atan2(o.y - P.y, o.x - P.x);
+        for (let i = 0; i < 16; i++) {
+          const a = away + (Math.random() - .5) * 1.6, r = 160 + Math.random() * 180, x = o.x + Math.cos(a) * r, y = o.y + Math.sin(a) * r;
+          if (standable(x, y, [], true)) { o.tx = x; o.ty = y; o.fly = 1; o.flyLen = Math.hypot(x - o.x, y - o.y); window.__worldLife.takeoffs = (window.__worldLife.takeoffs || 0) + 1; return; }
+        }
+      }
       o.peck += dt;
+      if ((o.wait -= dt) <= 0) { chooseTarget(o); o.wait = .6 + Math.random() * 1.8; o.hop = .25; }
+      if (o.hop > 0) {   // short hop to the next seed
+        o.hop -= dt; const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
+        if (d > 1) { o.x += dx / d * Math.min(d, 60 * dt); o.y += dy / d * Math.min(d, 60 * dt); if (Math.abs(dx) > 1) o.face = dx < 0 ? 'left' : 'right'; }
+        o.z = Math.sin(Math.max(0, o.hop) / .25 * Math.PI) * 3;
+      } else o.z = 0;
+    }
+    function updateAnimal(o, dt) {
+      if (o.kind === 'bird') return updateBird(o, dt);
+      o.peck += dt; o.moving = Math.max(0, (o.moving || 0) - dt);
       const pdx = o.x - P.x, pdy = o.y - P.y, pd = Math.hypot(pdx, pdy);
-      if (pd < 78) {
+      const shy = o.kind === 'fox' ? 150 : o.kind === 'stork' ? 110 : 78;
+      if (pd < shy) {
         const d = pd || 1;
-        if (tryMove(o, pdx / d, pdy / d, o.kind === 'dog' ? 30 : 22, dt)) return;
+        if (tryMove(o, pdx / d, pdy / d, { dog: 30, fox: 85, stork: 26 }[o.kind] || 22, dt)) return;
+      }
+      if (o.kind === 'fox' && Math.hypot(o.tx - o.x, o.ty - o.y) < 8) {   // sniff around the building for a moment
+        if (!o.rest) o.rest = 2 + Math.random() * 4;
+        if ((o.rest -= dt) > 0) return;
+        o.rest = 0; chooseTarget(o);
       }
       if ((o.wait -= dt) <= 0 || Math.hypot(o.tx - o.x, o.ty - o.y) < 8) chooseTarget(o);
       const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
-      if (d > 3) tryMove(o, dx / d, dy / d, o.kind === 'dog' ? 18 : 12, dt);
+      if (d > 3) tryMove(o, dx / d, dy / d, { dog: 18, fox: 48, stork: 9 }[o.kind] || 12, dt);
+    }
+
+    // sprite frames per kind (see CRIT / critters.json): walk cycle while moving, an idle pose otherwise
+    function critterFrame(o) {
+      const walk2 = Math.floor(o.step) % 2;
+      switch (o.kind) {
+        case 'chicken': return o.moving ? walk2 : Math.sin(o.peck * 3) > .4 ? 2 : 3;
+        case 'dog': return o.moving ? walk2 : (Math.floor(o.peck / 4) % 2 ? 2 : 3);
+        case 'bird': return o.fly > 0 ? 2 + (Math.floor(o.step) % 2) : o.z > .5 ? 1 : 0;
+        case 'stork': return o.moving ? walk2 : (Math.floor(o.peck / 3) % 3 === 1 ? 3 : 2);
+        case 'fox': return o.moving ? Math.floor(o.step) % 3 : 3;
+      }
+      return 0;
+    }
+    function drawCritter(o, sx, sy, s) {
+      const c = CRIT[o.kind], img = state.critters;
+      if (!img || !c) return (o.kind === 'dog' ? drawDog : drawChicken)(o, sx, sy, s);
+      const size = 64 * c.h * s / c.px, f = critterFrame(o), z = (o.z || 0) * s;
+      A.shadow(sx, sy, s * (o.kind === 'stork' ? 1 : o.kind === 'bird' ? .4 : .8) * (z ? .7 : 1), o.kind === 'bird' ? 3 : 7);
+      ctx.save(); ctx.imageSmoothingEnabled = false; ctx.translate(sx, sy - z);
+      if ((o.face || o.dir) === 'left') ctx.scale(-1, 1);
+      ctx.drawImage(img, f * 64, c.row * 64, 64, 64, -size / 2, -size + 2 * size / 64, size, size);
+      ctx.restore();
     }
 
     function px(sx, sy, s, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s, w * s, h * s); }
@@ -250,7 +358,7 @@
     HOOKS.world.push((push, S, inView) => {
       syncState();
       for (const car of state.cars) if (inView(car.x, car.y)) push(car.y, () => drawCar(car, ...S(car.x, car.y), A.zoom));
-      for (const o of state.animals) if (inView(o.x, o.y)) push(o.y, () => (o.kind === 'chicken' ? drawChicken : drawDog)(o, ...S(o.x, o.y), A.zoom));
+      for (const o of state.animals) if (inView(o.x, o.y)) push(o.y, () => drawCritter(o, ...S(o.x, o.y), A.zoom));
     });
     HOOKS.minimap.push(dot => { for (const car of state.cars) dot(car.x, car.y, '#d8262c'); });
     HOOKS.questLog.push(lines => {

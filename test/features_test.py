@@ -8,7 +8,10 @@ with sync_playwright() as p:
     errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.goto(URL); pg.wait_for_function("window.__game && window.__features")
     pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_function("window.__game && window.__features")
-    pg.keyboard.press("KeyN"); time.sleep(.2)
+    pg.keyboard.press("KeyN")
+    pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+    time.sleep(.2)
     def tp(x, y): pg.evaluate(f"(()=>{{const g=__game; for(let r=0;r<80;r+=2)for(let a=0;a<6.3;a+=.3){{const X={x}+Math.cos(a)*r,Y={y}+Math.sin(a)*r; if(!g.blocked(X,Y)){{g.P.x=X;g.P.y=Y;return}}}}}})()"); time.sleep(.35)
     def skip_talk():
         for _ in range(15):
@@ -16,7 +19,8 @@ with sync_playwright() as p:
             pg.keyboard.press("Enter"); time.sleep(.08); pg.keyboard.press("Enter"); time.sleep(.08)
     # --- A question marker opens before meeting Irenka
     bd = [x for x in pg.evaluate("__game.ITEMS.boards") if x['spot'] == 'windmill'][0]
-    tp(bd['x'], bd['y'] + 12); pg.keyboard.press("Enter"); time.sleep(.3)
+    tp(bd['x'], bd['y'] + 12); pg.keyboard.press("Enter")
+    pg.wait_for_function("!!(__features.QZ && __features.QZ.q)")
     print('board quiz before halina:', pg.evaluate("__features.QZ && __features.QZ.q.id"))
     slot = pg.evaluate("__features.QZ.order.indexOf(__features.QZ.q.ok)"); pg.keyboard.press(f"Digit{slot+1}"); time.sleep(.3); pg.keyboard.press("Space"); time.sleep(.2)
 
@@ -28,7 +32,8 @@ with sync_playwright() as p:
     pg.keyboard.press("Digit1"); time.sleep(.4); pg.screenshot(path="test/f2_quiz_result.png"); pg.keyboard.press("Space"); time.sleep(.2)
     # --- another marker (church)
     bd = [x for x in pg.evaluate("__game.ITEMS.boards") if x['spot'] == 'church'][0]
-    tp(bd['x'], bd['y'] + 12); pg.keyboard.press("Enter"); time.sleep(.3)
+    tp(bd['x'], bd['y'] + 12); pg.keyboard.press("Enter")
+    pg.wait_for_function("!!(__features.QZ && __features.QZ.q)")
     print('board quiz:', pg.evaluate("__features.QZ && __features.QZ.q.id"))
     # pick the correct answer through the UI mapping
     slot = pg.evaluate("__features.QZ.order.indexOf(__features.QZ.q.ok)"); pg.keyboard.press(f"Digit{slot+1}"); time.sleep(.3); pg.keyboard.press("Space"); time.sleep(.2)
@@ -60,7 +65,7 @@ with sync_playwright() as p:
             pg.evaluate(f"__game.P.x={tr['cx'] + math.cos(a) * tr['rx']}; __game.P.y={tr['cy'] + math.sin(a) * tr['ry']}"); time.sleep(.06)
     time.sleep(.2); print('race:', pg.evaluate("__features.MG && __features.MG.phase"), pg.evaluate("__features.MG && __features.MG.msg"))
     pg.screenshot(path="test/f7_race_end.png"); pg.keyboard.press("Escape")
-    pg.evaluate("__features.startMG('race')"); time.sleep(3.2 + 20.0)
+    pg.evaluate("__features.startMG('race')"); time.sleep(3.2 + 27.5)
     print('race idle:', pg.evaluate("__features.MG.phase"), pg.evaluate("__features.MG.msg"))
     print('mg', pg.evaluate("JSON.stringify(__game.Q.mg)"))
     print('errors', errs); b.close()

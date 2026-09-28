@@ -7,7 +7,10 @@ with sync_playwright() as p:
     errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")); pg.wait_for_function("window.__game", timeout=30000)
     pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_function("window.__game")
-    pg.keyboard.press("Enter"); time.sleep(.2)
+    pg.keyboard.press("Enter")
+    pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+    time.sleep(.2)
     def tp(x, y): pg.evaluate(f"(()=>{{const g=__game; for(let r=0;r<80;r+=2)for(let a=0;a<6.3;a+=.3){{const X={x}+Math.cos(a)*r,Y={y}+Math.sin(a)*r; if(!g.blocked(X,Y)){{g.P.x=X;g.P.y=Y;return}}}}}})()"); time.sleep(.35)
     def talk_all():
         for _ in range(12):

@@ -23,6 +23,7 @@ with sync_playwright() as p:
     page.reload()
     page.wait_for_function("window.__game")
     page.keyboard.press("KeyN")
+    page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play'")
 
     page.evaluate("""(() => {
@@ -67,6 +68,7 @@ with sync_playwright() as p:
     mobile.goto(os.environ.get("ARK_URL", os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")) + ("&" if "?" in os.environ.get("ARK_URL", os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")) else "?") + "lang=en")
     mobile.wait_for_function("window.__game", timeout=30000)
     mobile.keyboard.press("KeyN")
+    mobile.locator("#player-name-input").fill("Test"); mobile.keyboard.press("Enter")
     mobile.wait_for_function("__game.scene === 'play'")
     mobile.evaluate("__game.scene = 'end'")
     mobile.screenshot(path="test/cemetery_memory_mobile.png")

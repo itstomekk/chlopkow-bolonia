@@ -1,4 +1,4 @@
-/* Quiz o Chłopkowie for "Arek w Chłopkowie": Babcia Irenka, the 13 question markers and the ABCD quiz modal.
+/* Quiz o Chłopkowie for "Arek w Chłopkowie": Babcia Irenka, the question markers (village, wayside shrines, jazz barn) and the ABCD quiz modal.
    Plugs into game.js through window.ARK.HOOKS (see the comment at HOOKS in game.js). Minigames live in minigames.js.
    State in the save object: Q.halina (0 not met / 1 met / 2 quiz finished), Q.quiz {id: 1 correct | 0 wrong}. */
 'use strict';
@@ -14,29 +14,31 @@ window.addEventListener('ark-ready', () => {
   const L = PL ? {
     names: { halina: 'BABCIA IRENKA' },
     halina0: ['Dzień dobry, młody człowieku! Jestem Irenka, prowadzę kronikę Chłopkowa.', 'Rozstawiłam po okolicy zagadki — szukaj znaków zapytania!', 'Sprawdźmy najpierw, czy uważałeś na lekcjach historii...'],
-    halinaProgress: (n, c, all) => [`Rozwiązane zagadki: ${n} z ${all}. Poprawnie: ${c}.`, 'Znaki zapytania unoszą się przy kościele, plebanii, cmentarzu, wiatraku, sklepie, przystankach, rzece, boisku, sadzie, lesie i drodze na wschód.'],
+    halinaProgress: (n, c, all) => [`Rozwiązane zagadki: ${n} z ${all}. Poprawnie: ${c}.`, 'Znaki zapytania unoszą się przy kościele, plebanii, cmentarzu, wiatraku, sklepie, przystankach, rzece, boisku, sadzie, lesie i drodze na wschód.', 'Zajrzyj też do każdej przydrożnej kapliczki i krzyża, a wieczorem do stodoły, gdzie grają jazz.'],
     halinaEnd: (c, all, title) => [`Wszystkie zagadki rozwiązane! Wynik: ${c} na ${all}.`, `Mianuję cię tytułem: ${title}!`, 'Wpiszę cię do kroniki. Ołówkiem, na razie.'],
     halinaAfter: (c, all, title) => [`${title} — ${c}/${all}. Kronika pamięta!`],
-    titles: [[13, 'HONOROWY KRONIKARZ CHŁOPKOWA'], [10, 'ZNAWCA CHŁOPKOWA'], [6, 'TURYSTA Z AMBICJAMI'], [0, 'PRZYJEZDNY Z MIASTA']],
+    titles: [[1, 'HONOROWY KRONIKARZ CHŁOPKOWA'], [.75, 'ZNAWCA CHŁOPKOWA'], [.45, 'TURYSTA Z AMBICJAMI'], [0, 'PRZYJEZDNY Z MIASTA']],
     boardDone: ok => [ok ? 'Tę zagadkę już rozwiązałeś — poprawnie!' : 'Tę zagadkę już rozwiązałeś... niestety źle.'],
     quizTitle: 'ZAGADKA', correct: 'DOBRZE!', wrong: 'NIESTETY...', answerWas: 'Poprawna odpowiedź', cont: 'SPACJA — DALEJ', pick: 'STRZAŁKI / 1-4 — WYBÓR · SPACJA — ODPOWIEDZ',
     quizLog: (c, n, all) => `Quiz o Chłopkowie ★${c} (${n}/${all})`,
   } : {
     names: { halina: 'GRANNY IRENKA' },
     halina0: ["Good day, young man! I'm Irenka, I keep the chronicle of Chłopków.", 'I left riddles all around the village — look for the floating question marks!', "First, let's see if you paid attention in history class..."],
-    halinaProgress: (n, c, all) => [`Riddles solved: ${n} of ${all}. Correct: ${c}.`, 'Question marks float by the church, rectory, cemetery, windmill, shop, bus stops, river, pitch, orchard, woods and the road east.'],
+    halinaProgress: (n, c, all) => [`Riddles solved: ${n} of ${all}. Correct: ${c}.`, 'Question marks float by the church, rectory, cemetery, windmill, shop, bus stops, river, pitch, orchard, woods and the road east.', 'Check every wayside shrine and cross too, and the barn where they play jazz.'],
     halinaEnd: (c, all, title) => [`All riddles solved! Score: ${c} of ${all}.`, `I hereby name you: ${title}!`, "I'll write you into the chronicle. In pencil, for now."],
     halinaAfter: (c, all, title) => [`${title} — ${c}/${all}. The chronicle remembers!`],
-    titles: [[13, 'HONORARY CHRONICLER OF CHŁOPKÓW'], [10, 'CHŁOPKÓW EXPERT'], [6, 'AMBITIOUS TOURIST'], [0, 'VISITOR FROM THE CITY']],
+    titles: [[1, 'HONORARY CHRONICLER OF CHŁOPKÓW'], [.75, 'CHŁOPKÓW EXPERT'], [.45, 'AMBITIOUS TOURIST'], [0, 'VISITOR FROM THE CITY']],
     boardDone: ok => [ok ? 'You already solved this one — correctly!' : 'You already answered this one... wrongly.'],
     quizTitle: 'RIDDLE', correct: 'CORRECT!', wrong: 'NOT QUITE...', answerWas: 'The answer', cont: 'SPACE — CONTINUE', pick: 'ARROWS / 1-4 — CHOOSE · SPACE — ANSWER',
     quizLog: (c, n, all) => `Chłopków quiz ★${c} (${n}/${all})`,
   };
-  const QZ_ALL = window.QUIZ.length;
+  // only questions that can actually be reached count: Irenka's own + those whose signboard exists in items.json
+  const ACTIVE = window.QUIZ.filter(q => q.spot === 'halina' || (ITEMS.boards || []).some(b => b.spot === q.spot));
+  const QZ_ALL = ACTIVE.length;
   const qById = id => window.QUIZ.find(q => q.id === id);
-  const answered = () => Object.keys(Q().quiz).length;
-  const correctN = () => Object.values(Q().quiz).filter(v => v === 1).length;
-  const titleFor = c => L.titles.find(([min]) => c >= min)[1];
+  const answered = () => ACTIVE.filter(q => Q().quiz[q.id] !== undefined).length;
+  const correctN = () => ACTIVE.filter(q => Q().quiz[q.id] === 1).length;
+  const titleFor = c => L.titles.find(([min]) => c >= Math.ceil(min * QZ_ALL))[1];
 
   /* =================================================================== quiz modal */
   let QZ = null; // {q, order:[origIdx...], sel, phase:'ask'|'done', pick, rects:[], t}

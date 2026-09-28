@@ -7,7 +7,7 @@ import json, math, random, sys
 import numpy as np
 from PIL import Image
 sys.path.insert(0, 'osm')
-from geo import legacy_i, P
+from geo import legacy_i, pre_expansion_i, P, PRE_EXPANSION_ADDITIONS
 
 m = json.load(open('docs/map.json'))
 W, H = m['w'], m['h']
@@ -65,28 +65,44 @@ ry, rx = np.nonzero(road[:, W - 140:W - 60]); er = (W - 100, int(np.median(ry)))
 anchors = {
     'church': (poi['church']['x'] - 70, poi['church']['y'] + 40), 'rectory': (poi['rectory']['x'] - 30, poi['rectory']['y'] + 40),
     'cemetery': (poi['cemetery']['x'], poi['cemetery']['y'] + 90), 'windmill': (poi['windmill']['x'] - 60, poi['windmill']['y'] + 40),
-    'shop': (shop['x'] - 45, shop['y'] + 30), 'bus1': (bus_near['x'] - 25, bus_near['y'] + 12),
+    'shop': (shop['x'] - 45, shop['y'] + 30), 'bus1': (bus_near['x'] + 60, bus_near['y'] + 30),
     'bus2': (bus_far['x'] + 30, bus_far['y'] - 20), 'river': legacy_i(1300, 1650), 'pitch': legacy_i(690, 120),
     'orchard': legacy_i(1300, 2020), 'woods': legacy_i(1760, 1600), 'eastroad': (er[0], er[1] - 26),
 }
+# one board beside every wayside figure / cross / shrine (map.json shrines, see render_map.py) and one in the jazz yard
+for s in m.get('shrines', []): anchors[s['spot']] = (s['x'] + 34, s['y'] + 16)
+if 'jazz' in m: anchors['jazz'] = (m['jazz']['x'] - 60, m['jazz']['y'] + 20)
 boards = []
 for k, v in anchors.items():
     p = at(*v, r=8); boards.append(dict(spot=k, **p))
 
 # ---------------------------------------------------------------- NPCs
-woods = next(b for b in boards if b['spot'] == 'woods')
+soltys_spot = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['soltys'])
+cem = poi['cemetery']; TR = m['track']; RG = m['range']
+# litter for Mateusz's clean-up: fixed piles by the cemetery and by the southern shop (+3 random ones spawned per new game)
+south_shop = pre_expansion_i(2150, 2506)
+trash = [dict(id='cemetery', **at(cem['x'] + 150, cem['y'] + 60, r=8)), dict(id='southshop', **at(south_shop[0] - 50, south_shop[1] + 20, r=8))]
 npcs = [
     dict(id='kasia', **at(*P(52.26261, 22.88575))),          # far east, by a Chłopków-Kolonia farmstead
-    dict(id='marcin', **at(bus_near['x'] + 25, bus_near['y'] + 10)),
-    dict(id='damian', **at(*P(52.25980, 22.86990))),          # far south, farmstead by the shooting range
+    dict(id='marcin', **at(1106, 4251)),                      # hangs around the bus stop (the game lets him wander a little)
+    dict(id='damian', **at(TR['cx'] + 80, TR['cy'] + TR['ry'] + TR['w'] / 2 + 34)),   # always by the race track, outside the oval
     dict(id='grandpa', **at(poi['windmill']['x'] + 60, poi['windmill']['y'] + 40)),
     dict(id='halina', **at(poi['church']['x'] - 120, poi['church']['y'] + 70)),   # the chronicler waits by the church
-    # hidden Sołtys by the Białka, next to (not on top of) the woods signboard: NPCs win interaction priority
-    dict(id='soltys', secret=True, **at(woods['x'] - 70, woods['y'] + 30)),
+    # hidden Sołtys at the supplied preceding-map coordinate, away from every quiz board
+    dict(id='soltys', secret=True, **at(*soltys_spot)),
+    dict(id='michal', **at(RG['x'] - 44, RG['y'] + 26)),      # owner of the PPM range
+    dict(id='kuba', **at(RG['x'] - 90, RG['y'] + 40)),        # regular at the range
+    dict(id='mateusz', **at(trash[0]['x'] + 70, trash[0]['y'] + 30)),   # clean-up organiser by the cemetery
 ]
+if 'jazz' in m: npcs.append(dict(id='patryk', **at(m['jazz']['x'] + 50, m['jazz']['y'] - 5)))
+# Edytka: the game puts her at a random reachable spot on every new game (NPC_ZONE_RADIUS covers the whole map);
+# this is only her default, somewhere quiet south-east of the shop.
+npcs.append(dict(id='edytka', **at(shop['x'] + 420, shop['y'] + 380)))
 for n in npcs:
     for b in boards:
         assert math.hypot(n['x'] - b['x'], n['y'] - b['y']) > 45, f"{n['id']} blocks the {b['spot']} signboard"
+    for o in npcs:
+        assert o is n or math.hypot(n['x'] - o['x'], n['y'] - o['y']) > 38, f"{n['id']} overlaps {o['id']}"
 
 # ---------------------------------------------------------------- apples: next to tree trunks, spread over the village
 trees = [o for o in m['objects'] if o['w'] < 34]
@@ -114,6 +130,7 @@ dam = next(n for n in npcs if n['id'] == 'damian')   # "I was running through th
 cands = [(x, y) for x, y in zip(xs[::200], ys[::200]) if 300 < math.hypot(x - dam['x'], y - dam['y']) < 900 and free(x, y, 12)]
 cap = dict(zip('xy', map(int, rnd.choice(cands))))
 
-json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards, landmarks=landmarks), open('docs/items.json', 'w'), indent=1)
-print(f'reachable {reach.mean():.0%} of map |', len(apples), 'apples |', ', '.join(f"{n['id']}@{n['x']},{n['y']}" for n in npcs), '| cap', cap,
+json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards, landmarks=landmarks, trash=trash), open('docs/items.json', 'w'), indent=1)
+print(f'reachable {reach.mean():.0%} of map |', len(apples), 'apples |', ', '.join(f"{n['id']}@{n['x']},{n['y']}" for n in npcs), '| cap', cap, '| trash', trash,
+      '| boards', ', '.join(f"{b['spot']}@{b['x']},{b['y']}" for b in boards),
       '| landmarks', ', '.join(f"{lm['key']}->{lm['access']['x']},{lm['access']['y']}" for lm in landmarks))

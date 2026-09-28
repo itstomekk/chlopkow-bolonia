@@ -217,8 +217,8 @@ window.addEventListener('ark-ready', () => {
         }
       }
       MG.offTrack = !onTrack(P.x, P.y);
-      // Damian: steady pace with a little wobble; hops over the bale walls at 200° and 330°
-      const R = MG.rival, lapT = 9.2;
+      // Damian: steady pace with a little wobble (0.7x of his old 9.2 s lap); hops over the bale walls at 200° and 330°
+      const R = MG.rival, lapT = 9.2 / .7;
       R.th += (Math.PI * 2 / lapT) * (1 + Math.sin(MG.run * 1.3) * .08) * dt;
       const deg = ((R.th * 180 / Math.PI) % 360 + 360) % 360, wall = [200, 330].find(b => Math.abs(deg - b) < 9);
       R.z = wall ? Math.cos((deg - wall) / 9 * Math.PI / 2) * 14 : 0;

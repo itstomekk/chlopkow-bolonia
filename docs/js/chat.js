@@ -20,17 +20,28 @@
 'use strict';
 (() => {
   const CHANNEL_ID = '6432fea61ded982c2ac4cc63afd224c61a9858f6e85d09578f87bca1f9f4fbcc';
+  // Relays checked 2026-09-27 with a real write + read-back of a kind-42 event.
+  // relay.primal.net / relay.nostr.net / relay.damus.io hold the channel history.
+  // relay.chatbett.de (strfry, lists NIP-28, ~250 ms EOSE) and wheat.happytavern.co (GRAIN, no auth/payment)
+  // are small, open, independently run relays that keep an extra copy of the channel.
+  // Dropped: relay.nostr.band (dead), nos.lol (HTTP 502 at the time of the check).
   const RELAYS = Object.freeze([
-    'wss://relay.damus.io',
-    'wss://nos.lol',
     'wss://relay.primal.net',
-    'wss://relay.nostr.band',
+    'wss://relay.nostr.net',
+    'wss://relay.damus.io',
+    'wss://relay.chatbett.de',
+    'wss://wheat.happytavern.co',
   ]);
+  // History starts on 26 Sep 2026, 00:00 Polish time (22:00 UTC the day before).
+  const HISTORY_SINCE = 1790373600;
   const NOSTR_TOOLS_URL = 'https://esm.sh/nostr-tools@2.25.2?bundle&target=es2020';
   const SECRET_KEY_STORAGE = 'arek-chlopkowie-nostr-guest-secret-v1';
   const NICKNAME_STORAGE = 'arek-chlopkowie-nostr-nickname-v1';
-  const MAX_MESSAGE_CHARS = 100;
+  const MAX_MESSAGE_CHARS = 100;      // what this client lets you type
+  const MAX_SHOWN_CHARS = 280;        // longer messages from other clients are ignored as spam
+  const MAX_EVENTS = 500;
   const MAX_NICKNAME_CHARS = 24;
+  const DUPLICATE_WINDOW = 120;       // same author + same text within 2 min is shown once
 
   const state = {
     open: false,
@@ -43,6 +54,8 @@
     subscription: null,
     events: new Map(),
     eoseTimer: null,
+    renderQueued: false,
+    lastByAuthor: new Map(),   // pubkey -> [{ text, at }] for duplicate collapsing
   };
 
   const unicodeLength = value => Array.from(String(value)).length;
@@ -96,6 +109,8 @@
     .arek-chat-message:last-child { margin-bottom: 0; }
     .arek-chat-meta { color: #8fa0c3; font-size: 10px; }
     .arek-chat-name { color: #ffd21f; }
+    .arek-chat-message[data-own="true"] .arek-chat-name { color: #8fe38f; }
+    .arek-chat-day { margin: 4px 0 7px; color: #8490a9; font-size: 10px; text-align: center; }
     .arek-chat-empty { color: #8490a9; }
     #arek-chat-form { padding: 8px 9px 9px; }
     #arek-chat-nickname, #arek-chat-text { width: 100%; padding: 7px; }
@@ -210,47 +225,101 @@
     try { storageSet(NICKNAME_STORAGE, nickname.value); } catch (e) { setStatus(e.message, true); }
   }
 
+  const dayKey = ts => new Date(ts * 1000).toDateString();
+  const timeLabel = ts => new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dayLabel = ts => {
+    const d = new Date(ts * 1000), today = new Date(), y = new Date(Date.now() - 86400000);
+    if (d.toDateString() === today.toDateString()) return 'today';
+    if (d.toDateString() === y.toDateString()) return 'yesterday';
+    return d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  };
+
   function renderMessages() {
+    state.renderQueued = false;
+    // keep the reader's place when they scrolled up; follow new messages otherwise
+    const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 40;
     messages.replaceChildren();
     const list = Array.from(state.events.values()).sort((a, b) => a.created_at - b.created_at || a.id.localeCompare(b.id));
     if (!list.length) {
-      const blank = el('div', 'No messages yet.', messages);
+      const blank = el('div', state.connected ? 'No messages since 26 Sep. Say hi!' : 'No messages yet.', messages);
       blank.className = 'arek-chat-empty';
       return;
     }
+    let lastDay = '', prev = null;
     for (const event of list) {
+      const day = dayKey(event.created_at);
+      if (day !== lastDay) { el('div', `— ${dayLabel(event.created_at)} —`, messages).className = 'arek-chat-day'; lastDay = day; prev = null; }
       const row = el('div', undefined, messages);
       row.className = 'arek-chat-message';
-      const meta = el('div', undefined, row);
-      meta.className = 'arek-chat-meta';
-      const name = el('span', event.nickname, meta);
-      name.className = 'arek-chat-name';
-      el('span', ` · ${new Date(event.created_at * 1000).toLocaleTimeString()}`, meta);
+      row.dataset.own = event.pubkey === state.pubkey ? 'true' : 'false';
+      // consecutive messages from the same person within 5 minutes share one name/time line
+      const grouped = prev && prev.pubkey === event.pubkey && prev.nickname === event.nickname && event.created_at - prev.created_at < 300;
+      if (grouped) row.style.marginTop = '-5px';
+      else {
+        const meta = el('div', undefined, row);
+        meta.className = 'arek-chat-meta';
+        const name = el('span', event.nickname, meta);
+        name.className = 'arek-chat-name';
+        el('span', ` · ${timeLabel(event.created_at)}`, meta);
+      }
       el('div', event.content, row);
+      prev = event;
     }
-    messages.scrollTop = messages.scrollHeight;
+    if (nearBottom || !state.historyShown) messages.scrollTop = messages.scrollHeight;
+  }
+
+  // Many events arrive at once while history loads; draw once per frame instead of once per event.
+  function queueRender() {
+    if (state.renderQueued) return;
+    state.renderQueued = true;
+    (window.requestAnimationFrame || (fn => setTimeout(fn, 16)))(renderMessages);
+  }
+
+  // Strip invisible/control characters and collapse whitespace so spam can't break the layout.
+  function cleanText(value) {
+    return String(value)
+      .replace(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function isDuplicate(pubkey, content, at) {
+    const recent = (state.lastByAuthor.get(pubkey) || []).filter(r => Math.abs(r.at - at) < DUPLICATE_WINDOW * 4);
+    const dup = recent.some(r => r.text === content && Math.abs(r.at - at) < DUPLICATE_WINDOW);
+    if (!dup) recent.push({ text: content, at });
+    state.lastByAuthor.set(pubkey, recent.slice(-10));
+    return dup;
   }
 
   function addEvent(event) {
     if (!event || event.kind !== 42 || typeof event.id !== 'string' || typeof event.content !== 'string') return;
+    if (state.events.has(event.id)) return;
     const tags = Array.isArray(event.tags) ? event.tags : [];
     const rootTag = tags.find(tag => Array.isArray(tag) && tag[0] === 'e' && tag[1] === CHANNEL_ID && (tag[3] === 'root' || !tag[3]));
-    if (!rootTag || unicodeLength(event.content) > MAX_MESSAGE_CHARS) return;
-    if (state.events.has(event.id)) return;
+    if (!rootTag) return;
+    const createdAt = Number.isFinite(event.created_at) ? event.created_at : 0;
+    if (createdAt < HISTORY_SINCE || createdAt > Date.now() / 1000 + 600) return;   // too old, or dated in the future
+    const content = cleanText(event.content);
+    if (!content || unicodeLength(content) > MAX_SHOWN_CHARS) return;
+    const pubkey = typeof event.pubkey === 'string' ? event.pubkey : '';
+    if (isDuplicate(pubkey, content, createdAt)) return;
     const nameTag = tags.find(tag => Array.isArray(tag) && tag[0] === 'name' && typeof tag[1] === 'string');
-    const fallback = event.pubkey ? `guest-${event.pubkey.slice(0, 6)}` : 'guest';
-    const name = trimUnicode((nameTag ? nameTag[1] : fallback).trim(), MAX_NICKNAME_CHARS) || fallback;
-    state.events.set(event.id, {
-      id: event.id,
-      created_at: Number.isFinite(event.created_at) ? event.created_at : 0,
-      content: event.content,
-      nickname: name,
-    });
-    if (state.events.size > 200) {
+    const fallback = pubkey ? `guest-${pubkey.slice(0, 6)}` : 'guest';
+    const name = trimUnicode(cleanText(nameTag ? nameTag[1] : ''), MAX_NICKNAME_CHARS) || fallback;
+    state.events.set(event.id, { id: event.id, created_at: createdAt, content, nickname: name, pubkey });
+    if (state.events.size > MAX_EVENTS) {
       const oldest = Array.from(state.events.values()).sort((a, b) => a.created_at - b.created_at)[0];
       state.events.delete(oldest.id);
     }
-    renderMessages();
+    queueRender();
+  }
+
+  function relayCount() {
+    try {
+      const status = state.pool && state.pool.listConnectionStatus && state.pool.listConnectionStatus();
+      if (status) return Array.from(status.values()).filter(Boolean).length;
+    } catch (e) { /* older nostr-tools */ }
+    return null;
   }
 
   async function start() {
@@ -266,23 +335,32 @@
       state.tools = tools;
       state.secretKey = getGuestSecret(tools);
       state.pubkey = tools.getPublicKey(state.secretKey);
-      state.pool = new tools.SimplePool();
+      // enableReconnect keeps the live subscription alive when a relay drops; signatures are verified by the pool.
+      try { state.pool = new tools.SimplePool({ enableReconnect: true, enablePing: true }); } catch (e) { state.pool = new tools.SimplePool(); }
+      // nostr-tools 2.x takes ONE filter object here. Passing an array makes relays reject the request
+      // ("provided filter is not an object"), which is why the old chat never showed any history.
       state.subscription = state.pool.subscribeMany(
         RELAYS,
-        [{ kinds: [42], '#e': [CHANNEL_ID], limit: 100 }],
+        { kinds: [42], '#e': [CHANNEL_ID], since: HISTORY_SINCE, limit: MAX_EVENTS },
         {
           onevent: addEvent,
           oneose: () => {
             state.connected = true;
+            state.historyShown = true;
             if (state.eoseTimer) clearTimeout(state.eoseTimer);
-            setStatus('Connected. Messages are public across clients.');
+            renderMessages();
+            const n = relayCount(), total = state.events.size;
+            setStatus(`${total ? `${total} message${total === 1 ? '' : 's'} since 26 Sep` : 'Nobody wrote yet'} · live`);
+            status.title = n ? `Connected to ${n} of ${RELAYS.length} Nostr relays` : '';
           },
-          onclose: reason => {
+          onclose: reasons => {
             state.connected = false;
             state.started = false;
             state.subscription = null;
-            const detail = reason ? ` (${String(reason)})` : '';
-            setStatus(`Relay connection closed${detail}. Try again later.`, true);
+            if (state.pool && state.pool.close) state.pool.close(RELAYS);
+            state.pool = null;
+            setStatus('All relays disconnected. Close and reopen the chat to retry.', true);
+            if (window.console) console.warn('chat relays closed', reasons);
           },
         },
       );
@@ -291,7 +369,7 @@
       }, 15000);
       const savedNickname = storageGet(NICKNAME_STORAGE);
       if (savedNickname) nickname.value = trimUnicode(savedNickname, MAX_NICKNAME_CHARS);
-      setStatus('Connected; waiting for channel messages...');
+      setStatus('Loading messages since 26 Sep...');
     } catch (error) {
       state.started = false;
       state.connected = false;
@@ -377,7 +455,10 @@
   window.__arekGlobalChat = Object.freeze({
     channelId: CHANNEL_ID,
     relays: RELAYS.slice(),
+    historySince: HISTORY_SINCE,
     maxMessageChars: MAX_MESSAGE_CHARS,
+    messageCount: () => state.events.size,
+    isConnected: () => state.connected,
     unicodeLength,
     open: openChat,
     close: closeChat,

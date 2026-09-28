@@ -24,13 +24,18 @@ with sync_playwright() as p:
     page.evaluate("window.dispatchEvent(new Event('ark-ready'))")
     page.wait_for_function("window.__worldLife && window.__worldLife.cars.length === 2")
     page.keyboard.press("KeyN")
+    page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
+    page.wait_for_function("__game.scene === 'play'")
 
     facts = page.evaluate("""(() => {
       const g = __game, wl = __worldLife;
+      const ground = wl.animals.filter(a => a.kind !== 'bird');
       const allValid = wl.cars.length === 2 && wl.cars.every(c => !g.blocked(c.x, c.y)) &&
-        wl.animals.length === 8 && wl.animals.every(a => !g.blocked(a.x, a.y));
-      const apart = wl.animals.every((a, i) => Math.hypot(a.x - g.P.x, a.y - g.P.y) >= 29 &&
-        wl.animals.every((b, j) => i === j || Math.hypot(a.x - b.x, a.y - b.y) >= 23));
+        wl.animals.length >= 40 && wl.animals.every(a => !g.blocked(a.x, a.y));
+      // Birds are intentionally spawned in small flocks, so only require the
+      // separation invariant for the non-flocking ground animals.
+      const apart = ground.every((a, i) => Math.hypot(a.x - g.P.x, a.y - g.P.y) >= 29 &&
+        ground.every((b, j) => i === j || Math.hypot(a.x - b.x, a.y - b.y) >= 23));
       const oldCars = wl.cars.map(c => `${c.x},${c.y}`).join('|');
       wl.resetCars();
       const reset = wl.cars.length === 2 && wl.cars.map(c => `${c.x},${c.y}`).join('|') !== oldCars;
@@ -51,6 +56,8 @@ with sync_playwright() as p:
     assert persisted == [10, 0, 10], persisted
     page.evaluate("__game.scene = 'title'")
     page.keyboard.press("KeyN")
+    page.locator("#player-name-input").fill("Test")
+    page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play' && __worldLife.cars.length === 2")
     fresh = page.evaluate("[__game.Q.worldLife.spentApples, __game.Q.apples.length, __worldLife.cars.every(c => !__game.blocked(c.x, c.y))]")
     assert fresh == [0, 0, True], fresh

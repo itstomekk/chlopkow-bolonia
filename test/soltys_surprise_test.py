@@ -1,7 +1,11 @@
 """Headless test for the hidden Sołtys encounter by the Białka woodland path."""
 import os
+import sys
 import time
 from playwright.sync_api import sync_playwright
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "osm"))
+from geo import pre_expansion_i
 
 URL = os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")
 
@@ -16,13 +20,17 @@ with sync_playwright() as p:
     page.reload()
     page.wait_for_function("window.__game && window.CHURCH_ART?.soltys")
     page.keyboard.press("Enter")
+    page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
+    page.wait_for_function("__game.scene === 'play'")
     time.sleep(.2)
 
     npc = page.evaluate("__game.ITEMS.npcs.find(n => n.id === 'soltys' && n.secret)")
     assert npc, "the secret Sołtys should be listed as hidden data, not a marked quest NPC"
     board = page.evaluate("__game.ITEMS.boards.find(b => b.spot === 'woods')")
-    gap = ((npc["x"] - board["x"]) ** 2 + (npc["y"] - board["y"]) ** 2) ** .5
-    assert 45 < gap < 150, f"Sołtys should stand by the woods signboard, not on it (gap {gap:.0f})"
+    target = pre_expansion_i(1887, 1237)
+    gap = ((npc["x"] - target[0]) ** 2 + (npc["y"] - target[1]) ** 2) ** .5
+    assert gap <= 180, f"Sołtys should retain his supplied map position (gap {gap:.0f})"
+    assert all(((npc["x"] - b["x"]) ** 2 + (npc["y"] - b["y"]) ** 2) ** .5 > 45 for b in page.evaluate("__game.ITEMS.boards")), "Sołtys overlaps a signboard"
     assert page.evaluate("""n => { for (let r = 24; r <= 38; r += 2) for (let a = 0; a < 6.28; a += .3) if (!__game.blocked(n.x + Math.cos(a) * r, n.y + Math.sin(a) * r)) return true; return false; }""", npc), "the chosen path point must have a walkable interaction tile"
 
     # Stand beside him using a collision-free neighboring tile, then interact.

@@ -1,0 +1,55 @@
+{
+ "cell": 64,
+ "rows": {
+  "hen": {
+   "row": 0,
+   "frames": [
+    "walk1",
+    "walk2",
+    "peck",
+    "stand"
+   ],
+   "h": 30
+  },
+  "stray": {
+   "row": 1,
+   "frames": [
+    "trot1",
+    "trot2",
+    "sniff",
+    "sit"
+   ],
+   "h": 40
+  },
+  "bird": {
+   "row": 2,
+   "frames": [
+    "stand",
+    "hop",
+    "fly1",
+    "fly2"
+   ],
+   "h": 22
+  },
+  "stork": {
+   "row": 3,
+   "frames": [
+    "walk1",
+    "walk2",
+    "stand",
+    "hunt"
+   ],
+   "h": 56
+  },
+  "fox": {
+   "row": 4,
+   "frames": [
+    "run1",
+    "run2",
+    "run3",
+    "look"
+   ],
+   "h": 40
+  }
+ }
+}

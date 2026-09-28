@@ -1,4 +1,4 @@
-/* Quiz o Chłopkowie — 13 ABCD questions, each bound to a real place on the map.
+/* Quiz o Chłopkowie — ABCD questions, each bound to a real place on the map (13 village facts + wayside shrines + the jazz barn).
    Source: Polish Wikipedia, "Chłopków (województwo mazowieckie)" (CC BY-SA 4.0).
    `spot` = where the question signboard stands (see osm/place_items.py -> items.json "boards");
    `halina` = asked by Pani Halina herself. `ok` = index of the correct answer (0..3).
@@ -172,6 +172,86 @@ window.QUIZ = [
       q: 'This road leads east to the neighbouring village. Which one?',
       a: ['Stare Litewniki', 'Ostromęczyn', 'Grzybów', 'Hruszniew'],
       fact: 'Stare Litewniki lies to the east, Ostromęczyn to the west, Grzybów to the north and Hruszniew to the south-west.',
+    },
+  },
+  /* Wayside figures (osm/render_map.py GENERATED_SHRINES + the Kapliczka) and the JAZZ W STODOLE barn.
+     General Polish folk-religious customs, not claims about these particular figures. */
+  {
+    id: 'crossroads', spot: 'shrine1', ok: 0,
+    pl: {
+      q: 'Przydrożne krzyże na polskiej wsi najczęściej stawiano...',
+      a: ['na rozstajach dróg i na skraju wsi', 'tylko na szczytach gór', 'wyłącznie przy dworcach kolejowych', 'na środku stawów'],
+      fact: 'Krzyże stawiano na rozstajach i granicach wsi: z wdzięczności, jako wotum lub by chroniły mieszkańców i pola.',
+    },
+    en: {
+      q: 'Roadside crosses in Polish villages were most often put up...',
+      a: ['at crossroads and at the edge of the village', 'only on mountain tops', 'only at railway stations', 'in the middle of ponds'],
+      fact: 'Crosses stood at crossroads and village boundaries: as thanksgiving, as a votive offering or to protect the people and fields.',
+    },
+  },
+  {
+    id: 'majowka', spot: 'shrine2', ok: 1,
+    pl: {
+      q: 'W maju mieszkańcy wsi zbierają się przy kapliczkach na nabożeństwo majowe ("majówkę"). Komu jest ono poświęcone?',
+      a: ['Świętemu Mikołajowi', 'Matce Bożej', 'Świętemu Florianowi', 'Świętemu Janowi Chrzcicielowi'],
+      fact: 'Nabożeństwa majowe to modlitwy do Maryi, m.in. Litania Loretańska, śpiewane wieczorem przy przystrojonej kapliczce.',
+    },
+    en: {
+      q: 'In May villagers gather at wayside shrines for the May devotion ("majówka"). To whom is it dedicated?',
+      a: ['Saint Nicholas', 'the Virgin Mary', 'Saint Florian', 'Saint John the Baptist'],
+      fact: 'May devotions are prayers to Mary, such as the Litany of Loreto, sung in the evening at a decorated shrine.',
+    },
+  },
+  {
+    id: 'bozecialo', spot: 'shrine3', ok: 2,
+    pl: {
+      q: 'W Boże Ciało procesja idzie przez wieś i zatrzymuje się przy ołtarzach. Ile ich jest tradycyjnie?',
+      a: ['Dwa', 'Trzy', 'Cztery', 'Siedem'],
+      fact: 'Tradycyjnie są cztery ołtarze, przy każdym czyta się fragment innej Ewangelii. Ołtarze często stają przy kapliczkach.',
+    },
+    en: {
+      q: 'On Corpus Christi the procession walks through the village and stops at altars. How many are there traditionally?',
+      a: ['Two', 'Three', 'Four', 'Seven'],
+      fact: 'Traditionally there are four altars, each with a reading from a different Gospel. They are often set up at wayside shrines.',
+    },
+  },
+  {
+    id: 'nepomucen', spot: 'shrine4', ok: 3,
+    pl: {
+      q: 'Figury którego świętego, patrona od powodzi, stawiano często przy mostach i rzekach?',
+      a: ['Św. Floriana', 'Św. Huberta', 'Św. Izydora', 'Św. Jana Nepomucena'],
+      fact: 'Św. Jan Nepomucen chroni przed powodzią, dlatego jego figury stoją przy mostach. Św. Florian to patron strażaków.',
+    },
+    en: {
+      q: 'Statues of which saint, the patron against floods, were often put up by bridges and rivers?',
+      a: ['St Florian', 'St Hubert', 'St Isidore', 'St John of Nepomuk'],
+      fact: 'St John of Nepomuk protects from floods, so his statues stand by bridges. St Florian is the patron of firefighters.',
+    },
+  },
+  {
+    id: 'frasobliwy', spot: 'shrine5', ok: 0,
+    pl: {
+      q: 'Jak nazywa się ludowa figurka Chrystusa siedzącego w zadumie z głową opartą na dłoni, częsta w wiejskich kapliczkach?',
+      a: ['Chrystus Frasobliwy', 'Chrystus Pantokrator', 'Dobry Pasterz', 'Chrystus Król'],
+      fact: 'Chrystus Frasobliwy (Smętek) to jeden z najczęstszych motywów polskiej rzeźby ludowej w przydrożnych kapliczkach.',
+    },
+    en: {
+      q: 'What is the folk figure of Christ sitting deep in thought with his head resting on his hand, common in village shrines?',
+      a: ['Christ the Pensive (Frasobliwy)', 'Christ Pantocrator', 'The Good Shepherd', 'Christ the King'],
+      fact: 'The Pensive Christ (Frasobliwy) is one of the most common motifs of Polish folk carving in wayside shrines.',
+    },
+  },
+  {
+    id: 'discopolak', spot: 'jazz', ok: 2,
+    pl: {
+      q: 'Tu w stodole gra jazz, ale na wiejskiej zabawie tańczy się "discopolaka". Przy jakiej muzyce?',
+      a: ['Przy jazzie tradycyjnym', 'Przy muzyce klasycznej', 'Przy disco polo', 'Przy death metalu'],
+      fact: 'Disco polo wyrosło pod koniec lat 80. z muzyki granej na weselach i wiejskich zabawach. Najlepiej smakuje z parkietem pod chmurką!',
+    },
+    en: {
+      q: 'The barn plays jazz tonight, but at a village party people dance the "discopolak". To what music?',
+      a: ['Trad jazz', 'Classical music', 'Disco polo', 'Death metal'],
+      fact: 'Disco polo grew out of music played at weddings and village dances in the late 1980s. Best enjoyed on an open-air dance floor!',
     },
   },
 ];

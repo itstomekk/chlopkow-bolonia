@@ -14,8 +14,8 @@ with sync_playwright() as p:
     page.wait_for_function("window.__game", timeout=30000)
     page.evaluate("localStorage.clear()")
     page.reload()
-    page.wait_for_function("window.__game")
     page.keyboard.press("KeyN")
+    page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play'")
 
     first = page.evaluate("__game.ITEMS.npcs.filter(n => !n.secret).map(n => [n.id, n.x, n.y])")
@@ -28,6 +28,7 @@ with sync_playwright() as p:
     assert restored == first, (first, restored)
 
     page.keyboard.press("KeyN")
+    page.locator("#player-name-input").fill("Test"); page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play'")
     second = page.evaluate("__game.ITEMS.npcs.filter(n => !n.secret).map(n => [n.id, n.x, n.y])")
     assert second != first, "N must sample a new NPC layout"
@@ -40,6 +41,7 @@ with sync_playwright() as p:
     after = page.evaluate("[__game.P.x, __game.P.y]")
     cursor = page.evaluate("({seen: __game.mapCursor.seen, x: __game.mapCursor.x, y: __game.mapCursor.y})")
     assert after == before and cursor["seen"], (before, after, cursor)
+    assert page.evaluate("__game.mapPlaceName(2096, 3696)") == "WIATRAK KOŹLAK"
 
     time.sleep(0.2)
     assert not errors, errors

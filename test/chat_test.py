@@ -42,6 +42,17 @@ with sync_playwright() as playwright:
     status = page.locator("#arek-chat-status").text_content()
     assert status and not status.startswith("Message sent")
     assert re.fullmatch(r"[0-9a-f]{64}", page.evaluate(f"localStorage.getItem('{SECRET_KEY}')"))
+    # History since 26 Sep must actually arrive (the channel has public messages from 27 Sep on).
+    # Needs network; set ARK_CHAT_OFFLINE=1 to skip this part.
+    if not os.environ.get("ARK_CHAT_OFFLINE"):
+        page.wait_for_function("__arekGlobalChat.isConnected()", timeout=20000)
+        n = page.evaluate("__arekGlobalChat.messageCount()")
+        assert n >= 1, "no channel history loaded"
+        assert page.evaluate("__arekGlobalChat.historySince") <= 1790373600
+        days = page.locator(".arek-chat-day").count()
+        assert days >= 1, "day separators missing"
+        status = page.locator("#arek-chat-status").text_content()
+        print("history:", n, "messages,", days, "day(s)")
     assert not errors, errors
     print("chat smoke: PASS - opt-in, local guest key, Unicode limit, and no page errors")
     print("status:", status)

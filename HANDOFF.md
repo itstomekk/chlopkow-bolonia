@@ -1,6 +1,14 @@
-# HANDOFF — Arek w Chłopkowie (→ renaming to CHŁOPKÓW BOLONIA)
+# HANDOFF — Chłopków Bolonia
 
-## ▶ START HERE (2026-09-28, planning session, nothing built or deployed)
+## CURRENT STATE — read before historical notes below
+- Current project roadmap: `plans/2026-09-27-chlopkow-bolonia-roadmap.md`, indexed by `PLAN.md`. It includes Tomek's new terrain, player-name, diagonal-animation, duck-hunt, shooting, metadata, README and dialogue requests.
+- GitHub repo: https://github.com/itstomekk/chlopkow-bolonia; **published** at commit `ba64220e797adc4bc8842b8f82483c3749bf356d` to https://itstomekk.github.io/chlopkow-bolonia/. The exact-commit Pages build reports `built`; index, scripts, sprites and ground image read back. JSON bytes were minified by Pages but parsed objects match. Public `python test/run_all.py https://itstomekk.github.io/chlopkow-bolonia/index.html` passed 11/11. The old Pages URL has a separate redirect repository.
+- Published batch: expanded map (3896×5860), north forest, BUDKA, football pitch, PPM range, Irenka/Kuba/car art, optional Nostr overlay, world-life animals/car, cemetery art, map and navigation changes, Polish README and HTML metadata. This is an interim playable update: mushrooms, new Professor, duck-target replacement, new target range and other roadmap features are NOT yet implemented. Most old facts below describe the previous map and are historical.
+- Local `main` and `origin/main` match at `ba64220`; no local gameplay changes remain. Local-only `PLAN.md`, `HANDOFF.md`, roadmap and raw source images remain uncommitted. Do not add private reference photos or raw source images to the public repo. The minigame test prints `FAILED: none` when its failure list is empty and exits 0; this is confusing wording, not a failed assertion.
+- Coordinate source for new requests is the *previous* 3897×2698 map. Convert through `osm/geo.py:pre_expansion_i()`: Sołtys near (1887,1237), shrine old (2298,1423) → new (1744,1271), pond near (270,1893), second store near (2150,2506), duck hunt near (3145,2629), pitchfork near (3366,410).
+- Michał is the real shooting-range operator and Kuba is also there. Use village flavor in dialogue, but do not attribute wrongdoing, addiction or suicide to named private residents, and independently confirm the municipal status before any factual claim about Platerów.
+
+## HISTORICAL NOTES (earlier planning, superseded where inconsistent above)
 - Tomek asked for a batch of changes: rename the game to **CHŁOPKÓW BOLONIA** (and the repo); the river becomes **Melioranka**; Halina becomes **Babcia Irenka** with a new sprite from his photos; the quiz starts without visiting her; slower dogs; lat/lon on the M map; "DUŃCY" on the east edge; the big forest in the north; 5 real points from Google Maps; a gamification plan.
 - **Everything is planned in `PLAN-2026-09-28-bolonia.md`** (verified facts, 9 open questions, 4 phases). Read it first. It lives on branch `claude/gifted-goodall-12f9jo`; **`main` is untouched and nothing is deployed.**
 - New skill: `.claude/skills/add-real-poi/SKILL.md` (Google link → lat/lon → map).
@@ -87,6 +95,17 @@ Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigam
 - `MUSIC.renderWav(name, passes)` exports a track to WAV at 0.8×.
 - Covered by `test/music_test.py`: scene switching, tempo, bark, cemetery.
 - Ideas: MIDI import, recognisable public-domain folk tunes (e.g. "Czerwone jabłuszko" for Kasia), accordion timbre, a recorded "hej!".
+
+## Map extension + cemetery sunglasses (2026-09-28)
+- **Map:** `osm/geo.py` BBOX grew 10% south (minlat 52.2585 -> 52.25585) and 20% east (maxlon 22.8872 -> 22.89292): 3896x5860 -> 4675x6446 px. The NW corner is the pixel origin, so all existing art coordinates stay valid. New OSM data came from Overpass via `python osm/fetch_osm.py 52.25585 22.8586 52.285 22.89292 --old 52.2585 22.8586 52.285 22.8872`, which merges by (type, id), never removes anything and (with `--old`) leaves the already-drawn area untouched.
+- **Sunglasses:** `gen/build_arek_noglasses.py` writes `docs/img/arek_sheet_noglasses.png` (same layout as `arek_sheet.png`, only the glasses are repainted with skin + eyes; back views unchanged). `game.js` draws it while Arek is inside the cemetery zone (same rectangle + hysteresis as the cemetery music). `test/sunglasses_test.py` checks on in village / off in cemetery / on again after leaving.
+
+## Global chat (Nostr, `docs/js/chat.js`) — fixed 2026-09-27
+- NIP-28 channel `6432fea6…` (kind 40), messages are kind 42. Opt-in: nothing connects until GLOBAL CHAT is clicked.
+- **Bug fixed:** the old code passed an array of filters to `subscribeMany` (nostr-tools 2.x takes one filter object), so relays rejected the request and no history ever showed. It now loads everything since 26 Sep 2026 00:00 Polish time (`HISTORY_SINCE`), up to 500 messages, then stays live.
+- Clean display: day separators, grouped consecutive messages, own messages in green, invisible/control characters stripped, same text from the same author within 2 min shown once, messages over 280 chars or dated in the future ignored, one redraw per frame.
+- Relays (write + read-back checked 2026-09-27): relay.primal.net, relay.nostr.net, relay.damus.io, plus two small open ones, **relay.chatbett.de** (strfry) and **wheat.happytavern.co** (GRAIN). The existing channel events were copied, unchanged and still signed, to the two small relays. Dropped: relay.nostr.band (dead), nos.lol (502).
+- `test/chat_test.py` asserts history loads (needs network; `ARK_CHAT_OFFLINE=1` skips that part).
 
 ## Minigame tuning (in `minigames.js`)
 - `MEDAL` thresholds (bronze/silver/gold): race — beat Damian / 15.5 s / 14.0 s; pig — 30 s / 15 s / 8 s; dogs — win / 28 s / 18 s; skeet — 10 / 12 / 14 hits.

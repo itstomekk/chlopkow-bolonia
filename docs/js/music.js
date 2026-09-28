@@ -4,7 +4,7 @@
      krakowiak — 2/4, syncopated 16th-8th-16th "hop" rhythm, G major with a Góral raised-4th (C#) in part B  (village)
      mazurka   — 3/4, dotted first beat, accents on 2 and 3, C major                                         (title, village alt.)
      oberek    — fast 3/4 whirling eighths, um-pa-PA accompaniment, D major                                   (minigames)
-     pastoralka— slow 3/4 lullaby, soft pads, F major                                    (village, after ~25 s of standing still)
+     pastoralka— slow 3/4 lullaby, soft pads, F major                                    (available as a quiet piece)
      choral    — sacred organ hymn in D Dorian, 4/4 half notes, a church bell on each section           (church interior)
      nokturn   — Chopin-style nocturne in A minor, rolling left-hand arpeggios, ornamented melody  (cemetery, memory archive)
    Every pass is re-arranged: section order, a second fiddle in thirds, octave jumps, grace notes and drum fills
@@ -89,9 +89,20 @@
         A5:6 G5:2 F5:2 A5:2   G5:6 F5:2 E5:2 C5:2   F5:4 E5:2 D5:2 C5:2 D5:2   B4:8 G#4:4` },
       forms: ['AB', 'AAB', 'ABAB'],
     },
+    jazz: {     // JAZZ W STODOLE: swing in F. bar = 12 triplet-eighth steps (4/4 swung), ii-V-I changes, walking bass, ride & brushes
+      bpm: 150, bar: 12, beat: 3, key: 5, scale: [0, 2, 4, 5, 7, 9, 11], drone: null, drums: 'swing', acc: 'walking', style: 'jazz', range: [.9, 1.05], second: false,
+      A: { chords: 'Fmaj7 D7 Gm7 C7 Am7 D7 Gm7 C7', mel: `
+        A4:2 C5:1 E5:2 F5:1 A5:4 G5:2   F#5:2 A5:1 C6:2 A5:1 F#5:3 D5:3   G5:2 Bb5:1 D6:2 C6:1 Bb5:2 A5:1 G5:3   E5:2 G5:1 Bb5:3 A5:2 G5:1 E5:3
+        C6:3 A5:2 G5:1 E5:3 C5:3   D5:2 F#5:1 A5:2 C6:1 B5:2 A5:1 F#5:3   Bb5:2 A5:1 G5:2 F5:1 E5:2 D5:1 C5:3   E5:2 G5:1 F5:6 -:3` },
+      B: { chords: 'Bb7 Bb7 Fmaj7 D7 Gm7 C7 Fmaj7 C7', mel: `
+        D5:2 F5:1 Ab5:3 G5:2 F5:1 D5:3   F5:2 D5:1 Bb4:3 -:3 Ab4:2 A4:1   C5:2 F5:1 A5:2 C6:1 E6:6   D6:2 C6:1 A5:2 F#5:1 D5:3 -:3
+        Bb4:2 D5:1 F5:2 A5:1 G5:6   G5:2 E5:1 C5:2 Bb4:1 Db5:2 D5:1 E5:3   F5:3 A5:2 C6:1 A5:6   G5:2 F5:1 E5:2 C5:1 Bb4:3 G4:3` },
+      forms: ['AABA', 'ABAB', 'AAB'],
+    },
   };
   CHORD.Gm = [43, [0, 3, 7]]; CHORD.E7 = [52, [0, 4, 7, 10]];
   CHORD.Am = [45, [0, 3, 7]];
+  Object.assign(CHORD, { Fmaj7: [53, [0, 4, 7, 11]], Gm7: [43, [0, 3, 7, 10]], C7: [48, [0, 4, 7, 10]], Am7: [45, [0, 3, 7, 10]], Bb7: [46, [0, 4, 7, 10]] });
   for (const s of Object.values(SONGS)) for (const p of ['A', 'B']) { s[p].notes = parse(s[p].mel); s[p].chords = s[p].chords.split(' '); }
 
   /* ------------------------------------------------------------------ arrangement (one pass of a song -> events) */
@@ -146,6 +157,12 @@
         } else if (song.acc === 'nocturne') { // left hand: low root, fifth, tenth... rolling in eighths, pedal held
           const third = iv[1], pat = [0, 7, 12 + third, 19, 12 + third, 7];
           pat.forEach((o, k) => ev.push({ t: bt + k * 2, d: 6, ch: 'harp', m: root - 12 + o + 12, v: k === 0 ? 1 : .75 }));
+        } else if (song.acc === 'walking') {  // walking bass in quarters (root, chord tone, fifth, chromatic approach) + Charleston comping
+          const next = CHORD[sec.chords[(b + 1) % sec.chords.length]] || CHORD.C, nr = next[0];
+          const walk = [root, root + (Math.random() < .5 ? iv[1] : 2), root + 7, nr + (nr > root + 6 ? -1 : 1) * (Math.random() < .5 ? 1 : -1)];
+          walk.forEach((m, k) => ev.push({ t: bt + k * 3, d: 2.6, ch: 'bass', m, v: k ? .85 : 1 }));
+          ev.push({ t: bt, d: 1.5, ch: 'chord', ms: tones, v: .8 });
+          ev.push({ t: bt + (Math.random() < .5 ? 5 : 8), d: 1.2, ch: 'chord', ms: tones, v: .65 });
         } else {                              // pad: held bass, slow rolled chord
           ev.push({ t: bt, d: barLen, ch: 'bass', m: root });
           tones.forEach((m, k) => ev.push({ t: bt + k * 2, d: barLen - k * 2, ch: 'pad', m, v: .9 }));
@@ -164,6 +181,11 @@
           ev.push({ t: bt, ch: 'kick' }); ev.push({ t: bt + 4, ch: 'hat', v: .7 }); ev.push({ t: bt + 8, ch: 'snare', v: 1.1 });
           for (const o of [2, 6, 10]) ev.push({ t: bt + o, ch: 'hat', v: .35 });
           if (fill) for (const o of [9, 10, 11]) ev.push({ t: bt + o, ch: 'snare', v: .7 });
+        } else if (song.drums === 'swing') {  // ride "ding, ding-a ding, ding-a", hi-hat foot on 2 and 4, brush swishes
+          for (const o of [0, 3, 5, 6, 9, 11]) ev.push({ t: bt + o, ch: 'ride', v: o % 3 ? .55 : 1 });
+          for (const o of [3, 9]) { ev.push({ t: bt + o, ch: 'hat', v: .6 }); ev.push({ t: bt + o, ch: 'brush', v: 1 }); }
+          if (fill) for (const o of [7, 8, 10, 11]) ev.push({ t: bt + o, ch: 'brush', v: .7 });
+          if (b % 2 === 0) ev.push({ t: bt, ch: 'kick', v: .4 });
         }
       });
       t += sec.chords.length * barLen;
@@ -230,6 +252,11 @@
       const v = e.v ?? 1;
       if (s.style === 'organ') { tone(e.out, 'p50', e.m, t, d * .97, .11 * v, { a: .06, r: .25 }); tone(e.out, 'p25', e.m - 12, t, d * .97, .05 * v, { a: .08, r: .25 }); return; }
       if (s.style === 'piano') { tone(e.out, 'p25', e.m, t, d * 1.05, .24 * v, { a: .004, r: .35, decay: .4, vib: 6 }); return; }
+      if (s.style === 'jazz') {   // tenor-sax-ish: soft attack, scoop into the note, late vibrato, a breath of air
+        tone(e.out, 'p50', e.m, t, d * .9, .12 * v, { a: .03, r: .08, vib: 16, slide: Math.random() < .35 });
+        tone(e.out, 'p12', e.m, t, d * .9, .04 * v, { a: .04, r: .08 });
+        noise(e.out, t, Math.min(.12, d * .5), .015, 'bandpass', 1800); return;
+      }
       const soft = s.style === 'soft';
       tone(e.out, soft ? 'p50' : 'p25', e.m, t, d * .92, .15 * v, { vib: 14, slide: !soft && Math.random() < .15, a: soft ? .04 : .004, r: soft ? .18 : .05 });
     },
@@ -241,22 +268,23 @@
     chord: (e, t, d) => { e.ms.forEach((m, k) => tone(e.out, 'p50', m, t + k * .012, d, .035 * (e.v ?? 1), { r: .03 })); },
     pad: (e, t, d) => tone(e.out, 'p50', e.m, t, d, .04 * (e.v ?? 1), { a: .25, r: .5, vib: 6 }),
     drone: (e, t, d) => tone(e.out, 'p12', e.m, t, d, .025, { a: .3, r: .4 }),
-    kick: (e, t) => kick(e.out, t, .5),
+    kick: (e, t) => kick(e.out, t, .5 * (e.v ?? 1)),
     snare: (e, t) => noise(e.out, t, .09, .13 * (e.v ?? 1), 'bandpass', 2200),
     hat: (e, t) => noise(e.out, t, .03, .06 * (e.v ?? 1), 'highpass', 7500),
+    ride: (e, t) => { noise(e.out, t, .35, .035 * (e.v ?? 1), 'highpass', 6000); partial(e.out, 3150, t, .012 * (e.v ?? 1), .4); },
+    brush: (e, t) => noise(e.out, t, .16, .05 * (e.v ?? 1), 'bandpass', 3200),
   };
 
   /* ------------------------------------------------------------------ scheduler
-     Tempo follows the player: standing still -> 0.5x the written BPM, moving -> the "energy" builds up and the band
-     slowly speeds up to 1.5x (faster build-up while running), stopping -> it relaxes back to 0.5x over a few seconds.
+     Tempo follows the player: standing still -> 0.2x the written BPM, moving -> the "energy" builds up and the band
+     slowly speeds up to 1.3x (slower build-up while walking or running), stopping -> it relaxes linearly.
      Because the tempo changes while playing, the scheduler keeps a frontier (audio time fT <-> song step fS) and
      advances it at the current tempo, so a tempo change never makes the music jump. */
   const P = { name: null, song: null, arr: null, pass: 0, idx: 0, fT: 0, fS: 0, out: null, want: null };
   let VILLAGE = 'krakowiak', PICK = null, ACTIVITY = null;
   const LOOKAHEAD = .25;
-  const TEMPO = { idle: .4, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
-    rampUp: 20, rampRun: 10, rampDown: 1.5,         // slow build-up (walking / running seconds to max), quick calm-down
-    glideUp: 1.2, glideDown: 7 };                   // how fast the audible tempo follows the target, per second
+  const TEMPO = { idle: .2, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
+    rampUp: 30, rampRun: 20, rampDown: 20 };        // linear energy seconds to max (walking / running / stopping)
   // quiet pieces (church hymn, nocturne, lullaby) set song.range, e.g. [.8, 1], so they stay slow and dignified
   let energy = 0, tempo = TEMPO.still, lastTick = performance.now();
   function updateTempo() {
@@ -270,7 +298,7 @@
       const [lo, hi] = (P.song && P.song.range) || [TEMPO.idle, TEMPO.max];
       target = lo + energy * (hi - lo);
     }
-    tempo += (target - tempo) * Math.min(1, dt * (target > tempo ? TEMPO.glideUp : TEMPO.glideDown));   // slow up, fast down
+    tempo = target;                                  // keep the audible tempo linear with energy; no exponential catch-up
   }
   function startSong(name) {
     if (!ac) return;
@@ -345,6 +373,15 @@
     if (!ac || muted || rendering) return; const t = ac.currentTime + .01;
     tone(master, 'p25', midi('E6'), t, .06, .09, { r: .01 }); tone(master, 'p25', midi('B6'), t + .06, .12, .09, { r: .06 });
   }
+  function hop() {      // jump "boing": a quick upward pulse sweep with a springy wobble
+    if (!ac || muted || rendering) return; const t = ac.currentTime + .005;
+    const o = ac.createOscillator(), g = ac.createGain(), l = ac.createOscillator(), lg = ac.createGain();
+    o.setPeriodicWave(waves.p25); o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(620, t + .11); o.frequency.exponentialRampToValueAtTime(430, t + .2);
+    l.frequency.value = 28; lg.gain.value = 45; l.connect(lg); lg.connect(o.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.09, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + .22);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + .24); l.start(t); l.stop(t + .24);
+    window.MUSIC.hops = (window.MUSIC.hops || 0) + 1;
+  }
 
   /* ------------------------------------------------------------------ control */
   function setMuted(v) {
@@ -383,7 +420,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, TEMPO };
+  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
@@ -396,15 +433,19 @@
       const m = inCem ? 70 : 25, dx = Math.abs(A.P.x - CEM.x), dy = Math.abs(A.P.y - CEM.y);
       return (inCem = dx < CEM_HALF[0] + m && dy < CEM_HALF[1] + m);
     };
-    let idleFor = 0, lastT = performance.now();
-    setInterval(() => { const n = performance.now(); idleFor = A.scene === 'play' && !A.P.moving && !A.talk ? idleFor + (n - lastT) / 1000 : 0; lastT = n; }, 200);
+    // JAZZ W STODOLE: the barn yard plays swing (map.json jazz {x, y, r}), with hysteresis at the edge
+    let inJazz = false;
+    const nearJazz = () => {
+      const J = A.MAP.jazz; if (!J || A.room) return (inJazz = false);
+      return (inJazz = Math.hypot(A.P.x - J.x, A.P.y - J.y) < J.r + (inJazz ? 40 : 0));
+    };
     const pick = () => {
       const sc = A.scene;
       if (sc === 'title') return 'mazurka';
-      if (A.room) return 'choral';
+      if (A.room && A.room.soltys) return 'choral';
       if (sc === 'end' || nearCemetery()) return 'nokturn';
       if (A.minigame && A.minigame()) return 'oberek';
-      if (idleFor > 25) return 'pastoralka';   // standing still for a while: the band plays a lullaby
+      if (sc === 'play' && nearJazz()) return 'jazz';
       return VILLAGE;
     };
     ACTIVITY = () => A.scene === 'play' ? { moving: !!A.P.moving, running: A.keys.has('ShiftLeft') || A.keys.has('ShiftRight') } : A.scene === 'end' ? { moving: false } : null;
