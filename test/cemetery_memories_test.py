@@ -1,4 +1,5 @@
 """Win-screen cemetery archive reveals all three generated memories in order."""
+import os
 import time
 from playwright.sync_api import sync_playwright
 
@@ -16,7 +17,7 @@ with sync_playwright() as p:
             return original.call(this, image, ...args);
         };
     """)
-    page.goto("http://127.0.0.1:8765/index.html")
+    page.goto(os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html"))
     page.wait_for_function("window.__game", timeout=30000)
     page.evaluate("localStorage.clear()")
     page.reload()
@@ -63,7 +64,7 @@ with sync_playwright() as p:
     mobile = browser.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
     mobile_errors = []
     mobile.on("pageerror", lambda error: mobile_errors.append(str(error)))
-    mobile.goto("http://127.0.0.1:8765/index.html?lang=en")
+    mobile.goto(os.environ.get("ARK_URL", os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")) + ("&" if "?" in os.environ.get("ARK_URL", os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")) else "?") + "lang=en")
     mobile.wait_for_function("window.__game", timeout=30000)
     mobile.keyboard.press("KeyN")
     mobile.wait_for_function("__game.scene === 'play'")

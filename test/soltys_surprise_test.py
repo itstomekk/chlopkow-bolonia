@@ -1,8 +1,9 @@
 """Headless test for the hidden Sołtys encounter by the Białka woodland path."""
+import os
 import time
 from playwright.sync_api import sync_playwright
 
-URL = "http://127.0.0.1:8765/index.html"
+URL = os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -19,7 +20,9 @@ with sync_playwright() as p:
 
     npc = page.evaluate("__game.ITEMS.npcs.find(n => n.id === 'soltys' && n.secret)")
     assert npc, "the secret Sołtys should be listed as hidden data, not a marked quest NPC"
-    assert (npc["x"], npc["y"]) == (1760, 1600), npc
+    board = page.evaluate("__game.ITEMS.boards.find(b => b.spot === 'woods')")
+    gap = ((npc["x"] - board["x"]) ** 2 + (npc["y"] - board["y"]) ** 2) ** .5
+    assert 45 < gap < 150, f"Sołtys should stand by the woods signboard, not on it (gap {gap:.0f})"
     assert page.evaluate("""n => { for (let r = 24; r <= 38; r += 2) for (let a = 0; a < 6.28; a += .3) if (!__game.blocked(n.x + Math.cos(a) * r, n.y + Math.sin(a) * r)) return true; return false; }""", npc), "the chosen path point must have a walkable interaction tile"
 
     # Stand beside him using a collision-free neighboring tile, then interact.
@@ -36,7 +39,13 @@ with sync_playwright() as p:
     line = page.evaluate("__game.talk.lines[0]")
     assert line, "the secret encounter should have an optional dialogue line"
     assert page.evaluate("!!window.CHURCH_ART.soltys"), "the generated church Sołtys sprite should be reused"
-    page.screenshot(path="C:/Users/Lenovo/AppData/Local/hermes/cache/scratch/soltys_surprise.png")
+    page.screenshot(path="test/soltys_surprise.png")
+    # the woods quiz board must be reachable (the Sołtys used to stand on it and steal the interaction)
+    page.keyboard.press("Enter"); time.sleep(.1)
+    while page.evaluate("!!__game.talk"): page.keyboard.press("Enter"); time.sleep(.05)
+    page.evaluate("b => { __game.P.x = b.x; __game.P.y = b.y + 12; }", board); time.sleep(.2)
+    page.keyboard.press("KeyE"); time.sleep(.2)
+    assert page.evaluate("!__game.talk || __game.talk.who !== 'soltys'"), "the woods signboard is still shadowed by the Sołtys"
     assert not errors, errors
     print("secret Sołtys OK", npc, line, "errors", errors)
     browser.close()

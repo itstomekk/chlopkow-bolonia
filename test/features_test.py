@@ -1,7 +1,8 @@
 """Headless test: Halina + quiz, and the three minigames (race / pig / dogs)."""
+import os
 import time, sys
 from playwright.sync_api import sync_playwright
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8765/index.html"
+URL = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1280, "height": 720})
     errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)

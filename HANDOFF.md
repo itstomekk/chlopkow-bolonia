@@ -1,80 +1,57 @@
 # HANDOFF — Arek w Chłopkowie
 
-Last updated: 2026-09-27
-
-## 2026-09-27 (cloud, church interior)
-- **You can now enter the church.** Space/E at its door fades into `docs/js/church.js`, a 320×440 room drawn in code from Tomek's interior photos:
-  - pews, red aisle carpet, marble presbytery and steps;
-  - altar with lace cloth, four gold candles (animated flames), ambo and a processional cross;
-  - Sacred Heart painting, stained glass and murals;
-  - Lourdes Mary niche, flags, bishop's banner, confessional, holy water font;
-  - jubilee "100" flowers.
-  Walk out through the bottom door to get back to the church door.
-- **New NPC: the Sołtys** (village head), drawn in code from Tomek's photo: grey hair, glasses, brown pinstripe suit, harvest bread. He stands by the ambo and his lines depend on Kasia's quest.
-- `Q.churchSeen` shows the intro line once. Saving while inside stores the outdoor position.
-- Tests: `test/church_test.py` is new. `quest_test.py` and `jump_test.py 1662 1747` still pass.
-- **AI art complete:** Codex GPT Image 2 medium generated `backwall`, `altar`, `candles`, `cross`, `ambo`, `banner`, `mary`, `flags`, `flowers100`, `pew`, `confessional`, `font`, and `soltys`. `gen/prep_church_sprite.py` processed them into `docs/img/church/`; the game loads the manifest automatically. Raw outputs are in ignored `gen/raw/`.
-- Visual QA passed in the local room screenshots; the pew was regenerated to fit its wide, low game box. Tests: `church_test.py`, `quest_test.py`, and `jump_test.py 1662 1747` each end with `errors []`.
-- Six church interior photos and the Sołtys photo are in ignored `references/`; never commit them. The Sołtys photo is used only with Codex, not PPQ.
-- Codex did not report USD pricing. Sixteen successful generations (including three replacement drafts) were logged with `cost_usd: null` in Hermes image telemetry; actual cost is unknown.
-- "100" = **100 years of the parish** (confirmed by Tomek). The Sołtys agreed to appear in the game.
-- **AI art hook:** any PNG in `docs/img/church/<name>.png` replaces the hand-drawn piece. The names and boxes are in `CHURCH_PIECES` (`church.js`). `gen/prep_church_sprite.py` keys, crops and saves the images. **Hermes runbook: `gen/HERMES-PROMPT.md`.**
-- Repo skill for adding more rooms: `.claude/skills/add-interior/SKILL.md`.
-- **Merged to `main` and live (2026-09-27).** Merged alongside the quiz/minigames work: quiz signs, flags and minigame draws are hidden inside the church.
-  The church door stays shut while a quiz or minigame runs (`HOOKS.busy`).
-- AI church art loads only the names listed in `docs/img/church/manifest.json`, so there are no 404s. `prep_church_sprite.py` keeps the list updated.
-- `test/features_test.py` reports one 404 that already exists on `main` (not from the church, probably a favicon).
-
-## Latest session — 2026-09-27 (Frodo companion)
-- Frodo's first-pass procedural atlas was replaced with a GPT Image 2 pixel-art sheet based on six supplied local reference photos (`gen/frodo_sheet_raw.png` → `gen/build_frodo.py` → `docs/img/frodo.png`). The reference photos remain outside the repo.
-- Frodo follows Arek with collision-aware movement, appears in the y-sorted scene, and repositions safely when entering or leaving the church. His location is not added to save data.
-- Verified with `test/frodo_test.py` (following, rendering, church transition), `test/quest_test.py`, and `test/jump_test.py 1312 1670`; no browser errors in these runs.
-
-## Latest session — 2026-09-27 (village house + wayside shrines)
-- Generated one generic house sprite plus four distinct cross/shrine sprites with Codex GPT Image 2 (`gen/lm_house_generic.png`, `gen/lm_cross_iron.png`, `gen/lm_shrine_stone.png`, `gen/lm_shrine_white.png`, `gen/lm_shrine_fenced.png`). The house is not a literal copy of any one reference house.
-- `osm/render_map.py` replaces OSM house way 1095382322 with the generic sprite and places shrines at four nearby-road junctions. The user photos have no GPS metadata; these locations are approximate, not verified real sites.
-- Rebuilt the entrance sign from a GPT Image 2 medium pixel-art draft (`gen/lm_village_sign_raw.png`), then keyed the magenta background and overlaid exact `CHŁOPKÓW` bitmap lettering in `gen/build_village_sign.py`. The in-game sign now has the reference's green upper panel, pale lower skyline panel, metal frame, and two posts. Codex did not report a USD cost.
-- Regenerated the map and checked the house, four shrines/crosses, and sign in a local browser at gameplay zoom. The sign is legible and beside the road; the landmarks remain readable and no visible road/player-route obstruction was found. The house remains consistent with nearby rural homes. Shrine locations are still approximate because the photos lack GPS metadata.
-- `test/village_sign_test.py`, `quest_test.py`, `features_test.py`, `church_test.py`, `frodo_test.py`, and `jump_test.py 1312 1670` all pass locally; browser error arrays were empty. No commit or push has been made.
-
-## Latest session — 2026-09-27 (cemetery archive + deploy prep)
-- Generated three respectful cemetery-memory illustrations from the user-supplied old photos with Codex GPT Image 2 medium (all responses reported `low` quality). The scenes avoid recognizable faces and readable inscriptions. `gen/build_cemetery_memories.py` removes the magenta background, crops, palette-reduces and nearest-neighbor pixelates them into `docs/img/memories/`; original photographs are not shipped.
-- After Arek receives the tractor keys, the end screen now shows the illustrations one at a time with short photo-grounded trivia. Enter/Space or tap advances; Escape skips. English and Polish copy are included.
-- `test/cemetery_memories_test.py` drives the actual win transition, verifies all three slides render in order, then verifies return to play. Visual review of the 1280×720 screens found no clipping. Cost was not reported by Codex; it is unknown, not estimated.
-- Along with this archive work, the previously approved generic house and four wayside shrine assets are rendered in the map. Renderer, `features_test.py`, `quest_test.py`, `jump_test.py 1662 1747`, `church_test.py`, `frodo_test.py`, `play_test.py`, and `cemetery_memories_test.py` have passed locally. `git diff --check` passes. No commit or push has been made; several unrelated Frodo changes were already pending and must not be swept in inadvertently.
+Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier per-session notes are in
+`_archive/2026-09-27_HANDOFF-before-audit.md`.
 
 ## Where things are
-- Live: https://itstomekk.github.io/arek-w-chlopkowie/ (GitHub Pages, branch `main`, folder `/docs`). Every push to `main` redeploys.
-- Repo: https://github.com/itstomekk/arek-w-chlopkowie (public)
-- Local: `C:\Users\Lenovo\Hermes\projects\games\arek-w-chlopkowie\`
-- Local server: `python -m http.server 8765 --directory docs`. The VibeTV project's `.claude/launch.json` has an `arek-game` entry.
+- **Live:** https://itstomekk.github.io/arek-w-chlopkowie/ (GitHub Pages from `main:/docs`; every push to `main` redeploys in about 1 minute; browsers cache for 10 minutes).
+- **Repo:** https://github.com/itstomekk/arek-w-chlopkowie (public)
+- **Local:** `C:\Users\Lenovo\Hermes\projects\games\arek-w-chlopkowie\`
+- **Local server:** `python -m http.server 8765 --directory docs`. The VibeTV project's `.claude/launch.json` has an `arek-game` entry.
+- **Tests:** `python test/run_all.py [URL]` runs all 10 Playwright play-tests. All 10 pass locally as of this update.
 
-## State
-- Done and verified by headless play-tests (`test/quest_test.py`, `test/jump_test.py`, also run against the live URL):
-  - map from OSM;
-  - Arek 4-direction walk cycle;
-  - NPCs Kasia, Marcin, Damian and Grandpa;
-  - apples, cap and orangeade quests plus the ending;
-  - jumping over low obstacles;
-  - minimap, autosave, touch controls, PL/EN.
-- Reference photos of Arek (4 new + 7 older) and the church live in `references/`. That folder is **gitignored and must never be committed**.
+## What the game has
+- **Map:** generated from OpenStreetMap, 3897×2698 art px (1 m = 2 px), about 1.95 × 1.35 km. It covers the whole main street, the church quarter, the riverside farmsteads in the west and Chłopków-Kolonia in the east. 93% of it is reachable on foot.
+- **Main quest:** Kasia (10 of 16 apples), Damian (cap), Marcin (oranżada), then Grandpa's Ursus keys, then the cemetery memory archive.
+- **Quiz:** Pani Halina and 13 signboards (`quiz.js`, `features.js`).
+- **Church interior** with the Sołtys (`church.js`). The hidden Sołtys stands by the Białka woods.
+- **Frodo** the dog follows Arek.
+- **Minigames** (`minigames.js`), all with medals, records and retry:
+  - race (with a ghost of your record run);
+  - catch the pig;
+  - eggs and dogs;
+  - Kasia's shooting gallery with tin moorhens.
+- Landmarks from photos: church, Koźlak windmill, shop, generic house, 4 wayside shrines, village sign.
+
+## Audit 2026-09-27: what was found and fixed
+1. **Skeet minigame was a stub.** It had texts, a flag and a HUD but no setup or update logic. Starting it crashed the game: an undefined intro, reading `MG.skeet.hit` every frame, and undefined `W/H/S` in the key handler. It has been rewritten as a real shooting gallery in `minigames.js`.
+2. **The hidden Sołtys stood exactly on the "woods" quiz signboard.** NPCs win interaction priority, so quiz question 12 of 13 could never be answered, and Halina's title was unreachable. He was also hand-edited into `items.json`, so any re-run of `place_items.py` would have deleted him. He's now placed by `place_items.py`, 70 px from the sign, and an assertion stops NPCs landing on signboards.
+3. **No bridges.** Roads crossing the Białka kept the river's "low" collision (and the woods' "tall" collision), so the church side of the village was reachable only by jumping. Roads and tracks are now always walkable.
+4. **Boxed-in start.** The spawn and Kasia were inside a fenced garden; the garden fences had openings only next to roads. Fences now have a 16 px gate every 110 px. The spawn sits on the path by the shop. `place_items.py` flood-fills from the spawn, so every item is reachable without jumping.
+5. The skeet flag sat inside the dog meadow. The shooting range now has its own venue in the new western area.
+6. Hardcoded map coordinates were scattered across `render_map.py` and `place_items.py`. Everything now goes through `osm/geo.py` (`BBOX`, `P()`, `legacy_i()`), so the map can be resized safely.
+7. Cleanup:
+   - `features.js` now holds the quiz only; the minigames moved to `minigames.js`.
+   - One `freshQ()` save factory replaces two duplicated copies.
+   - A favicon was added (fixes the 404).
+   - Full-map numpy arrays became windowed ones (the renderer would otherwise need hundreds of MB).
+   - The ground layer is a 256-colour PNG (5.4 MB for 1.8× the area; the old one was 6.4 MB).
+   - Tests read `ARK_URL`, and `run_all.py` finds a river column for the jump test automatically.
+8. `docs/superpowers/` is untracked planning from another session. It's now in `.gitignore`, so it can't accidentally be published on Pages.
+
+## Minigame tuning (in `minigames.js`)
+- `MEDAL` thresholds (bronze/silver/gold): race — beat Damian / 15.5 s / 14.0 s; pig — 30 s / 15 s / 8 s; dogs — win / 28 s / 18 s; skeet — 10 / 12 / 14 hits.
+- Race: Damian needs 8.1 s per lap (about 16.2 s total). Off-track speed is 0.55× (`HOOKS.speed`). The ghost is `Q.mg.race.ghost`, saved on each new record.
+- Pig: speed goes from 175 down to 105 over about 26 s, with a sideways juke every 1.2–2 s.
+- Dogs: states patrol → chase (92) → windup 0.45 s ("!") → lunge 235 for 0.5 s → rest 0.8 s. Speed rises 7% per egg.
+- Skeet: 15 targets (12 launches, 3 of them doubles), 2 barrels, 0.9 s reload. Hit radius is 12 art px in screen space; targets draw at 1.6× size.
 
 ## Image generation
-- Preferred: Codex GPT Image via Hermes (`gen/codex_gen.py`, run with the Hermes venv python). Local reference files, nothing uploaded. It hits the ChatGPT image quota (HTTP 429) now and then.
-- Fallback: PPQ (`gen/ppq_gen.py`, about $0.0115/image). It needs a public URL for references (Blossom upload). **Do not upload real photos of people that way.** The auto-mode classifier blocked it, and Tomek chose Codex for photos.
-- OpenRouter had no credits (HTTP 402) on 2026-09-27.
-
-## 2026-09-27 (later): quiz + minigames
-- `docs/js/quiz.js` holds 13 questions from pl.wikipedia (Chłopków, mazowieckie), each bound to a board spot in `items.json`.
-- `docs/js/features.js` covers Pani Halina (new NPC, `gen/npc_src/halina.png`), the signboards, the quiz modal, and the minigames race/pig/dogs. It plugs into `HOOKS` in game.js.
-- Venues are drawn by render_map.py: TRACK (north oval, bale walls at 200°/330°), CORRAL (below the windmill), MEADOW (south of the street).
-- The windmill sprite was regenerated from a text description of Tomek's photos (the photos came only as chat attachments, not files). The old generic version is `gen/lm_windmill_v1_generic.png`.
-- Tests: `test/features_test.py` (quiz and minigames), `quest_test.py`, and `jump_test.py 1340 1645` (use a river column without a riverside tree).
+- Preferred: Codex GPT Image via Hermes (`gen/codex_gen.py`, run with `hermes-agent\.venv\Scripts\python.exe` and absolute paths). Local reference files only; nothing is uploaded. It hits the ChatGPT image quota (HTTP 429) now and then.
+- PPQ (`gen/ppq_gen.py`, about $0.0115/image) needs public URLs. **Never upload real photos of people there.**
+- Reference photos live in the gitignored `references/`. Never commit them.
 
 ## Next ideas
-- Regenerate landmarks from Tomek's photos as they arrive (list in `PHOTOS-WANTED.md`).
-- Add the świetlica (community hall) and wayside shrines as landmarks. The świetlica could be the next interior; see the add-interior skill.
-- Put a priest NPC in the church, and add a harvest-festival (dożynki) scene with the Sołtys and Kasia's pie.
-- Walk cycles for the NPCs (they are single static poses now).
-- Tractor-driving minigame after getting the keys, bridging into the *Grand Theft Tractor* video.
-- Sound: the video's `AUDIO.md` brief has the music direction.
+- Regenerate landmarks from photos as they arrive (`PHOTOS-WANTED.md`). The windmill photos so far came only as chat attachments; save the files for an exact re-render.
+- The west and east map extensions have no quest content yet. Candidates: a Kolonia NPC, a second orchard, the świetlica as an interior.
+- NPC walk cycles; a tractor-driving minigame after the keys; sound (see `AUDIO.md` in the Grand Theft Tractor video project).

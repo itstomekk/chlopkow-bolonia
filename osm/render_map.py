@@ -3,28 +3,24 @@
 Outputs (docs/img/ + docs/map.json):
   map_ground.png   ground layer (grass, fields, roads, river, shadows, flat details)
   map_objects.png  y-sorted layer (buildings, trees) — drawn by the game per object rect, sorted with Arek
-  map_collide.png  1 = solid (buildings, water, woods, trunks)
-  map.json         size, objects [x,y,w,h,base], POIs, spawn
+  map_collide.png  255 = tall/solid (buildings, ponds, woods, trunks), 128 = low/jumpable (streams, fences, bales)
+  map.json         size, objects [x,y,w,h,base], POIs, minigame venues, spawn
+
+Geometry (bbox, scale, legacy-coordinate conversion) lives in osm/geo.py.
 
 1 m = A art pixels. Buildings are exaggerated around their centroid (RPG convention).
 Map data © OpenStreetMap contributors (ODbL).
 """
-import json, math, random
+import json, math, random, sys
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
+sys.path.insert(0, 'osm'); sys.path.insert(0, 'gen')
+from geo import A, BBOX, W, H, P, legacy_i
+from slice_sheet import key as chroma_key
 
 OSM = 'osm/chlopkow.json'
-BBOX = (52.2588, 22.8630, 52.2700, 22.8800)
-A = 2.0
-lat0 = (BBOX[0] + BBOX[2]) / 2
-MX = 111320 * math.cos(math.radians(lat0)); MY = 110574
-W = int((BBOX[3] - BBOX[1]) * MX * A); H = int((BBOX[2] - BBOX[0]) * MY * A)
 rnd = random.Random(7)
 np.random.seed(7)
-
-
-def P(lat, lon):
-    return ((lon - BBOX[1]) * MX * A, (BBOX[2] - lat) * MY * A)
 
 
 data = json.load(open(OSM, encoding='utf-8'))
@@ -56,6 +52,15 @@ def mask_of(polys, lines=None, width=1):
         d.line(l, fill=255, width=int(w), joint='curve')
         for x, y in l: d.ellipse([x - w / 2, y - w / 2, x + w / 2, y + w / 2], fill=255)
     return np.array(m) > 0
+
+
+def mask_win(poly, pad=2):
+    """Polygon mask on its own bounding window: returns (x0, y0, bool array). Much cheaper than a full-map mask."""
+    arr = np.array(poly); x0 = max(0, int(arr[:, 0].min()) - pad); y0 = max(0, int(arr[:, 1].min()) - pad)
+    x1 = min(W, int(arr[:, 0].max()) + pad + 1); y1 = min(H, int(arr[:, 1].max()) + pad + 1)
+    if x1 <= x0 or y1 <= y0: return x0, y0, np.zeros((0, 0), bool)
+    m = Image.new('L', (x1 - x0, y1 - y0), 0); ImageDraw.Draw(m).polygon([(x - x0, y - y0) for x, y in poly], fill=255)
+    return x0, y0, np.array(m) > 0
 
 
 # ---------------------------------------------------------------- ground base
@@ -93,11 +98,12 @@ for k, a_, b_ in [('residential', '#7ab84c', '#6aa843'), ('religious', '#86c05a'
 # farmland: oriented furrow stripes, one crop per field
 CROPS = [('#dcb64c', '#c9a13d'), ('#d4ad44', '#be973a'), ('#86b24c', '#739f3f'), ('#9c724a', '#86603d'), ('#e6d24a', '#d2bd3b'), ('#a8c060', '#94ab50')]
 for i, p in enumerate(classes.get('farmland', [])):
-    m = mask_of([p])
-    arr = np.array(p); c = arr.mean(0); u, s, vt = np.linalg.svd(arr - c); ang = math.atan2(vt[0][1], vt[0][0])
-    yy, xx = np.nonzero(m)
-    proj = (xx * -math.sin(ang) + yy * math.cos(ang))
+    ox_, oy_, m = mask_win(p, pad=1)
     ca, cb = CROPS[rnd.randrange(len(CROPS))]
+    if not m.size: continue
+    arr = np.array(p); c = arr.mean(0); u, s, vt = np.linalg.svd(arr - c); ang = math.atan2(vt[0][1], vt[0][0])
+    yy, xx = np.nonzero(m); yy = yy + oy_; xx = xx + ox_
+    proj = (xx * -math.sin(ang) + yy * math.cos(ang))
     stripe = (np.floor(proj / 5) % 2).astype(bool)
     colA, colB = np.array(hexc(ca)), np.array(hexc(cb))
     col = np.where(stripe[:, None], colA, colB).astype(np.float32)
@@ -105,7 +111,7 @@ for i, p in enumerate(classes.get('farmland', [])):
     g[yy, xx] = col
     # dark field edge
     edge = m & ~np.pad(m[1:-1, 1:-1] & m[:-2, 1:-1] & m[2:, 1:-1] & m[1:-1, :-2] & m[1:-1, 2:], 1)
-    g[edge] *= .8
+    ey_, ex_ = np.nonzero(edge); g[ey_ + oy_, ex_ + ox_] *= .8
 
 # orchard / cemetery / pitch
 for p in classes.get('cemetery', []):
@@ -218,7 +224,7 @@ for b in sorted(buildings, key=lambda b: -(b['L0'] * b['W0'])):
         k -= .1
     if b.get('skip'): continue
     b['poly'], b['L'], b['Wd'] = poly, L, Wd
-    grown = Image.fromarray((mm * 255).astype(np.uint8)).filter(__import__('PIL.ImageFilter', fromlist=['x']).MaxFilter(5))
+    grown = Image.fromarray((mm * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5))
     placed[y0:y1, x0:x1] |= np.array(grown) > 0
 LM_NODES = []
 for e in nodes:
@@ -301,61 +307,82 @@ for b in buildings:
     collide |= fmask; occupied |= fmask
 
 # ---------------------------------------------------------------- minigame venues
-TRACK = dict(cx=1080, cy=300, rx=300, ry=150, w=44)
-CORRAL = dict(cx=1490, cy=565, r=100)
-MEADOW = dict(x0=720, y0=1010, x1=1140, y1=1290)
-yy, xx = np.mgrid[0:H, 0:W]
+# Positions were tuned on the first map; legacy_i() keeps them on the same real-world spot.
+_tc = legacy_i(1080, 300); TRACK = dict(cx=_tc[0], cy=_tc[1], rx=300, ry=150, w=44)
+_cc = legacy_i(1490, 565); CORRAL = dict(cx=_cc[0], cy=_cc[1], r=100)
+# dog meadow: open grass between the street and the Białka
+_m0, _m1 = legacy_i(680, 1060), legacy_i(1100, 1330); MEADOW = dict(x0=_m0[0], y0=_m0[1], x1=_m1[0], y1=_m1[1])
+_rc = tuple(int(v) for v in P(52.26499, 22.86081)); RANGE = dict(x=_rc[0], y=_rc[1])   # skeet range: riverside meadow, west part of the village
+
+
+def window(cx, cy, rx, ry):
+    """Coordinate grids (yy, xx) for a window around a venue, plus its offset."""
+    x0, y0 = max(0, int(cx - rx)), max(0, int(cy - ry)); x1, y1 = min(W, int(cx + rx) + 1), min(H, int(cy + ry) + 1)
+    yy, xx = np.mgrid[y0:y1, x0:x1]
+    return x0, y0, yy, xx
+
+
+g3 = np.array(ground).astype(np.float32)
+x0_, y0_, yy, xx = window(TRACK['cx'], TRACK['cy'], TRACK['rx'] + 80, TRACK['ry'] + 80)
 def ell(dx):  # normalised elliptic radius for an ellipse grown by dx pixels
     return ((xx - TRACK['cx']) / (TRACK['rx'] + dx)) ** 2 + ((yy - TRACK['cy']) / (TRACK['ry'] + dx)) ** 2
 outer, inner = ell(TRACK['w'] / 2) <= 1, ell(-TRACK['w'] / 2) <= 1
 ring = outer & ~inner
-tn = noise2(W, H, 4, 91)[..., None]
+tn = noise2(xx.shape[1], xx.shape[0], 4, 91)[..., None]
 tcol = np.array(hexc('#c79a62')) * (1 - tn) + np.array(hexc('#b48752')) * tn
-g3 = np.array(ground).astype(np.float32)
-g3[ring] = tcol[ring]
+sub = g3[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
+sub[ring] = tcol[ring]
 ang = np.arctan2((yy - TRACK['cy']) / TRACK['ry'], (xx - TRACK['cx']) / TRACK['rx'])
 kerb_o = outer & ~(ell(TRACK['w'] / 2 - 4) <= 1); kerb_i = (ell(-TRACK['w'] / 2 + 4) <= 1) & ~inner
 stripes = (np.floor(ang / (2 * np.pi) * 90) % 2).astype(bool)
 for kb in (kerb_o, kerb_i):
-    g3[kb & stripes] = hexc('#d8262c'); g3[kb & ~stripes] = hexc('#f4f1e6')
+    sub[kb & stripes] = hexc('#d8262c'); sub[kb & ~stripes] = hexc('#f4f1e6')
+occupied[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]] |= outer & ~(ell(-TRACK['w'] / 2 - 25) <= 1)
 # chequered start/finish line at the bottom of the oval
 sx0 = TRACK['cx'] - 6; sy0, sy1 = TRACK['cy'] + TRACK['ry'] - TRACK['w'] / 2, TRACK['cy'] + TRACK['ry'] + TRACK['w'] / 2
 for i_ in range(int(sy0), int(sy1), 4):
     for j_ in range(3):
         g3[i_:i_ + 4, sx0 + j_ * 4:sx0 + j_ * 4 + 4] = (20, 20, 20) if (i_ // 4 + j_) % 2 else (245, 245, 245)
-ground = Image.fromarray(g3.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
-occupied |= outer & ~(ell(-TRACK['w'] / 2 - 25) <= 1)
 TRACK_BALES = []
 for deg in (200, 330):   # two bale walls across the track: jump them!
     a_ = math.radians(deg)
     for k_ in (-1, 0, 1):
         r_ = 1 + k_ * (TRACK['w'] / 2 - 9) / ((TRACK['rx'] + TRACK['ry']) / 2)
         TRACK_BALES.append((int(TRACK['cx'] + math.cos(a_) * TRACK['rx'] * r_), int(TRACK['cy'] + math.sin(a_) * TRACK['ry'] * r_)))
-# corral fence (low) with a gate on the west side
+# corral: muddy floor + low fence with a gate on the west side
+x0_, y0_, yy, xx = window(CORRAL['cx'], CORRAL['cy'], CORRAL['r'] + 24, CORRAL['r'] + 24)
+cm_ = (((xx - CORRAL['cx']) / (CORRAL['r'] - 8)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] - 8) * .8)) ** 2) <= 1
+mud = noise2(xx.shape[1], xx.shape[0], 4, 93) > .62
+sub = g3[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
+sub[cm_] = sub[cm_] * .8 + np.array(hexc('#a88a5c')) * .2; sub[cm_ & mud] = sub[cm_ & mud] * .75 + np.array(hexc('#8a6a44')) * .25
+occupied[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]] |= (((xx - CORRAL['cx']) / (CORRAL['r'] + 20)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] + 20) * .8)) ** 2) <= 1
+ground = Image.fromarray(g3.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
+del g3, yy, xx, ang, sub
 for k_ in range(0, 360, 3):
     if 165 < k_ < 195: continue
     a_ = math.radians(k_); x_, y_ = int(CORRAL['cx'] + math.cos(a_) * CORRAL['r']), int(CORRAL['cy'] + math.sin(a_) * CORRAL['r'] * .8)
     gd.rectangle([x_ - 1, y_ - 6, x_ + 1, y_ - 5], fill=(150, 104, 62)); gd.rectangle([x_ - 1, y_ - 3, x_ + 1, y_ - 2], fill=(128, 88, 52))
     if k_ % 9 == 0: gd.rectangle([x_ - 1, y_ - 8, x_ + 1, y_], fill=(110, 74, 42))
     low[y_ - 3:y_ + 2, x_ - 2:x_ + 3] = True
-g4 = np.array(ground).astype(np.float32)
-cm_ = (((xx - CORRAL['cx']) / (CORRAL['r'] - 8)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] - 8) * .8)) ** 2) <= 1
-mud = noise2(W, H, 4, 93) > .62
-g4[cm_] = g4[cm_] * .8 + np.array(hexc('#a88a5c')) * .2; g4[cm_ & mud] = g4[cm_ & mud] * .75 + np.array(hexc('#8a6a44')) * .25
-ground = Image.fromarray(g4.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
-occupied |= (((xx - CORRAL['cx']) / (CORRAL['r'] + 20)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] + 20) * .8)) ** 2) <= 1
+# shooting stand: planks + sandbags (walkable); clays fly north over the field
+sx, sy = RANGE['x'], RANGE['y']
+gd.rectangle([sx - 18, sy - 10, sx + 18, sy + 6], fill=(120, 84, 48), outline=(70, 46, 26))
+for k_ in range(-18, 19, 6): gd.line([(sx + k_, sy - 10), (sx + k_, sy + 6)], fill=(98, 66, 38))
+for k_ in range(-22, 23, 8): gd.ellipse([sx + k_ - 4, sy - 16, sx + k_ + 4, sy - 10], fill=(176, 160, 118), outline=(110, 96, 64))
+occupied[sy - 160:sy + 30, sx - 80:sx + 80] = True
 occupied[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']] = True
-del yy, xx, ang
 
 # ---------------------------------------------------------------- fences around gardens + hay bales (low, jumpable)
-from PIL import ImageFilter as _IF
-road_near = np.array(Image.fromarray(((pm | dm) * 255).astype(np.uint8)).filter(_IF.MaxFilter(21))) > 0
+road_near = np.array(Image.fromarray(((pm | dm) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(21))) > 0
 for poly_ in classes.get('residential', []):
+    run = 0.0   # distance along this fence line; a 16 px gate opens every 110 px so every garden can be entered on foot
     for a_, b_ in zip(poly_, poly_[1:]):
         L = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); n = int(L // 3)
         for k in range(n):
             t_ = k / max(1, n); x, y = a_[0] + (b_[0] - a_[0]) * t_, a_[1] + (b_[1] - a_[1]) * t_
             xi, yi = int(x), int(y)
+            run += 3
+            if run % 110 < 16: continue
             if not (2 < xi < W - 3 and 40 < yi < H - 3) or road_near[yi, xi] or occupied[yi, xi]: continue
             # two rails + a post every ~9 px
             gd.rectangle([xi - 1, yi - 6, xi + 1, yi - 5], fill=(150, 104, 62))
@@ -375,23 +402,17 @@ def bale(x, y):
     low[y - 6:y + 2, x - 11:x + 12] = True
 for x_, y_ in TRACK_BALES: bale(x_, y_)
 for p_ in classes.get('farmland', []):
-    m_ = mask_of([p_]); ys_, xs_ = np.nonzero(m_ & ~occupied)
+    ox_, oy_, m_ = mask_win(p_)
+    if not m_.size: continue
+    ys_, xs_ = np.nonzero(m_ & ~occupied[oy_:oy_ + m_.shape[0], ox_:ox_ + m_.shape[1]]); ys_ = ys_ + oy_; xs_ = xs_ + ox_
     if len(xs_) < 4000: continue
     for _ in range(3):
         i_ = rnd.randrange(len(xs_)); x, y = int(xs_[i_]), int(ys_[i_])
         if not (20 < x < W - 20 and 60 < y < H - 20): continue
-        gd.ellipse([x - 11, y - 2, x + 13, y + 5], fill=(96, 84, 40))
-        od.rectangle([x - 11, y - 16, x + 11, y + 1], fill=(206, 168, 80), outline=(112, 84, 36))
-        od.ellipse([x - 11, y - 20, x + 11, y - 12], fill=(226, 192, 104), outline=(112, 84, 36))
-        od.ellipse([x - 6, y - 18, x + 6, y - 14], outline=(180, 142, 64))
-        for yy in (y - 9, y - 4): od.line([(x - 10, yy), (x + 10, yy)], fill=(186, 150, 70))
-        objects.append(dict(x=x - 13, y=y - 22, w=27, h=26, base=float(y + 2)))
-        low[y - 6:y + 2, x - 11:x + 12] = True; bales += 1
+        bale(x, y); bales += 1
 print('hay bales', bales)
 
 # ---------------------------------------------------------------- landmark sprites
-import sys; sys.path.insert(0, 'gen')
-from slice_sheet import key as chroma_key
 LM_SIZE = {'church': 150, 'windmill': 84, 'shop': 100}   # sprite width in art px
 for k_, (lx, ly) in LM_NODES:
     a = chroma_key(f'gen/lm_{k_}.png'); im = Image.fromarray(a); im = im.crop(im.getbbox())
@@ -407,12 +428,12 @@ for k_, (lx, ly) in LM_NODES:
 # The following four sites are deterministic OSM road junctions (paved-dirt crossings).
 # The supplied chat photos have no GPS metadata; placements use the actual junction nodes.
 # Shrines are kept small (~32-36 px) so they sit cleanly on the verge without blocking traffic.
-GENERATED_SHRINES = [
-    ('cross_iron', 1643, 628, 32),       # tertiary × track/service junction (NW of village)
-    ('shrine_stone', 1671, 1284, 36),    # residential × service junction (by the windmill)
+GENERATED_SHRINES = [(name, *legacy_i(x, y), w) for name, x, y, w in [
+    ('cross_iron', 1643, 628, 32),       # tertiary × track/service junction (east end of the street)
+    ('shrine_stone', 1671, 1284, 36),    # junction on the road to the church
     ('shrine_white', 1457, 2358, 34),    # residential × track junction (south road)
-    ('shrine_fenced', 558, 959, 32),     # residential × service junction (east edge)
-]
+    ('shrine_fenced', 558, 959, 32),     # residential × service junction (by the bus stop)
+]]
 
 def add_generated_sprite(name, cx, foot_y, width, block_base=True):
     image = Image.fromarray(chroma_key(f'gen/lm_{name}.png'))
@@ -443,7 +464,7 @@ sign = sign.crop(sign.getbbox())
 sign_w = 110
 sign_h = round(sign.height * sign_w / sign.width)
 sign = sign.resize((sign_w, sign_h), Image.LANCZOS)
-sign_x, sign_base = 1150, 2405
+sign_x, sign_base = legacy_i(1150, 2405)
 sign_y = sign_base - sign_h
 objects_img.alpha_composite(sign, (sign_x - sign_w // 2, sign_y))
 objects.append(dict(x=sign_x - sign_w // 2, y=sign_y, w=sign_w, h=sign_h, base=float(sign_base)))
@@ -452,7 +473,6 @@ occupied[max(0, sign_y):sign_base, max(0, sign_x - sign_w // 2):sign_x + sign_w 
 
 # ---------------------------------------------------------------- trees
 occ_img = Image.fromarray((occupied * 255).astype(np.uint8))
-from PIL import ImageFilter
 occ_d = np.array(occ_img.filter(ImageFilter.MaxFilter(15))) > 0
 
 
@@ -516,7 +536,8 @@ for x, y in cand:
 # ---------------------------------------------------------------- POIs + landmark placeholders
 pois = []
 def add_poi(key, lat, lon, **kw):
-    x, y = P(lat, lon); pois.append(dict(key=key, x=round(x), y=round(y), **kw))
+    x, y = P(lat, lon)
+    if 20 < x < W - 20 and 50 < y < H - 20: pois.append(dict(key=key, x=round(x), y=round(y), **kw))
 for e in nodes:
     t = e.get('tags', {})
     if t.get('man_made') == 'windmill': add_poi('windmill', e['lat'], e['lon'])
@@ -533,11 +554,19 @@ for e in ways:
 # river poi at the bridge (road/river crossing)
 add_poi('river', 52.2621, 22.8752)
 
-ground.save('docs/img/map_ground.png')
+# 256-colour palette: pixel art survives it and the download shrinks several times
+ground.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save('docs/img/map_ground.png', optimize=True)
 objects_img.save('docs/img/map_objects.png')
+low &= ~(pm | dm)   # roads and tracks cross the Białka on bridges: walkable, not a jump
+collide &= ~(pm | dm)   # nothing solid on roads/tracks (woods and bridges included)
 cm = np.where(collide, 255, np.where(low, 128, 0)).astype(np.uint8)
 Image.fromarray(cm).save('docs/img/map_collide.png')   # 255 tall, 128 low (jumpable)
 shop = next((p for p in pois if p['key'] == 'shop'), dict(x=W // 2, y=H // 2))
-json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, track=TRACK, corral=CORRAL, meadow=MEADOW, spawn=dict(x=shop['x'] + 30, y=shop['y'] + 70),
+# spawn: the walkable dirt-path pixel nearest to the spot just below the shop door (never inside a fenced garden)
+cm_free = (cm == 0)
+py_, px_ = np.nonzero(dm[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150] & cm_free[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150])
+k_ = int(np.argmin((px_ - 150) ** 2 + (py_ - 60) ** 2)) if len(px_) else None
+spawn = dict(x=int(shop['x'] - 150 + px_[k_]), y=int(shop['y'] + py_[k_])) if k_ is not None else dict(x=shop['x'], y=shop['y'] + 60)
+json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, spawn=spawn,
                attribution='Map data © OpenStreetMap contributors (ODbL)'), open('docs/map.json', 'w'), indent=0)
 print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois])

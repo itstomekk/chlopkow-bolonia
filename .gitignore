@@ -14,3 +14,7 @@ __pycache__/
 gen/check.jpg
 gen/animals_sheet.jpg
 gen/raw/
+
+# planning notes from other sessions (not part of the published site)
+docs/superpowers/
+.pytest_cache/

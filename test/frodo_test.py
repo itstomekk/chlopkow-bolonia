@@ -1,4 +1,5 @@
 """Frodo remains with Arek during ordinary exploration."""
+import os
 import time
 from playwright.sync_api import sync_playwright
 
@@ -15,7 +16,7 @@ with sync_playwright() as p:
         };
     """)
     page.on("pageerror", lambda error: errors.append(str(error)))
-    page.goto("http://127.0.0.1:8765/index.html")
+    page.goto(os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html"))
     page.wait_for_function("window.__game", timeout=30000)
     page.evaluate("localStorage.clear()")
     page.reload()

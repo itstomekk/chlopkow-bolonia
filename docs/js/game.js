@@ -141,8 +141,10 @@
      key(e) / pointer(px, py) -> true if consumed (modal UIs)
      questLog(lines)                          push [text, done] rows into the quest log
      minimap(dot)                             draw markers: dot(x, y, colour)
-     blocksPlayer() -> true to freeze normal movement (e.g. countdowns) */
-  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [], busy: [] };   // busy: a quiz/minigame is running (church door stays shut)
+     blocksPlayer() -> true to freeze normal movement (e.g. countdowns)
+     speed(x, y) -> multiplier for Arek's walking speed at (x, y) (e.g. off-track slowdown in the race)
+     busy() -> true while a quiz/minigame runs (the church door stays shut) */
+  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [], busy: [], speed: [] };
 
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
@@ -157,10 +159,12 @@
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
-  let Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 };
+  const freshQ = () => ({ kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 });
+  let Q = freshQ();
   let hasSave = false, memoryIndex = 0;
   const keys = new Set();
   const joy = { active: false, id: null, cx: 0, cy: 0, x: 0, y: 0 };
+  const pointer = { x: 0, y: 0, seen: false };   // last mouse/touch position in canvas pixels (used for aiming)
 
   function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ Q, x: ROOM ? OUT.x : P.x, y: ROOM ? OUT.y : P.y })); } catch (e) { } }
   function loadSave() {
@@ -172,7 +176,7 @@
 
   /* ---------- input ---------- */
   function startGame(fresh) {
-    if (fresh) { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Q = { kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, quiz: {}, mg: {}, apples: [], cap: false, orange: false, playTime: 0 }; P.x = MAP.spawn.x; P.y = MAP.spawn.y; unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; }
+    if (fresh) { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Q = freshQ(); P.x = MAP.spawn.x; P.y = MAP.spawn.y; unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; }
     scene = 'play';
   }
   addEventListener('keydown', e => {
@@ -204,6 +208,7 @@
       return;
     }
     const [px, py] = toCanvas(e);
+    pointer.x = px; pointer.y = py; pointer.seen = true;
     if (!talk && HOOKS.pointer.some(f => f(px, py))) return;
     if (px > cvs.width * .78 && py > cvs.height * .6) { if (talk || nearThing()) interact(); else jump(); return; }
     if (px > cvs.width * .78 && py < cvs.height * .3) { showMap = !showMap; return; }
@@ -211,6 +216,7 @@
     Object.assign(joy, { active: true, id: e.pointerId, cx: px, cy: py, x: 0, y: 0 });
   });
   cvs.addEventListener('pointermove', e => {
+    [pointer.x, pointer.y] = toCanvas(e); pointer.seen = true;
     if (!joy.active || e.pointerId !== joy.id) return;
     const [px, py] = toCanvas(e);
     let dx = px - joy.cx, dy = py - joy.cy; const d = Math.hypot(dx, dy), max = 70;
@@ -402,7 +408,8 @@
       ix /= Math.max(1, m); iy /= Math.max(1, m);
       P.dir = Math.abs(ix) > Math.abs(iy) * .9 ? (ix < 0 ? 'left' : 'right') : (iy < 0 ? 'up' : 'down');
       const run = keys.has('ShiftLeft') || keys.has('ShiftRight') || (joy.active && m > .95) ? 1.8 : 1;
-      const nx = P.x + ix * SPEED * run * dt, ny = P.y + iy * SPEED * run * dt;
+      const terrain = HOOKS.speed.reduce((k, f) => k * f(P.x, P.y), 1);
+      const nx = P.x + ix * SPEED * run * terrain * dt, ny = P.y + iy * SPEED * run * terrain * dt;
       let moved = false;
       if (!blocked(nx, P.y)) { P.x = nx; moved = true; }
       if (!blocked(P.x, ny)) { P.y = ny; moved = true; }
@@ -429,7 +436,7 @@
   }
 
   /* ---------- render helpers ---------- */
-  let zoom = 3, camX = 0, camY = 0;
+  let zoom = 3, camX = 0, camY = 0, lastCam = null;
   function resize() {
     const dpr = Math.min(2, devicePixelRatio || 1);
     cvs.width = Math.round(innerWidth * dpr); cvs.height = Math.round(innerHeight * dpr);
@@ -453,6 +460,12 @@
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh);
     ctx.restore(); ctx.imageSmoothingEnabled = false;
+  }
+  function drawArekPose(sx, sy, s, dir, step, alpha = 1) {   // used for the race ghost
+    const { meta, sheet } = SPR, anim = meta.anims['walk_' + dir], f = anim.frames[Math.floor(step) % anim.frames.length];
+    const h = CHAR_H * s, scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
+    ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
   function drawFrodo(sx, sy, s) {
     shadow(sx, sy, s * .78, 6);
@@ -524,6 +537,7 @@
     const sw = Math.max(1, Math.min(MAP.w - sx0, Math.ceil(W / zoom) + 2)), sh = Math.max(1, Math.min(MAP.h - sy0, Math.ceil(H / zoom) + 2));
     ctx.drawImage(GROUND, sx0, sy0, sw, sh, ox + sx0 * zoom, oy + sy0 * zoom, sw * zoom, sh * zoom);
     const S = (x, y) => [ox + x * zoom, oy + y * zoom];
+    lastCam = { ox, oy, zoom, S, toWorld: (px, py) => [(px - ox) / zoom, (py - oy) / zoom] };
     for (const d of dust) { const k = d.t / .5; ctx.fillStyle = `rgba(235,220,180,${.55 * (1 - k)})`; const s = (2 + k * 3) * zoom; ctx.fillRect(ox + (d.x - 2 - k * 4) * zoom, oy + (d.y - 2 - k * 3) * zoom, s, s); }
 
     // everything that stands on the ground, sorted by baseline
@@ -549,7 +563,7 @@
     }
     for (const f of fx) { ctx.globalAlpha = 1 - f.t / 1.2; ctx.fillStyle = f.c; const s = zoom * 2; ctx.fillRect(ox + f.x * zoom - s / 2, oy + f.y * zoom - s / 2, s, s); }
     ctx.globalAlpha = 1;
-    if (DEBUG) { ctx.strokeStyle = 'cyan'; for (const s of MAP.pois) { ctx.beginPath(); ctx.arc(ox + s.x * zoom, oy + s.y * zoom, (SPOT_R[s.key] || 50) * zoom, 0, 7); ctx.stroke(); } }
+    if (DEBUG) { ctx.strokeStyle = 'cyan'; for (const s of MAP.pois) { ctx.beginPath(); ctx.arc(ox + s.x * zoom, oy + s.y * zoom, (s.r || SPOT_R[s.key] || 50) * zoom, 0, 7); ctx.stroke(); } }
 
     const U = Math.min(W, H * 1.6) / 100;
     ctx.textBaseline = 'middle';
@@ -695,7 +709,8 @@
     window.ARK = {
       HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
       get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; },
-      save, say, popToast, celebrate, blocked, unstick, drawNpc, shadow, box, wrapText, fmtTime,
+      pointer, get camera() { return lastCam; },
+      save, say, popToast, celebrate, blocked, unstick, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime,
       teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },
       burst(x, y, colors, n = 16) { for (let k = 0; k < n; k++) fx.push({ x, y, vx: (Math.random() - .5) * 120, vy: -Math.random() * 150, t: 0, c: colors[k % colors.length] }); },
       load,

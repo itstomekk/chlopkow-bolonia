@@ -1,10 +1,11 @@
 """Headless play-test: walk around, check collisions and dialogue, save screenshots."""
+import os
 import time, json
 from playwright.sync_api import sync_playwright
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1280, "height": 720})
     pg.on("pageerror", lambda e: print("[err]", e))
-    pg.goto("http://127.0.0.1:8765/index.html"); pg.wait_for_function("window.__game", timeout=30000)
+    pg.goto(os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")); pg.wait_for_function("window.__game", timeout=30000)
     time.sleep(.5); pg.screenshot(path="test/01_title.png")
     pg.keyboard.press("Enter"); time.sleep(.3)
     pos = lambda: pg.evaluate("[Math.round(__game.P.x), Math.round(__game.P.y), __game.P.dir]")
