@@ -1,0 +1,31 @@
+:root { --bg: #16181c; --panel: #1f2228; --line: #343842; --fg: #e8e6e1; --mute: #9aa0a8; --acc: #e0b04a; --bad: #e0604a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+#top { position: fixed; inset: 0 0 auto 0; height: 40px; display: flex; gap: 6px; align-items: center; padding: 0 10px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 3; }
+#top strong { margin-right: 8px; }
+#dirty { width: 9px; height: 9px; border-radius: 50%; background: transparent; margin-right: 4px; }
+#dirty.on { background: var(--acc); }
+#status { margin-left: auto; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw; }
+#status.err { color: var(--bad); }
+button, .btn { background: #2b2f37; color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 9px; cursor: pointer; font: inherit; }
+button:hover, .btn:hover { border-color: var(--acc); }
+button:disabled { opacity: .45; cursor: default; }
+#side { position: fixed; top: 40px; left: 0; bottom: 0; width: 230px; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 6px 10px 20px; z-index: 2; }
+#side h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--mute); margin: 12px 0 6px; }
+#side label { display: flex; gap: 6px; align-items: center; padding: 2px 0; }
+#side .row { display: flex; gap: 6px; align-items: center; margin: 4px 0; }
+#side select, #side input[type=text], #side input:not([type]), #side textarea { background: #15171b; color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 3px 5px; font: inherit; width: 100%; }
+#side textarea { min-height: 70px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+#tools { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+#tools button { text-align: left; font-size: 12px; padding: 4px 6px; }
+#tools button.on { border-color: var(--acc); background: #3a3322; }
+#tools button .k { color: var(--mute); float: right; }
+#tool-panel:empty { display: none; }
+#tool-panel p { color: var(--mute); margin: 4px 0; }
+#readout { font-family: ui-monospace, Consolas, monospace; font-size: 12px; white-space: pre; color: var(--fg); }
+#stage { position: fixed; top: 40px; left: 230px; right: 0; bottom: 0; }
+#cv { width: 100%; height: 100%; display: block; cursor: crosshair; }
+#help { position: fixed; top: 60px; right: 20px; width: 420px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; z-index: 5; box-shadow: 0 8px 30px #0008; }
+#help td { padding: 2px 10px 2px 0; vertical-align: top; }
+#help td:first-child { color: var(--acc); white-space: nowrap; }
+.hint { color: var(--mute); font-size: 12px; }

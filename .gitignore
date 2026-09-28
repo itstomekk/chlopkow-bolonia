@@ -18,3 +18,6 @@ gen/raw/
 # planning notes from other sessions (not part of the published site)
 docs/superpowers/
 .pytest_cache/
+
+# map editor: local save history (imagery tiles in editor/basemap/ may be committed)
+editor/history/
