@@ -310,8 +310,8 @@
     });
     // tap the note icon (bottom-left) on touch screens
     let ICON = null;
-    const icon = (U, H) => (ICON = { x: U * 1.5, y: H - U * 5.5, s: U * 4 });
-    HOOKS.pointer.push((px, py) => { const b = ICON; if (b && px < b.x + b.s + b.s / 2 && py > b.y - b.s / 2) { setMuted(!muted); pt(muted ? A.T.musicOff : A.T.musicOn); return true; } return false; });
+    const icon = (U, H) => (ICON = { x: U * 1.5, y: H - U * 7.2, s: U * 4 });
+    HOOKS.pointer.push((px, py) => { const b = ICON; if (b && px < b.x + b.s + b.s / 2 && py > b.y - b.s / 2 && py < b.y + b.s * 1.2) { setMuted(!muted); pt(muted ? A.T.musicOff : A.T.musicOn); return true; } return false; });
     HOOKS.hud.push((U, W, H) => {
       const c = A.ctx, b = icon(U, H), u = b.s / 10, x = b.x, y = b.y;
       c.globalAlpha = .75; c.fillStyle = 'rgba(8,12,40,.78)'; c.fillRect(x, y, b.s, b.s);
