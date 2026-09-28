@@ -38,7 +38,7 @@
     pl: {
       title: 'CHŁOPKÓW BOLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA' },
+      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -51,7 +51,7 @@
       rectory: ['Plebania. Ksiądz macha z okna. Arek udaje, że poprawia okulary.'],
       cemetery: ['Cmentarz parafialny. Arek zdejmuje okulary. Na chwilę.'],
       windmill: ['Wiatrak „Koźlak”. Stoi tu dłużej niż ktokolwiek pamięta. Skrzypi, jakby coś mówił.'],
-      shop: ['Sklep spożywczo-przemysłowy. Oranżada, drożdżówka i najnowsze plotki ze wsi.'],
+      shop: ['Sklep spożywczo-przemysłowy. Półki są ciasne, ale pełne: oranżada, chleb, konserwy, nabiał i słodycze.', 'Pani sklepowa zna ceny na pamięć. I wie, kto kupił ostatniego pączka.'],
       shopBuy: ['Pani ze sklepu: „Oranżada? Ostatnia butelka, dla Marcina.”', 'Arek dostaje oranżadę!'],
       bus: ['Przystanek. Autobus był... albo będzie. W Chłopkowie to jedno i to samo.'],
       river: ['Rzeka Melioranka. Woda zimna, żaby głośne, a lato jeszcze długie.'],
@@ -79,8 +79,8 @@
       flowers: ['Kwiaty ułożone w złote „100”. Sto lat parafii w Chłopkowie!'],
       confession: ['Konfesjonał. Arek szybko idzie dalej. Nie dziś.'],
       pew: ['Drewniane ławki. Babcia Irenka zawsze siada w trzecim rzędzie, po lewej.'],
-      soltys0: ['Dzień dobry, Arek. Chleb na dożynki już jest, poświęcony.', 'Teraz czekamy tylko na szarlotkę Kasi. Pomożesz jej, prawda?'],
-      soltys1: ['Szarlotka Kasi będzie? To dożynki mamy uratowane.', 'Sołtys wszystko widzi, Arek. Dobra robota.'],
+      soltys0: ['Dzień dobry, Arek. Chleb na dożynki już jest, poświęcony.', 'Teraz czekamy tylko na szarlotkę Kasi. Pomożesz jej, prawda?', 'A ja dopilnuję porządku. Po pracy należy się zimne piwo i pięć minut ciszy.'],
+      soltys1: ['Szarlotka Kasi będzie? To dożynki mamy uratowane.', 'Sołtys wszystko widzi, Arek. Dobra robota.', 'Za taką pomoc wznoszę toast. Tylko nie każ mi przemawiać przed orkiestrą.'],
       soltysSecret: ['Sołtys musi wiedzieć, co dzieje się w każdym zakątku wsi. Nawet w tym.'],
       churchLabel: 'KOŚCIÓŁ', exitHint: '↓ WYJŚCIE', musicOn: 'KAPELA GRA!', musicOff: 'KAPELA CICHO',
       end1: 'MASZ KLUCZYKI DO URSUSA', end2: 'CIĄG DALSZY: GRAND THEFT TRACTOR', end3: 'CZAS',
@@ -95,7 +95,7 @@
     en: {
       title: 'CHŁOPKÓW BOLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA' },
+      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -108,7 +108,7 @@
       rectory: ['The rectory. The priest waves from a window. Arek pretends to fix his sunglasses.'],
       cemetery: ['The parish cemetery. Arek takes his sunglasses off. For a moment.'],
       windmill: ['The "Koźlak" windmill. Older than anyone remembers. It creaks like it wants to talk.'],
-      shop: ['The village shop. Orangeade, sweet buns and the freshest gossip in Chłopków.'],
+      shop: ['The village shop. Tight aisles, full shelves: orangeade, bread, tins, dairy and sweets.', 'The shopkeeper knows every price by heart. And who bought the last doughnut.'],
       shopBuy: ['Shop lady: "Orangeade? Last bottle. For Marcin."', 'Arek got an ORANGEADE!'],
       bus: ['Bus stop. The bus has been... or will be. In Chłopków that is the same thing.'],
       river: ['The Melioranka river. Cold water, loud frogs, and summer is still long.'],
@@ -136,8 +136,8 @@
       flowers: ['Flowers around a golden "100". The parish of Chłopków turns one hundred!'],
       confession: ['The confessional. Arek walks on quickly. Not today.'],
       pew: ['Wooden pews. Granny Irenka always sits in the third row, on the left.'],
-      soltys0: ['Good morning, Arek. The harvest bread is ready, and blessed.', "Now we're only waiting for Kasia's apple pie. You'll help her, right?"],
-      soltys1: ["Kasia's pie is coming? Then the harvest festival is saved.", 'The sołtys sees everything, Arek. Good job.'],
+      soltys0: ['Good morning, Arek. The harvest bread is ready, and blessed.', "Now we're only waiting for Kasia's apple pie. You'll help her, right?", 'I will keep order. After work, a cold beer and five minutes of quiet.'],
+      soltys1: ["Kasia's pie is coming? Then the harvest festival is saved.", 'The sołtys sees everything, Arek. Good job.', 'For that kind of help, I raise a toast. Just do not make me speak before the band.'],
       soltysSecret: ['A village head must know what is happening in every corner of the village. Even this one.'],
       churchLabel: 'CHURCH', exitHint: '↓ EXIT', musicOn: 'BAND PLAYS!', musicOff: 'BAND QUIET',
       end1: 'YOU GOT THE URSUS KEYS', end2: 'TO BE CONTINUED: GRAND THEFT TRACTOR', end3: 'TIME',
@@ -185,11 +185,12 @@
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
   const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0, idleAnim: 0, action: 'idle', wander: 0, wanderX: 0, wanderY: 0, wanderWait: 4 };
+  const BALES = [];
   const JUMP_T = .48, JUMP_H = 15, DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
-  const freshQ = () => ({ playerName: 'Arek', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], cap: false, orange: false, playTime: 0 });
+  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], cap: false, orange: false, playTime: 0 });
   function sanitizePlayerName(value) {
     return Array.from(String(value || '').normalize('NFC').replace(/[^\p{L}\p{N} _'-]/gu, '').replace(/\s+/g, ' ').trim()).slice(0, 20).join('');
   }
@@ -209,7 +210,11 @@
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
       if (s && s.Q) {
-        Q = Object.assign(Q, s.Q); Q.playerName = sanitizePlayerName(Q.playerName) || 'Arek'; P.x = s.x; P.y = s.y;
+        Q = Object.assign(Q, s.Q);
+        Q.playerName = sanitizePlayerName(Q.playerName);
+        if (Q.playerName.toUpperCase() === 'AREK') Q.playerName = '';
+        if (!Q.playerName) return false;
+        P.x = s.x; P.y = s.y;
         if (Array.isArray(s.npcs) && ITEMS && ITEMS.npcs) for (const saved of s.npcs) {
           const n = ITEMS.npcs.find(v => v.id === saved.id && !v.secret && !NPC_FIXED.has(v.id));
           if (n && Number.isFinite(saved.x) && Number.isFinite(saved.y)) { n.x = saved.x; n.y = saved.y; }
@@ -345,13 +350,18 @@
     }
   }
   // Marcin loiters ("kręci się") around the bus stop: slow random strolls inside a small radius, paused while talking.
-  const WANDER = { marcin: { r: 60, speed: 26 } };
+  const WANDER = {
+    kasia: { r: 42, speed: 20 }, marcin: { r: 60, speed: 26 }, damian: { r: 48, speed: 22 },
+    grandpa: { r: 34, speed: 16 }, halina: { r: 42, speed: 18 }, edytka: { r: 54, speed: 24 },
+    kuba: { r: 36, speed: 18 }, michal: { r: 38, speed: 20 }, mateusz: { r: 44, speed: 20 }, patryk: { r: 44, speed: 20 },
+  };
   const wanderState = {};
   function updateWanderers(dt) {
     if (!ITEMS || ROOM) return;
     for (const n of ITEMS.npcs) {
       const cfg = WANDER[n.id], home = NPC_HOME[n.id]; if (!cfg || !home) continue;
       const w = wanderState[n.id] || (wanderState[n.id] = { tx: n.x, ty: n.y, wait: 1 + Math.random() * 2, moving: false });
+      if (n.id === 'edytka' && Q.edytka === 1) continue; // keep the quest anchor stable while Frodo visits
       if (talk && Math.hypot(P.x - n.x, P.y - n.y) < 70) { w.moving = false; continue; }
       if (Math.hypot(P.x - n.x, P.y - n.y) < 30) { w.moving = false; continue; }   // stand still when Arek walks up
       if (!w.moving) {
@@ -373,14 +383,14 @@
   /* ---------- input ---------- */
   function cancelClickMove() { clickTarget.active = false; }
   let namePrompt = null;
-  function requestPlayerName() {
+  function requestPlayerName(fresh = true) {
     if (namePrompt || scene !== 'title') return;
     const overlay = document.createElement('div'); overlay.id = 'player-name-overlay';
     Object.assign(overlay.style, { position: 'fixed', inset: '0', zIndex: '20', display: 'grid', placeItems: 'center', padding: '20px', boxSizing: 'border-box', background: 'rgba(5,8,25,.78)', fontFamily: 'sans-serif', touchAction: 'auto' });
     const form = document.createElement('form');
     Object.assign(form.style, { width: 'min(420px, 100%)', boxSizing: 'border-box', padding: '24px', border: '3px solid #ffd21f', background: '#10163a', color: '#f5f0e0', textAlign: 'center', display: 'grid', gap: '16px' });
     const label = document.createElement('label'); label.htmlFor = 'player-name-input'; label.textContent = LANG === 'pl' ? 'JAK MASZ NA IMIĘ?' : 'WHAT IS YOUR NAME?';
-    const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'nickname'; input.placeholder = LANG === 'pl' ? 'Wpisz imię' : 'Enter a name'; input.required = true;
+    const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'nickname'; input.placeholder = LANG === 'pl' ? 'Wpisz imię' : 'Enter a name'; input.value = fresh ? '' : heroName(); input.required = true;
     Object.assign(input.style, { width: '100%', boxSizing: 'border-box', padding: '14px', fontSize: '18px', border: '2px solid #c8cee0', borderRadius: '4px' });
     const submit = document.createElement('button'); submit.id = 'player-name-submit'; submit.type = 'submit'; submit.textContent = LANG === 'pl' ? 'ZACZNIJ GRĘ' : 'START GAME';
     Object.assign(submit.style, { padding: '14px', border: '0', borderRadius: '4px', background: '#ffd21f', color: '#10163a', fontWeight: 'bold', fontSize: '16px', touchAction: 'manipulation' });
@@ -391,7 +401,9 @@
       e.preventDefault();
       const playerName = sanitizePlayerName(input.value);
       if (!playerName) { error.textContent = LANG === 'pl' ? 'Wpisz niepuste imię.' : 'Please enter a non-blank name.'; input.focus(); return; }
-      overlay.remove(); namePrompt = null; startGame(true, playerName);
+      overlay.remove(); namePrompt = null;
+      if (fresh) startGame(true, playerName);
+      else { Q.playerName = playerName; save(); }
     });
     document.body.appendChild(overlay); namePrompt = overlay; input.focus();
   }
@@ -412,13 +424,14 @@
   }
   function startGame(fresh, playerName) {
     if (fresh) {
-      if (!playerName) { requestPlayerName(); return; }
+      if (!playerName) { requestPlayerName(true); return; }
       try { localStorage.removeItem(SAVE_KEY); } catch (e) { }
-      Q = freshQ(); Q.playerName = sanitizePlayerName(playerName) || 'Arek';
+      Q = freshQ(); Q.playerName = sanitizePlayerName(playerName);
       const debugX = params.has('x') && params.has('y') ? Number(params.get('x')) : NaN, debugY = params.has('x') && params.has('y') ? Number(params.get('y')) : NaN;
       const spawn = Number.isFinite(debugX) && Number.isFinite(debugY) ? { x: debugX, y: debugY } : samplePlayerSpawn();
       P.x = spawn.x; P.y = spawn.y; randomizeNpcPositions(); ensureMushrooms(); unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; hasSave = true; save();
     }
+    if (!fresh && !Q.playerName) { requestPlayerName(false); return; }
     scene = 'play';
   }
   addEventListener('keydown', e => {
@@ -426,7 +439,12 @@
     keys.add(e.code);
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) cancelClickMove();
-    if (scene === 'title') { if (e.code === 'KeyN') startGame(true); else if (e.code === 'Enter' || e.code === 'Space') startGame(!hasSave); return; }
+    if (scene === 'title') {
+      if (e.code === 'KeyN') hasSave ? requestPlayerName(false) : startGame(true);
+      else if (e.code === 'KeyR') startGame(true);
+      else if (e.code === 'Enter' || e.code === 'Space') startGame(!hasSave);
+      return;
+    }
     if (scene === 'end') {
       if (e.code === 'Escape') scene = 'play';
       else if (e.code === 'Enter' || e.code === 'Space') {
@@ -436,6 +454,7 @@
       return;
     }
     if (!talk && HOOKS.key.some(f => f(e))) return;
+    if (e.code === 'Escape' && scene === 'play' && !talk && !shopGame) { save(); showMap = false; mapCursor.seen = false; keys.clear(); scene = 'title'; return; }
     if (e.code === 'KeyX' || e.code === 'KeyJ') jump();
     else if (e.code === 'Space') { if (talk || nearThing()) interact(); else jump(); }
     else if (e.code === 'KeyE' || e.code === 'Enter') interact();
@@ -600,7 +619,9 @@
   const npcsHere = () => ROOM ? (ROOM.soltys ? [{ id: 'soltys', x: ROOM.soltys.x, y: ROOM.soltys.y }] : []) : ITEMS.npcs;
 
   /* ---------- dialogue & quests ---------- */
-  function say(who, lines, after) { talk = { who, lines, i: 0, after }; talkT = 0; }
+  function heroName() { return sanitizePlayerName(Q.playerName) || (LANG === 'pl' ? 'GRACZ' : 'PLAYER'); }
+  function heroText(value) { return String(value).replace(/\bAREK\b/gi, heroName()); }
+  function say(who, lines, after) { talk = { who, lines: lines.map(heroText), i: 0, after }; talkT = 0; }
   function nearThing() {
     let best = null, bd = 1e9;
     for (const n of npcsHere()) { const d = Math.hypot(P.x - n.x, P.y - n.y); if (d < 42 && d < bd) { bd = d; best = { npc: n.id, x: n.x, y: n.y }; } }
@@ -744,7 +765,21 @@
     const v = SOLID[y * MAP.w + x];
     return air ? v === 2 : v !== 0;   // 2 = tall (walls, trees, ponds), 1 = low (fences, streams, hay) — clearable mid-air
   }
+  function baleAt(x, y) { return BALES.some(b => Math.hypot(x - b.x, y - b.y) < 22); }
+  function updateBales(dt) {
+    for (const b of BALES) {
+      const dx = b.x - P.x, dy = b.y - P.y, d = Math.hypot(dx, dy);
+      if (!P.air && P.moving && d < 30) {
+        const v = DIRV[P.dir] || DIRV.down;
+        b.vx += v[0] * 120 * dt; b.vy += v[1] * 120 * dt; b.angle += (v[0] - v[1]) * dt * 2;
+      }
+      b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= Math.max(0, 1 - dt * 4.2); b.vy *= Math.max(0, 1 - dt * 4.2);
+      b.angle += (b.vx + b.vy) * dt * .012;
+      b.x = Math.max(30, Math.min(MAP.w - 30, b.x)); b.y = Math.max((MAP.top || 40) + 20, Math.min(MAP.h - 20, b.y));
+    }
+  }
   function blocked(x, y, air = false) {
+    if (!air && baleAt(x, y)) return false;
     const l = x - HIT.w / 2, r = x + HIT.w / 2, t = y - HIT.h;
     if (solidAt(l, y, air) || solidAt(r, y, air) || solidAt(l, t, air) || solidAt(r, t, air) || solidAt(x, y, air) || solidAt(x, t, air)) return true;
     if (ITEMS) for (const n of npcsHere()) if (Math.abs(x - n.x) < 12 && Math.abs(y - n.y) < 6) return true;
@@ -759,7 +794,7 @@
     const [dx, dy] = DIRV[P.dir] || DIRV.down;
     const behind = Math.atan2(-dy, -dx);
     const turns = [0, -.65, .65, -1.3, 1.3, -2, 2, Math.PI];
-    for (let r = 42; r <= 88; r += 8) for (const turn of turns) {
+    for (let r = 26; r <= 68; r += 7) for (const turn of turns) {
       const x = P.x + Math.cos(behind + turn) * r, y = P.y + Math.sin(behind + turn) * r;
       if (!blocked(x, y)) { FRODO.x = x; FRODO.y = y; FRODO.stuck = 0; FRODO.wander = 0; FRODO.wanderWait = 4; return; }
     }
@@ -812,9 +847,9 @@
       if (Math.abs(vy) > .01 && !blocked(FRODO.x, FRODO.y + vy)) { FRODO.y += vy; moved = true; }
     }
     if (moved) { FRODO.step += dt * (FRODO.wander ? 4 : 9); FRODO.stuck = 0; FRODO.idleAnim = 0; FRODO.action = 'idle'; }
-    else if ((FRODO.stuck += dt) > (dist > 200 ? 1.2 : 2.5)) {
+    else if ((FRODO.stuck += dt) > (dist > 100 ? 1.0 : 2.0)) {
       // far from Arek and stuck behind a fence or wall (e.g. running back from Edytka): catch up next to him
-      if (dist > 200) placeFrodoNearArek();
+      if (dist > 100) placeFrodoNearArek();
       FRODO.wander = 0; FRODO.wanderWait = .5; FRODO.stuck = 0;
     }
   }
@@ -866,6 +901,7 @@
       }
     }
     }
+    updateBales(dt);
     updateFrodo(dt);
     if (ROOM) { const e = ROOM.exit; if (P.y > e.y && P.x > e.x0 && P.x < e.x1) leaveRoom(); return; }
     // pickups
@@ -929,6 +965,14 @@
     ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
     ctx.imageSmoothingEnabled = true; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
+  function drawBale(bale, sx, sy, s) {
+    shadow(sx, sy, s * .9, 10);
+    ctx.save(); ctx.translate(sx, sy - 5 * s); ctx.rotate(bale.angle);
+    ctx.fillStyle = '#c58b3a'; ctx.fillRect(-12 * s, -5 * s, 24 * s, 10 * s);
+    ctx.fillStyle = '#f0c15b'; ctx.fillRect(-10 * s, -3 * s, 20 * s, 2 * s);
+    ctx.fillStyle = '#7b4b24'; ctx.fillRect(-4 * s, -5 * s, 2 * s, 10 * s); ctx.fillRect(7 * s, -5 * s, 2 * s, 10 * s);
+    ctx.restore();
+  }
   function drawFrodo(sx, sy, s) {
     shadow(sx, sy, s * .78, 6);
     const row = { down: 0, up: 1, right: 2, left: 3 }[FRODO.dir] || 0;
@@ -955,9 +999,18 @@
   function drawNpc(n, sx, sy, s) {
     shadow(sx, sy, s, 8);
     if (n.id === 'soltys') {
-      if (window.CHURCH_ART.soltys) window.fitSprite(ctx, window.CHURCH_ART.soltys, sx - 14 * s, sy - 44 * s, 28 * s, 44 * s);
-      else window.drawSoltys(ctx, sx, sy, s, time);
+      window.drawSoltysBeer(ctx, sx, sy, s, time);
       ctx.imageSmoothingEnabled = false;
+      return;
+    }
+    // The selected hero takes the matching NPC's place. Keep the original id
+    // for dialogue and saves, but render the Arek-style player sprite there.
+    if (n.id === selectedCharacter && selectedCharacter !== 'arek' && PLAYER_SHEETS.arek) {
+      const player = PLAYER_SHEETS.arek, meta = player.meta;
+      const anim = meta.anims['walk_' + (n.face || 'down')] || meta.anims.walk_down;
+      const f = anim.frames[Math.floor(time * 3) % anim.frames.length], h = CHAR_H * s;
+      const scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
+      ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(player.sheet, f.x, f.y, f.w, f.h, sx - w / 2, sy + meta.foot * scale - hh, w, hh); ctx.restore();
       return;
     }
     const i = NPC_IDX[n.id], h = CHAR_H * s * (n.id === 'grandpa' ? 1.05 : 1);
@@ -988,7 +1041,7 @@
   function drawMushroom(sx, sy, s) {
     const b = Math.sin(time * 3 + sx * .1) * s * .45;
     const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s - b, w * s, h * s); };
-    px(-1, -5, 2, 5, '#f7e6c4'); px(-4, -7, 8, 3, '#d84b48'); px(-3, -9, 6, 2, '#e86a53'); px(-2, -8, 1, 1, '#fff0ba'); px(1, -8, 1, 1, '#fff0ba');
+    px(-1, -5, 2, 5, '#fffdf2'); px(-4, -7, 8, 3, '#fffdf2'); px(-3, -9, 6, 2, '#ffffff'); px(-2, -8, 1, 1, '#d9d3c3'); px(1, -8, 1, 1, '#d9d3c3');
     ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 3 * s, sy + 1 * s, 6 * s, 1.5 * s);
   }
   function drawCap(sx, sy, s) {
@@ -1010,7 +1063,7 @@
 
   // Position readout: map pixels and real-world lat/lon from map.json's bbox.
   function drawCoords(U, H, big, mx, my, mw, mh) {
-    const player = `AREK ${Math.round(P.x)},${Math.round(P.y)}  ${mapCoordinateText(P.x, P.y)}`;
+    const player = `${heroName()} ${Math.round(P.x)},${Math.round(P.y)}  ${mapCoordinateText(P.x, P.y)}`;
     if (!big) {
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
       const tw = ctx.measureText(player).width;
@@ -1076,6 +1129,12 @@
       const label = T.names[button.id] || button.id.toUpperCase();
       ctx.fillText(label, button.x + button.w / 2, button.y + button.h * .86);
     }
+    if (hasSave) {
+      ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillStyle = '#fff7d6';
+      ctx.fillText(`${LANG === 'pl' ? 'BOHATER' : 'HERO'}: ${heroName()}`, W / 2, H * .37);
+      ctx.font = `${U * 1.15}px Silkscreen`; ctx.fillStyle = '#c8cee0';
+      ctx.fillText(LANG === 'pl' ? 'N - ZMIEŃ IMIĘ   R - NOWA GRA' : 'N - CHANGE NAME   R - NEW GAME', W / 2, H * .405);
+    }
     // prompt + help on a translucent strip at the bottom
     ctx.fillStyle = 'rgba(8,12,40,.72)'; ctx.fillRect(0, H - U * 9.5, W, U * 9.5);
     ctx.textAlign = 'center';
@@ -1102,12 +1161,13 @@
     // everything that stands on the ground, sorted by baseline
     const inView = (x, y) => x > sx0 - 60 && x < sx0 + sw + 60 && y > sy0 - 60 && y < sy0 + sh + 80;
     const draw = [];
-    for (const o of MAP.objects) if (o.x < sx0 + sw && o.x + o.w > sx0 && o.y < sy0 + sh && o.y + o.h > sy0) draw.push({ base: o.base, fn: () => ctx.drawImage(OBJ, o.x, o.y, o.w, o.h, ox + o.x * zoom, oy + o.y * zoom, o.w * zoom, o.h * zoom) });
+    for (const o of MAP.objects) if (!BALES.some(b => b.source === o) && o.x < sx0 + sw && o.x + o.w > sx0 && o.y < sy0 + sh && o.y + o.h > sy0) draw.push({ base: o.base, fn: () => ctx.drawImage(OBJ, o.x, o.y, o.w, o.h, ox + o.x * zoom, oy + o.y * zoom, o.w * zoom, o.h * zoom) });
     if (ROOM && ROOM.soltys) draw.push({ base: ROOM.soltys.y, fn: () => { const [a, b] = S(ROOM.soltys.x, ROOM.soltys.y); shadow(a, b, zoom, 8); if (window.CHURCH_ART.soltys) window.fitSprite(ctx, window.CHURCH_ART.soltys, a - 14 * zoom, b - 44 * zoom, 28 * zoom, 44 * zoom); else window.drawSoltys(ctx, a, b, zoom, time); ctx.imageSmoothingEnabled = false; } });
     else if (!ROOM) {
     ITEMS.apples.forEach((a, i) => { if (!Q.apples.includes(i) && inView(a.x, a.y)) draw.push({ base: a.y, fn: () => drawApple(...S(a.x, a.y), zoom) }); });
     (Q.mushroomSpots || []).forEach((m, i) => { if (!(Q.mushrooms || []).includes(i) && inView(m.x, m.y)) draw.push({ base: m.y, fn: () => drawMushroom(...S(m.x, m.y), zoom) }); });
     if (!Q.cap && inView(ITEMS.cap.x, ITEMS.cap.y)) draw.push({ base: ITEMS.cap.y, fn: () => drawCap(...S(ITEMS.cap.x, ITEMS.cap.y), zoom) });
+    for (const b of BALES) if (inView(b.x, b.y)) draw.push({ base: b.y, fn: () => drawBale(b, ...S(b.x, b.y), zoom) });
     for (const n of ITEMS.npcs) if (inView(n.x, n.y)) draw.push({ base: n.y, fn: () => drawNpc(n, ...S(n.x, n.y), zoom) });
     }
     draw.push({ base: P.y, fn: () => drawArek(...S(P.x, P.y), zoom) });
@@ -1147,20 +1207,20 @@
       if (Q.edytka) lines.push([`${T.edytkaQuest} (${Math.min(Q.edytkaN || 0, EDYTKA_TIMES)}/${EDYTKA_TIMES})`, Q.edytka === 2]);
       if (Q.grandpa || questsDone() >= 3) lines.push([T.quests[3], Q.grandpa === 2]);
       HOOKS.questLog.forEach(f => f(lines));
-      const qh = U * (7.2 + lines.length * 2.6);
+      const qh = U * (5.2 + lines.length * 2.6);
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(qx, qy, qw, qh);
-      // apple icon + count
+      // Apple and mushroom counters share one compact line.
       const ax = qx + U * 2.4, ay = qy + U * 2.8;
       ctx.save(); ctx.translate(ax, ay + U * .8); const us = U * .32; ctx.fillStyle = '#d8262c'; ctx.fillRect(-3 * us, -6 * us, 6 * us, 6 * us); ctx.fillStyle = '#4fa34a'; ctx.fillRect(0, -9 * us, 2 * us, 2 * us); ctx.restore();
       ctx.font = `${U * 2}px Silkscreen`; ctx.fillStyle = '#f5f0e0'; ctx.textAlign = 'left';
       ctx.fillText(`× ${appleCount()}`, ax + U * 2, ay);
-      const mxh = qx + U * 2.4, myh = qy + U * 5.05;
-      ctx.fillStyle = '#f7e6c4'; ctx.fillRect(mxh - U * .35, myh - U * 1.1, U * .7, U * 1.4); ctx.fillStyle = '#d84b48'; ctx.fillRect(mxh - U * 1.3, myh - U * 1.8, U * 2.6, U * .75);
+      const mxh = qx + U * 13.8, myh = ay;
+      ctx.fillStyle = '#fffdf2'; ctx.fillRect(mxh - U * .35, myh - U * 1.1, U * .7, U * 1.4); ctx.fillStyle = '#ffffff'; ctx.fillRect(mxh - U * 1.3, myh - U * 1.8, U * 2.6, U * .75);
       ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${mushroomCount()}/${MUSHROOMS_TOTAL}`, mxh + U * 2, myh);
       ctx.fillStyle = '#ffd21f'; ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 7, ay);
       ctx.font = `${U * 1.45}px Silkscreen`;
       lines.forEach(([txt, done], i) => {
-        const ly = qy + U * (8 + i * 2.6);
+        const ly = qy + U * (6.1 + i * 2.6);
         ctx.strokeStyle = done ? '#7cff6b' : '#f5f0e0'; ctx.lineWidth = Math.max(1, U * .2); ctx.strokeRect(qx + U * 1.6, ly - U * .7, U * 1.4, U * 1.4);
         if (done) { ctx.fillStyle = '#7cff6b'; ctx.fillRect(qx + U * 1.9, ly - U * .4, U * .8, U * .8); }
         ctx.fillStyle = done ? '#8aa08a' : '#f5f0e0'; ctx.fillText(txt.toUpperCase(), qx + U * 3.8, ly);
@@ -1176,7 +1236,7 @@
       const bw = Math.min(W - U * 6, U * 92), bh = U * 17, bx = (W - bw) / 2, by = H - bh - U * 3;
       box(bx, by, bw, bh, U);
       ctx.font = `${U * 2.4}px Silkscreen`; ctx.fillStyle = talk.who === 'arek' ? '#ffd21f' : '#7cd0ff'; ctx.textAlign = 'left';
-      ctx.fillText(T.names[talk.who], bx + U * 3, by + U * 3.6);
+      ctx.fillText(talk.who === 'arek' ? heroName() : T.names[talk.who], bx + U * 3, by + U * 3.6);
       ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.25}px Silkscreen`;
       const full = talk.lines[talk.i].toUpperCase(), shown = full.slice(0, Math.floor(talkT * 45));
       wrapText(shown, bw - U * 6).slice(0, 3).forEach((l, i) => ctx.fillText(l, bx + U * 3, by + U * (7.6 + i * 3.1)));
@@ -1184,7 +1244,7 @@
     }
     if (scene === 'play' && ROOM) {   // room label instead of the village minimap
       ctx.font = `${U * 1.8}px Silkscreen`; ctx.textAlign = 'right';
-      const txt = `${T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
+      const txt = `${ROOM.kind === 'shop' ? (LANG === 'pl' ? 'SKLEP' : 'SHOP') : T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(W - tw - U * 2, U * 2, tw, U * 4); ctx.fillStyle = '#ffd21f'; ctx.fillText(txt, W - U * 3, U * 4);
     }
     // minimap
@@ -1211,14 +1271,20 @@
             ctx.fillStyle = '#ffd21f'; ctx.fillText(place.name, lx + U * 1.5, ly + U * 2.55);
           }
         }
-        ctx.font = `${U * 1.5}px Silkscreen`; ctx.textAlign = 'right'; ctx.fillStyle = '#ffd21f';
-        ctx.fillText('→ DUŃCY', mx + mw - U * 2, my + U * 3);
-        ctx.font = `${U * 1.2}px Silkscreen`; ctx.fillStyle = '#f5f0e0';
-        ctx.fillText('WIELKIE KSIĘSTWO LITEWSKIE', W - U * 1.5, my + mh * .5);
       }
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.75)';
       ctx.fillText('© OPENSTREETMAP CONTRIBUTORS', W - U * 1.5, H - U * 1.2);
       drawCoords(U, H, big, mx, my, mw, mh);
+    }
+    // Direction signs belong to the playable board, not the map overlay.
+    if (scene === 'play' && !ROOM && !showMap) {
+      ctx.save();
+      ctx.font = `${U * 1.5}px Silkscreen`; ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left'; ctx.fillStyle = '#fff7d6'; ctx.shadowColor = '#10163a'; ctx.shadowBlur = U * .7;
+      ctx.fillText('← DUŃCY', W * .28, H * .52);
+      ctx.textAlign = 'right'; ctx.font = `${U * 1.15}px Silkscreen`;
+      ctx.fillText('WIELKIE KSIĘSTWO LITEWSKIE →', W * .72, H * .52);
+      ctx.restore();
     }
     if (scene === 'play') HOOKS.hud.forEach(f => f(U, W, H));
     if (scene === 'play' && matchMedia('(pointer:coarse)').matches) {
@@ -1260,6 +1326,15 @@
   async function init() {
     load('img/splash.png').then(i => { SPLASH = i; }, () => { });   // title art; the title still works without it
     [MAP, ITEMS] = await Promise.all([fetch('map.json').then(r => r.json()), fetch('items.json').then(r => r.json())]);
+    // A stale generated items file or an old save must not render the same NPC twice.
+    // Keep the first authored instance, which preserves the intended range position.
+    if (Array.isArray(ITEMS.npcs)) {
+      const seenNpcIds = new Set();
+      ITEMS.npcs = ITEMS.npcs.filter(n => !seenNpcIds.has(n.id) && seenNpcIds.add(n.id));
+    }
+    BALES.splice(0, BALES.length, ...MAP.objects.filter(o => o.w === 23 && o.h === 11).map(source => ({
+      source, x: source.x + source.w / 2, y: source.base, vx: 0, vy: 0, angle: 0,
+    })));
     PLAYER_SHEETS = Object.fromEntries(await Promise.all(PLAYABLE_CHARACTERS.map(async character => {
       const sheetName = `${character}_sheet`;
       const [sheet, meta] = await Promise.all([load(`img/${sheetName}.png`), fetch(`img/${sheetName}.json`).then(r => r.json())]);
@@ -1299,7 +1374,7 @@
     P.x = MAP.spawn.x; P.y = MAP.spawn.y;
     hasSave = loadSave();
     buildReachableMask();
-    if (ensureMushrooms()) save();
+    if (ensureMushrooms() && hasSave) save();
     if (params.has('x') && params.has('y')) { P.x = +params.get('x'); P.y = +params.get('y'); }   // e.g. ?x=1243&y=901
     unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y;
     resize(); requestAnimationFrame(loop);
@@ -1315,7 +1390,7 @@
       load,
     };
     window.dispatchEvent(new Event('ark-ready'));
-    window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
+    window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: { left: '← DUŃCY', right: 'WIELKIE KSIĘSTWO LITEWSKIE →' }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

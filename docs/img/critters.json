@@ -50,6 +50,46 @@
     "look"
    ],
    "h": 40
+  },
+  "boar": {
+   "row": 5,
+   "frames": [
+    "walk1",
+    "walk2",
+    "idle",
+    "idle2"
+   ],
+   "h": 44
+  },
+  "mouse": {
+   "row": 6,
+   "frames": [
+    "walk1",
+    "walk2",
+    "idle",
+    "idle2"
+   ],
+   "h": 18
+  },
+  "hare": {
+   "row": 7,
+   "frames": [
+    "walk1",
+    "walk2",
+    "idle",
+    "idle2"
+   ],
+   "h": 28
+  },
+  "pig": {
+   "row": 8,
+   "frames": [
+    "walk1",
+    "walk2",
+    "idle",
+    "idle2"
+   ],
+   "h": 42
   }
  }
 }

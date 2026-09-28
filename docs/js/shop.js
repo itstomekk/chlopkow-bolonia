@@ -39,7 +39,7 @@ window.buildShop = function buildShop() {
     R(o, x, y + 10, w, 4, '#55361f'); R(o, x + 2, y + 13, w - 4, 6, '#98683b');
     R(o, x, y + 18, w, 4, '#51331f');
     const packCols = ['#c94a34', '#e0bc77', '#538b4a', '#e7dfcb', '#466987', '#ad743c', '#d3c9b6'];
-    for (let row = 0; row < 2; row++) for (let px = x + 5; px < x + w - 6; px += 11) {
+    for (let row = 0; row < 3; row++) for (let px = x + 5; px < x + w - 6; px += 11) {
       const height = 8 + (px % 3) * 2, py = y - height + 6 + row * 11;
       R(o, px, py, 7, height, packCols[(px + row * 2) % packCols.length]);
       R(o, px + 1, py + 2, 5, 1, '#f1e5c8');
@@ -51,6 +51,8 @@ window.buildShop = function buildShop() {
   };
   shelf(12, 150, 94); shelf(214, 150, 94);
   shelf(12, 204, 94); shelf(214, 204, 94);
+  // A cramped central rack: jars, flour bags and preserves fill the gap above the counter.
+  shelf(112, 184, 96);
   // Lace-trimmed high stock shelves on the back wall.
   shelf(111, 82, 98);
 
@@ -149,14 +151,14 @@ window.ShopGame = (() => {
     root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-labelledby', 'shop-title');
     const style = doc.createElement('style');
     style.textContent = `
-      .shop-game{position:fixed;z-index:10000;inset:0;background:rgba(25,20,15,.78);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;font:16px system-ui,sans-serif;color:#2e2419}
-      .shop-card{width:min(100%,520px);max-height:94dvh;overflow:auto;background:#f3e8d2;border:5px solid #68472e;box-shadow:0 0 0 4px #e5d8bb,8px 10px 0 #16120f;padding:clamp(16px,5vw,28px);box-sizing:border-box}
-      .shop-card h2{font-size:clamp(20px,6vw,28px);margin:0 0 10px;color:#51351f}.shop-copy{line-height:1.5;margin:10px 0}
-      .shop-game button,.shop-game input{font:inherit;min-height:48px;border:3px solid #68472e;box-sizing:border-box;border-radius:4px}
-      .shop-game input{width:100%;padding:9px 12px;background:#fffdf6;font-size:22px;touch-action:manipulation}
-      .shop-game button{width:100%;margin:8px 0;padding:9px 12px;background:#d7b77b;color:#2a2119;font-weight:700;cursor:pointer;touch-action:manipulation}
-      .shop-game button:focus,.shop-game input:focus{outline:3px solid #3e7044;outline-offset:2px}
-      .shop-meter{font-weight:700;color:#38583b}.shop-message{min-height:1.5em;color:#7a3328}
+      .shop-game{position:fixed;z-index:10000;inset:0;background:rgba(8,12,40,.82);display:flex;align-items:center;justify-content:center;padding:10px;box-sizing:border-box;font:16px Silkscreen,monospace;color:#f5f0e0;image-rendering:pixelated}
+      .shop-card{width:min(100%,500px);max-height:92dvh;overflow:auto;background:#10163a;border:4px solid #f5f0e0;box-shadow:6px 6px 0 #050819;padding:clamp(12px,4vw,22px);box-sizing:border-box}
+      .shop-card h2{font-size:clamp(18px,5vw,25px);line-height:1.35;margin:0 0 10px;color:#ffd21f}.shop-copy{line-height:1.55;margin:9px 0}
+      .shop-game button,.shop-game input{font:inherit;min-height:44px;border:3px solid #ffd21f;box-sizing:border-box;border-radius:0}
+      .shop-game input{width:100%;padding:8px 10px;background:#f5f0e0;color:#10163a;font-size:20px;touch-action:manipulation}
+      .shop-game button{width:100%;margin:7px 0;padding:8px 10px;background:#2f6fe0;color:#fff;font-weight:700;cursor:pointer;touch-action:manipulation}
+      .shop-game button:focus,.shop-game input:focus{outline:3px solid #7cff6b;outline-offset:2px}
+      .shop-meter{font-weight:700;color:#7cff6b}.shop-message{min-height:1.5em;color:#ffb3ab}
       @media(max-width:480px){.shop-card{max-height:96dvh;padding:16px}.shop-game button{min-height:52px}}
     `;
     root.appendChild(style);

@@ -352,7 +352,7 @@ PIT = dict(cx=_gx0 + 150, cy=_gy0 + 110, rx=140, ry=100)
 GRAVEL = dict(x=PIT['cx'] + 40, y=PIT['cy'] + 42, r=60)
 print('venues', dict(corral=CORRAL, meadow=MEADOW, barn=BARN, jazz=JAZZ, pit=PIT, gravel=GRAVEL))
 _rc = tuple(int(round(v)) for v in P(52.2736642, 22.867767)); RANGE = dict(x=_rc[0], y=_rc[1])   # PPM Strzelectwo
-_pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0] + 200, cy=_pc[1] + 200, w=110, h=190)
+_pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0] + 200, cy=_pc[1] + 100, w=110, h=190)
 
 
 def window(cx, cy, rx, ry):

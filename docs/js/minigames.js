@@ -2,7 +2,9 @@
      race   (Damian, north track)      2 laps vs Damian; jump the bale walls; off-track = slow; ghost of your best run
      pig    (Grandpa, corral)          catch Pepa in 30 s; she is fast at first and tires over time
      dogs   (Marcin, south meadow)     collect 6 eggs; dogs growl ("!") before they lunge — jump over them
-     skeet  (Kuba, PPM range)           fairground-style tin moorhens ("kurki wodne") fly across; aim & shoot, 2 barrels
+     skeet  (Michał, PPM range)         shoot a pixel-art target at the range; aim & shoot, 2 barrels
+     ducks  (south-east wetland)        ducks fly across the southern-east fields; aim & shoot, 2 barrels
+     mowing (football pitch)            mow every strip of the pitch before time runs out
    Shared: 3-2-1 lights, bronze/silver/gold medals, records and retry. Venues come from map.json (osm/render_map.py).
    Save: Q.mg[type] = { tries, won, best, medal, ghost? }  — best = time (s) or hits (skeet). */
 'use strict';
@@ -16,31 +18,35 @@ window.addEventListener('ark-ready', () => {
 
   /* ------------------------------------------------------------------ texts */
   const L = PL ? {
-    flag: { race: 'TOR', pig: 'ŚWINKA', dogs: 'PSY', skeet: 'STRZELNICA' },
+    flag: { race: 'TOR', pig: 'ŚWINKA', dogs: 'PSY', skeet: 'TARCZA', ducks: 'KACZKI', mowing: 'KOSZENIE' },
     intro: {
       race: ['Damian: „Wyścig! Dwa okrążenia. Bele siana przeskakujesz — SPACJA albo X.”', 'Damian: „Po trawie biegnie się wolno, a skróty się nie liczą. Pobij mnie, a potem swój rekord!”'],
       pig: ['Dziadek Zdzisiek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
       dogs: ['Marcin: „Kury pana Stefana zniosły na pastwisku 6 jajek, ale pilnują ich psy.”', 'Marcin: „Kiedy pies warknie „!”, zaraz skoczy. Wtedy przeskocz go albo uciekaj w bok!”'],
-      skeet: ['Kuba: „Moja strzelnica! Blaszane kurki wodne wylatują z budek po bokach.”', !coarse() ? 'Kuba: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Kuba: „Dotknij kurki, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
+      skeet: ['Michał: „Tu jest tarcza, nie gra w kurki. Sprawdź oko na PPM Strzelectwie.”', !coarse() ? 'Michał: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Michał: „Dotknij tarczy, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
+      ducks: ['Michał: „Grę w kaczki przeniosłem na południowy wschód, nad mokradła.”', 'Michał: „Kaczki lecą łukiem nad polami. Traf 10 z 15, ale nie strzelaj w nic poza tarczą.”'],
+      mowing: ['Damian: „Boisko zarosło po deszczu. Pomożesz je skosić?”', 'Damian: „Przejdź po każdym pasie murawy. Spacja uruchamia kosiarkę, ale liczy się dokładność.”'],
     },
-    win: { race: 'WYGRAŁEŚ Z DAMIANEM!', pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNE OKO!' },
-    lose: { race: 'DAMIAN BYŁ SZYBSZY...', pig: 'PEPA UCIEKŁA...', dogs: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...', skeet: 'ZA MAŁO TRAFIEŃ...' },
-    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Strzelnica Kuby' },
+    win: { race: 'WYGRAŁEŚ Z DAMIANEM!', pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNA TARCZA!', ducks: 'KACZKI TRAFIONE!', mowing: 'BOISKO SKOSZONE!' },
+    lose: { race: 'DAMIAN BYŁ SZYBSZY...', pig: 'PEPA UCIEKŁA...', dogs: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...', skeet: 'ZA MAŁO TRAFIEŃ...', ducks: 'KACZKI ODLECIAŁY...', mowing: 'BOISKO NADAL ZAROSŁE...' },
+    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Tarcza u Michała', ducks: 'Gra w kaczki', mowing: 'Koszenie boiska' },
     medal: ['', 'BRĄZ', 'SREBRO', 'ZŁOTO'], next: m => `NASTĘPNY: ${m}`,
     go: 'START!', lap: 'OKRĄŻENIE', time: 'CZAS', best: 'REKORD', eggs: 'JAJKA', left: 'ZOSTAŁO', hits: 'TRAFIENIA', reload: 'PRZEŁADOWANIE...',
     retry: 'SPACJA / R — JESZCZE RAZ', quit: 'ESC — WYJDŹ', esc: 'ESC — PRZERWIJ', record: 'NOWY REKORD!', ghost: 'DUCH REKORDU', offTrack: 'TRAWA — WOLNIEJ!',
     tired: 'PEPA SIĘ MĘCZY!',
   } : {
-    flag: { race: 'TRACK', pig: 'PIGGY', dogs: 'DOGS', skeet: 'RANGE' },
+    flag: { race: 'TRACK', pig: 'PIGGY', dogs: 'DOGS', skeet: 'TARGET', ducks: 'DUCKS', mowing: 'MOWING' },
     intro: {
       race: ['Damian: "Race! Two laps. Jump the hay bales — SPACE or X."', 'Damian: "Grass is slow and shortcuts don\'t count. Beat me, then beat your own record!"'],
       pig: ['Grandpa Zdzisiek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
       dogs: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "When a dog growls "!", it is about to lunge. Jump over it or dodge sideways!"'],
-      skeet: ['Kuba: "My shooting gallery! Tin moorhens fly out of the booths on both sides."', !coarse() ? 'Kuba: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Kuba: "Tap a moorhen to shoot. Two barrels, then reload. Hit 10 of 15!"'],
+      skeet: ['Michał: "This is a target, not a moorhen game. Test your aim at the PPM range."', !coarse() ? 'Michał: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Michał: "Tap the target to shoot. Two barrels, then reload. Hit 10 of 15!"'],
+      ducks: ['Michał: "The duck game moved south-east, out by the wetlands."', 'Michał: "Ducks fly in arcs over the fields. Hit 10 of 15, and keep your aim on the targets."'],
+      mowing: ['Damian: "The pitch has grown wild after the rain. Can you mow it?"', 'Damian: "Walk every strip of grass. SPACE starts the mower, but accuracy matters."'],
     },
-    win: { race: 'YOU BEAT DAMIAN!', pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'SHARPSHOOTER!' },
-    lose: { race: 'DAMIAN WAS FASTER...', pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...' },
-    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: "Kuba's shooting gallery" },
+    win: { race: 'YOU BEAT DAMIAN!', pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'TARGET MASTER!', ducks: 'DUCKS HIT!', mowing: 'PITCH MOWN!' },
+    lose: { race: 'DAMIAN WAS FASTER...', pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...', ducks: 'THE DUCKS FLEW OFF...', mowing: 'THE PITCH IS STILL WILD...' },
+    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: 'Target at Michał\'s range', ducks: 'Duck game', mowing: 'Mow the football pitch' },
     medal: ['', 'BRONZE', 'SILVER', 'GOLD'], next: m => `NEXT: ${m}`,
     go: 'GO!', lap: 'LAP', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT', hits: 'HITS', reload: 'RELOADING...',
     retry: 'SPACE / R — AGAIN', quit: 'ESC — LEAVE', esc: 'ESC — QUIT', record: 'NEW RECORD!', ghost: 'RECORD GHOST', offTrack: 'GRASS — SLOWER!',
@@ -48,16 +54,16 @@ window.addEventListener('ark-ready', () => {
   };
 
   /* ------------------------------------------------------------------ medals: [bronze, silver, gold] thresholds */
-  const MEDAL = {   // time games: lower is better; skeet: hits, higher is better
+  const MEDAL = {   // time games: lower is better; shooting: hits, higher is better
     race: { lower: true, t: [Infinity, 18.5, 16.5] },   // bronze = simply beating Damian (~18.4 s)
     pig: { lower: true, t: [30, 15, 8] },
     dogs: { lower: true, t: [Infinity, 28, 18] },
-    skeet: { lower: false, t: [10, 12, 14] },
+    skeet: { lower: false, t: [10, 12, 14] }, ducks: { lower: false, t: [10, 12, 14] }, mowing: { lower: true, t: [Infinity, 35, 22] },
   };
   const medalFor = (type, score) => { const m = MEDAL[type]; let r = 0; m.t.forEach((th, i) => { if (m.lower ? score <= th : score >= th) r = i + 1; }); return r; };
   const MEDAL_COL = ['#666', '#cd7f32', '#d8d8e0', '#ffd21f'];
   const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
-  const scoreText = (type, v) => type === 'skeet' ? `${v}/15` : fmt(v);
+  const scoreText = (type, v) => ['skeet', 'ducks'].includes(type) ? `${v}/15` : fmt(v);
 
   /* ------------------------------------------------------------------ geometry helpers */
   const trackPt = th => [TR.cx + Math.cos(th) * TR.rx, TR.cy + Math.sin(th) * TR.ry];
@@ -65,11 +71,21 @@ window.addEventListener('ark-ready', () => {
   const angOf = (x, y) => { let a = Math.atan2((y - TR.cy) / TR.ry, (x - TR.cx) / TR.rx); if (a < 0) a += Math.PI * 2; return a; };
   const DIRS = ['down', 'up', 'left', 'right'];
 
+  function freeVenue(x, y) {
+    for (let r = 0; r < 500; r += 18) for (let a = 0; a < Math.PI * 2; a += .45) {
+      const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+      if (px > 30 && py > 30 && px < MAP.w - 30 && py < MAP.h - 30 && !A.blocked(px, py)) return { x: px, y: py };
+    }
+    return { x, y };
+  }
+  const DUCKS_SITE = freeVenue(MAP.w * .78, MAP.h * .78);
   const FLAGS = [
     { type: 'race', host: 'damian', x: TR.cx - 30, y: TR.cy + TR.ry + TR.w / 2 + 22, color: '#d8262c' },
     { type: 'pig', host: 'grandpa', x: CO.cx - CO.r - 26, y: CO.cy + 6, color: '#ff8fb8' },
     { type: 'dogs', host: 'marcin', x: ME.x0 - 18, y: (ME.y0 + ME.y1) / 2, color: '#2f6fe0' },
-    { type: 'skeet', host: 'kuba', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
+    { type: 'skeet', host: 'michal', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
+    { type: 'ducks', host: 'michal', x: DUCKS_SITE.x, y: DUCKS_SITE.y, color: '#5fb7d4' },
+    { type: 'mowing', host: 'damian', x: MAP.football_pitch.cx, y: MAP.football_pitch.cy + MAP.football_pitch.h / 2 + 30, color: '#68bd52' },
   ];
   let MG = null, ANIM = null;
   A.minigame = () => MG && MG.type;   // read by music.js
@@ -95,12 +111,13 @@ window.addEventListener('ark-ready', () => {
       }
       const dogs = [0, 1, 2].map(i => ({ x: ME.x1 - 30, y: ME.y0 + 50 + i * (ME.y1 - ME.y0 - 100) / 2, dir: 'left', step: 0, st: 'patrol', st_t: Math.random(), home: ME.y0 + 50 + i * (ME.y1 - ME.y0 - 100) / 2 }));
       Object.assign(MG, { eggs, dogs });
+    } else if (type === 'mowing') {
+      A.teleport(MAP.football_pitch.cx, MAP.football_pitch.cy); P.dir = 'up';
+      Object.assign(MG, { cut: new Set(), cellsX: 7, cellsY: 10, target: 70, mower: false, limit: 45 });
     } else {
       A.teleport(RG.x, RG.y); P.dir = 'up';
-      // 15 targets: singles and a few doubles, alternating booths
-      const plan = []; let t = 1.2;
-      for (let i = 0; i < 12; i++) { const dbl = i === 4 || i === 8 || i === 11; plan.push({ t, from: i % 2 }); if (dbl) plan.push({ t: t + .15, from: 1 - (i % 2) }); t += dbl ? 2.4 : 1.7; }
-      Object.assign(MG, { plan, targets: [], hits: 0, shots: 0, barrel: 2, reload: 0, aim: null, flash: 0, results: [] });
+      if (type === 'ducks') { A.teleport(DUCKS_SITE.x, DUCKS_SITE.y); P.dir = 'up'; }
+      setupShooting(type, type === 'ducks' ? DUCKS_SITE : RG);
     }
   }
   function endMG(win, msg) {
@@ -118,6 +135,12 @@ window.addEventListener('ark-ready', () => {
   const leave = () => { MG = null; };
   const retry = () => { const t = MG.type; MG = null; startMG(t); };
 
+  function setupShooting(type, site) {
+    const plan = []; let t = 1.2;
+    for (let i = 0; i < 12; i++) { const dbl = i === 4 || i === 8 || i === 11; plan.push({ t, from: i % 2 }); if (dbl) plan.push({ t: t + .15, from: 1 - (i % 2) }); t += dbl ? 2.4 : 1.7; }
+    Object.assign(MG, { site, plan, targets: [], hits: 0, shots: 0, barrel: 2, reload: 0, aim: null, flash: 0, results: [] });
+  }
+
   /* ------------------------------------------------------------------ hooks: interaction, input, movement */
   HOOKS.near.push(() => (HOOKS.busy.some(f => f()) ? [] : FLAGS.map(f => ({
     x: f.x, y: f.y, r: 30,
@@ -130,13 +153,13 @@ window.addEventListener('ark-ready', () => {
     if (!MG) return false;
     if (e.code === 'Escape') { leave(); return true; }
     if (MG.phase === 'win' || MG.phase === 'lose') { if (MG.t > .5 && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyR')) retry(); return true; }
-    if (MG.type === 'skeet' && MG.phase === 'run' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyX')) { shoot(); return true; }
+    if (['skeet', 'ducks'].includes(MG.type) && MG.phase === 'run' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyX')) { shoot(); return true; }
     return false;   // let Space/X reach the jump handler in the other games
   });
   HOOKS.pointer.push((px, py) => {
     if (!MG) return false;
     if (MG.phase === 'win' || MG.phase === 'lose') { if (MG.t > .5) { if (MG.btn && px > MG.btn.mid) leave(); else retry(); } return true; }
-    if (MG.type === 'skeet' && MG.phase === 'run') { MG.aim = [px, py]; shoot(); return true; }
+    if (['skeet', 'ducks'].includes(MG.type) && MG.phase === 'run') { MG.aim = [px, py]; shoot(); return true; }
     return false;
   });
 
@@ -152,7 +175,7 @@ window.addEventListener('ark-ready', () => {
   }
 
   /* ------------------------------------------------------------------ skeet */
-  const BOOTH = side => [RG.x + (side ? 130 : -130), RG.y - 18];   // arcs must stay inside the ~330 px tall view
+  const BOOTH = (side, site) => [site.x + (side ? 130 : -130), site.y - 18];   // arcs stay close to the selected venue
   function shoot() {
     if (MG.reload > 0 || MG.barrel <= 0) return;
     MG.barrel--; MG.shots++; MG.flash = .12;
@@ -185,7 +208,7 @@ window.addEventListener('ark-ready', () => {
     // launch
     for (const p of MG.plan) if (!p.done && MG.run >= p.t) {
       p.done = true;
-      const [x0, y0] = BOOTH(p.from), [x1, y1] = BOOTH(1 - p.from);
+      const [x0, y0] = BOOTH(p.from, MG.site), [x1, y1] = BOOTH(1 - p.from, MG.site);
       MG.targets.push({ x0, y0, x1: x1 + (Math.random() - .5) * 50, y1: y1 - 10 - Math.random() * 40, T: 1.6 + Math.random() * .5, h: 45 + Math.random() * 45, t: 0, alive: true, x: x0, y: y0, z: 0, spin: Math.random() * 6 });
     }
     for (const t of MG.targets) if (t.alive) {
@@ -193,7 +216,7 @@ window.addEventListener('ark-ready', () => {
       t.x = t.x0 + (t.x1 - t.x0) * u; t.y = t.y0 + (t.y1 - t.y0) * u; t.z = Math.sin(Math.PI * Math.min(1, u)) * t.h; t.spin += dt * 9;
       if (u >= 1) { t.alive = false; MG.results.push(0); }
     }
-    if (MG.plan.every(p => p.done) && MG.targets.every(t => !t.alive)) endMG(MG.hits >= 10, MG.hits >= 10 ? L.win.skeet : L.lose.skeet);
+    if (MG.plan.every(p => p.done) && MG.targets.every(t => !t.alive)) endMG(MG.hits >= 10, MG.hits >= 10 ? L.win[MG.type] : L.lose[MG.type]);
   }
 
   /* ------------------------------------------------------------------ per-frame update */
@@ -261,6 +284,22 @@ window.addEventListener('ark-ready', () => {
         if (dg.st === 'rest' && dg.st_t < 0) dg.st_t = 0;
         if (d < 13 && P.z < 6) { endMG(false, L.lose.dogs); return; }
       }
+    } else if (MG.type === 'mowing') {
+      const fp = MAP.football_pitch, x0 = fp.cx - fp.w / 2, y0 = fp.cy - fp.h / 2;
+      const inside = P.x >= x0 && P.x <= x0 + fp.w && P.y >= y0 && P.y <= y0 + fp.h;
+      if (inside && (P.moving || A.keys.has('Space'))) {
+        const cx = Math.max(0, Math.min(MG.cellsX - 1, Math.floor((P.x - x0) / fp.w * MG.cellsX)));
+        const cy = Math.max(0, Math.min(MG.cellsY - 1, Math.floor((P.y - y0) / fp.h * MG.cellsY)));
+        MG.cut.add(`${cx},${cy}`);
+        // The mower cuts a small cross around the player's strip, so walking
+        // naturally covers the pitch instead of requiring pixel-perfect paths.
+        if (A.keys.has('Space')) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+          const nx = cx + dx, ny = cy + dy; if (nx >= 0 && nx < MG.cellsX && ny >= 0 && ny < MG.cellsY) MG.cut.add(`${nx},${ny}`);
+        }
+        MG.mower = true;
+      } else MG.mower = false;
+      if (MG.cut.size >= MG.target) endMG(true, L.win.mowing);
+      else if (MG.run >= MG.limit) endMG(false, L.lose.mowing);
     } else updateSkeet(dt);
   });
 
@@ -306,14 +345,28 @@ window.addEventListener('ark-ready', () => {
     px(-6, -1, 1.5, 1.5, '#f5f0e0'); px(-3, 0, 5, 1, '#3a4256'); px(4, -4, 1, 1, '#f5f0e0'); // white under-tail, wing line, eye
     ctx.restore();
   }
+  function drawTarget(t, sx, sy, s) {
+    const w = 18 * s, h = 24 * s;
+    ctx.fillStyle = '#6a4229'; ctx.fillRect(sx - 2 * s, sy - 4 * s, 4 * s, h);
+    ctx.fillStyle = '#e7dfcb'; ctx.fillRect(sx - w / 2, sy - h, w, h * .78);
+    ctx.fillStyle = '#d8262c'; ctx.beginPath(); ctx.arc(sx, sy - h * .61, 7 * s, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f5f0e0'; ctx.beginPath(); ctx.arc(sx, sy - h * .61, 4.5 * s, 0, 7); ctx.fill();
+    ctx.fillStyle = '#d8262c'; ctx.beginPath(); ctx.arc(sx, sy - h * .61, 2 * s, 0, 7); ctx.fill();
+  }
+  function drawMower(sx, sy, s) {
+    ctx.fillStyle = '#68bd52'; ctx.fillRect(sx - 8 * s, sy - 10 * s, 16 * s, 9 * s);
+    ctx.fillStyle = '#2b542d'; ctx.fillRect(sx - 5 * s, sy - 13 * s, 10 * s, 3 * s);
+    ctx.fillStyle = '#24232b'; ctx.fillRect(sx - 7 * s, sy - 1 * s, 4 * s, 3 * s); ctx.fillRect(sx + 3 * s, sy - 1 * s, 4 * s, 3 * s);
+  }
   HOOKS.world.push((push, S, inView) => {
     for (const f of FLAGS) if (inView(f.x, f.y) && !(MG && MG.type === f.type)) push(f.y, () => drawFlag(f, ...S(f.x, f.y), A.zoom));
     const host = FLAGS[3];
     if (inView(host.x + 28, host.y - 25)) push(host.y - 25, () => {
       const [sx, sy] = S(host.x + 28, host.y - 25);
-      A.drawNpc({ id: 'kuba', x: host.x + 28, y: host.y - 25 }, sx, sy, A.zoom);
+      A.drawNpc({ id: host.host, x: host.x + 28, y: host.y - 25 }, sx, sy, A.zoom);
     });
-    for (const side of [0, 1]) { const [bx, by] = BOOTH(side); if (inView(bx, by)) push(by, () => drawBooth(side, ...S(bx, by), A.zoom)); }
+    for (const side of [0, 1]) { const [bx, by] = BOOTH(side, DUCKS_SITE); if (inView(bx, by)) push(by, () => drawBooth(side, ...S(bx, by), A.zoom)); }
+    if (inView(RG.x, RG.y)) push(RG.y, () => drawTarget(null, ...S(RG.x, RG.y), A.zoom));
     if (!MG) return;
     const s = A.zoom;
     if (MG.type === 'race') {
@@ -331,11 +384,15 @@ window.addEventListener('ark-ready', () => {
         const [sx, sy] = S(d.x, d.y); drawAnimal(1, d, sx, sy, s);
         if (d.st === 'windup') bubble(sx, sy - 30 * s, s, '!', '#ff4b3e');
       });
+    } else if (MG.type === 'mowing') {
+      const fp = MAP.football_pitch, s0 = A.zoom, x0 = fp.cx - fp.w / 2, y0 = fp.cy - fp.h / 2;
+      for (const key of MG.cut) { const [cx, cy] = key.split(',').map(Number); const [sx, sy] = S(x0 + (cx + .5) * fp.w / MG.cellsX, y0 + (cy + .5) * fp.h / MG.cellsY); ctx.fillStyle = '#68bd52'; ctx.fillRect(sx - fp.w / MG.cellsX * s0 / 2, sy - fp.h / MG.cellsY * s0 / 2, fp.w / MG.cellsX * s0, fp.h / MG.cellsY * s0); }
+      if (MG.mower) { const [sx, sy] = S(P.x, P.y); push(P.y, () => drawMower(sx, sy, s0)); }
     } else {
       for (const t of MG.targets) if (t.alive) push(t.y + 400, () => {
         const [sx, sy] = S(t.x, t.y), [hx, hy] = S(t.x, t.y - t.z);
         ctx.fillStyle = 'rgba(20,34,12,.25)'; ctx.beginPath(); ctx.ellipse(sx, sy, 4 * s, 1.5 * s, 0, 0, 7); ctx.fill();
-        drawMoorhen(t, hx, hy, s * 1.6);
+        if (MG.type === 'skeet') drawTarget(t, hx, hy, s * 1.5); else drawMoorhen(t, hx, hy, s * 1.6);
       });
     }
   });
@@ -360,7 +417,7 @@ window.addEventListener('ark-ready', () => {
     ctx.textBaseline = 'middle';
     const rec = Q().mg[MG.type];
     const info = MG.type === 'race' ? `${L.lap} ${MG.lap}/${MG.laps}` : MG.type === 'pig' ? `${L.left} ${Math.max(0, MG.limit - MG.run).toFixed(1)}`
-      : MG.type === 'dogs' ? `${L.eggs} ${MG.eggs.filter(e => e.got).length}/6` : `${L.hits} ${MG.hits}/15`;
+      : MG.type === 'dogs' ? `${L.eggs} ${MG.eggs.filter(e => e.got).length}/6` : MG.type === 'mowing' ? `${MG.cut.size}/${MG.target}` : `${L.hits} ${MG.hits}/15`;
     const bw = Math.min(W * .56, U * 64), bx = (W - bw) / 2;
     ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(bx, U * 1.5, bw, U * 6);
     ctx.font = `${U * 2.3}px Silkscreen`; ctx.textAlign = 'left'; ctx.fillStyle = '#ffd21f'; ctx.fillText(`${L.time} ${fmt(MG.run)}`, bx + U * 2, U * 3.6);
@@ -373,10 +430,11 @@ window.addEventListener('ark-ready', () => {
     if (MG.type === 'race' && MG.phase === 'run' && MG.offTrack) status = [L.offTrack, '#ff6b5e'];
     if (MG.type === 'race' && MG.ghost && MG.phase === 'run' && !status) status = [L.ghost, '#9fd0f0'];
     if (MG.type === 'pig' && MG.tired) status = [L.tired, '#7cff6b'];
-    if (MG.type === 'skeet' && MG.reload > 0) status = [L.reload, '#ffd21f'];
+    if (['skeet', 'ducks'].includes(MG.type) && MG.reload > 0) status = [L.reload, '#ffd21f'];
+    if (MG.type === 'mowing' && MG.phase === 'run') status = [`${MG.cut.size}/${MG.target}`, '#7cff6b'];
     if (status) { ctx.font = `${U * 1.7}px Silkscreen`; ctx.fillStyle = status[1]; ctx.fillText(status[0], W / 2, U * 9.2); }
 
-    if (MG.type === 'skeet' && MG.phase === 'run') drawSkeetHUD(U, W, H);
+    if (['skeet', 'ducks'].includes(MG.type) && MG.phase === 'run') drawSkeetHUD(U, W, H);
     if (MG.phase === 'count') {   // three lamps: red, red, yellow... then green GO
       const n = Math.floor(MG.t), k = MG.t % 1, r = U * 3.2, cy = H * .38;
       ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(W / 2 - r * 5, cy - r * 1.6, r * 10, r * 3.2);
@@ -390,7 +448,7 @@ window.addEventListener('ark-ready', () => {
       ctx.font = `${U * 3.2}px Silkscreen`; ctx.fillStyle = MG.phase === 'win' ? '#7cff6b' : '#ff6b5e'; ctx.fillText(MG.msg, W / 2, py + U * 4.6);
       if (MG.medal) { drawMedal(W / 2 - pw * .32, py + U * 12.5, U * 3, MG.medal); ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillStyle = MEDAL_COL[MG.medal]; ctx.fillText(L.medal[MG.medal], W / 2 - pw * .32, py + U * 17.4); }
       ctx.font = `${U * 2.2}px Silkscreen`; ctx.fillStyle = '#f5f0e0';
-      const main = MG.type === 'skeet' ? `${L.hits} ${MG.hits}/15` : `${L.time} ${fmt(MG.run)}`;
+      const main = ['skeet', 'ducks'].includes(MG.type) ? `${L.hits} ${MG.hits}/15` : `${L.time} ${fmt(MG.run)}`;
       ctx.fillText(main, W / 2 + (MG.medal ? pw * .1 : 0), py + U * 9.5);
       ctx.font = `${U * 1.6}px Silkscreen`; ctx.fillStyle = '#c8cee0';
       if (MG.type === 'race' && MG.laps_t.length) ctx.fillText(MG.laps_t.map((t, i) => `${L.lap} ${i + 1}: ${fmt(i ? t - MG.laps_t[i - 1] : t)}`).join('  '), W / 2 + (MG.medal ? pw * .1 : 0), py + U * 12.6);

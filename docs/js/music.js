@@ -282,6 +282,8 @@
      advances it at the current tempo, so a tempo change never makes the music jump. */
   const P = { name: null, song: null, arr: null, pass: 0, idx: 0, fT: 0, fS: 0, out: null, want: null };
   let VILLAGE = 'krakowiak', PICK = null, ACTIVITY = null;
+  const MAIN_TRACK = 'audio/Polka_Dziadek_true_chiptune_NES.wav';
+  let mainTrack = null, mainTrackOn = false;
   const LOOKAHEAD = .25;
   const TEMPO = { idle: .2, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
     rampUp: 30, rampRun: 20, rampDown: 20 };        // linear energy seconds to max (walking / running / stopping)
@@ -310,6 +312,25 @@
     P.out = ac.createGain(); P.out.gain.value = 1; P.out.connect(bus);
     P.arr = arrange(P.song, 0); P.fT = now + .15; P.fS = 0;
   }
+  function setMainTrack(enabled) {
+    if (!mainTrack) {
+      mainTrack = new Audio(MAIN_TRACK);
+      mainTrack.loop = true;
+      mainTrack.preload = 'auto';
+      mainTrack.volume = .62;
+    }
+    if (mainTrackOn === enabled) return;
+    mainTrackOn = enabled;
+    if (enabled) mainTrack.play().catch(() => { });
+    else { mainTrack.pause(); mainTrack.currentTime = 0; }
+  }
+  function setSynthEnabled(enabled) {
+    if (!bus || !ac) return;
+    const now = ac.currentTime;
+    bus.gain.cancelScheduledValues(now);
+    bus.gain.setValueAtTime(bus.gain.value, now);
+    bus.gain.linearRampToValueAtTime(enabled ? 1 : 0, now + .25);
+  }
   function nextPass() {
     // the village alternates between the krakowiak and the mazurka every couple of passes
     if ((P.name === 'krakowiak' || P.name === 'mazurka') && P.want === P.name && P.pass % 2 === 1) {
@@ -321,9 +342,16 @@
   function tick() {
     updateTempo();
     if (!ac || rendering || ac.state !== 'running') return;
-    if (PICK) P.want = PICK();
+    if (PICK) {
+      const zone = PICK();
+      const field = zone === 'field';
+      const main = zone === 'main';
+      setMainTrack(main);
+      setSynthEnabled(!main);
+      P.want = field || main ? 'krakowiak' : zone;
+    }
     if (P.want && P.want !== P.name) startSong(P.want);
-    if (!P.song) return;
+    if (!P.song) startSong('krakowiak');
     const step = 60 / (P.song.bpm * tempo) / 4, horizon = ac.currentTime + LOOKAHEAD;
     if (P.fT < ac.currentTime - .5) P.fT = ac.currentTime;   // after a suspend: resume from now instead of catching up
     while (P.fT < horizon) {
@@ -441,29 +469,34 @@
     };
     const pick = () => {
       const sc = A.scene;
-      if (sc === 'title') return 'mazurka';
+      if (sc === 'title') return 'main';
       if (A.room && A.room.soltys) return 'choral';
+      if (A.room && A.room.shop) return 'mazurka';
       if (sc === 'end' || nearCemetery()) return 'nokturn';
       if (A.minigame && A.minigame()) return 'oberek';
+      if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'field') return 'field';
+      if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'forest') return 'pastoralka';
       if (sc === 'play' && nearJazz()) return 'jazz';
+      if (sc === 'play') return 'main';
       return VILLAGE;
     };
     ACTIVITY = () => A.scene === 'play' ? { moving: !!A.P.moving, running: A.keys.has('ShiftLeft') || A.keys.has('ShiftRight') } : A.scene === 'end' ? { moving: false } : null;
-    // "HAU!" whenever Arek touches Frodo (walks into him); a speech bubble pops above the dog
-    let hau = null, touching = false;
+    // Frodo answers Arek with short, slightly overconfident dog thoughts.
+    let dogLine = null, touching = false;
+    const DOG_LINES = ['WĘSZĘ KŁOPOTY.', 'AREK, ZA MNĄ. MAM PLAN.', 'DOBRY CZŁOWIEK. SŁABY NOS.', 'KTO MA KIEŁBASĘ?', 'SZYBCIEJ. ŁAPA ZA ŁAPĄ.'];
     setInterval(() => {
       const F = A.FRODO; if (A.scene !== 'play' || !F) { touching = false; return; }
       const d = Math.hypot(A.P.x - F.x, A.P.y - F.y);
-      if (!touching && d < 18 && (!hau || performance.now() - hau.t > 800)) { touching = true; bark(); hau = { t: performance.now() }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
+      if (!touching && d < 18 && (!dogLine || performance.now() - dogLine.t > 1800)) { touching = true; bark(); dogLine = { t: performance.now(), text: DOG_LINES[(Math.random() * DOG_LINES.length) | 0] }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
       else if (touching && d > 28) touching = false;
     }, 50);
     HOOKS.hud.push(U => {
-      if (!hau) return; const age = (performance.now() - hau.t) / 1000; if (age > .9) return;
+      if (!dogLine) return; const age = (performance.now() - dogLine.t) / 1000; if (age > 1.8) return;
       const cam = A.camera, F = A.FRODO; if (!cam) return;
       const [x, y0] = cam.S(F.x, F.y), y = y0 - 18 * cam.zoom, c = A.ctx;
-      c.globalAlpha = Math.min(1, (0.9 - age) * 4); c.font = `${U * 2.2}px Silkscreen`; c.textAlign = 'center';
-      const yy = y - U * 4 - age * U * 3, w = c.measureText('HAU!').width + U * 1.6;
-      c.fillStyle = '#fff'; c.fillRect(x - w / 2, yy - U * 2.2, w, U * 3); c.fillStyle = '#10163a'; c.fillText('HAU!', x, yy);
+      c.globalAlpha = Math.min(1, (1.8 - age) * 2); c.font = `${U * 1.65}px Silkscreen`; c.textAlign = 'center';
+      const yy = y - U * 4 - age * U * 3, w = c.measureText(dogLine.text).width + U * 1.6;
+      c.fillStyle = '#fff'; c.fillRect(x - w / 2, yy - U * 2.2, w, U * 3); c.fillStyle = '#10163a'; c.fillText(dogLine.text, x, yy);
       c.globalAlpha = 1;
     });
     if (!OFF_PARAM) { initAudio(); if (ac && ac.state === 'suspended') ac.resume().catch(() => { }); }

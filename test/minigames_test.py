@@ -86,10 +86,33 @@ with sync_playwright() as p:
     check(r and r['phase'] == 'win', f"skeet win by aiming at targets (hits {hits}, {r})")
     pg.screenshot(path="test/m6_skeet_result.png"); pg.keyboard.press("Escape")
 
+    # ---- ducks: the former "kurki" game now lives at a separate south-east venue
+    ev("__features.startMG('ducks')"); time.sleep(3.2)
+    shots = 0; t_end = time.time() + 40
+    while time.time() < t_end and ev("__features.MG && __features.MG.phase") == 'run':
+        tgt = ev("""(() => { const M = __features.MG, c = ARK.camera; const t = M.targets.find(t => t.alive && t.t > .25);
+                   if (!t || M.reload > 0 || M.barrel <= 0) return null; const r = c.S(t.x, t.y - t.z); return [r[0], r[1]]; })()""")
+        if tgt:
+            box = pg.evaluate("(() => { const r = document.getElementById('game').getBoundingClientRect(); const c = document.getElementById('game'); return [r.left, r.top, r.width / c.width, r.height / c.height]; })()")
+            pg.mouse.click(box[0] + tgt[0] * box[2], box[1] + tgt[1] * box[3]); shots += 1
+        time.sleep(.05)
+    r = mg(); check(r and r['phase'] == 'win', f"ducks win by aiming at targets ({r})"); pg.keyboard.press("Escape")
+
+    # ---- mowing: holding SPACE while walking paints every pitch strip green
+    ev("__features.startMG('mowing')"); time.sleep(3.2)
+    fp = ev("__game.MAP.football_pitch")
+    pg.keyboard.down("ArrowRight"); pg.keyboard.down("Space")
+    for cy in range(10):
+        for cx in range(7):
+            ev(f"__game.P.x={fp['cx'] - fp['w'] / 2 + (cx + .5) * fp['w'] / 7}; __game.P.y={fp['cy'] - fp['h'] / 2 + (cy + .5) * fp['h'] / 10}")
+            time.sleep(.045)
+    pg.keyboard.up("Space"); pg.keyboard.up("ArrowRight"); time.sleep(.3)
+    r = mg(); check(r and r['phase'] == 'win', f"mowing covers the pitch ({r})"); pg.keyboard.press("Escape")
+
     # ---- save + quest log
     q = ev("JSON.stringify(Object.fromEntries(Object.entries(__game.Q.mg).map(([k, v]) => [k, {won: v.won, medal: v.medal, best: v.best}])))")
     print('mg save:', q)
-    check(all(ev(f"!!(__game.Q.mg.{k} && __game.Q.mg.{k}.won)") for k in ['race', 'pig', 'dogs', 'skeet']), "all four minigames recorded as won")
+    check(all(ev(f"!!(__game.Q.mg.{k} && __game.Q.mg.{k}.won)") for k in ['race', 'pig', 'dogs', 'skeet', 'ducks', 'mowing']), "all six minigames recorded as won")
     check(not errs, f"no page errors {errs}")
     b.close()
 print('\nFAILED:', fails if fails else 'none')

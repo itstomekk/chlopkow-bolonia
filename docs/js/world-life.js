@@ -4,11 +4,11 @@
 'use strict';
 (() => {
   const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35;
-  // ~3x the old 5 hens + 3 dogs; extra ones prefer empty parts of the map (the northern fields)
-  const CHICKENS = 15, DOGS = 7, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
+  // Keep domestic birds out of the forest; wild animals are selected by terrain.
+  const CHICKENS = 12, DOGS = 7, BOARS = 4, MICE = 10, HARES = 6, PIGS = 5, BUTTERFLIES = 8, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
   // docs/img/critters.png rows (64px cells, drawn facing right): hen, stray, bird, stork, fox.
   // `px` = tallest sprite in that row in sheet pixels (critters.json h), `h` = its on-screen height in map px.
-  const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 } };
+  const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 }, boar: { row: 5, px: 44, h: 21 }, mouse: { row: 6, px: 18, h: 9 }, hare: { row: 7, px: 28, h: 15 }, pig: { row: 8, px: 42, h: 18 } };
   const READY = () => {
     const A = window.ARK;
     if (!A || A.__worldLifeInstalled) return;
@@ -93,18 +93,19 @@
       return out;
     }
 
-    function randomSite(extra, minFromPlayer = 100) {
+    function randomSite(extra, minFromPlayer = 100, allowed = () => true) {
       const pool = reachableSites().slice();
       for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
       for (const s of pool) {
         if (Math.hypot(P.x - s.x, P.y - s.y) < minFromPlayer) continue;
+        if (!allowed(s)) continue;
         if (tooCloseToStatic(s.x, s.y, extra)) continue;
         if (standable(s.x, s.y, extra)) return { x: s.x, y: s.y };
       }
       for (let r = 120; r < 900; r += 36) {
         for (let a = 0; a < Math.PI * 2; a += .35) {
           const x = P.x + Math.cos(a) * r, y = P.y + Math.sin(a) * r;
-          if (standable(x, y, extra) && !tooCloseToStatic(x, y, extra)) return { x, y };
+          if (allowed({ x, y }) && standable(x, y, extra) && !tooCloseToStatic(x, y, extra)) return { x, y };
         }
       }
       return { x: Math.max(24, Math.min(MAP.w - 24, P.x + 120)), y: Math.max((MAP.top || 40) + 24, Math.min(MAP.h - 24, P.y)) };
@@ -127,7 +128,7 @@
     }
 
     function newAnimal(kind, extra, site) {
-      const p = site || randomSite(extra, 150); p.kind = kind;
+      const p = site || randomSite(extra, 150, s => wildlifeAllowed(kind, s)); p.kind = kind;
       return { kind, x: p.x, y: p.y, homeX: p.x, homeY: p.y, tx: p.x, ty: p.y, dir: Math.random() < .5 ? 'left' : 'right', step: Math.random() * 4, peck: Math.random() * 2, wait: Math.random() * 2, z: 0, fly: 0 };
     }
     // How "empty" a site is: few map objects / POIs / landmarks nearby. Used to send extra wildlife to the quiet fields.
@@ -147,6 +148,29 @@
       }
       return best;
     }
+    const inMeadow = s => {
+      const m = MAP.meadow;
+      return !!m && s.x >= m.x0 && s.x <= m.x1 && s.y >= m.y0 && s.y <= m.y1;
+    };
+    const wildlifeAllowed = (kind, s) => {
+      const terrain = A.terrainAt(s.x, s.y);
+      if (kind === 'boar') return terrain === 'forest';
+      if (kind === 'mouse') return terrain === 'forest' || terrain === 'field';
+      if (kind === 'hare') return terrain === 'field' || inMeadow(s) || terrain === 'grass';
+      if (kind === 'butterfly') return terrain === 'field' || terrain === 'grass' || inMeadow(s);
+      return terrain !== 'forest';
+    };
+    function animalSite(kind, extra, preferred = () => true) {
+      const allowed = s => wildlifeAllowed(kind, s) && preferred(s);
+      const found = emptySite(extra, allowed);
+      if (found) return found;
+      if (kind === 'stork') {
+        // Never use randomSite's generic last-resort point for storks: that
+        // fallback is deliberately global and would violate the river rule.
+        for (const s of reachableSites()) if (allowed(s) && standable(s, [], true)) return { x: s.x, y: s.y };
+      }
+      return randomSite(extra, 150, s => wildlifeAllowed(kind, s));
+    }
     // building spots for the foxes: map objects that are buildings (wide sprites), reduced to a standable point in front
     function buildingSpots() {
       if (state.buildings) return state.buildings;
@@ -157,17 +181,43 @@
       }
       return (state.buildings = out);
     }
-    const nearRiver = s => (MAP.pois || []).some(p => p.key === 'river' && Math.hypot(p.x - s.x, p.y - s.y) < 900) || emptiness(s) < 2;
+    function pigHomeSite(home, extra) {
+      // Keep the animal visibly tied to the building, while leaving the door and
+      // the player a little room. The first valid offset is deterministic.
+      for (const [dx, dy] of [[28, 0], [-28, 0], [0, 28], [0, -28], [40, 22], [-40, 22]]) {
+        const x = home.x + dx, y = home.y + dy;
+        if (standable(x, y, extra) && Math.hypot(x - home.x, y - home.y) < 90) return { x, y };
+      }
+      return standable(home.x, home.y, extra, true) ? { x: home.x, y: home.y } : null;
+    }
+    // The bridge POI is the stable, exported reference for the river. Never use
+    // emptiness as a fallback here: that used to put storks in arbitrary fields.
+    const nearRiver = s => (MAP.pois || []).some(p => p.key === 'river' && Math.hypot(p.x - s.x, p.y - s.y) < 720);
     function makeAnimals() {
       const extra = state.cars.slice();
       const animals = [];
       const add = (kind, site) => { const a = newAnimal(kind, extra.concat(animals), site || undefined); animals.push(a); return a; };
-      for (let i = 0; i < CHICKENS; i++) add('chicken', i >= 5 && i % 2 ? emptySite(extra.concat(animals)) : null);
-      for (let i = 0; i < DOGS; i++) add('dog', i >= 3 ? emptySite(extra.concat(animals)) : null);
-      for (let i = 0; i < STORKS; i++) add('stork', emptySite(extra.concat(animals), nearRiver));
-      for (let i = 0; i < FOXES; i++) { const b = buildingSpots(); add('fox', b.length ? Object.assign({}, b[(Math.random() * b.length) | 0]) : null); }
+      for (let i = 0; i < CHICKENS; i++) add('chicken', animalSite('chicken', extra.concat(animals)));
+      for (let i = 0; i < DOGS; i++) add('dog', animalSite('dog', extra.concat(animals)));
+      for (let i = 0; i < BOARS; i++) add('boar', animalSite('boar', extra.concat(animals)));
+      for (let i = 0; i < MICE; i++) add('mouse', animalSite('mouse', extra.concat(animals)));
+      for (let i = 0; i < HARES; i++) add('hare', animalSite('hare', extra.concat(animals)));
+      // Pigs stay by a subset of accessible building fronts rather than becoming
+      // generic roaming wildlife. This gives the village a few lived-in farmyards.
+      const pigHomes = buildingSpots().filter((s, i, all) => all.slice(0, i).every(v => Math.hypot(v.x - s.x, v.y - s.y) > 260));
+      for (let i = 0; i < PIGS; i++) {
+        const home = pigHomes[i % Math.max(1, pigHomes.length)];
+        const site = home ? (pigHomeSite(home, extra.concat(animals)) || animalSite('pig', extra.concat(animals), s => Math.hypot(s.x - home.x, s.y - home.y) < 130)) : animalSite('pig', extra.concat(animals));
+        add('pig', site);
+      }
+      for (let i = 0; i < BUTTERFLIES; i++) {
+        const b = animalSite('butterfly', extra.concat(animals), s => wildlifeAllowed('butterfly', s));
+        if (b) { const a = add('butterfly', b); a.mood = Math.random() < .5 ? -1 : 1; a.color = ['#ff5a8a', '#ffd21f', '#6fd0ff', '#a67cff'][i % 4]; }
+      }
+      for (let i = 0; i < STORKS; i++) add('stork', animalSite('stork', extra.concat(animals), nearRiver));
+      for (let i = 0; i < FOXES; i++) { const b = buildingSpots(); add('fox', animalSite('fox', extra.concat(animals), s => b.length && b.some(v => Math.hypot(v.x - s.x, v.y - s.y) < 90))); }
       for (let f = 0; f < BIRD_FLOCKS; f++) {   // small flocks of sparrows, half of them in the empty north
-        const c = f % 2 ? emptySite(extra.concat(animals), s => s.y < MAP.h * .4) : emptySite(extra.concat(animals));
+        const c = f % 2 ? animalSite('bird', extra.concat(animals), s => s.y < MAP.h * .4) : animalSite('bird', extra.concat(animals));
         if (!c) continue;
         for (let k = 0; k < 3 + (f % 3); k++) {
           const b = newAnimal('bird', [], { x: c.x + (Math.random() - .5) * 40, y: c.y + (Math.random() - .5) * 30 });
@@ -220,7 +270,7 @@
         const b = buildingSpots().filter(s => { const d = Math.hypot(s.x - o.x, s.y - o.y); return d > 120 && d < 700; });
         if (b.length) { const s = b[(Math.random() * b.length) | 0]; o.tx = s.x; o.ty = s.y; o.wait = 14; return; }
       }
-      const radius = { chicken: 90, dog: 150, stork: 90, bird: 40, fox: 200 }[o.kind] || 120;
+      const radius = { chicken: 90, dog: 150, boar: 140, mouse: 70, hare: 120, pig: 80, butterfly: 110, stork: 90, bird: 40, fox: 200 }[o.kind] || 120;
       for (let i = 0; i < 18; i++) {
         const a = Math.random() * Math.PI * 2, d = Math.random() * radius;
         const x = o.homeX + Math.cos(a) * d, y = o.homeY + Math.sin(a) * d;
@@ -234,6 +284,7 @@
       for (const turn of turns) {
         const c = Math.cos(turn), s = Math.sin(turn), vx = ux * c - uy * s, vy = ux * s + uy * c;
         const nx = o.x + vx * speed * dt, ny = o.y + vy * speed * dt;
+        if (o.kind === 'stork' && !nearRiver({ x: nx, y: ny })) continue;
         if (!standable(nx, ny, others) || Math.hypot(P.x - nx, P.y - ny) < MIN_PLAYER_GAP) continue;
         o.x = nx; o.y = ny; o.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
         if (Math.abs(vx) > .2) o.face = vx < 0 ? 'left' : 'right';
@@ -269,12 +320,13 @@
     }
     function updateAnimal(o, dt) {
       if (o.kind === 'bird') return updateBird(o, dt);
+      if (o.kind === 'butterfly') return updateButterfly(o, dt);
       o.peck += dt; o.moving = Math.max(0, (o.moving || 0) - dt);
       const pdx = o.x - P.x, pdy = o.y - P.y, pd = Math.hypot(pdx, pdy);
       const shy = o.kind === 'fox' ? 150 : o.kind === 'stork' ? 110 : 78;
       if (pd < shy) {
         const d = pd || 1;
-        if (tryMove(o, pdx / d, pdy / d, { dog: 30, fox: 85, stork: 26 }[o.kind] || 22, dt)) return;
+        if (tryMove(o, pdx / d, pdy / d, { dog: 30, boar: 44, mouse: 24, hare: 38, pig: 25, fox: 85, stork: 26 }[o.kind] || 22, dt)) return;
       }
       if (o.kind === 'fox' && Math.hypot(o.tx - o.x, o.ty - o.y) < 8) {   // sniff around the building for a moment
         if (!o.rest) o.rest = 2 + Math.random() * 4;
@@ -283,7 +335,15 @@
       }
       if ((o.wait -= dt) <= 0 || Math.hypot(o.tx - o.x, o.ty - o.y) < 8) chooseTarget(o);
       const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
-      if (d > 3) tryMove(o, dx / d, dy / d, { dog: 18, fox: 48, stork: 9 }[o.kind] || 12, dt);
+      if (d > 3) tryMove(o, dx / d, dy / d, { dog: 18, boar: 28, mouse: 16, hare: 24, pig: 16, fox: 48, stork: 9 }[o.kind] || 12, dt);
+    }
+    function updateButterfly(o, dt) {
+      const pdx = P.x - o.x, pdy = P.y - o.y, pd = Math.hypot(pdx, pdy);
+      let ux = Math.cos(A.time * 1.7 + o.homeX) * .7, uy = Math.sin(A.time * 1.4 + o.homeY) * .7;
+      if (pd < 150) { const sign = o.mood > 0 ? 1 : -1, d = pd || 1; ux += sign * pdx / d * 1.8; uy += sign * pdy / d * 1.8; }
+      const d = Math.hypot(ux, uy) || 1;
+      tryMove(o, ux / d, uy / d, 22, dt);
+      o.z = 5 + Math.sin(A.time * 8 + o.homeX) * 3; o.step += dt * 8; o.moving = .2;
     }
 
     // sprite frames per kind (see CRIT / critters.json): walk cycle while moving, an idle pose otherwise
@@ -295,17 +355,30 @@
         case 'bird': return o.fly > 0 ? 2 + (Math.floor(o.step) % 2) : o.z > .5 ? 1 : 0;
         case 'stork': return o.moving ? walk2 : (Math.floor(o.peck / 3) % 3 === 1 ? 3 : 2);
         case 'fox': return o.moving ? Math.floor(o.step) % 3 : 3;
+        case 'boar': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
+        case 'mouse': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
+        case 'hare': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
+        case 'pig': return o.moving ? walk2 : 2 + (Math.floor(o.peck / 3) % 2);
       }
       return 0;
     }
     function drawCritter(o, sx, sy, s) {
+      if (o.kind === 'butterfly') return drawButterfly(o, sx, sy, s);
       const c = CRIT[o.kind], img = state.critters;
-      if (!img || !c) return (o.kind === 'dog' ? drawDog : drawChicken)(o, sx, sy, s);
+      if (!img || !c) return (o.kind === 'dog' ? drawDog : o.kind === 'chicken' ? drawChicken : drawSmallWildlife)(o, sx, sy, s);
       const size = 64 * c.h * s / c.px, f = critterFrame(o), z = (o.z || 0) * s;
       A.shadow(sx, sy, s * (o.kind === 'stork' ? 1 : o.kind === 'bird' ? .4 : .8) * (z ? .7 : 1), o.kind === 'bird' ? 3 : 7);
       ctx.save(); ctx.imageSmoothingEnabled = false; ctx.translate(sx, sy - z);
       if ((o.face || o.dir) === 'left') ctx.scale(-1, 1);
       ctx.drawImage(img, f * 64, c.row * 64, 64, 64, -size / 2, -size + 2 * size / 64, size, size);
+      ctx.restore();
+    }
+    function drawButterfly(o, sx, sy, s) {
+      const flap = Math.sin(A.time * 9 + o.homeX) > 0 ? 1 : .55, c = o.color || '#ff5a8a';
+      A.shadow(sx, sy, s * .3, 3);
+      ctx.save(); ctx.translate(sx, sy - (o.z || 0) * s); ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = c; ctx.fillRect(-7 * s * flap, -7 * s, 5 * s * flap, 6 * s); ctx.fillRect(2 * s, -7 * s, 5 * s * flap, 6 * s);
+      ctx.fillStyle = '#402b4f'; ctx.fillRect(-1 * s, -7 * s, 2 * s, 8 * s); ctx.fillRect(-2 * s, 0, 4 * s, 2 * s);
       ctx.restore();
     }
 
@@ -327,6 +400,28 @@
       px(0, 0, s, 8, -17 + bob, 3, 4, '#3d3029'); px(0, 0, s, -7, -3, 3, 7, '#4a392f'); px(0, 0, s, 4, -3, 3, 7, '#4a392f');
       px(0, 0, s, -8, -10 + bob, 4, 3, '#9b8064'); px(0, 0, s, 9, -14 + bob, 1, 1, '#f5f0e0');
       px(0, 0, s, -13, -12 + bob, 4, 2, '#806b58'); px(0, 0, s, -14, -15 + bob, 2, 5, '#665444');
+      ctx.restore();
+    }
+    function drawSmallWildlife(o, sx, sy, s) {
+      A.shadow(sx, sy, s * .7, o.kind === 'boar' || o.kind === 'pig' ? 8 : 4);
+      ctx.save(); ctx.translate(sx, sy); if ((o.face || o.dir) === 'left') ctx.scale(-1, 1);
+      const bob = Math.sin(o.step * 2) * .4;
+      if (o.kind === 'boar') {
+        px(0, 0, s, -12, -13 + bob, 22, 11, '#4d3b32'); px(0, 0, s, 6, -16 + bob, 9, 9, '#60483c');
+        px(0, 0, s, 13, -13 + bob, 5, 4, '#2d2423'); px(0, 0, s, 15, -12 + bob, 2, 2, '#e7c1a1');
+        px(0, 0, s, -8, -4, 3, 6, '#332827'); px(0, 0, s, 7, -4, 3, 6, '#332827');
+      } else if (o.kind === 'pig') {
+        px(0, 0, s, -12, -13 + bob, 21, 12, '#d48691'); px(0, 0, s, 5, -17 + bob, 10, 10, '#e19aa2');
+        px(0, 0, s, 13, -14 + bob, 5, 4, '#b86270'); px(0, 0, s, 15, -13 + bob, 2, 2, '#5e3841');
+        px(0, 0, s, -7, -3, 3, 6, '#a95f6c'); px(0, 0, s, 5, -3, 3, 6, '#a95f6c');
+        px(0, 0, s, -15, -10 + bob, 4, 2, '#e19aa2');
+      } else if (o.kind === 'mouse') {
+        px(0, 0, s, -6, -7 + bob, 11, 6, '#8b776d'); px(0, 0, s, 3, -10 + bob, 6, 6, '#a38b80');
+        px(0, 0, s, 6, -9 + bob, 3, 2, '#d8a4a2'); px(0, 0, s, 8, -8 + bob, 2, 2, '#27222a'); px(0, 0, s, -10, -3, 6, 2, '#a38b80');
+      } else {
+        px(0, 0, s, -7, -10 + bob, 13, 8, '#9b6b49'); px(0, 0, s, 3, -15 + bob, 7, 8, '#b27b52');
+        px(0, 0, s, 7, -13 + bob, 3, 2, '#28232a'); px(0, 0, s, -7, -3, 3, 6, '#6e4b39'); px(0, 0, s, 3, -3, 3, 6, '#6e4b39');
+      }
       ctx.restore();
     }
     function drawCar(car, sx, sy, s) {

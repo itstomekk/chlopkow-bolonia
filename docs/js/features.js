@@ -93,7 +93,10 @@ window.addEventListener('ark-ready', () => {
     const ansH = U * 7.2, gap = U * 1.2;
     const bh = U * 6 + qLines.length * U * 3 + ansH * 2 + gap * 3 + (QZ.phase === 'done' ? U * 5 + factLines.length * U * 2.8 : U * 3);
     const by = Math.max(U, (H - bh) / 2);
-    A.box(bx, by, bw, bh, U);
+    // Keep the quiz in the same hard-edged pixel language as the dialogue box.
+    ctx.fillStyle = '#050819'; ctx.fillRect(bx + U * 2, by + U * 2, bw, bh);
+    ctx.fillStyle = '#10163a'; ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = '#f5f0e0'; ctx.lineWidth = Math.max(1, U * .35); ctx.strokeRect(bx, by, bw, bh);
     ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 2.3}px Silkscreen`;
     ctx.fillText(`${L.quizTitle} ${answered() + (QZ.phase === 'ask' ? 1 : 0)}/${QZ_ALL}`, bx + U * 3, by + U * 3.4);
@@ -106,10 +109,10 @@ window.addEventListener('ark-ready', () => {
       const ox = bx + U * 3 + (slot & 1) * (aw + gap), oy = ay + (slot >> 1) * (ansH + gap);
       QZ.rects.push([ox, oy, aw, ansH]);
       const orig = QZ.order[slot], isOk = orig === QZ.q.ok, picked = QZ.phase === 'done' && orig === QZ.pick;
-      let bg = 'rgba(255,255,255,0.07)', fg = '#f5f0e0';
-      if (QZ.phase === 'ask' && slot === QZ.sel) { bg = 'rgba(255,210,31,0.22)'; fg = '#ffd21f'; }
-      if (QZ.phase === 'done' && isOk) { bg = 'rgba(124,255,107,0.25)'; fg = '#b8ffae'; }
-      if (picked && !isOk) { bg = 'rgba(255,75,62,0.3)'; fg = '#ffb3ab'; }
+      let bg = '#17204a', fg = '#f5f0e0';
+      if (QZ.phase === 'ask' && slot === QZ.sel) { bg = '#355fbc'; fg = '#ffd21f'; }
+      if (QZ.phase === 'done' && isOk) { bg = '#245c38'; fg = '#b8ffae'; }
+      if (picked && !isOk) { bg = '#73353b'; fg = '#ffb3ab'; }
       ctx.fillStyle = bg; ctx.fillRect(ox, oy, aw, ansH);
       ctx.strokeStyle = fg; ctx.lineWidth = Math.max(1, U * .2); ctx.strokeRect(ox, oy, aw, ansH);
       ctx.fillStyle = fg; ctx.font = `${U * 2}px Silkscreen`;
@@ -175,7 +178,7 @@ window.addEventListener('ark-ready', () => {
   });
   HOOKS.minimap.push(dot => { if (Q().halina) for (const b of ITEMS.boards) { const q = spotQuestion(b.spot), marker = b.marker || b; if (q && Q().quiz[q.id] === undefined) dot(marker.x, marker.y, '#ffd21f'); } });
   HOOKS.questLog.push(lines => {
-    if (Q().halina) lines.push([L.quizLog(correctN(), answered(), QZ_ALL), Q().halina === 2]);
+    if (Q().halina) lines.unshift([L.quizLog(correctN(), answered(), QZ_ALL), Q().halina === 2]);
   });
 
   HOOKS.hud.push((U, W, H) => drawQuiz(U, W, H));

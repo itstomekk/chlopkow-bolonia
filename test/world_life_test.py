@@ -30,6 +30,12 @@ with sync_playwright() as p:
     facts = page.evaluate("""(() => {
       const g = __game, wl = __worldLife;
       const ground = wl.animals.filter(a => a.kind !== 'bird');
+      const river = g.MAP.pois.find(p => p.key === 'river');
+      const storks = wl.animals.filter(a => a.kind === 'stork');
+      const pigs = wl.animals.filter(a => a.kind === 'pig');
+      const buildings = (g.MAP.objects || []).filter(o => o.w >= 40 && o.h >= 30 && o.w <= 200);
+      const riverOnly = storks.length === 3 && storks.every(a => river && Math.hypot(a.x - river.x, a.y - river.y) < 900);
+      const pigsByBuildings = pigs.length === 5 && pigs.every(a => buildings.some(o => Math.hypot(a.x - (o.x + o.w / 2), a.y - o.base) < 180));
       const allValid = wl.cars.length === 2 && wl.cars.every(c => !g.blocked(c.x, c.y)) &&
         wl.animals.length >= 40 && wl.animals.every(a => !g.blocked(a.x, a.y));
       // Birds are intentionally spawned in small flocks, so only require the
@@ -44,9 +50,9 @@ with sync_playwright() as p:
       wl.buyRide(0);
       const purchased = wl.rideSeconds === 15 && g.Q.worldLife.spentApples === 10 &&
         wl.balance() === 0 && g.Q.apples.length === 10;
-      return {allValid, apart, reset, purchased};
+      return {allValid, apart, reset, purchased, riverOnly, pigsByBuildings};
     })()""")
-    assert facts == {"allValid": True, "apart": True, "reset": True, "purchased": True}, facts
+    assert facts == {"allValid": True, "apart": True, "reset": True, "purchased": True, "riverOnly": True, "pigsByBuildings": True}, facts
     page.reload()
     page.wait_for_function("window.ARK && window.__game", timeout=30000)
     page.add_script_tag(url=URL.rsplit("/", 1)[0] + "/js/world-life.js")
@@ -55,7 +61,7 @@ with sync_playwright() as p:
     persisted = page.evaluate("[__game.Q.worldLife.spentApples, __worldLife.balance(), __game.Q.apples.length]")
     assert persisted == [10, 0, 10], persisted
     page.evaluate("__game.scene = 'title'")
-    page.keyboard.press("KeyN")
+    page.keyboard.press("KeyR")
     page.locator("#player-name-input").fill("Test")
     page.keyboard.press("Enter")
     page.wait_for_function("__game.scene === 'play' && __worldLife.cars.length === 2")

@@ -73,13 +73,13 @@
     #arek-global-chat, #arek-global-chat * { box-sizing: border-box; }
     #arek-global-chat {
       position: fixed; z-index: 10000; right: 12px; bottom: 12px;
-      width: min(360px, calc(100vw - 24px));
-      color: #f4e6c1; font: 12px/1.35 "Silkscreen", monospace;
-      text-shadow: 1px 1px #111; pointer-events: none;
+      width: min(520px, calc(100vw - 24px));
+      color: #fff7d6; font: 12px/1.35 "Silkscreen", monospace;
+      text-shadow: 2px 2px #10163a; pointer-events: none;
     }
     #arek-global-chat button, #arek-global-chat input, #arek-global-chat textarea {
-      color: #f4e6c1; background: #172238; border: 1px solid #6e7897;
-      border-radius: 3px; font: inherit; text-shadow: inherit;
+      color: #fff7d6; background: transparent; border: 0;
+      border-radius: 0; font: inherit; text-shadow: inherit;
     }
     #arek-global-chat button { cursor: pointer; padding: 7px 9px; }
     #arek-global-chat button:hover, #arek-global-chat button:focus-visible {
@@ -87,38 +87,36 @@
     }
     #arek-chat-launch {
       display: block; margin-left: auto; pointer-events: auto;
-      background: #182942; border-color: #ffd21f; color: #ffd21f;
-      box-shadow: 2px 2px 0 #090d18;
+      background: transparent; color: #fff7d6; padding: 2px 0;
+      border-bottom: 1px solid #fff7d6;
     }
     #arek-chat-panel {
       display: none; pointer-events: auto; overflow: hidden;
-      border: 2px solid #ffd21f; border-radius: 4px;
-      background: rgba(12, 15, 28, .96); box-shadow: 3px 3px 0 #090d18;
+      background: transparent;
     }
-    #arek-chat-header { display: flex; align-items: center; gap: 8px; padding: 8px 9px 5px; }
+    #arek-chat-header { display: flex; align-items: center; gap: 8px; padding: 2px 0 4px; }
     #arek-chat-title { flex: 1; color: #ffd21f; }
     #arek-chat-close { padding: 3px 7px !important; }
-    #arek-chat-status { min-height: 17px; padding: 0 9px 5px; color: #a8b4cc; }
-    #arek-chat-status[data-error="true"] { color: #ff837c; }
+    #arek-chat-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     #arek-chat-messages {
-      height: 190px; overflow-y: auto; padding: 7px 9px;
-      background: rgba(5, 8, 17, .75); border-top: 1px solid #394667;
-      border-bottom: 1px solid #394667;
+      height: 190px; overflow: hidden; padding: 3px 0 7px;
+      background: transparent;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      mask-image: linear-gradient(to bottom, transparent 0, #000 24%, #000 100%);
     }
-    .arek-chat-message { margin: 0 0 7px; overflow-wrap: anywhere; }
+    .arek-chat-message { margin: 0 0 7px; overflow-wrap: anywhere; opacity: var(--chat-opacity, 1); transition: opacity .25s; }
     .arek-chat-message:last-child { margin-bottom: 0; }
-    .arek-chat-meta { color: #8fa0c3; font-size: 10px; }
-    .arek-chat-name { color: #ffd21f; }
-    .arek-chat-message[data-own="true"] .arek-chat-name { color: #8fe38f; }
-    .arek-chat-day { margin: 4px 0 7px; color: #8490a9; font-size: 10px; text-align: center; }
-    .arek-chat-empty { color: #8490a9; }
-    #arek-chat-form { padding: 8px 9px 9px; }
-    #arek-chat-nickname, #arek-chat-text { width: 100%; padding: 7px; }
-    #arek-chat-nickname { margin-bottom: 6px; }
-    #arek-chat-text { display: block; min-height: 50px; resize: vertical; }
-    #arek-chat-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-    #arek-chat-count { flex: 1; color: #8490a9; font-size: 10px; }
-    #arek-chat-send { color: #111; background: #ffd21f; border-color: #fff0a2; text-shadow: none; }
+    .arek-chat-meta { color: #fff7d6; font-size: 10px; }
+    .arek-chat-name { color: #fff7d6; }
+    .arek-chat-message[data-own="true"] .arek-chat-name { color: #b8ff9c; }
+    .arek-chat-day { display: none; }
+    .arek-chat-empty { color: #fff7d6; opacity: .7; }
+    #arek-chat-form { padding: 4px 0 0; }
+    #arek-chat-text { display: block; width: calc(100% - 36px); padding: 5px 0; border-bottom: 1px solid rgba(255,247,214,.8) !important; outline: none; }
+    #arek-chat-text::placeholder { color: #fff7d6; opacity: .7; }
+    #arek-chat-actions { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    #arek-chat-count { display: none; }
+    #arek-chat-send { color: #fff7d6; background: transparent; padding: 0; text-shadow: inherit; }
     #arek-chat-send:disabled { cursor: wait; opacity: .6; }
     @media (max-width: 480px) {
       #arek-global-chat { right: 8px; bottom: 8px; width: calc(100vw - 16px); }
@@ -137,7 +135,7 @@
 
   const panel = el('section', undefined, root);
   panel.id = 'arek-chat-panel';
-  panel.setAttribute('aria-label', 'Global Nostr chat');
+  panel.setAttribute('aria-label', 'Global chat');
   const header = el('div', undefined, panel);
   header.id = 'arek-chat-header';
   el('div', 'GLOBAL CHAT', header).id = 'arek-chat-title';
@@ -145,7 +143,7 @@
   close.id = 'arek-chat-close';
   close.type = 'button';
   close.setAttribute('aria-label', 'Close global chat');
-  const status = el('div', 'Clicking chat connects to public Nostr relays.', panel);
+  const status = el('div', '', panel);
   status.id = 'arek-chat-status';
   const messages = el('div', undefined, panel);
   messages.id = 'arek-chat-messages';
@@ -154,23 +152,17 @@
   empty.className = 'arek-chat-empty';
   const form = el('form', undefined, panel);
   form.id = 'arek-chat-form';
-  const nickname = el('input', undefined, form);
-  nickname.id = 'arek-chat-nickname';
-  nickname.type = 'text';
-  nickname.placeholder = 'Nickname';
-  nickname.autocomplete = 'nickname';
-  nickname.maxLength = MAX_NICKNAME_CHARS;
-  nickname.setAttribute('aria-label', 'Nickname');
-  const text = el('textarea', undefined, form);
+  const text = el('input', undefined, form);
   text.id = 'arek-chat-text';
+  text.type = 'text';
   text.placeholder = 'Write a message...';
-  text.rows = 2;
+  text.autocomplete = 'off';
   text.setAttribute('aria-label', 'Message');
   const actions = el('div', undefined, form);
   actions.id = 'arek-chat-actions';
   const count = el('span', `0/${MAX_MESSAGE_CHARS}`, actions);
   count.id = 'arek-chat-count';
-  const send = el('button', 'SEND', actions);
+  const send = el('button', '↵', actions);
   send.id = 'arek-chat-send';
   send.type = 'submit';
   document.body.appendChild(root);
@@ -212,17 +204,8 @@
   }
 
   function getNickname() {
-    let value = nickname.value;
-    if (!value) {
-      try { value = storageGet(NICKNAME_STORAGE) || ''; } catch (e) { value = ''; }
-    }
-    value = trimUnicode(value.trim(), MAX_NICKNAME_CHARS);
-    return value || (state.pubkey ? `guest-${state.pubkey.slice(0, 6)}` : 'guest');
-  }
-
-  function saveNickname() {
-    nickname.value = trimUnicode(nickname.value, MAX_NICKNAME_CHARS);
-    try { storageSet(NICKNAME_STORAGE, nickname.value); } catch (e) { setStatus(e.message, true); }
+    const name = window.__game && window.__game.playerName;
+    return trimUnicode(cleanText(name || ''), MAX_NICKNAME_CHARS) || (state.pubkey ? `guest-${state.pubkey.slice(0, 6)}` : 'guest');
   }
 
   const dayKey = ts => new Date(ts * 1000).toDateString();
@@ -236,8 +219,6 @@
 
   function renderMessages() {
     state.renderQueued = false;
-    // keep the reader's place when they scrolled up; follow new messages otherwise
-    const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 40;
     messages.replaceChildren();
     const list = Array.from(state.events.values()).sort((a, b) => a.created_at - b.created_at || a.id.localeCompare(b.id));
     if (!list.length) {
@@ -246,11 +227,13 @@
       return;
     }
     let lastDay = '', prev = null;
-    for (const event of list) {
+    for (let index = 0; index < list.length; index++) {
+      const event = list[index];
       const day = dayKey(event.created_at);
       if (day !== lastDay) { el('div', `— ${dayLabel(event.created_at)} —`, messages).className = 'arek-chat-day'; lastDay = day; prev = null; }
       const row = el('div', undefined, messages);
       row.className = 'arek-chat-message';
+      row.style.setProperty('--chat-opacity', String(Math.max(.12, Math.min(1, .18 + (index + 1) / list.length * .82))));
       row.dataset.own = event.pubkey === state.pubkey ? 'true' : 'false';
       // consecutive messages from the same person within 5 minutes share one name/time line
       const grouped = prev && prev.pubkey === event.pubkey && prev.nickname === event.nickname && event.created_at - prev.created_at < 300;
@@ -265,7 +248,7 @@
       el('div', event.content, row);
       prev = event;
     }
-    if (nearBottom || !state.historyShown) messages.scrollTop = messages.scrollHeight;
+
   }
 
   // Many events arrive at once while history loads; draw once per frame instead of once per event.
@@ -367,8 +350,6 @@
       state.eoseTimer = setTimeout(() => {
         if (!state.connected) setStatus('Relay connection timed out. Check your network and try again.', true);
       }, 15000);
-      const savedNickname = storageGet(NICKNAME_STORAGE);
-      if (savedNickname) nickname.value = trimUnicode(savedNickname, MAX_NICKNAME_CHARS);
       setStatus('Loading messages since 26 Sep...');
     } catch (error) {
       state.started = false;
@@ -408,7 +389,7 @@
       text.value = '';
       updateCount();
       const failed = results.length - accepted;
-      setStatus(failed ? `Sent to ${accepted} relay(s); ${failed} unavailable.` : 'Message sent to Nostr.');
+      setStatus(failed ? `Sent to ${accepted} relay(s); ${failed} unavailable.` : 'Message sent.');
     } catch (error) {
       setStatus(`Message not sent: ${error.message || 'all relays failed'}`, true);
     } finally {
@@ -425,7 +406,7 @@
     state.open = true;
     launch.style.display = 'none';
     panel.style.display = 'block';
-    nickname.focus();
+    text.focus();
     start();
   }
 
@@ -437,7 +418,6 @@
 
   launch.addEventListener('click', openChat);
   close.addEventListener('click', closeChat);
-  nickname.addEventListener('input', saveNickname);
   text.addEventListener('input', updateCount);
   text.addEventListener('keydown', event => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -457,6 +437,7 @@
     relays: RELAYS.slice(),
     historySince: HISTORY_SINCE,
     maxMessageChars: MAX_MESSAGE_CHARS,
+    playerName: getNickname,
     messageCount: () => state.events.size,
     isConnected: () => state.connected,
     unicodeLength,

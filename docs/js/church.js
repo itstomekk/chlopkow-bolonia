@@ -164,7 +164,7 @@ window.buildChurch = function buildChurch() {
 
 /* Sołtys (village head) sprite, drawn at 1 unit = 1 px, feet at (0,0). From Tomek's photo: grey hair, glasses,
    brown pinstripe suit, white shirt, grey tie, holding a harvest loaf on a lace cloth. */
-window.drawSoltys = function drawSoltys(ctx, sx, sy, s, t) {
+window.drawSoltys = function drawSoltys(ctx, sx, sy, s, t, holdBeer = false) {
   const P = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s, w * s, h * s); };
   const b = Math.round(Math.sin(t * 2) * .5);
   P(-5, -9, 4, 9, '#2b2420'); P(1, -9, 4, 9, '#2b2420'); P(-6, -1, 5, 2, '#111'); P(1, -1, 5, 2, '#111');   // legs, shoes
@@ -172,12 +172,18 @@ window.drawSoltys = function drawSoltys(ctx, sx, sy, s, t) {
   for (let x = -7; x < 8; x += 3) P(x, -26 + b, 1, 18, '#5e4535');                                                // pinstripes
   P(-3, -26 + b, 6, 9, '#f2f0ea'); P(-1, -25 + b, 2, 9, '#7d7f84'); P(-4, -26 + b, 1, 12, '#35251b'); P(3, -26 + b, 1, 12, '#35251b');
   P(-10, -24 + b, 3, 13, '#4a3326'); P(7, -24 + b, 3, 13, '#4a3326');                                             // arms
-  P(-11, -15 + b, 22, 3, '#ffffff'); P(-10, -12 + b, 20, 1, '#e3e0d6');                                           // lace cloth
-  P(-8, -19 + b, 16, 5, '#d9a45a'); P(-7, -20 + b, 14, 2, '#eac38a'); P(-5, -19 + b, 2, 2, '#f2d9a8'); P(2, -19 + b, 2, 2, '#f2d9a8');
-  P(-6, -16 + b, 2, 2, '#3d9a55'); P(4, -16 + b, 2, 2, '#3d9a55');                                                // loaf + leaves
+  if (!holdBeer) {
+    P(-11, -15 + b, 22, 3, '#ffffff'); P(-10, -12 + b, 20, 1, '#e3e0d6');
+    P(-8, -19 + b, 16, 5, '#d9a45a'); P(-7, -20 + b, 14, 2, '#eac38a'); P(-5, -19 + b, 2, 2, '#f2d9a8'); P(2, -19 + b, 2, 2, '#f2d9a8');
+    P(-6, -16 + b, 2, 2, '#3d9a55'); P(4, -16 + b, 2, 2, '#3d9a55');                                                // loaf + leaves
+  } else {
+    P(-9, -19 + b, 6, 7, '#d9a441'); P(-8, -20 + b, 4, 2, '#f2d9a8'); P(-8, -13 + b, 4, 2, '#a9752e');
+    P(3, -19 + b, 6, 7, '#d9a441'); P(4, -20 + b, 4, 2, '#f2d9a8'); P(4, -13 + b, 4, 2, '#a9752e');                         // beer glasses
+  }
   P(-9, -14 + b, 3, 2, '#e8b58c'); P(6, -14 + b, 3, 2, '#e8b58c');                                                // hands
   P(-4, -36 + b, 8, 10, '#e2a988'); P(-5, -34 + b, 1, 4, '#d69478'); P(4, -34 + b, 1, 4, '#d69478');              // face, ears
   P(-4, -38 + b, 8, 3, '#8d8a86'); P(-5, -37 + b, 2, 3, '#8d8a86'); P(3, -37 + b, 2, 2, '#6f6c68');               // grey hair
   P(-4, -33 + b, 3, 2, '#2a2a2a'); P(1, -33 + b, 3, 2, '#2a2a2a'); P(-1, -33 + b, 2, 1, '#2a2a2a');               // glasses
   P(-3, -32 + b, 1, 1, '#9fc3e0'); P(2, -32 + b, 1, 1, '#9fc3e0'); P(-2, -29 + b, 4, 1, '#a9644e');
 };
+window.drawSoltysBeer = function drawSoltysBeer(ctx, sx, sy, s, t) { window.drawSoltys(ctx, sx, sy, s, t, true); };
