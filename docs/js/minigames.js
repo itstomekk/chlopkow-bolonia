@@ -72,6 +72,7 @@ window.addEventListener('ark-ready', () => {
     { type: 'skeet', host: 'damian', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
   ];
   let MG = null, ANIM = null;
+  A.minigame = () => MG && MG.type;   // read by music.js
   A.load('img/animals.png').then(i => { ANIM = i; });
 
   /* ------------------------------------------------------------------ lifecycle */

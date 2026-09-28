@@ -33,7 +33,7 @@
   const T = {
     pl: {
       title: 'AREK W CHŁOPKOWIE', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
-      help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA',
+      help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
       names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZBYSZEK', halina: 'PANI HALINA', soltys: 'SOŁTYS' },
       church: ['Kościół pw. Narodzenia NMP. Dzwony biją w południe. Arek, jak zwykle, spóźniony.'],
       rectory: ['Plebania. Ksiądz macha z okna. Arek udaje, że poprawia okulary.'],
@@ -70,7 +70,7 @@
       soltys0: ['Dzień dobry, Arek. Chleb na dożynki już jest, poświęcony.', 'Teraz czekamy tylko na szarlotkę Kasi. Pomożesz jej, prawda?'],
       soltys1: ['Szarlotka Kasi będzie? To dożynki mamy uratowane.', 'Sołtys wszystko widzi, Arek. Dobra robota.'],
       soltysSecret: ['Sołtys musi wiedzieć, co dzieje się w każdym zakątku wsi. Nawet w tym.'],
-      churchLabel: 'KOŚCIÓŁ', exitHint: '↓ WYJŚCIE',
+      churchLabel: 'KOŚCIÓŁ', exitHint: '↓ WYJŚCIE', musicOn: 'KAPELA GRA!', musicOff: 'KAPELA CICHO',
       end1: 'MASZ KLUCZYKI DO URSUSA', end2: 'CIĄG DALSZY: GRAND THEFT TRACTOR', end3: 'CZAS',
       memoryTitle: 'ARCHIWUM CMENTARZA', memoryNext: 'ENTER — NASTĘPNE ZDJĘCIE · ESC — POMIŃ', memoryReturn: 'ENTER — WRÓĆ DO WSI',
       memoryNames: ['PROCESJA', 'PAMIĘĆ O ZMARŁYCH', 'DREWNIANY KRZYŻ'],
@@ -82,7 +82,7 @@
     },
     en: {
       title: 'AREK IN CHŁOPKÓW', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
-      help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP',
+      help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
       names: { arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZBYSZEK', halina: 'MRS HALINA', soltys: 'SOŁTYS (VILLAGE HEAD)' },
       church: ['Church of the Nativity of the Virgin Mary. Bells at noon. Arek is late, as usual.'],
       rectory: ['The rectory. The priest waves from a window. Arek pretends to fix his sunglasses.'],
@@ -119,7 +119,7 @@
       soltys0: ['Good morning, Arek. The harvest bread is ready, and blessed.', "Now we're only waiting for Kasia's apple pie. You'll help her, right?"],
       soltys1: ["Kasia's pie is coming? Then the harvest festival is saved.", 'The sołtys sees everything, Arek. Good job.'],
       soltysSecret: ['A village head must know what is happening in every corner of the village. Even this one.'],
-      churchLabel: 'CHURCH', exitHint: '↓ EXIT',
+      churchLabel: 'CHURCH', exitHint: '↓ EXIT', musicOn: 'BAND PLAYS!', musicOff: 'BAND QUIET',
       end1: 'YOU GOT THE URSUS KEYS', end2: 'TO BE CONTINUED: GRAND THEFT TRACTOR', end3: 'TIME',
       memoryTitle: 'CEMETERY ARCHIVE', memoryNext: 'ENTER — NEXT PHOTO · ESC — SKIP', memoryReturn: 'ENTER — RETURN TO THE VILLAGE',
       memoryNames: ['THE PROCESSION', 'REMEMBERING THE DEAD', 'A WOODEN CROSS'],
@@ -298,7 +298,7 @@
     say('arek', T[s.poi]);
   }
   function turnTo(s) { const dx = s.x - P.x, dy = s.y - P.y; P.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'); }
-  function popToast(text) { toast = { text, t: 0 }; }
+  function popToast(text) { toast = { text, t: 0 }; if (window.MUSIC) MUSIC.ding(); }
   function jump() {
     if (scene !== 'play' || talk || P.air || time - talkClosedAt < .3) return;   // don't jump when mashing Space through dialogue
     let ix = 0, iy = 0;
@@ -332,7 +332,7 @@
     P.air = false; P.z = 0; P.land = 0;
     for (let k = 0; k < 6; k++) dust.push({ x: P.x + (k - 2.5) * 3, y: P.y + (k % 2), t: k * .03 });
   }
-  function celebrate() { for (let i = 0; i < 40; i++) fx.push({ x: P.x, y: P.y - 25, vx: (Math.random() - .5) * 160, vy: -Math.random() * 180 - 40, t: 0, c: ['#ffd21f', '#ff4fa3', '#7cff6b', '#6fd0ff'][i % 4] }); }
+  function celebrate() { if (window.MUSIC) MUSIC.jingle(); for (let i = 0; i < 40; i++) fx.push({ x: P.x, y: P.y - 25, vx: (Math.random() - .5) * 160, vy: -Math.random() * 180 - 40, t: 0, c: ['#ffd21f', '#ff4fa3', '#7cff6b', '#6fd0ff'][i % 4] }); }
 
   /* ---------- physics ---------- */
   function solidAt(x, y, air) {
@@ -748,7 +748,7 @@
     // API for features.js
     window.ARK = {
       HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
-      get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; },
+      get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; }, get room() { return ROOM; },
       pointer, get camera() { return lastCam; },
       save, say, popToast, celebrate, blocked, unstick, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime,
       teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },

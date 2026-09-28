@@ -33,7 +33,7 @@ def river_column():
 
 
 jx, jy = river_column()
-TESTS = [['quest_test.py'], ['jump_test.py', str(jx), str(jy)], ['features_test.py'], ['minigames_test.py'],
+TESTS = [['music_test.py'], ['quest_test.py'], ['jump_test.py', str(jx), str(jy)], ['features_test.py'], ['minigames_test.py'],
          ['church_test.py'], ['frodo_test.py'], ['soltys_surprise_test.py'], ['cemetery_memories_test.py'],
          ['village_sign_test.py'], ['play_test.py']]
 results = []

@@ -1,6 +1,6 @@
 # HANDOFF — Arek w Chłopkowie
 
-Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier per-session notes are in
+Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigame overhaul). The earlier per-session notes are in
 `_archive/2026-09-27_HANDOFF-before-audit.md`.
 
 ## Where things are
@@ -8,7 +8,7 @@ Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier p
 - **Repo:** https://github.com/itstomekk/arek-w-chlopkowie (public)
 - **Local:** `C:\Users\Lenovo\Hermes\projects\games\arek-w-chlopkowie\`
 - **Local server:** `python -m http.server 8765 --directory docs`. The VibeTV project's `.claude/launch.json` has an `arek-game` entry.
-- **Tests:** `python test/run_all.py [URL]` runs all 10 Playwright play-tests. All 10 pass locally as of this update.
+- **Tests:** `python test/run_all.py [URL]` runs all 11 Playwright play-tests. All 11 pass (cloud container, 2026-09-28).
 
 ## What the game has
 - **Map:** generated from OpenStreetMap, 3897×2698 art px (1 m = 2 px), about 1.95 × 1.35 km. It covers the whole main street, the church quarter, the riverside farmsteads in the west and Chłopków-Kolonia in the east. 93% of it is reachable on foot.
@@ -48,6 +48,21 @@ Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier p
 - Splash/title screen: `docs/img/splash.png` is a pixel-art remake of the classic photo with the "Chłopków" sign, the linden and the church (source `gen/splash_raw.png`, ref `references/splash_sign_church_photo.png`). It is drawn by `drawSplash()` in game.js with a slow drift, sparkles and an outlined title.
 - Codex tip: when Hermes reports "No Codex credentials" after a 429, run `hermes auth reset openai-codex` once the cooldown shows "ready to retry".
 
+## Music (added 2026-09-28, `docs/js/music.js`)
+- Procedural 8-bit Polish folk chiptune. There are no audio files: WebAudio synthesises pulse leads, a triangle bass, noise drums and a bagpipe drone.
+- Four original tunes in the tracker format (`"NOTE:len"`, where len is in 16th steps, plus one chord symbol per bar):
+  - village: **krakowiak** (2/4, G major, Góral C# in part B), alternating with a **mazurka** (3/4); the mazurka also plays on the title;
+  - minigames: **oberek**;
+  - church and memories: **pastorałka**.
+- Global tempo factor `TEMPO = .8` in `music.js` (Tomek asked for 80% speed, 2026-09-28).
+- Every pass is re-arranged at random: section form, a second fiddle in thirds, grace notes, an octave-up part B, drum fills.
+- `celebrate()` plays a "hej!" fanfare and `popToast()` plays a pickup blip; the music ducks under both.
+- **K** mutes the music (remembered in `localStorage`); on touch screens, tap the note icon at the bottom left. `?music=0` disables the music for a session.
+- Audio starts on the first key press or tap (browser autoplay rule).
+- `MUSIC.renderWav(name, passes)` renders a track offline to WAV (for previews and videos).
+- `test/music_test.py` is part of `run_all.py` (11 tests).
+- Next: "swojski" sound upgrades (accordion/fiddle timbres, real public-domain folk tunes, optional MIDI import). See the options discussed in the session.
+
 ## Minigame tuning (in `minigames.js`)
 - `MEDAL` thresholds (bronze/silver/gold): race — beat Damian / 15.5 s / 14.0 s; pig — 30 s / 15 s / 8 s; dogs — win / 28 s / 18 s; skeet — 10 / 12 / 14 hits.
 - Race: Damian needs 8.1 s per lap (about 16.2 s total). Off-track speed is 0.55× (`HOOKS.speed`). The ghost is `Q.mg.race.ghost`, saved on each new record.
@@ -63,4 +78,4 @@ Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier p
 ## Next ideas
 - Regenerate landmarks from photos as they arrive (`PHOTOS-WANTED.md`). The windmill photos so far came only as chat attachments; save the files for an exact re-render.
 - The west and east map extensions have no quest content yet. Candidates: a Kolonia NPC, a second orchard, the świetlica as an interior.
-- NPC walk cycles; a tractor-driving minigame after the keys; sound (see `AUDIO.md` in the Grand Theft Tractor video project).
+- NPC walk cycles; a tractor-driving minigame after the keys; more sound effects (steps, jump, dog bark); see also `AUDIO.md` in the Grand Theft Tractor video project.
