@@ -71,13 +71,18 @@ def safe_join(base, rel):
     return p
 
 
+def bbox_key():
+    """Tiles are cut in map-pixel space, so a bbox change (map extension) needs a fresh tile set."""
+    return 'bbox_' + '_'.join(f'{v:.5f}' for v in geo.BBOX).replace('.', 'p')
+
+
 def fetch_tile(src, z, tx, ty):
     """Tile (tx, ty) at zoom level z covers TILE*2**z art pixels and is TILE px wide."""
     span = TILE * (2 ** z)
     x0, y0 = tx * span, ty * span
     if tx < 0 or ty < 0 or x0 >= geo.W or y0 >= geo.H or z < 0 or z > 4:
         return None, 'tile outside map'
-    path = os.path.join(BASEMAP, src, str(z), f'{tx}_{ty}.jpg')
+    path = os.path.join(BASEMAP, src, bbox_key(), str(z), f'{tx}_{ty}.jpg')
     if os.path.exists(path):
         return path, None
     lat1, lon0 = geo.to_latlon(x0, y0)

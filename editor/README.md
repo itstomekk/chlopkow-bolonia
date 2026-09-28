@@ -107,6 +107,12 @@ python test/editor_test.py   # server API + browser UI; uses a temp edits file, 
 
 ## Imagery
 
-Satellite tiles are fetched on demand and cached in `editor/basemap/<source>/`.
+Satellite tiles are fetched on demand and cached in `editor/basemap/<source>/bbox_<map bbox>/`.
+The cache is keyed by the map bbox, so after the map is extended the editor fetches a
+fresh, correctly aligned tile set automatically.
+
+The editor reads the map size and bbox from `osm/geo.py` at start (`/api/geo`) and edits
+are stored in lat/lon, so extending the map (e.g. further south or east) needs no editor
+change: existing edits stay on the same real-world spot.
 Esri: Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community.
 Geoportal: Ortofotomapa © GUGiK. Both are shown as the basemap source hint in the UI.
