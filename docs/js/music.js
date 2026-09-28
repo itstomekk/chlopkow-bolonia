@@ -318,6 +318,7 @@
       mainTrack.loop = true;
       mainTrack.preload = 'auto';
       mainTrack.volume = .62;
+      mainTrack.muted = muted;
     }
     if (mainTrackOn === enabled) return;
     mainTrackOn = enabled;
@@ -414,6 +415,7 @@
   /* ------------------------------------------------------------------ control */
   function setMuted(v) {
     muted = v; try { localStorage.setItem(MUTE_KEY, v ? '1' : '0'); } catch (e) { }
+    if (mainTrack) mainTrack.muted = v;
     if (ac) { const now = ac.currentTime; master.gain.cancelScheduledValues(now); master.gain.setValueAtTime(master.gain.value, now); master.gain.linearRampToValueAtTime(v ? 0 : .45, now + .25); }
   }
   function unlock() {
