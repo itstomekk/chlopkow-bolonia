@@ -400,6 +400,7 @@ def bale(x, y):
     for yy_ in (y - 9, y - 4): od.line([(x - 10, yy_), (x + 10, yy_)], fill=(186, 150, 70))
     objects.append(dict(x=x - 13, y=y - 22, w=27, h=26, base=float(y + 2)))
     low[y - 6:y + 2, x - 11:x + 12] = True
+    occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # keep trees and other props off the bale
 for x_, y_ in TRACK_BALES: bale(x_, y_)
 for p_ in classes.get('farmland', []):
     ox_, oy_, m_ = mask_win(p_)
@@ -413,7 +414,7 @@ for p_ in classes.get('farmland', []):
 print('hay bales', bales)
 
 # ---------------------------------------------------------------- landmark sprites
-LM_SIZE = {'church': 150, 'windmill': 84, 'shop': 100}   # sprite width in art px
+LM_SIZE = {'church': 150, 'windmill': 84, 'shop': 140}   # sprite width in art px
 for k_, (lx, ly) in LM_NODES:
     a = chroma_key(f'gen/lm_{k_}.png'); im = Image.fromarray(a); im = im.crop(im.getbbox())
     w = LM_SIZE[k_]; h = int(im.height * w / im.width); im = im.resize((w, h), Image.LANCZOS)

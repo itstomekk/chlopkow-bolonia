@@ -44,7 +44,9 @@ Last updated: 2026-09-27 (audit + bigger map + minigame overhaul). The earlier p
 - Positions: Kasia in far-east Kolonia (lat 52.26261, lon 22.88575); Damian far south by the village sign (52.25980, 22.86990); the shooting range sits next to Damian (hosted by Damian); Pani Halina moved to the church. Damian's cap is now placed 150–450 m from him.
 - Wayside shrines/crosses: chosen automatically from real OSM road junctions by farthest-point selection (≥650 px apart, ≥260 px from landmarks/venues). See `SHRINE_NAMES` in render_map.py.
 - A coordinate readout sits bottom-left (map x/y + lat/lon). `?x=..&y=..` starts the game at a position.
-- New shop sprite from Tomek's photo (`references/shop_photo_2026-09-27.*`), with the SKLEP sign, bikes and customers with beer. It was pending on the Codex rate limit; retry with `gen/_retry_shop.sh` if `gen/lm_shop_raw_v2.png` is missing.
+- Shop sprite remade from Tomek's photo (`references/shop_photo_2026-09-27.*`): peach walls, rust-brown metal roof, dormer, solar panels, SKLEP sign, three bikes and three regulars with beer on the bench. The old generic sprite is kept as `gen/lm_shop_v1_generic.png`.
+- Splash/title screen: `docs/img/splash.png` is a pixel-art remake of the classic photo with the "Chłopków" sign, the linden and the church (source `gen/splash_raw.png`, ref `references/splash_sign_church_photo.png`). It is drawn by `drawSplash()` in game.js with a slow drift, sparkles and an outlined title.
+- Codex tip: when Hermes reports "No Codex credentials" after a 429, run `hermes auth reset openai-codex` once the cooldown shows "ready to retry".
 
 ## Minigame tuning (in `minigames.js`)
 - `MEDAL` thresholds (bronze/silver/gold): race — beat Damian / 15.5 s / 14.0 s; pig — 30 s / 15 s / 8 s; dogs — win / 28 s / 18 s; skeet — 10 / 12 / 14 hits.

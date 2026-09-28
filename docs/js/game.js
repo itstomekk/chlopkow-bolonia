@@ -149,7 +149,7 @@
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
-  let MAP, GROUND, OBJ, SOLID, SPR, MINI, NPCIMG, DOGIMG, ITEMS, MEMORY_ART = [];
+  let MAP, GROUND, OBJ, SOLID, SPR, MINI, NPCIMG, DOGIMG, ITEMS, SPLASH = null, MEMORY_ART = [];
   let ROOM = null, OUT = null, trans = null;   // ROOM: the church interior while Arek is inside; OUT: the village to return to
 
   /* ---------- state ---------- */
@@ -535,6 +535,38 @@
     ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(txt, U * 1.6, H - U * 1.35);
   }
 
+  /* ---------- title / splash screen: pixel-art remake of the "Chłopków" sign + church photo ---------- */
+  function outlined(txt, x, y, fill, px) {   // pixel-font text with a hard 8-way dark outline
+    ctx.fillStyle = '#10163a';
+    for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) ctx.fillText(txt, x + dx * px, y + dy * px);
+    ctx.fillStyle = fill; ctx.fillText(txt, x, y);
+  }
+  function drawSplash(W, H, U) {
+    ctx.fillStyle = '#6fb6ea'; ctx.fillRect(0, 0, W, H);
+    if (SPLASH) {   // cover-fit with a slow Ken-Burns drift toward the church
+      const k = Math.max(W / SPLASH.width, H / SPLASH.height) * (1.04 + .02 * Math.sin(time * .15));
+      const dw = SPLASH.width * k, dh = SPLASH.height * k;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(SPLASH, (W - dw) / 2 - Math.sin(time * .1) * U * .8, (H - dh) * .55, dw, dh);
+    }
+    // golden-hour sparkles drifting over the grass
+    for (let i = 0; i < 18; i++) {
+      const x = ((i * 137.5 + time * (8 + i % 5)) % 100) / 100 * W, y = H * (.62 + ((i * 53) % 30) / 100) - Math.sin(time * 1.3 + i) * U;
+      ctx.fillStyle = `rgba(255,238,160,${.35 + .35 * Math.sin(time * 3 + i * 1.7)})`; ctx.fillRect(x, y, U * .35, U * .35);
+    }
+    // title block on the calm upper-left sky
+    const tx = W * .06, ty = H * .12;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.font = `${U * 5.4}px Silkscreen`; outlined(T.title.split(' ').slice(0, -1).join(' '), tx, ty, '#ffd21f', Math.max(2, U * .35));
+    ctx.font = `${U * 7}px Silkscreen`; outlined(T.title.split(' ').slice(-1)[0], tx, ty + U * 7.2, '#ffffff', Math.max(2, U * .4));
+    ctx.font = `${U * 1.6}px Silkscreen`; outlined(LANG === 'pl' ? 'GMINA PLATERÓW · MAZOWSZE' : 'PLATERÓW COMMUNE · MASOVIA', tx, ty + U * 12.4, '#f5f0e0', Math.max(1, U * .2));
+    // prompt + help on a translucent strip at the bottom
+    ctx.fillStyle = 'rgba(8,12,40,.72)'; ctx.fillRect(0, H - U * 9.5, W, U * 9.5);
+    ctx.textAlign = 'center';
+    if (Math.floor(time * 2) % 2) { ctx.font = `${U * 2.5}px Silkscreen`; outlined(hasSave ? T.cont : T.start, W / 2, H - U * 6.2, '#ffd21f', Math.max(1, U * .25)); }
+    ctx.font = `${U * 1.4}px Silkscreen`; ctx.fillStyle = '#c8cee0'; ctx.fillText(T.help, W / 2, H - U * 2.6);
+  }
+
   /* ---------- render ---------- */
   function render() {
     const W = cvs.width, H = cvs.height;
@@ -658,13 +690,7 @@
       ctx.globalAlpha = 1; ctx.fillStyle = '#10163a'; ctx.font = `${U * 2.6}px Silkscreen`; ctx.textAlign = 'center'; ctx.fillText('A', W * .89, H * .8);
     }
     if (trans) { ctx.fillStyle = `rgba(0,0,0,${Math.max(0, 1 - Math.abs(trans.t - .25) / .25)})`; ctx.fillRect(0, 0, W, H); }
-    if (scene === 'title') {
-      ctx.fillStyle = 'rgba(5,8,25,0.72)'; ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 6}px Silkscreen`;
-      ctx.fillText(T.title, W / 2, H * .36);
-      if (Math.floor(time * 2) % 2) { ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.6}px Silkscreen`; ctx.fillText(hasSave ? T.cont : T.start, W / 2, H * .54); }
-      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 1.6}px Silkscreen`; ctx.fillText(T.help, W / 2, H * .66);
-    }
+    if (scene === 'title') drawSplash(W, H, U);
     if (scene === 'end') {
       ctx.fillStyle = 'rgba(5,8,25,0.8)'; ctx.fillRect(0, 0, W, H);
       ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3.6}px Silkscreen`; ctx.fillText(T.end1, W / 2, H * .075);
@@ -694,6 +720,7 @@
   }
 
   async function init() {
+    load('img/splash.png').then(i => { SPLASH = i; }, () => { });   // title art; the title still works without it
     [MAP, ITEMS] = await Promise.all([fetch('map.json').then(r => r.json()), fetch('items.json').then(r => r.json())]);
     const loaded = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
