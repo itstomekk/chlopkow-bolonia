@@ -100,6 +100,34 @@ edits.apply('entities', {'layers': {'entities': {'npc:soltys': {'lat': lat, 'lon
 check(tgt['npc:soltys']['x'] == 1234 and tgt['npc:soltys']['y'] == 2345 and tgt['npc:soltys']['secret'], 'entity override moves, keeps other fields')
 check('npc:ghost' not in tgt, 'unknown entity ids are ignored, not invented')
 
+# stage: buildings
+lat, lon = geo.to_latlon(1000, 2000)
+bl = [dict(id=11, kind='house', c=np.array([5., 5.]), ax=np.array([1., 0.]), nx=np.array([0., 1.]), L=10., Wd=8.),
+      dict(id=22, kind='barn', c=np.array([50., 50.]), ax=np.array([1., 0.]), nx=np.array([0., 1.]), L=20., Wd=10.),
+      dict(id=33, kind='house', c=np.array([90., 90.]), ax=np.array([1., 0.]), nx=np.array([0., 1.]), L=9., Wd=9.)]
+bdoc = {'version': 1, 'layers': {'buildings': {
+    'remove': [11],
+    'modify': {'22': {'lat': lat, 'lon': lon, 'len': 12, 'wid': 6, 'angle': 90}},
+    'add': [{'lat': lat, 'lon': lon, 'len': 8, 'wid': 5, 'angle': 0, 'kind': 'farm'}]}}}
+check(edits.validate(bdoc) == [], 'buildings layer validates')
+check(edits.validate({'version': 1, 'layers': {'buildings': {'add': [{'lat': lat, 'lon': lon, 'len': 0, 'wid': 5}], 'remove': ['x'], 'modify': {'abc': {}}}}}).__len__() >= 3,
+      'bad buildings rejected (size, remove ids, modify key)')
+edits.apply('buildings', bdoc, {'buildings': bl})
+ids = [b['id'] for b in bl]
+check(ids == [22, 33, 'edit:0'], f'buildings remove/keep/add order ({ids})')
+m = bl[0]
+check(abs(m['c'][0] - 1000) < 1e-6 and abs(m['c'][1] - 2000) < 1e-6 and m['L'] == 12 * geo.A and m['Wd'] == 6 * geo.A
+      and abs(m['ax'][1] - 1) < 1e-9 and m['kind'] == 'barn' and m['fixed'], 'building modify: centre, size in metres, 90° axis, keeps kind, fixed')
+check(bl[1].get('fixed') is None and bl[2]['kind'] == 'farm' and bl[2]['fixed'], 'untouched building unchanged, added one is fixed farm')
+
+# the editor's OSM building extraction matches the generator fit (centre, dims, axis)
+sys.path.insert(0, os.path.join(ROOT, 'editor'))
+import server  # noqa: E402
+ob = server.osm_buildings()
+check(len(ob) > 50 and all(o['len'] > 0 and o['wid'] > 0 for o in ob), f'editor lists OSM buildings ({len(ob)})')
+rec = edits.building_record(ob[0], ob[0]['id'])
+check(abs(rec['L'] / geo.A - ob[0]['len']) < 1e-6, 'editor building round-trips through building_record')
+
 # empty edits change nothing
 fm = np.random.default_rng(1).random((50, 50)) > .5; before = fm.copy()
 edits.apply('forest', edits.empty(), {'forest_mask': fm})

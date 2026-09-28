@@ -38,6 +38,7 @@ binds to `127.0.0.1` only.
 | Blokada / Przejście — collision override (roads always stay walkable) | 7 / 8 | `collision.block` / `collision.free` |
 | Strefy — music / animals / people / custom zones with JSON props | 9 | `zones.items` |
 | Postacie — drag NPCs, landmarks and minigame venues | – | `entities["kind:id"]` |
+| Budynki — select an OSM building: move, resize (handles), rotate (Shift = 15° steps), delete; drag on empty ground = new blocking rectangle | – | `buildings.modify` / `.remove` / `.add` |
 | Obraz — overlay your own screenshot, calibrate it with 2 point pairs | – | nothing (stays in the browser) |
 
 Layers: game map, buildings/trees, collision, edits, entities, sector grid (A1…, 500 px
@@ -93,6 +94,9 @@ Plan and ordered tasks: `plans/2026-09-28-map-editor.md` (local).
     "water":     {"add": [{"poly": [...], "name": "Staw Strażacki"}]},
     "collision": {"block": [{"poly": [...]}], "free": [{"poly": [...]}]},
     "entities":  {"npc:soltys": {"lat": 52.27, "lon": 22.87}},
+    "buildings": {"add":    [{"lat": 52.264, "lon": 22.866, "len": 10, "wid": 6, "angle": 0, "kind": "farm"}],
+                  "modify": {"1095382322": {"lat": 52.265, "lon": 22.87, "len": 12, "wid": 8, "angle": 30}},
+                  "remove": [413730644]},
     "zones":     {"items": [{"id": "jazz-w-stodole", "kind": "music", "poly": [...], "props": {"track": "jazz"}}]}
   }
 }
@@ -104,6 +108,15 @@ Plan and ordered tasks: `plans/2026-09-28-map-editor.md` (local).
 python test/edits_test.py    # format, validation, geometry, stage appliers
 python test/editor_test.py   # server API + browser UI; uses a temp edits file, never touches the game
 ```
+
+## Buildings
+
+The editor lists every OSM building as an oriented rectangle (`GET /api/buildings`, the same
+PCA fit as `osm/render_map.py`) and shows its real footprint. The game draws unedited
+houses 1.25–2.3× larger so they read well in pixel art; a moved, resized or added
+building keeps the exact size you set (`fixed`). Every building blocks movement.
+Sizes are in metres (2 map px = 1 m), angles in degrees. Landmarks with their own sprite
+(church) are listed but may not visibly change.
 
 ## Imagery
 

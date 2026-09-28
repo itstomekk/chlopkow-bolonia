@@ -76,7 +76,7 @@ try:
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.goto(BASE + '/#949,4665,1')
         page.wait_for_function("window.Editor && Editor.img.ground && Editor.entities && Editor.entities.length > 5", timeout=60000)
-        check(page.evaluate("Editor.tools.map(t => t.id).join(',')") == 'pan,trees,clear,forest+,forest-,water,block,free,zones,entities,ref',
+        check(page.evaluate("Editor.tools.map(t => t.id).join(',')") == 'pan,trees,clear,forest+,forest-,water,block,free,zones,entities,buildings,ref',
               'all tools registered')
         # JS geo parity with Python
         pts = [(0, 0), (949, 4665), (3000, 120), (1234.5, 2345.25)]
@@ -130,11 +130,35 @@ try:
         else:
             check(False, 'Marcin dragged')
 
+        # buildings: draw a new rectangle, then select an OSM building and move it, then delete another
+        page.evaluate("Editor.setTool('buildings')")
+        page.wait_for_function("Editor.tools.find(t => t.id === 'buildings') && document.querySelector('#tool-panel').textContent.includes('OSM: ') && !document.querySelector('#tool-panel').textContent.includes('OSM: 0')", timeout=20000)
+        page.evaluate("Editor.centerOn(20, 20, 2)")  # map corner: empty ground
+        page.wait_for_timeout(100)
+        page.mouse.move(cx - 20, cy - 10); page.mouse.down(); page.mouse.move(cx + 20, cy + 10, steps=5); page.mouse.up()
+        nb = page.evaluate("Editor.edits.layers.buildings && Editor.edits.layers.buildings.add[0]")
+        check(bool(nb) and abs(nb['len'] - 40 / 2 / 2) < .6 and abs(nb['wid'] - 20 / 2 / 2) < .6,
+              f'new building rectangle drawn (len {nb and nb["len"]} m, wid {nb and nb["wid"]} m)')
+        ob = page.evaluate("fetch('/api/buildings').then(r => r.json()).then(j => j.buildings.find(b => !b.landmark && b.len > 8))")
+        bx, by = geo.P(ob['lat'], ob['lon'])
+        page.evaluate("([x, y]) => Editor.centerOn(x, y, 2)", [bx, by])
+        page.wait_for_timeout(100)
+        page.mouse.move(cx, cy); page.mouse.down(); page.mouse.move(cx + 30, cy, steps=5); page.mouse.up()
+        mod = page.evaluate("id => Editor.edits.layers.buildings.modify && Editor.edits.layers.buildings.modify[id]", ob['id'])
+        if mod:
+            mx, my = geo.P(mod['lat'], mod['lon'])
+            check(abs(mx - bx - 15) < 1.5 and abs(my - by) < 1.5 and abs(mod['len'] - ob['len']) < .01, f'OSM building moved by 15 px, size kept')
+        else:
+            check(False, 'OSM building moved')
+        page.keyboard.press('Delete')
+        check(page.evaluate("id => Editor.edits.layers.buildings.remove.includes(id) && !(Editor.edits.layers.buildings.modify || {})[id]", ob['id']),
+              'Delete removes the OSM building (and drops its modify entry)')
+
         # save via Ctrl+S -> server validates and writes the temp edits file
         page.keyboard.press('Control+s')
         page.wait_for_function("!Editor.dirty", timeout=10000)
         saved = json.load(open(EDITS, encoding='utf-8'))
-        check(set(saved['layers']) == {'trees', 'zones', 'forest', 'entities'} and saved['meta'].get('updated'), 'Ctrl+S saved all layers')
+        check(set(saved['layers']) == {'trees', 'zones', 'forest', 'entities', 'buildings'} and saved['meta'].get('updated'), 'Ctrl+S saved all layers')
         sys.path.insert(0, os.path.join(ROOT, 'osm'))
         import edits
         check(edits.validate(saved) == [], 'saved file passes osm/edits.py validation')

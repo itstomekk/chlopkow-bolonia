@@ -17,6 +17,10 @@ Stages and the ctx keys they use:
     water       pond_m (bool HxW), collide (bool HxW)      water.add
     collision   collide_img (uint8 HxW: 0/128/255), road_m   collision.block / collision.free
     entities    target (dict key -> dict with x/y)          entities.<kind>:<id>
+    buildings   buildings (generator list of dicts: id, kind, c, ax, nx, L, Wd)
+                                                            buildings.remove / .modify / .add
+                (hook right after the OSM building list is built, before footprint fitting;
+                 records with fixed=True must keep their size: skip the 1.25-2.3x exaggeration)
     zones       (not applied by generators; exported for the game runtime later)
 
 An empty or missing edits file must leave every output unchanged.
@@ -37,6 +41,7 @@ except ImportError:  # imported as osm.edits from the project root
 VERSION = 1
 DEFAULT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'edits.json')
 ZONE_KINDS = ('music', 'animals', 'people', 'custom')
+BUILDING_KINDS = ('house', 'farm')
 
 
 # ---------------------------------------------------------------- geometry
@@ -188,6 +193,63 @@ def _v_zones(layer, w):
     return _list(layer, 'items', w, zone)
 
 
+def _v_buildings(layer, w):
+    errs = []
+
+    def rect(o, where):
+        e = _latlon_errors(o, where)
+        for k, lo, hi in (('len', 1, 300), ('wid', 1, 300)):
+            if not (_num(o.get(k)) and lo <= o[k] <= hi):
+                e.append(f'{where}: {k} (metres) must be a number in [{lo}, {hi}]')
+        if 'angle' in o and not (_num(o['angle']) and -360 <= o['angle'] <= 360):
+            e.append(f'{where}: angle (degrees) must be in [-360, 360]')
+        if 'kind' in o and o['kind'] not in BUILDING_KINDS:
+            e.append(f'{where}: kind must be one of {", ".join(BUILDING_KINDS)}')
+        return e
+    errs += _list(layer, 'add', w, rect)
+    rm = layer.get('remove', [])
+    if not isinstance(rm, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in rm):
+        errs.append(f'{w}.remove: must be a list of OSM way ids (integers)')
+    mod = layer.get('modify', {})
+    if not isinstance(mod, dict):
+        errs.append(f'{w}.modify: must be an object keyed by OSM way id')
+    else:
+        for k, o in mod.items():
+            if not str(k).isdigit():
+                errs.append(f'{w}.modify.{k}: key must be an OSM way id')
+            elif not isinstance(o, dict):
+                errs.append(f'{w}.modify.{k}: must be an object')
+            else:
+                errs += rect(o, f'{w}.modify.{k}')
+    return errs
+
+
+def building_record(o, bid, kind='house'):
+    """Edit rectangle (centre lat/lon, len/wid metres, angle degrees) -> generator building dict.
+    `fixed` means: use this exact size, do not apply the generator's footprint exaggeration."""
+    cx, cy = to_px(o['lat'], o['lon'])
+    a = math.radians(o.get('angle', 0))
+    ax, nx = np.array([math.cos(a), math.sin(a)]), np.array([-math.sin(a), math.cos(a)])
+    return dict(id=bid, kind=o.get('kind', kind), c=np.array([cx, cy]), ax=ax, nx=nx,
+                L=float(o['len']) * geo.A, Wd=float(o['wid']) * geo.A, fixed=True)
+
+
+def _a_buildings(layer, ctx):
+    bl = ctx['buildings']
+    removed = set(layer.get('remove', []))
+    mod = {int(k): v for k, v in layer.get('modify', {}).items()}
+    out = []
+    for b in bl:
+        if b['id'] in removed:
+            continue
+        if b['id'] in mod:
+            b = dict(b, **building_record(mod[b['id']], b['id'], b.get('kind', 'house')))
+        out.append(b)
+    for i, o in enumerate(layer.get('add', [])):
+        out.append(building_record(o, o.get('id') or f'edit:{i}'))
+    bl[:] = out
+
+
 # ---------------------------------------------------------------- appliers
 
 def _a_forest(layer, ctx):
@@ -250,6 +312,7 @@ LAYERS = {
     'water': LayerSpec(_v_water, 'water', _a_water),
     'collision': LayerSpec(_v_collision, 'collision', _a_collision),
     'entities': LayerSpec(_v_entities, 'entities', _a_entities),
+    'buildings': LayerSpec(_v_buildings, 'buildings', _a_buildings),
     'zones': LayerSpec(_v_zones, None, None),   # read by the game runtime in a later version
 }
 

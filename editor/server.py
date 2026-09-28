@@ -71,6 +71,45 @@ def safe_join(base, rel):
     return p
 
 
+_BUILDINGS = None
+
+
+def osm_buildings():
+    """OSM building footprints as oriented rectangles, same fit as render_map.py (PCA axes, metres).
+    The game draws them 1.25-2.3x larger; the editor shows the real OSM footprint."""
+    global _BUILDINGS
+    if _BUILDINGS is not None:
+        return _BUILDINGS
+    import math
+    import numpy as np
+    d = json.load(open(os.path.join(ROOT, 'osm', 'chlopkow.json'), encoding='utf-8'))
+    out = []
+    for e in d.get('elements', []):
+        tg = e.get('tags', {})
+        if e.get('type') != 'way' or 'building' not in tg or len(e.get('geometry', [])) < 3:
+            continue
+        g = e['geometry']
+        ll = [(p['lat'], p['lon']) for p in g]
+        if ll[0] == ll[-1]:
+            ll = ll[:-1]
+        arr = np.array([geo.P(la, lo) for la, lo in ll])
+        c = arr.mean(0)
+        _, _, vt = np.linalg.svd(arr - c)
+        ax, nx = vt[0], vt[1]
+        pl, pn = (arr - c) @ ax, (arr - c) @ nx
+        # centre of the oriented bounding box (not the vertex mean)
+        cc = c + ax * (pl.max() + pl.min()) / 2 + nx * (pn.max() + pn.min()) / 2
+        lat, lon = geo.to_latlon(*cc)
+        kind = tg['building']
+        out.append(dict(id=e['id'], lat=float(lat), lon=float(lon), len=round(float(pl.max() - pl.min()) / geo.A, 2),
+                        wid=round(float(pn.max() - pn.min()) / geo.A, 2), angle=round(math.degrees(math.atan2(ax[1], ax[0])), 2),
+                        kind='house' if kind in ('house', 'detached', 'bungalow', 'yes', 'residential') else 'farm',
+                        osmKind=kind, name=tg.get('name', ''),
+                        landmark=kind == 'church' or tg.get('amenity') == 'place_of_worship'))
+    _BUILDINGS = out
+    return out
+
+
 def bbox_key():
     """Tiles are cut in map-pixel space, so a bbox change (map extension) needs a fresh tile set."""
     return 'bbox_' + '_'.join(f'{v:.5f}' for v in geo.BBOX).replace('.', 'p')
@@ -151,6 +190,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_file(os.path.join(EDITOR, 'index.html'))
         if p == '/api/geo':
             return self.send_json(geo_info())
+        if p == '/api/buildings':
+            return self.send_json({'buildings': osm_buildings()})
         if p == '/api/edits':
             try:
                 return self.send_json(edits.load(EDITS_PATH))
