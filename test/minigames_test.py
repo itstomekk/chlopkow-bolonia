@@ -42,7 +42,7 @@ with sync_playwright() as p:
     pg.screenshot(path="test/m2_race_ghost.png")
     pg.keyboard.press("Escape"); time.sleep(.2)
     # race lose: stand still
-    ev("__features.startMG('race')"); time.sleep(3.2 + 16.8)
+    ev("__features.startMG('race')"); time.sleep(3.2 + 20.0)
     r = mg(); check(r and r['phase'] == 'lose', f"race idle -> lose ({r and r['msg']})"); pg.keyboard.press("Escape")
 
     # ---- pig: catch → medal by time; timeout → lose
@@ -54,7 +54,7 @@ with sync_playwright() as p:
     ev("__features.startMG('dogs')"); time.sleep(3.2)
     d = ev("__features.MG.dogs[1]"); ev(f"__game.P.x={d['x'] - 90}; __game.P.y={d['y']}")
     seen_windup = False
-    for _ in range(40):
+    for _ in range(60):
         time.sleep(.05)
         st = ev("__features.MG && __features.MG.dogs && __features.MG.dogs.map(d => d.st).join(',')") or ''
         if 'windup' in st: seen_windup = True; pg.screenshot(path="test/m4_dog_windup.png")

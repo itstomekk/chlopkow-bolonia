@@ -47,12 +47,12 @@ window.QUIZ = [
   {
     id: 'lightning', spot: 'river', ok: 1,
     pl: {
-      q: 'Z nad Białki widać wieżę kościoła. A co w 1702 roku zniszczyło pierwszą cerkiew w Chłopkowie?',
+      q: 'Z nad Melioranki widać wieżę kościoła. A co w 1702 roku zniszczyło pierwszą cerkiew w Chłopkowie?',
       a: ['Powódź', 'Uderzenie pioruna', 'Wojsko szwedzkie', 'Trąba powietrzna'],
       fact: 'Cerkiew spłonęła od pioruna w 1702 r. Już dwa lata później, w 1704 r., stanęła nowa świątynia.',
     },
     en: {
-      q: 'You can see the church tower from the Białka. What destroyed the first church in Chłopków in 1702?',
+      q: 'You can see the church tower from the Melioranka. What destroyed the first church in Chłopków in 1702?',
       a: ['A flood', 'A lightning strike', 'The Swedish army', 'A tornado'],
       fact: 'It burned down after a lightning strike in 1702. A new church stood just two years later, in 1704.',
     },

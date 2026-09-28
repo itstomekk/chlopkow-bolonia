@@ -1,4 +1,4 @@
-/* Quiz o Chłopkowie for "Arek w Chłopkowie": Pani Halina, the 13 signboards and the ABCD quiz modal.
+/* Quiz o Chłopkowie for "Arek w Chłopkowie": Babcia Irenka, the 13 question markers and the ABCD quiz modal.
    Plugs into game.js through window.ARK.HOOKS (see the comment at HOOKS in game.js). Minigames live in minigames.js.
    State in the save object: Q.halina (0 not met / 1 met / 2 quiz finished), Q.quiz {id: 1 correct | 0 wrong}. */
 'use strict';
@@ -12,24 +12,22 @@ window.addEventListener('ark-ready', () => {
 
   /* =================================================================== texts */
   const L = PL ? {
-    names: { halina: 'PANI HALINA' },
-    halina0: ['Dzień dobry, młody człowieku! Jestem Halina, prowadzę kronikę Chłopkowa.', 'Nasza wieś ma ponad 570 lat historii. Rozstawiłam po okolicy tabliczki z zagadkami — szukaj znaków zapytania!', 'Sprawdźmy najpierw, czy uważałeś na lekcjach historii...'],
-    halinaProgress: (n, c, all) => [`Rozwiązane zagadki: ${n} z ${all}. Poprawnie: ${c}.`, 'Tabliczki stoją przy kościele, plebanii, cmentarzu, wiatraku, sklepie, przystankach, rzece, boisku, sadzie, lesie i drodze na wschód.'],
+    names: { halina: 'BABCIA IRENKA' },
+    halina0: ['Dzień dobry, młody człowieku! Jestem Irenka, prowadzę kronikę Chłopkowa.', 'Rozstawiłam po okolicy zagadki — szukaj znaków zapytania!', 'Sprawdźmy najpierw, czy uważałeś na lekcjach historii...'],
+    halinaProgress: (n, c, all) => [`Rozwiązane zagadki: ${n} z ${all}. Poprawnie: ${c}.`, 'Znaki zapytania unoszą się przy kościele, plebanii, cmentarzu, wiatraku, sklepie, przystankach, rzece, boisku, sadzie, lesie i drodze na wschód.'],
     halinaEnd: (c, all, title) => [`Wszystkie zagadki rozwiązane! Wynik: ${c} na ${all}.`, `Mianuję cię tytułem: ${title}!`, 'Wpiszę cię do kroniki. Ołówkiem, na razie.'],
     halinaAfter: (c, all, title) => [`${title} — ${c}/${all}. Kronika pamięta!`],
     titles: [[13, 'HONOROWY KRONIKARZ CHŁOPKOWA'], [10, 'ZNAWCA CHŁOPKOWA'], [6, 'TURYSTA Z AMBICJAMI'], [0, 'PRZYJEZDNY Z MIASTA']],
-    boardLocked: ['Tabliczka z zagadką. Najpierw porozmawiaj z panią Haliną, kronikarką — czeka przy kościele.'],
     boardDone: ok => [ok ? 'Tę zagadkę już rozwiązałeś — poprawnie!' : 'Tę zagadkę już rozwiązałeś... niestety źle.'],
     quizTitle: 'ZAGADKA', correct: 'DOBRZE!', wrong: 'NIESTETY...', answerWas: 'Poprawna odpowiedź', cont: 'SPACJA — DALEJ', pick: 'STRZAŁKI / 1-4 — WYBÓR · SPACJA — ODPOWIEDZ',
     quizLog: (c, n, all) => `Quiz o Chłopkowie ★${c} (${n}/${all})`,
   } : {
-    names: { halina: 'MRS HALINA' },
-    halina0: ["Good day, young man! I'm Halina, I keep the chronicle of Chłopków.", 'Our village has over 570 years of history. I put riddle signboards all around — look for the question marks!', "First, let's see if you paid attention in history class..."],
-    halinaProgress: (n, c, all) => [`Riddles solved: ${n} of ${all}. Correct: ${c}.`, 'The signboards stand by the church, rectory, cemetery, windmill, shop, bus stops, river, pitch, orchard, woods and the road east.'],
+    names: { halina: 'GRANNY IRENKA' },
+    halina0: ["Good day, young man! I'm Irenka, I keep the chronicle of Chłopków.", 'I left riddles all around the village — look for the floating question marks!', "First, let's see if you paid attention in history class..."],
+    halinaProgress: (n, c, all) => [`Riddles solved: ${n} of ${all}. Correct: ${c}.`, 'Question marks float by the church, rectory, cemetery, windmill, shop, bus stops, river, pitch, orchard, woods and the road east.'],
     halinaEnd: (c, all, title) => [`All riddles solved! Score: ${c} of ${all}.`, `I hereby name you: ${title}!`, "I'll write you into the chronicle. In pencil, for now."],
     halinaAfter: (c, all, title) => [`${title} — ${c}/${all}. The chronicle remembers!`],
     titles: [[13, 'HONORARY CHRONICLER OF CHŁOPKÓW'], [10, 'CHŁOPKÓW EXPERT'], [6, 'AMBITIOUS TOURIST'], [0, 'VISITOR FROM THE CITY']],
-    boardLocked: ['A riddle signboard. Talk to Mrs Halina, the village chronicler, first — she waits by the church.'],
     boardDone: ok => [ok ? 'You already solved this one — correctly!' : 'You already answered this one... wrongly.'],
     quizTitle: 'RIDDLE', correct: 'CORRECT!', wrong: 'NOT QUITE...', answerWas: 'The answer', cont: 'SPACE — CONTINUE', pick: 'ARROWS / 1-4 — CHOOSE · SPACE — ANSWER',
     quizLog: (c, n, all) => `Chłopków quiz ★${c} (${n}/${all})`,
@@ -55,7 +53,7 @@ window.addEventListener('ark-ready', () => {
   }
   function closeQuiz() {
     QZ = null;
-    if (answered() === QZ_ALL && Q().halina === 1) A.popToast(PL ? 'WRÓĆ DO PANI HALINY' : 'GO BACK TO MRS HALINA');
+    if (answered() === QZ_ALL && Q().halina === 1) A.popToast(PL ? 'WRÓĆ DO BABCI IRENKI' : 'GO BACK TO GRANNY IRENKA');
   }
   HOOKS.key.push(e => {
     if (!QZ) return false;
@@ -129,13 +127,17 @@ window.addEventListener('ark-ready', () => {
     ctx.textAlign = 'left';
   }
 
-  /* =================================================================== Pani Halina + signboards */
+  /* =================================================================== Babcia Irenka + question markers */
   HOOKS.npcTalk.push(id => {
     if (id !== 'halina') return false;
     const q = Q();
-    if (q.halina === 0) { q.halina = 1; A.save(); A.say('halina', L.halina0, () => openQuiz('king')); }
+    if (answered() >= QZ_ALL) { q.halina = 2; A.save(); A.say('halina', L.halinaEnd(correctN(), QZ_ALL, titleFor(correctN())), () => A.celebrate()); }
+    else if (q.halina === 0) {
+      q.halina = 1; A.save();
+      if (q.quiz.king === undefined) A.say('halina', L.halina0, () => openQuiz('king'));
+      else A.say('halina', L.halinaProgress(answered(), correctN(), QZ_ALL));
+    }
     else if (q.halina === 1 && q.quiz.king === undefined) openQuiz('king');
-    else if (q.halina === 1 && answered() >= QZ_ALL) { q.halina = 2; A.save(); A.say('halina', L.halinaEnd(correctN(), QZ_ALL, titleFor(correctN())), () => A.celebrate()); }
     else if (q.halina === 1) A.say('halina', L.halinaProgress(answered(), correctN(), QZ_ALL));
     else A.say('halina', L.halinaAfter(correctN(), QZ_ALL, titleFor(correctN())));
     return true;
@@ -145,32 +147,22 @@ window.addEventListener('ark-ready', () => {
     x: b.x, y: b.y, r: 30,
     onInteract() {
       const q = spotQuestion(b.spot); if (!q) return;
-      if (Q().halina === 0) A.say('arek', L.boardLocked);
-      else if (Q().quiz[q.id] !== undefined) {
+      if (Q().quiz[q.id] !== undefined) {
         const t = q[PL ? 'pl' : 'en'];
         A.say('arek', [...L.boardDone(Q().quiz[q.id] === 1), `${L.answerWas}: ${t.a[q.ok]}.`]);
       } else openQuiz(q.id);
     },
   }))));
-  function drawBoard(b, sx, sy, s) {
+  function drawQuestionMarker(b, sx, sy, s) {
     const q = spotQuestion(b.spot), st = q ? Q().quiz[q.id] : undefined;
-    const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s, w * s, h * s); };
-    A.shadow(sx, sy, s, 6);
-    px(-1, -16, 2, 16, '#6b4526');                         // post
-    px(-8, -24, 16, 11, '#3f2814'); px(-7, -23, 14, 9, '#c89a5c'); // board
-    px(-7, -23, 14, 1, '#e0b878');
-    const bob = Math.floor(A.time * 2) % 2;
-    if (st === undefined) {                                // pixel "?"
-      const c = Q().halina ? '#d8262c' : '#8a5a2c';
-      px(-2, -22 + bob * 0, 4, 1, c); px(1, -21, 1, 2, c); px(-1, -19, 2, 1, c); px(-1, -18, 1, 1, c); px(-1, -16, 1, 1, c);
-    } else if (st === 1) {                                 // tick
-      px(-3, -18, 1, 1, '#2a8a2a'); px(-2, -17, 1, 1, '#2a8a2a'); px(-1, -18, 1, 1, '#2a8a2a'); px(0, -19, 1, 1, '#2a8a2a'); px(1, -20, 1, 1, '#2a8a2a'); px(2, -21, 1, 1, '#2a8a2a');
-    } else {                                               // cross
-      for (let k = -2; k <= 2; k++) { px(k, -18 + k, 1, 1, '#b8261e'); px(k, -18 - k, 1, 1, '#b8261e'); }
-    }
+    if (st !== undefined) return;
+    const bob = Math.sin(A.time * 5 + b.x) * 1.5 * s, my = sy - 20 * s + bob;
+    ctx.fillStyle = '#10163a'; ctx.fillRect(sx - 5 * s, my - 6 * s, 10 * s, 11 * s);
+    ctx.fillStyle = '#ffd21f'; ctx.font = `${8 * s}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('?', sx, my);
   }
   HOOKS.world.push((push, S, inView) => {
-    for (const b of ITEMS.boards) if (inView(b.x, b.y)) push(b.y, () => drawBoard(b, ...S(b.x, b.y), A.zoom));
+    for (const b of ITEMS.boards) if (inView(b.x, b.y)) push(b.y - 20, () => drawQuestionMarker(b, ...S(b.x, b.y), A.zoom));
   });
   HOOKS.minimap.push(dot => { if (Q().halina) for (const b of ITEMS.boards) { const q = spotQuestion(b.spot); if (q && Q().quiz[q.id] === undefined) dot(b.x, b.y, '#ffd21f'); } });
   HOOKS.questLog.push(lines => {

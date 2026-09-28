@@ -1,7 +1,8 @@
 """Pack NPC sprites (gen/npc_src/*.png, transparent 8-bit sprites from the Grand Theft Tractor video)
 into docs/img/npcs.png: 4 cells of 130x170, feet 6 px above the cell bottom. Order must match NPC_IDX in docs/js/game.js."""
 from PIL import Image
-ORDER = ['kasia', 'marcin', 'damian', 'grandpa', 'halina']
+# Fifth atlas slot retains the saved NPC id 'halina', but displays Irenka; Kuba hosts the range.
+ORDER = ['kasia', 'marcin', 'damian', 'grandpa', 'irenka', 'kuba']
 CELL_W, CELL_H, FOOT, TARGET_H = 130, 170, 6, 150
 atlas = Image.new('RGBA', (CELL_W * len(ORDER), CELL_H), (0, 0, 0, 0))
 for i, n in enumerate(ORDER):

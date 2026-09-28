@@ -2,7 +2,7 @@
      race   (Damian, north track)      2 laps vs Damian; jump the bale walls; off-track = slow; ghost of your best run
      pig    (Grandpa, corral)          catch Pepa in 30 s; she is fast at first and tires over time
      dogs   (Marcin, south meadow)     collect 6 eggs; dogs growl ("!") before they lunge — jump over them
-     skeet  (Damian, range by his farm) fairground-style tin moorhens ("kurki wodne") fly across; aim & shoot, 2 barrels
+     skeet  (Kuba, PPM range)           fairground-style tin moorhens ("kurki wodne") fly across; aim & shoot, 2 barrels
    Shared: 3-2-1 lights, bronze/silver/gold medals, records and retry. Venues come from map.json (osm/render_map.py).
    Save: Q.mg[type] = { tries, won, best, medal, ghost? }  — best = time (s) or hits (skeet). */
 'use strict';
@@ -19,13 +19,13 @@ window.addEventListener('ark-ready', () => {
     flag: { race: 'TOR', pig: 'ŚWINKA', dogs: 'PSY', skeet: 'STRZELNICA' },
     intro: {
       race: ['Damian: „Wyścig! Dwa okrążenia. Bele siana przeskakujesz — SPACJA albo X.”', 'Damian: „Po trawie biegnie się wolno, a skróty się nie liczą. Pobij mnie, a potem swój rekord!”'],
-      pig: ['Dziadek Zbyszek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
+      pig: ['Dziadek Zdzisiek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
       dogs: ['Marcin: „Kury pana Stefana zniosły na pastwisku 6 jajek, ale pilnują ich psy.”', 'Marcin: „Kiedy pies warknie „!”, zaraz skoczy. Wtedy przeskocz go albo uciekaj w bok!”'],
-      skeet: ['Damian: „Moja strzelnica! Blaszane kurki wodne wylatują z budek po bokach.”', PL && !coarse() ? 'Damian: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Damian: „Dotknij kurki, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
+      skeet: ['Kuba: „Moja strzelnica! Blaszane kurki wodne wylatują z budek po bokach.”', !coarse() ? 'Kuba: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Kuba: „Dotknij kurki, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
     },
     win: { race: 'WYGRAŁEŚ Z DAMIANEM!', pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNE OKO!' },
     lose: { race: 'DAMIAN BYŁ SZYBSZY...', pig: 'PEPA UCIEKŁA...', dogs: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...', skeet: 'ZA MAŁO TRAFIEŃ...' },
-    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Strzelnica Damiana' },
+    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Strzelnica Kuby' },
     medal: ['', 'BRĄZ', 'SREBRO', 'ZŁOTO'], next: m => `NASTĘPNY: ${m}`,
     go: 'START!', lap: 'OKRĄŻENIE', time: 'CZAS', best: 'REKORD', eggs: 'JAJKA', left: 'ZOSTAŁO', hits: 'TRAFIENIA', reload: 'PRZEŁADOWANIE...',
     retry: 'SPACJA / R — JESZCZE RAZ', quit: 'ESC — WYJDŹ', esc: 'ESC — PRZERWIJ', record: 'NOWY REKORD!', ghost: 'DUCH REKORDU', offTrack: 'TRAWA — WOLNIEJ!',
@@ -34,13 +34,13 @@ window.addEventListener('ark-ready', () => {
     flag: { race: 'TRACK', pig: 'PIGGY', dogs: 'DOGS', skeet: 'RANGE' },
     intro: {
       race: ['Damian: "Race! Two laps. Jump the hay bales — SPACE or X."', 'Damian: "Grass is slow and shortcuts don\'t count. Beat me, then beat your own record!"'],
-      pig: ['Grandpa Zbyszek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
+      pig: ['Grandpa Zdzisiek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
       dogs: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "When a dog growls "!", it is about to lunge. Jump over it or dodge sideways!"'],
-      skeet: ['Damian: "My shooting gallery! Tin moorhens fly out of the booths on both sides."', !coarse() ? 'Damian: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Damian: "Tap a moorhen to shoot. Two barrels, then reload. Hit 10 of 15!"'],
+      skeet: ['Kuba: "My shooting gallery! Tin moorhens fly out of the booths on both sides."', !coarse() ? 'Kuba: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Kuba: "Tap a moorhen to shoot. Two barrels, then reload. Hit 10 of 15!"'],
     },
     win: { race: 'YOU BEAT DAMIAN!', pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'SHARPSHOOTER!' },
     lose: { race: 'DAMIAN WAS FASTER...', pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...' },
-    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: "Damian's shooting gallery" },
+    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: "Kuba's shooting gallery" },
     medal: ['', 'BRONZE', 'SILVER', 'GOLD'], next: m => `NEXT: ${m}`,
     go: 'GO!', lap: 'LAP', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT', hits: 'HITS', reload: 'RELOADING...',
     retry: 'SPACE / R — AGAIN', quit: 'ESC — LEAVE', esc: 'ESC — QUIT', record: 'NEW RECORD!', ghost: 'RECORD GHOST', offTrack: 'GRASS — SLOWER!',
@@ -49,7 +49,7 @@ window.addEventListener('ark-ready', () => {
 
   /* ------------------------------------------------------------------ medals: [bronze, silver, gold] thresholds */
   const MEDAL = {   // time games: lower is better; skeet: hits, higher is better
-    race: { lower: true, t: [Infinity, 15.5, 14.0] },   // bronze = simply beating Damian (~16.2 s)
+    race: { lower: true, t: [Infinity, 18.5, 16.5] },   // bronze = simply beating Damian (~18.4 s)
     pig: { lower: true, t: [30, 15, 8] },
     dogs: { lower: true, t: [Infinity, 28, 18] },
     skeet: { lower: false, t: [10, 12, 14] },
@@ -69,7 +69,7 @@ window.addEventListener('ark-ready', () => {
     { type: 'race', host: 'damian', x: TR.cx - 30, y: TR.cy + TR.ry + TR.w / 2 + 22, color: '#d8262c' },
     { type: 'pig', host: 'grandpa', x: CO.cx - CO.r - 26, y: CO.cy + 6, color: '#ff8fb8' },
     { type: 'dogs', host: 'marcin', x: ME.x0 - 18, y: (ME.y0 + ME.y1) / 2, color: '#2f6fe0' },
-    { type: 'skeet', host: 'damian', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
+    { type: 'skeet', host: 'kuba', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
   ];
   let MG = null, ANIM = null;
   A.minigame = () => MG && MG.type;   // read by music.js
@@ -218,7 +218,7 @@ window.addEventListener('ark-ready', () => {
       }
       MG.offTrack = !onTrack(P.x, P.y);
       // Damian: steady pace with a little wobble; hops over the bale walls at 200° and 330°
-      const R = MG.rival, lapT = 8.1;
+      const R = MG.rival, lapT = 9.2;
       R.th += (Math.PI * 2 / lapT) * (1 + Math.sin(MG.run * 1.3) * .08) * dt;
       const deg = ((R.th * 180 / Math.PI) % 360 + 360) % 360, wall = [200, 330].find(b => Math.abs(deg - b) < 9);
       R.z = wall ? Math.cos((deg - wall) / 9 * Math.PI / 2) * 14 : 0;
@@ -247,14 +247,16 @@ window.addEventListener('ark-ready', () => {
       const got = MG.eggs.filter(e => e.got).length;
       if (got === MG.eggs.length) { endMG(true, L.win.dogs); return; }
       if (P.x < ME.x0 - 40 || P.x > ME.x1 + 40 || P.y < ME.y0 - 40 || P.y > ME.y1 + 40) { endMG(false, L.lose.dogsOut); return; }
-      const angry = 1 + got * .07;                                      // dogs speed up as you take their eggs
+      const chaseSpeed = 68 + got * 3;                                  // speeds up with eggs, but stays below Arek's 110 px/s walk speed
       for (const dg of MG.dogs) {
         dg.st_t -= dt;
         const d = Math.hypot(P.x - dg.x, P.y - dg.y);
         if (dg.st === 'windup') { if (dg.st_t <= 0) { dg.st = 'lunge'; dg.st_t = .5; const k = 1 / (d || 1); dg.lx = (P.x - dg.x) * k; dg.ly = (P.y - dg.y) * k; } }
-        else if (dg.st === 'lunge') { steer(dg, dg.x + dg.lx * 40, dg.y + dg.ly * 40, 235 * angry, dt); if (dg.st_t <= 0) { dg.st = 'rest'; dg.st_t = .8; } }
+        else if (dg.st === 'lunge') { steer(dg, dg.x + dg.lx * 40, dg.y + dg.ly * 40, 145 + got * 4, dt); if (dg.st_t <= 0) { dg.st = 'rest'; dg.st_t = .9; } }
         else if (dg.st === 'rest') { if (dg.st_t <= 0) dg.st = 'chase'; }
-        else if (d < 210) { dg.st = 'chase'; steer(dg, P.x, P.y, 92 * angry, dt); if (d < 95 && dg.st_t <= 0) { dg.st = 'windup'; dg.st_t = .45; } }
+        else if (dg.st === 'alert') { if (d > 250) dg.st = 'patrol'; else if (dg.st_t <= 0) dg.st = 'chase'; }
+        else if (dg.st === 'chase') { if (d > 250) dg.st = 'patrol'; else { steer(dg, P.x, P.y, chaseSpeed, dt); if (d < 95 && dg.st_t <= 0) { dg.st = 'windup'; dg.st_t = .75; } } }
+        else if (d < 210) { dg.st = 'alert'; dg.st_t = .8; }
         else { dg.st = 'patrol'; steer(dg, ME.x1 - 50 - Math.sin(MG.run * .5 + dg.home) * 110, dg.home, 45, dt); }
         if (dg.st === 'rest' && dg.st_t < 0) dg.st_t = 0;
         if (d < 13 && P.z < 6) { endMG(false, L.lose.dogs); return; }
@@ -306,6 +308,11 @@ window.addEventListener('ark-ready', () => {
   }
   HOOKS.world.push((push, S, inView) => {
     for (const f of FLAGS) if (inView(f.x, f.y) && !(MG && MG.type === f.type)) push(f.y, () => drawFlag(f, ...S(f.x, f.y), A.zoom));
+    const host = FLAGS[3];
+    if (inView(host.x + 28, host.y - 25)) push(host.y - 25, () => {
+      const [sx, sy] = S(host.x + 28, host.y - 25);
+      A.drawNpc({ id: 'kuba', x: host.x + 28, y: host.y - 25 }, sx, sy, A.zoom);
+    });
     for (const side of [0, 1]) { const [bx, by] = BOOTH(side); if (inView(bx, by)) push(by, () => drawBooth(side, ...S(bx, by), A.zoom)); }
     if (!MG) return;
     const s = A.zoom;

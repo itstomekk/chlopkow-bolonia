@@ -15,7 +15,7 @@ import json, math, random, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, 'osm'); sys.path.insert(0, 'gen')
-from geo import A, BBOX, W, H, P, legacy_i
+from geo import A, BBOX, W, H, P, to_latlon, legacy_i, pre_expansion_i, REAL_POIS, PRE_EXPANSION_ADDITIONS
 from slice_sheet import key as chroma_key
 
 OSM = 'osm/chlopkow.json'
@@ -307,12 +307,15 @@ for b in buildings:
     collide |= fmask; occupied |= fmask
 
 # ---------------------------------------------------------------- minigame venues
-# Positions were tuned on the first map; legacy_i() keeps them on the same real-world spot.
-_tc = legacy_i(1080, 300); TRACK = dict(cx=_tc[0], cy=_tc[1], rx=300, ry=150, w=44)
+# The race oval is at the supplied coordinate on the preceding map.
+_tc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['race_oval'])
+# Keep the complete oval inside the southern edge while staying within the requested vicinity.
+TRACK = dict(cx=_tc[0], cy=min(_tc[1], H - 220), rx=300, ry=150, w=44)
 _cc = legacy_i(1490, 565); CORRAL = dict(cx=_cc[0], cy=_cc[1], r=100)
 # dog meadow: open grass between the street and the Białka
 _m0, _m1 = legacy_i(680, 1060), legacy_i(1100, 1330); MEADOW = dict(x0=_m0[0], y0=_m0[1], x1=_m1[0], y1=_m1[1])
-_rc = tuple(int(v) for v in P(52.26016, 22.87064)); RANGE = dict(x=_rc[0], y=_rc[1])   # shooting range: open wheat by Damian's farmstead (south)
+_rc = tuple(int(round(v)) for v in P(52.2736642, 22.867767)); RANGE = dict(x=_rc[0], y=_rc[1])   # PPM Strzelectwo
+_pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0], cy=_pc[1], w=190, h=110)
 
 
 def window(cx, cy, rx, ry):
@@ -357,6 +360,17 @@ sub = g3[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
 sub[cm_] = sub[cm_] * .8 + np.array(hexc('#a88a5c')) * .2; sub[cm_ & mud] = sub[cm_ & mud] * .75 + np.array(hexc('#8a6a44')) * .25
 occupied[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]] |= (((xx - CORRAL['cx']) / (CORRAL['r'] + 20)) ** 2 + ((yy - CORRAL['cy']) / ((CORRAL['r'] + 20) * .8)) ** 2) <= 1
 ground = Image.fromarray(g3.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground)
+# A procedural football pitch at the supplied old-map coordinate. It is deliberately
+# simple pixel art, not a fabricated photographic sprite, and remains fully walkable.
+fp = FOOTBALL_PITCH
+fx0, fx1 = int(fp['cx'] - fp['w'] / 2), int(fp['cx'] + fp['w'] / 2)
+fy0, fy1 = int(fp['cy'] - fp['h'] / 2), int(fp['cy'] + fp['h'] / 2)
+gd.rectangle([fx0, fy0, fx1, fy1], fill=hexc('#4fae4a'), outline=hexc('#e9efdc'), width=3)
+gd.line([(fp['cx'], fy0), (fp['cx'], fy1)], fill=hexc('#e9efdc'), width=2)
+gd.ellipse([fp['cx'] - 18, fp['cy'] - 18, fp['cx'] + 18, fp['cy'] + 18], outline=hexc('#e9efdc'), width=2)
+box_w, box_h = 42, 58
+gd.rectangle([fx0, fp['cy'] - box_h / 2, fx0 + box_w, fp['cy'] + box_h / 2], outline=hexc('#e9efdc'), width=2)
+gd.rectangle([fx1 - box_w, fp['cy'] - box_h / 2, fx1, fp['cy'] + box_h / 2], outline=hexc('#e9efdc'), width=2)
 del g3, yy, xx, ang, sub
 for k_ in range(0, 360, 3):
     if 165 < k_ < 195: continue
@@ -559,8 +573,27 @@ for x, y in cand:
     gd.ellipse([x - r * .8, y - r * .9, x + r * .6, y + r * .5], fill=base)
     gd.ellipse([x - r * .55, y - r * .75, x + r * .1, y - r * .15], fill=shade(base, 1.3))
 
-# ---------------------------------------------------------------- POIs + landmark placeholders
+# ---------------------------------------------------------------- POIs + named real-world landmarks
 pois = []
+landmarks = []
+
+
+def add_landmark(key, name, lat, lon, kind='poi'):
+    x, y = P(lat, lon)
+    if 20 < x < W - 20 and 50 < y < H - 20:
+        landmarks.append(dict(key=key, name=name, kind=kind, lat=lat, lon=lon, x=round(x), y=round(y)))
+
+
+for landmark in REAL_POIS:
+    add_landmark(landmark['key'], landmark['name'], landmark['lat'], landmark['lon'])
+
+
+for key, name, kind in [('bus_budka', 'BUDKA', 'bus_stop'), ('football_pitch', 'Boisko', 'football_pitch')]:
+    lx, ly = pre_expansion_i(*PRE_EXPANSION_ADDITIONS[key])
+    lat, lon = to_latlon(lx, ly)
+    add_landmark(key, name, lat, lon, kind)
+
+
 def add_poi(key, lat, lon, **kw):
     x, y = P(lat, lon)
     if 20 < x < W - 20 and 50 < y < H - 20: pois.append(dict(key=key, x=round(x), y=round(y), **kw))
@@ -579,6 +612,10 @@ for e in ways:
         b = e['bounds']; add_poi('rectory', (b['minlat'] + b['maxlat']) / 2, (b['minlon'] + b['maxlon']) / 2)
 # river poi at the bridge (road/river crossing)
 add_poi('river', 52.2621, 22.8752)
+# BUDKA remains a regular bus POI so existing game interaction works; the full
+# named landmark record above preserves its requested preceding-map placement.
+_budka_x, _budka_y = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['bus_budka'])
+pois.append(dict(key='bus', x=_budka_x, y=_budka_y, name='BUDKA'))
 
 # 256-colour palette: pixel art survives it and the download shrinks several times
 ground.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save('docs/img/map_ground.png', optimize=True)
@@ -593,6 +630,6 @@ cm_free = (cm == 0)
 py_, px_ = np.nonzero(dm[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150] & cm_free[shop['y']:shop['y'] + 200, shop['x'] - 150:shop['x'] + 150])
 k_ = int(np.argmin((px_ - 150) ** 2 + (py_ - 60) ** 2)) if len(px_) else None
 spawn = dict(x=int(shop['x'] - 150 + px_[k_]), y=int(shop['y'] + py_[k_])) if k_ is not None else dict(x=shop['x'], y=shop['y'] + 60)
-json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, spawn=spawn,
+json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, pois=pois, landmarks=landmarks, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, spawn=spawn,
                attribution='Map data © OpenStreetMap contributors (ODbL)'), open('docs/map.json', 'w'), indent=0)
-print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois])
+print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois], 'landmarks', [(p['key'], p['x'], p['y']) for p in landmarks])

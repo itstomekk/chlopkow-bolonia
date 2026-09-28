@@ -8,8 +8,23 @@ and back into the current map, so the map can be resized without re-tuning anyth
 import math
 
 A = 2.0                                           # art pixels per metre
-BBOX = (52.2585, 22.8586, 52.2707, 22.8872)       # minlat, minlon, maxlat, maxlon  (village + Kolonia, ~1.95 x 1.35 km)
+BBOX = (52.2585, 22.8586, 52.2850, 22.8872)       # minlat, minlon, maxlat, maxlon  (village + northern forest)
 LEGACY_BBOX = (52.2588, 22.8630, 52.2700, 22.8800)  # the first map (2316 x 2476 px)
+
+# Named sites supplied for the expanded map. Keep these as coordinates, rather than
+# photographic assets or guessed OSM tags, so the renderer can use procedural art.
+REAL_POIS = (
+    dict(key='kapliczka', name='Kapliczka', lat=52.265937, lon=22.8658023),
+    dict(key='chata', name='Chata', lat=52.2669308, lon=22.8674792),
+    dict(key='swietlica', name='Świetlica', lat=52.2641139, lon=22.8754946),
+    dict(key='cemetery_real', name='Cmentarz', lat=52.2685251, lon=22.8772688),
+    dict(key='shooting_range', name='PPM Strzelectwo', lat=52.2736642, lon=22.867767),
+)
+
+# These user-supplied coordinates refer to the immediately previous 3897x2698 map,
+# not the first 2316x2476 map used by legacy_i().
+PRE_EXPANSION_BBOX = (52.2585, 22.8586, 52.2707, 22.8872)
+PRE_EXPANSION_ADDITIONS = dict(bus_budka=(1135, 1085), football_pitch=(2339, 1468), race_oval=(610, 2417))
 
 MY = 110574.0
 
@@ -36,6 +51,11 @@ def legacy(x, y):
     """Art coords of the first (legacy) map -> art coords of the current map."""
     return P(*to_latlon(x, y, LEGACY_BBOX))
 
+
+def pre_expansion_i(x, y):
+    """Art coords of the preceding 3897x2698 map -> current map."""
+    px, py = P(*to_latlon(x, y, PRE_EXPANSION_BBOX))
+    return int(round(px)), int(round(py))
 
 def legacy_i(x, y):
     px, py = legacy(x, y)

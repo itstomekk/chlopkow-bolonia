@@ -46,6 +46,13 @@ def at(x, y, r=10):
     px, py = near_free(x, y, r); return dict(x=px, y=py)
 
 
+landmarks = []
+for lm in m.get('landmarks', []):
+    ax, ay = near_free(lm['x'], lm['y'], r=8)
+    assert free(ax, ay, 8), f"{lm['key']} has no reachable access point"
+    landmarks.append(dict(lm, access=dict(x=ax, y=ay)))
+
+
 poi = {p['key']: p for p in m['pois']}
 shop = poi['shop']
 bus = [p for p in m['pois'] if p['key'] == 'bus']
@@ -107,5 +114,6 @@ dam = next(n for n in npcs if n['id'] == 'damian')   # "I was running through th
 cands = [(x, y) for x, y in zip(xs[::200], ys[::200]) if 300 < math.hypot(x - dam['x'], y - dam['y']) < 900 and free(x, y, 12)]
 cap = dict(zip('xy', map(int, rnd.choice(cands))))
 
-json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards), open('docs/items.json', 'w'), indent=1)
-print(f'reachable {reach.mean():.0%} of map |', len(apples), 'apples |', ', '.join(f"{n['id']}@{n['x']},{n['y']}" for n in npcs), '| cap', cap)
+json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards, landmarks=landmarks), open('docs/items.json', 'w'), indent=1)
+print(f'reachable {reach.mean():.0%} of map |', len(apples), 'apples |', ', '.join(f"{n['id']}@{n['x']},{n['y']}" for n in npcs), '| cap', cap,
+      '| landmarks', ', '.join(f"{lm['key']}->{lm['access']['x']},{lm['access']['y']}" for lm in landmarks))
