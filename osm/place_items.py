@@ -151,7 +151,8 @@ assert min(new_gaps + new_old_gaps) >= 200, 'optional building markers are too c
 # ---------------------------------------------------------------- NPCs
 soltys_spot = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['soltys'])
 cem = poi['cemetery']; TR = m['track']; RG = m['range']
-# litter for Mateusz's clean-up: fixed piles by the cemetery and by the southern shop (+3 random ones spawned per new game)
+# litter spots: fixed trash bags by the cemetery and by the southern shop; the game scatters more per new game
+# and the player collects them like apples and mushrooms (no clean-up NPC).
 south_shop = pre_expansion_i(2150, 2506)
 trash = [dict(id='cemetery', **at(cem['x'] + 150, cem['y'] + 60, r=8)), dict(id='southshop', **at(south_shop[0] - 50, south_shop[1] + 20, r=8))]
 npcs = [
@@ -164,7 +165,6 @@ npcs = [
     dict(id='soltys', secret=True, **at(*soltys_spot)),
     dict(id='michal', **at(RG['x'] - 44, RG['y'] + 26)),      # owner of the PPM range
     dict(id='kuba', **at(RG['x'] - 90, RG['y'] + 40)),        # regular at the range
-    dict(id='mateusz', **at(trash[0]['x'] + 70, trash[0]['y'] + 30)),   # clean-up organiser by the cemetery
 ]
 if 'jazz' in m: npcs.append(dict(id='patryk', **at(m['jazz']['x'] + 50, m['jazz']['y'] - 5)))
 # Edytka: the game puts her at a random reachable spot on every new game (NPC_ZONE_RADIUS covers the whole map);

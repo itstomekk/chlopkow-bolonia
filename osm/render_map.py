@@ -308,7 +308,7 @@ for b in buildings:
 
 # ---------------------------------------------------------------- minigame venues
 # Sept 28 moves/additions, given as CURRENT map art pixels (the in-game coordinate readout), meaning "near here".
-CUR_SITES = dict(pig=(3487, 3308), dogs=(1321, 888), jazz=(2471, 1091), gravel=(873, 2322))
+CUR_SITES = dict(pig=(3487, 3308), dogs=(1321, 888), jazz=(2953, 2657), gravel=(873, 2322))
 
 
 def clear_rect(cx, cy, w, h, block, soft=None, search=600, step=10):
@@ -342,10 +342,11 @@ _ox, _oy = clear_rect(*CUR_SITES['pig'], 260, 220, _venue_block, _venue_soft); C
 # dog meadow (twice the old 420x270): open grass cleared near the requested spot
 _mx0, _my0 = clear_rect(*CUR_SITES['dogs'], 840, 540, _venue_block, _venue_soft)
 MEADOW = dict(x0=_mx0, y0=_my0, x1=_mx0 + 840, y1=_my0 + 540)
-# JAZZ W STODOLE: barn sprite (~150 x 120) with an open yard in front of the door
-_jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 190, 230, _venue_block | pm, dm)
-BARN = dict(cx=_jx0 + 95, foot=_jy0 + 135, w=150)
-JAZZ = dict(x=BARN['cx'], y=BARN['foot'] + 45, r=170)
+# JAZZ W STODOLE: a smaller barn sprite in the supplied developed-area location,
+# with an open yard in front of the door.
+_jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 160, 190, _venue_block | pm, dm)
+BARN = dict(cx=_jx0 + 80, foot=_jy0 + 112, w=120)
+JAZZ = dict(x=BARN['cx'], y=BARN['foot'] + 38, r=140)
 # Wapnica: gravel pit / village dump
 _gx0, _gy0 = clear_rect(*CUR_SITES['gravel'], 300, 220, _venue_block, _venue_soft)
 PIT = dict(cx=_gx0 + 150, cy=_gy0 + 110, rx=140, ry=100)

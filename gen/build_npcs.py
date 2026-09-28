@@ -3,9 +3,20 @@ into docs/img/npcs.png: 4 cells of 130x170, feet 6 px above the cell bottom. Ord
 from PIL import Image
 import sys
 sys.path.insert(0, 'gen')
-from build_walk_cycles import remove_checker_background
+from build_walk_cycles import remove_checker_background, remove_magenta_background
+import os
+import numpy as np
+from scipy import ndimage
+# DJ Renik: key the magenta GPT Image backdrop once into gen/npc_src/renik.png (largest blob + attached props).
+if os.path.exists('gen/npc_src/renik_raw.png'):
+    a = np.array(remove_magenta_background(Image.open('gen/npc_src/renik_raw.png')))
+    lab, k = ndimage.label(a[..., 3] > 0, structure=np.ones((3, 3)))
+    if k:
+        sizes = np.bincount(lab.ravel()); sizes[0] = 0
+        a[..., 3] = np.where(sizes[lab] >= max(60, sizes.max() * .01), a[..., 3], 0)
+    im = Image.fromarray(a); im.crop(im.getbbox()).save('gen/npc_src/renik.png')
 # Fifth atlas slot retains the saved NPC id 'halina', but displays Irenka; Kuba hosts the range.
-ORDER = ['kasia', 'marcin', 'damian', 'grandpa', 'irenka', 'kuba', 'michal', 'mateusz', 'patryk', 'zbyszek', 'wesoly_swiat', 'edytka']
+ORDER = ['kasia', 'marcin', 'damian', 'grandpa', 'irenka', 'kuba', 'michal', 'mateusz', 'patryk', 'zbyszek', 'wesoly_swiat', 'edytka', 'renik']
 CELL_W, CELL_H, FOOT, TARGET_H = 130, 170, 6, 150
 atlas = Image.new('RGBA', (CELL_W * len(ORDER), CELL_H), (0, 0, 0, 0))
 for i, n in enumerate(ORDER):

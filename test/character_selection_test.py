@@ -16,18 +16,23 @@ with sync_playwright() as p:
     page.reload()
     page.wait_for_function("window.__game")
 
-    # Select Damian on the title screen. Bounds match the 2x2 selector at 1280x720.
-    u = min(1280, 720 * 1.6) / 100
-    button_size, gap = u * 7, u * 1.5
-    grid_x, grid_y = (1280 - (button_size * 2 + gap)) / 2, 720 * 0.45
-    page.mouse.click(grid_x + button_size / 2, grid_y + button_size + gap + button_size / 2)
+    # Select Damian on the title screen, using the game's own selector geometry.
+    center = lambda pg, cid: pg.evaluate(f"__game.characterButtonCenter('{cid}')")
+    page.mouse.click(*center(page, "damian"))
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "damian"
 
     # Selection survives reload and the displayed selector can change it before starting.
     page.reload()
     page.wait_for_function("window.__game")
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "damian"
-    page.mouse.click(grid_x + button_size / 2, grid_y + button_size / 2)
+    page.mouse.click(*center(page, "arek"))
+    assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "arek"
+
+    # DJ Renik is selectable and his button sits fully above the bottom prompt strip.
+    page.mouse.click(*center(page, "renik"))
+    assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "renik"
+    assert center(page, "renik")[1] + 50 < 720 - min(1280, 720 * 1.6) / 100 * 9.5, center(page, "renik")
+    page.mouse.click(*center(page, "arek"))
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "arek"
 
     # The chosen character sheet remains the active player art after starting a fresh game.
@@ -36,7 +41,7 @@ with sync_playwright() as p:
     page.locator("#player-name-submit").click()
     page.wait_for_function("__game.scene === 'play'")
     assert page.evaluate("__game.playerCharacter") == "arek"
-    assert page.evaluate("__game.playerSheetName") == "arek_sheet.png"
+    assert page.evaluate("__game.playerSheetName") == "arek_sheet_8dir.png"
     assert not errors, errors
 
     # A saved choice is loaded before init; non-Arek sprites idle and animate from walk rows.
@@ -58,20 +63,30 @@ with sync_playwright() as p:
     assert other.evaluate("__game.playerSheetName") == "marcin_sheet.png"
     assert not other_errors, other_errors
 
+    # DJ Renik plays with his own walk sheet; his NPC twin is swapped to Arek's art (existing rule).
+    other.evaluate(f"localStorage.clear(); localStorage.setItem('{CHARACTER_KEY}', 'renik')")
+    other.reload()
+    other.wait_for_function("window.__game")
+    other.keyboard.press("KeyN")
+    other.locator("#player-name-input").fill("Renik")
+    other.locator("#player-name-submit").click()
+    other.wait_for_function("__game.scene === 'play'")
+    other.evaluate("__game.P.moving = true; __game.P.dir = 'down_right'; __game.P.step = 1")
+    other.wait_for_timeout(100)
+    assert other.evaluate("__game.playerCharacter") == "renik"
+    assert other.evaluate("__game.playerSheetName") == "renik_sheet.png"
+    assert not other_errors, other_errors
+
     # On a touch-sized viewport, selector hit targets stay tappable and do not start the game.
     mobile = browser.new_page(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
     mobile.goto(URL)
     mobile.wait_for_function("window.__game")
-    touch_point = mobile.evaluate("""() => {
-      const scale = Math.round(innerWidth * Math.min(2, devicePixelRatio || 1)) / innerWidth;
-      const W = Math.round(innerWidth * scale), H = Math.round(innerHeight * scale);
-      const U = Math.min(W, H * 1.6) / 100, size = Math.max(U * 7, 48 * scale), gap = U * 1.5;
-      const gx = (W - (size * 2 + gap)) / 2, gy = H * .45;
-      return [(gx + size / 2) / scale, (gy + size + gap + size / 2) / scale];
-    }""")
-    mobile.touchscreen.tap(*touch_point)
+    mobile.touchscreen.tap(*center(mobile, "damian"))
     assert mobile.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "damian"
+    assert mobile.evaluate("__game.scene") == "title"
+    mobile.touchscreen.tap(*center(mobile, "renik"))
+    assert mobile.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "renik"
     assert mobile.evaluate("__game.scene") == "title"
 
     browser.close()
-    print("Character selection passed: click, persistence, change-before-start, selected player sheet, idle/walk rendering, mobile tap")
+    print("Character selection passed: click, persistence, change-before-start, selected player sheet, idle/walk rendering, DJ Renik, mobile tap")

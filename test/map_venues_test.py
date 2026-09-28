@@ -30,7 +30,7 @@ if (M['x1'] - M['x0'], M['y1'] - M['y0']) != (840, 540): fails.append(f'meadow i
 if solid[M['y0']:M['y1'], M['x0']:M['x1']].any(): fails.append('meadow interior has solid pixels')
 check('meadow', (M['x0'] + M['x1']) / 2, (M['y0'] + M['y1']) / 2, (1321, 888), 450)
 npc = {n['id']: n for n in items['npcs']}
-for i in ('michal', 'kuba', 'mateusz', 'patryk', 'marcin', 'damian'):
+for i in ('michal', 'kuba', 'patryk', 'marcin', 'damian'):
     if i not in npc: fails.append(f'missing npc {i}'); continue
     check(i, npc[i]['x'], npc[i]['y'])
 check('marcin@bus', npc['marcin']['x'], npc['marcin']['y'], (1106, 4251), 20)
@@ -48,8 +48,7 @@ trash = {t['id']: t for t in items.get('trash', [])}
 for k in ('cemetery', 'southshop'):
     if k not in trash: fails.append(f'missing trash {k}'); continue
     check('trash ' + k, trash[k]['x'], trash[k]['y'])
-if 'cemetery' in trash and 'mateusz' in npc and math.hypot(npc['mateusz']['x'] - trash['cemetery']['x'], npc['mateusz']['y'] - trash['cemetery']['y']) < 60:
-    fails.append('mateusz stands on the cemetery trash')
+if 'mateusz' in npc: fails.append('mateusz (trash-collector NPC) should not be on the map; trash bags are plain pickups')
 spots = {b['spot']: b for b in items['boards']}
 want = [s['spot'] for s in m['shrines']] + ['jazz']
 if len(m['shrines']) < 5: fails.append(f'only {len(m["shrines"])} shrines exported')

@@ -5,7 +5,7 @@
 (() => {
   const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35;
   // Keep domestic birds out of the forest; wild animals are selected by terrain.
-  const CHICKENS = 12, DOGS = 7, BOARS = 4, MICE = 10, HARES = 6, PIGS = 5, BUTTERFLIES = 8, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
+  const CHICKENS = 12, DOGS = 7, BOARS = 4, MICE = 10, HARES = 6, PIGS = 5, BUTTERFLIES = 8, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, TRACTORS = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
   // docs/img/critters.png rows (64px cells, drawn facing right): hen, stray, bird, stork, fox.
   // `px` = tallest sprite in that row in sheet pixels (critters.json h), `h` = its on-screen height in map px.
   const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 }, boar: { row: 5, px: 44, h: 21 }, mouse: { row: 6, px: 18, h: 9 }, hare: { row: 7, px: 28, h: 15 }, pig: { row: 8, px: 42, h: 18 } };
@@ -17,7 +17,7 @@
     const { HOOKS, P, MAP, ITEMS, ctx } = A;
     const Q = () => A.Q;
     const PL = A.LANG === 'pl';
-    const state = { q: null, cars: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, critters: null };
+    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, critters: null };
     A.load('img/car_red.png').then(image => { state.carImage = image; }, () => {});
     A.load('img/critters.png').then(image => { state.critters = image; }, () => {});
     const text = PL ? {
@@ -125,6 +125,17 @@
       if (!second) second = randomSite(cars, 140);
       second.kind = 'car'; cars.push(second);
       return cars;
+    }
+
+    function makeTractors() {
+      const pool = reachableSites().filter(s => A.terrainAt(s.x, s.y) === 'field' && standable(s.x, s.y, [], true));
+      const out = [];
+      for (const s of pool.sort(() => Math.random() - .5)) {
+        if (out.some(t => distance(t, s) < 280) || Math.hypot(P.x - s.x, P.y - s.y) < 180) continue;
+        out.push({ kind: 'tractor', x: s.x, y: s.y, homeX: s.x, homeY: s.y, tx: s.x, ty: s.y, dir: 'right', step: Math.random() * 4, wait: 0 });
+        if (out.length >= TRACTORS) break;
+      }
+      return out;
     }
 
     function newAnimal(kind, extra, site) {
@@ -241,6 +252,7 @@
         state.cars = chooseCars();
         w.cars = state.cars.map(c => ({ x: c.x, y: c.y }));
       }
+      state.tractors = makeTractors();
       state.animals = makeAnimals();
       state.ride = Math.max(0, Math.min(RIDE_SECONDS, Number(w.rideRemaining) || 0));
       state.car = Number.isInteger(w.rideCar) ? w.rideCar : -1;
@@ -346,6 +358,29 @@
       o.z = 5 + Math.sin(A.time * 8 + o.homeX) * 3; o.step += dt * 8; o.moving = .2;
     }
 
+    function chooseTractorTarget(t) {
+      for (let i = 0; i < 24; i++) {
+        const a = Math.random() * Math.PI * 2, d = 100 + Math.random() * 260;
+        const x = t.homeX + Math.cos(a) * d, y = t.homeY + Math.sin(a) * d;
+        if (A.terrainAt(x, y) === 'field' && standable(x, y, state.cars.concat(state.tractors.filter(v => v !== t)), true)) { t.tx = x; t.ty = y; return; }
+      }
+      t.tx = t.homeX; t.ty = t.homeY;
+    }
+
+    function updateTractor(t, dt) {
+      if (Math.hypot(P.x - t.x, P.y - t.y) < 150) {
+        const away = Math.atan2(t.y - P.y, t.x - P.x);
+        t.tx = t.homeX + Math.cos(away) * 180; t.ty = t.homeY + Math.sin(away) * 180;
+      } else if (Math.hypot(t.tx - t.x, t.ty - t.y) < 12 || (t.wait -= dt) <= 0) {
+        chooseTractorTarget(t); t.wait = 2 + Math.random() * 4;
+      }
+      const dx = t.tx - t.x, dy = t.ty - t.y, d = Math.hypot(dx, dy);
+      if (d < 2) return;
+      const speed = 22, nx = t.x + dx / d * speed * dt, ny = t.y + dy / d * speed * dt;
+      if (A.terrainAt(nx, ny) !== 'field' || !standable(nx, ny, state.cars.concat(state.tractors.filter(v => v !== t)))) { chooseTractorTarget(t); return; }
+      t.x = nx; t.y = ny; t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'); t.step += dt * 5;
+    }
+
     // sprite frames per kind (see CRIT / critters.json): walk cycle while moving, an idle pose otherwise
     function critterFrame(o) {
       const walk2 = Math.floor(o.step) % 2;
@@ -437,7 +472,16 @@
       px(sx, sy, s, -15, -4, 8, 6, '#24232b'); px(sx, sy, s, 9, -4, 8, 6, '#24232b');
       px(sx, sy, s, -19, -12, 5, 2, '#ee5050'); px(sx, sy, s, -8, -24, 10, 2, '#8a181e');
       px(sx, sy, s, 13, -15, 3, 2, '#6e171c'); px(sx, sy, s, -15, -8, 2, 2, '#e2664c');
-    }
+ }
+ function drawTractor(t, sx, sy, s) {
+ A.shadow(sx, sy, s * 1.2, 15);
+ ctx.save(); ctx.translate(sx, sy); if (t.dir === 'left') ctx.scale(-1, 1);
+ const bob = Math.sin(t.step * 2) * .5;
+ px(0, 0, s, -22, -9 + bob, 30, 12, '#2e6ea7'); px(0, 0, s, -2, -22 + bob, 15, 14, '#3b82bd');
+ px(0, 0, s, 1, -20 + bob, 10, 8, '#9ed2e8'); px(0, 0, s, -18, -1, 9, 8, '#171923'); px(0, 0, s, 12, -2, 7, 7, '#171923');
+ px(0, 0, s, -25, -16 + bob, 5, 3, '#f0a62f'); px(0, 0, s, -5, -28 + bob, 3, 8, '#1f2937');
+ ctx.restore();
+ }
 
     HOOKS.near.push(() => state.cars.map((car, i) => ({ x: car.x, y: car.y, r: 34, onInteract: () => buyRide(i) })));
     HOOKS.speed.push(() => state.ride > 0 ? RIDE_SPEED : 1);
@@ -448,11 +492,13 @@
         if (state.saveT >= 1 || state.ride === 0) { state.saveT = 0; saveRideState(); }
       }
       if (A.scene !== 'play') return;
+      for (const t of state.tractors) updateTractor(t, dt);
       for (const o of state.animals) updateAnimal(o, dt);
     });
     HOOKS.world.push((push, S, inView) => {
       syncState();
       for (const car of state.cars) if (inView(car.x, car.y)) push(car.y, () => drawCar(car, ...S(car.x, car.y), A.zoom));
+      for (const t of state.tractors) if (inView(t.x, t.y)) push(t.y, () => drawTractor(t, ...S(t.x, t.y), A.zoom));
       for (const o of state.animals) if (inView(o.x, o.y)) push(o.y, () => drawCritter(o, ...S(o.x, o.y), A.zoom));
     });
     HOOKS.minimap.push(dot => { for (const car of state.cars) dot(car.x, car.y, '#d8262c'); });
@@ -474,6 +520,7 @@
     /* Small public surface for deterministic browser tests and debugging. */
     window.__worldLife = {
       get cars() { return state.cars; },
+      get tractors() { return state.tractors; },
       get animals() { return state.animals; },
       get rideSeconds() { return state.ride; },
       balance: appleBalance,

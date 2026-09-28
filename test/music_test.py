@@ -22,10 +22,16 @@ with sync_playwright() as p:
     if pg.locator("#player-name-input").count():
         pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
     pg.wait_for_function("__game.scene === 'play'")
+    # Randomized spawns can land in the forest's intentionally quiet track.
+    # Start this tempo contract on ordinary grass so the village-track timing
+    # assertions are deterministic; forest routing is checked separately.
+    pg.evaluate("__game.P.x = 2651; __game.P.y = 5421")
     time.sleep(.6)
     st = pg.evaluate("[MUSIC.state, MUSIC.current, MUSIC.muted]")
+    start_zone = pg.evaluate("__game.terrainAt(__game.P.x, __game.P.y)")
     print("after start", st)
-    assert st[0] == 'running' and st[1] in ('krakowiak', 'mazurka') and not st[2], st
+    allowed_start = ('pastoralka',) if start_zone == 'forest' else ('krakowiak', 'mazurka')
+    assert st[0] == 'running' and st[1] in allowed_start and not st[2], (st, start_zone)
 
     # outdoor tempo contract: slower acceleration, a 0.2x floor, and no fast asymmetric catch-up
     tempo = pg.evaluate("({ ...MUSIC.TEMPO })")
@@ -54,7 +60,7 @@ with sync_playwright() as p:
         pg.evaluate("window.__advanceMusicClock(1000)"); time.sleep(.08)
     idle_track = pg.evaluate("MUSIC.current")
     print("long-idle track", idle_track)
-    assert idle_track in ('krakowiak', 'mazurka'), idle_track
+    assert idle_track in ('krakowiak', 'mazurka', 'pastoralka'), idle_track
 
     # touching Frodo barks
     pg.evaluate("(() => { const g = __game; g.P.x = g.FRODO.x; g.P.y = g.FRODO.y; })()"); time.sleep(.3)
@@ -66,7 +72,7 @@ with sync_playwright() as p:
     pg.evaluate(f"__game.P.x = {cem['x']}; __game.P.y = {cem['y']} + 60"); time.sleep(.8)
     print("cemetery", pg.evaluate("MUSIC.current")); assert pg.evaluate("MUSIC.current") == 'nokturn'
     pg.evaluate(f"__game.P.x = {cem['x']} + 600"); time.sleep(.8)
-    assert pg.evaluate("MUSIC.current") in ('krakowiak', 'mazurka'), pg.evaluate("MUSIC.current")
+    assert pg.evaluate("MUSIC.current") in ('krakowiak', 'mazurka', 'pastoralka'), pg.evaluate("MUSIC.current")
 
     # church -> choral
     pg.evaluate("__game.enterChurch()"); time.sleep(1.2)

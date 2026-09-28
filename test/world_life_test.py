@@ -33,6 +33,7 @@ with sync_playwright() as p:
       const river = g.MAP.pois.find(p => p.key === 'river');
       const storks = wl.animals.filter(a => a.kind === 'stork');
       const pigs = wl.animals.filter(a => a.kind === 'pig');
+      const tractorsField = wl.tractors.length === 2 && wl.tractors.every(t => g.terrainAt(t.x, t.y) === 'field' && !g.blocked(t.x, t.y));
       const buildings = (g.MAP.objects || []).filter(o => o.w >= 40 && o.h >= 30 && o.w <= 200);
       const riverOnly = storks.length === 3 && storks.every(a => river && Math.hypot(a.x - river.x, a.y - river.y) < 900);
       const pigsByBuildings = pigs.length === 5 && pigs.every(a => buildings.some(o => Math.hypot(a.x - (o.x + o.w / 2), a.y - o.base) < 180));
@@ -50,9 +51,9 @@ with sync_playwright() as p:
       wl.buyRide(0);
       const purchased = wl.rideSeconds === 15 && g.Q.worldLife.spentApples === 10 &&
         wl.balance() === 0 && g.Q.apples.length === 10;
-      return {allValid, apart, reset, purchased, riverOnly, pigsByBuildings};
+      return {allValid, apart, reset, purchased, riverOnly, pigsByBuildings, tractorsField};
     })()""")
-    assert facts == {"allValid": True, "apart": True, "reset": True, "purchased": True, "riverOnly": True, "pigsByBuildings": True}, facts
+    assert facts == {"allValid": True, "apart": True, "reset": True, "purchased": True, "riverOnly": True, "pigsByBuildings": True, "tractorsField": True}, facts
     page.reload()
     page.wait_for_function("window.ARK && window.__game", timeout=30000)
     page.add_script_tag(url=URL.rsplit("/", 1)[0] + "/js/world-life.js")

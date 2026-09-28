@@ -28,8 +28,8 @@
   const DEBUG = params.get('debug') === '1';
   const SAVE_KEY = 'arek-chlopkow-save-v1';
   const CHARACTER_KEY = 'arek-chlopkow-character-v1';
-  const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10;
-  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka'];
+  const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 12;
+  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik'];
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
   if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) selectedCharacter = 'arek';
 
@@ -38,7 +38,7 @@
     pl: {
       title: 'CHŁOPKÓW BOLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA' },
+      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -47,6 +47,15 @@
       edytkaAfter: ['Pozdrów Frodo. I podrap go za uchem ode mnie.'],
       edytkaBack: 'FRODO UCIEKŁ DO AREKA!',
       edytkaQuest: 'Przyprowadź Frodo do Edytki',
+      wesoly0: ['Ho ho... spokojnie, to nie kolęda, tylko mój marsz przez las.', 'Widziałeś gdzieś renifera? Albo chociaż żabę w czapce?', 'Idę dalej. Jak się zgubię, będę udawał, że to plan.'],
+      renik: [
+        ['Siema! DJ Renik, do usług. Dziś na boisku gram tylko disco polo.', 'Techno? Techno jest dla ludzi, którzy nie umieją tańczyć w parach.'],
+        ['Wiesz, co jest najpiękniejsze w disco polo? Refren. Słyszysz raz i nosisz go w głowie do niedzieli.', 'A potem śpiewa go cała wieś. Nawet ksiądz. Po cichu.'],
+        ['Mam na pendrive 4000 kawałków. Wszystkie o miłości, oczach i wakacjach.', 'Każdy inny. Tak mi się przynajmniej wydaje.'],
+        ['Syntezator, stopa na raz, klaskanie na dwa. Tyle potrzeba do szczęścia.', 'Reszta to tylko dodatki. Jak sól do ogórków.'],
+        ['Kiedyś grałem na weselu do piątej rano. Wujek Zdzisiek tańczył z krzesłem.', 'Krzesło do dziś go wspomina.'],
+        ['Jak zrobię remizę pod gwiazdami, to będziesz pierwszy na parkiecie. Obiecuję.', 'Tylko załóż coś błyszczącego. Disco polo lubi cekiny.'],
+      ],
       church: ['Kościół pw. Narodzenia NMP. Dzwony biją w południe. Arek, jak zwykle, spóźniony.'],
       rectory: ['Plebania. Ksiądz macha z okna. Arek udaje, że poprawia okulary.'],
       cemetery: ['Cmentarz parafialny. Arek zdejmuje okulary. Na chwilę.'],
@@ -70,7 +79,7 @@
       grandpa0: ['Czego tu szukasz, młody? Wiatrak nie jest na sprzedaż.', 'Chcesz czegoś więcej niż spacer? Pomóż najpierw Kasi, Damianowi i Marcinowi.'],
       grandpa1: n => [`Pomogłeś ${n} z 3 przyjaciół. Wracaj, jak skończysz.`],
       grandpa2: ['Pomogłeś całej ekipie. Dobra robota, Arek.', 'Masz tu kluczyki do mojego Ursusa. Tylko w niedzielę i tylko do wzgórza.', 'I nie mów babci Irenki.'],
-      apple: 'JABŁKO', mushroom: 'PIECZARKA', cap: 'CZAPKA DAMIANA', gotCap: ['Czapka Damiana! Trochę zakurzona, ale cała.'],
+      apple: 'JABŁKO', mushroom: 'PIECZARKA', trash: 'WOREK ŚMIECI', cap: 'CZAPKA DAMIANA', gotCap: ['Czapka Damiana! Trochę zakurzona, ale cała.'],
       quests: ['10 pieczarek dla Kasi', 'Czapka Damiana', 'Oranżada dla Marcina', 'Pogadaj z dziadkiem Zdziśkiem'],
       churchIn: ['Wnętrze kościoła. Chłodno, cicho, pachnie woskiem i kwiatami.'],
       altar: ['Ołtarz w białym obrusie z koronką. Arek niczego nie dotyka. Tym razem.'],
@@ -95,7 +104,7 @@
     en: {
       title: 'CHŁOPKÓW BOLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA' },
+      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'MICHAŁ', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -104,6 +113,15 @@
       edytkaAfter: ['Say hi to Frodo. And scratch him behind the ear from me.'],
       edytkaBack: 'FRODO RAN BACK TO AREK!',
       edytkaQuest: 'Bring Frodo to Edytka',
+      wesoly0: ['Ho ho... easy, this is not a carol, just my walk through the woods.', 'Have you seen a reindeer? Or at least a frog in a hat?', 'I am moving on. If I get lost, I will call it a plan.'],
+      renik: [
+        ['Hey! DJ Renik at your service. Tonight at the pitch it is disco polo only.', 'Techno? Techno is for people who cannot dance in pairs.'],
+        ['The best thing about disco polo? The chorus. Hear it once and it stays in your head till Sunday.', 'Then the whole village sings it. Even the priest. Quietly.'],
+        ['I have 4000 tracks on my USB stick. All about love, eyes and holidays.', 'Every one is different. At least I think so.'],
+        ['A synth, a kick on one, a clap on two. That is all you need for happiness.', 'The rest is extras. Like salt on cucumbers.'],
+        ['Once I played a wedding till five in the morning. Uncle Zdzisiek danced with a chair.', 'The chair still remembers him.'],
+        ['When I throw a party under the stars, you are first on the dance floor. Promise.', 'Just wear something shiny. Disco polo loves sequins.'],
+      ],
       church: ['Church of the Nativity of the Virgin Mary. Bells at noon. Arek is late, as usual.'],
       rectory: ['The rectory. The priest waves from a window. Arek pretends to fix his sunglasses.'],
       cemetery: ['The parish cemetery. Arek takes his sunglasses off. For a moment.'],
@@ -127,7 +145,7 @@
       grandpa0: ["What are you after, young man? The windmill isn't for sale.", 'Want to prove yourself? Help Kasia, Damian and Marcin first.'],
       grandpa1: n => [`You've helped ${n} of 3 friends. Come back when you're done.`],
       grandpa2: ['You helped the whole crew. Good job, Arek.', 'Here are the keys to my Ursus. Sundays only, and only to the hill.', "And don't tell Granny Irenka."],
-      apple: 'APPLE', mushroom: 'MUSHROOM', cap: "DAMIAN'S CAP", gotCap: ["Damian's cap! A bit dusty, but in one piece."],
+      apple: 'APPLE', mushroom: 'MUSHROOM', trash: 'TRASH BAG', cap: "DAMIAN'S CAP", gotCap: ["Damian's cap! A bit dusty, but in one piece."],
       quests: ['10 mushrooms for Kasia', "Damian's cap", 'Orangeade for Marcin', 'Talk to Grandpa Zdzisiek'],
       churchIn: ['Inside the church. Cool, quiet, it smells of wax and flowers.'],
       altar: ['The altar in its white lace cloth. Arek touches nothing. This time.'],
@@ -151,7 +169,7 @@
     },
   }[LANG];
   const SPOT_R = { church: 90, rectory: 60, cemetery: 90, windmill: 60, shop: 60, bus: 40, river: 70 };
-  const NPC_IDX = { kasia: 0, marcin: 1, damian: 2, grandpa: 3, halina: 4, kuba: 5, michal: 6, mateusz: 7, patryk: 8, edytka: 11 };   // 9 zbyszek, 10 wesoly_swiat (gen/build_npcs.py ORDER)
+  const NPC_IDX = { kasia: 0, marcin: 1, damian: 2, grandpa: 3, halina: 4, kuba: 5, michal: 6, mateusz: 7, patryk: 8, wesoly_swiat: 10, edytka: 11, renik: 12 };   // 9 zbyszek (gen/build_npcs.py ORDER)
   // Walking speed follows the ground everywhere outdoors: asphalt is quickest, crops and the forest floor slow Arek down.
   // docs/img/map_terrain.png (1/4 scale, from osm/render_map.py): 0 grass, 60 paved, 100 dirt road, 160 field, 220 forest.
   const TERRAIN_CLASS = { 0: 'grass', 60: 'road', 100: 'track', 160: 'field', 220: 'forest' };
@@ -179,18 +197,23 @@
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
-  let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, ITEMS, SPLASH = null, MEMORY_ART = [];
+  let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, SPLASH = null, MEMORY_ART = [];
   let ROOM = null, OUT = null, trans = null, shopGame = null;   // OUT: the village to return to
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
-  const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0, idleAnim: 0, action: 'idle', wander: 0, wanderX: 0, wanderY: 0, wanderWait: 4 };
+  const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0, idleAnim: 0, action: 'idle', wander: 0, wanderX: 0, wanderY: 0, wanderWait: 4, returning: false, returningT: 0 };
   const BALES = [];
-  const JUMP_T = .48, JUMP_H = 15, DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  const JUMP_T = .48, JUMP_H = 15, DIRV = { up: [0, -1], up_right: [.707, -.707], right: [1, 0], down_right: [.707, .707], down: [0, 1], down_left: [-.707, .707], left: [-1, 0], up_left: [-.707, -.707] };
+  const DIR8 = ['right', 'down_right', 'down', 'down_left', 'left', 'up_left', 'up', 'up_right'];
+  const DIR4 = { down: 'down', down_right: 'right', right: 'right', up_right: 'up', up: 'up', up_left: 'left', left: 'left', down_left: 'down' };
+  const direction8 = (x, y) => DIR8[(Math.round(Math.atan2(y, x) / (Math.PI / 4)) + 8) % 8];
+  const cardinalDir = d => DIR4[d] || d || 'down';
+  const CLOUDS = Array.from({ length: 7 }, (_, i) => ({ x: (i * 733 + 260) % 4675, y: 220 + (i * 907) % 5800, speed: 3 + (i % 3) * 1.4, scale: .75 + (i % 4) * .12, alpha: .07 + (i % 3) * .018 }));
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
-  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], cap: false, orange: false, playTime: 0 });
+  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], trashSpots: [], trash: [], cap: false, orange: false, playTime: 0 });
   function sanitizePlayerName(value) {
     return Array.from(String(value || '').normalize('NFC').replace(/[^\p{L}\p{N} _'-]/gu, '').replace(/\s+/g, ' ').trim()).slice(0, 20).join('');
   }
@@ -226,6 +249,7 @@
   }
   const appleCount = () => Q.apples.length;
   const mushroomCount = () => Array.isArray(Q.mushrooms) ? Q.mushrooms.length : 0;
+  const trashCount = () => Array.isArray(Q.trash) ? Q.trash.length : 0;
   const questsDone = () => (Q.kasia === 2) + (Q.damian === 2) + (Q.marcin === 2);
 
   // Keep quest roles in their useful parts of the map while varying the exact spot.
@@ -308,6 +332,34 @@
     Q.mushrooms = Array.isArray(Q.mushrooms) ? Q.mushrooms.filter(i => Number.isInteger(i) && i >= 0 && i < MUSHROOMS_TOTAL).filter((i, n, a) => a.indexOf(i) === n) : [];
     return false;
   }
+  // Trash bags: a plain collectible like apples and mushrooms. The fixed litter spots from items.json
+  // (by the cemetery and the southern shop) come first, the rest are scattered by roads and on grass.
+  function ensureTrash() {
+    const ok = Array.isArray(Q.trashSpots) && Q.trashSpots.length === TRASH_TOTAL && Q.trashSpots.every(p => p && Number.isFinite(p.x) && Number.isFinite(p.y));
+    if (ok) {
+      Q.trash = Array.isArray(Q.trash) ? Q.trash.filter(i => Number.isInteger(i) && i >= 0 && i < TRASH_TOTAL).filter((i, n, a) => a.indexOf(i) === n) : [];
+      return false;
+    }
+    buildReachableMask();
+    const spots = (ITEMS.trash || []).map(t => ({ x: t.x, y: t.y })).slice(0, TRASH_TOTAL);
+    const near = (x, y, r) => spots.some(p => Math.hypot(x - p.x, y - p.y) < r)
+      || (Q.mushroomSpots || []).some(p => Math.hypot(x - p.x, y - p.y) < 40)
+      || (ITEMS.apples || []).some(a => Math.hypot(x - a.x, y - a.y) < 36)
+      || (ITEMS.npcs || []).some(n => Math.hypot(x - n.x, y - n.y) < 48);
+    for (const strict of [true, false]) {
+      for (let tries = 0; tries < 60000 && spots.length < TRASH_TOTAL; tries++) {
+        const i = (Math.random() * reachableMask.length) | 0;
+        if (!reachableMask[i]) continue;
+        const x = (i % reachableW) * reachableStep + reachableStep / 2, y = Math.floor(i / reachableW) * reachableStep + reachableStep / 2;
+        if (!npcWalkable(x, y) || !['grass', 'road', 'track'].includes(terrainAt(x, y))) continue;
+        if (Math.hypot(x - P.x, y - P.y) < 120 || near(x, y, strict ? 180 : 60)) continue;
+        spots.push({ x, y });
+      }
+    }
+    Q.trashSpots = spots.slice(0, TRASH_TOTAL);
+    Q.trash = [];
+    return true;
+  }
   function npcPositionAllowed(x, y, occupied, requireReachable = true) {
     if (!npcWalkable(x, y)) return false;
     const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep);
@@ -339,7 +391,7 @@
     return { x: npc.x, y: npc.y };
   }
   // These roles live at a fixed spot of the level (items.json) and are never shuffled; old saves are pulled back to it.
-  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'soltys']);
+  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys']);
   function randomizeNpcPositions() {
     if (!MAP || !ITEMS || !SOLID) return;
     buildReachableMask();
@@ -354,6 +406,7 @@
     kasia: { r: 42, speed: 20 }, marcin: { r: 60, speed: 26 }, damian: { r: 48, speed: 22 },
     grandpa: { r: 34, speed: 16 }, halina: { r: 42, speed: 18 }, edytka: { r: 54, speed: 24 },
     kuba: { r: 36, speed: 18 }, michal: { r: 38, speed: 20 }, mateusz: { r: 44, speed: 20 }, patryk: { r: 44, speed: 20 },
+    wesoly_swiat: { r: 72, speed: 20 }, renik: { r: 56, speed: 24 },
   };
   const wanderState = {};
   function updateWanderers(dt) {
@@ -411,9 +464,11 @@
     const W = cvs.width, H = cvs.height, U = Math.min(W, H * 1.6) / 100;
     const scale = W / Math.max(1, innerWidth);
     const size = Math.max(U * 7, 48 * scale), gap = U * 1.5;
-    const gridW = size * 2 + gap, gridX = (W - gridW) / 2, gridY = H * .45;
-    return PLAYABLE_CHARACTERS.map((id, i) => ({
-      id, x: gridX + (i % 2) * (size + gap), y: gridY + Math.floor(i / 2) * (size + gap), w: size, h: size,
+    const n = PLAYABLE_CHARACTERS.length, rows = Math.ceil(n / 2);
+    // keep every row above the bottom prompt strip (H - 9.5U) on short landscape screens
+    const gridW = size * 2 + gap, gridX = (W - gridW) / 2, gridY = Math.min(H * .45, H - U * 10.3 - rows * size - (rows - 1) * gap);
+    return PLAYABLE_CHARACTERS.map((id, i) => ({   // 2 columns; a lone last button is centred on its own row
+      id, x: i === n - 1 && n % 2 ? (W - size) / 2 : gridX + (i % 2) * (size + gap), y: gridY + Math.floor(i / 2) * (size + gap), w: size, h: size,
     }));
   }
   function selectCharacter(char) {
@@ -429,7 +484,7 @@
       Q = freshQ(); Q.playerName = sanitizePlayerName(playerName);
       const debugX = params.has('x') && params.has('y') ? Number(params.get('x')) : NaN, debugY = params.has('x') && params.has('y') ? Number(params.get('y')) : NaN;
       const spawn = Number.isFinite(debugX) && Number.isFinite(debugY) ? { x: debugX, y: debugY } : samplePlayerSpawn();
-      P.x = spawn.x; P.y = spawn.y; randomizeNpcPositions(); ensureMushrooms(); unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; hasSave = true; save();
+      P.x = spawn.x; P.y = spawn.y; randomizeNpcPositions(); ensureMushrooms(); ensureTrash(); unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; hasSave = true; save();
     }
     if (!fresh && !Q.playerName) { requestPlayerName(false); return; }
     scene = 'play';
@@ -652,6 +707,11 @@
       else if (n >= 3) { say(id, T.grandpa2, () => { Q.grandpa = 2; save(); celebrate(); memoryIndex = 0; scene = 'end'; }); }
       else if (Q.grandpa === 0) { Q.grandpa = 1; say(id, T.grandpa0); }
       else say(id, T.grandpa1(n));
+    } else if (id === 'wesoly_swiat') {
+      say(id, T.wesoly0);
+    } else if (id === 'renik') {
+      Q.renikTalks = (Q.renikTalks || 0) + 1;
+      say(id, T.renik[(Q.renikTalks - 1) % T.renik.length]);
     } else if (id === 'edytka') {
       talkEdytka();
     } else HOOKS.npcTalk.some(f => f(id));
@@ -683,7 +743,7 @@
     if (ROOM) { FRODO.visit = null; return false; }
     v.t += dt;
     if (v.t >= EDYTKA_STAY) {
-      FRODO.visit = null; FRODO.wander = 0; FRODO.wanderWait = 6;
+      FRODO.visit = null; FRODO.wander = 0; FRODO.wanderWait = 6; FRODO.returning = true; FRODO.returningT = 0;
       if (Q.edytkaN >= EDYTKA_TIMES) { Q.edytka = 2; say('edytka', T.edytkaDone, () => celebrate()); }
       else popToast(T.edytkaBack);
       save(); return false;
@@ -811,6 +871,7 @@
     const [dx, dy] = DIRV[P.dir] || DIRV.down;
     const tx = P.x - dx * 42, ty = P.y - dy * 42;
     const followDist = Math.hypot(tx - FRODO.x, ty - FRODO.y);
+    if (FRODO.returning) { FRODO.returningT += dt; if (followDist < 42) { FRODO.returning = false; FRODO.returningT = 0; } }
     if (followDist > 75) FRODO.wander = 0;
     if (!FRODO.wander && followDist < 68 && (FRODO.wanderWait -= dt) <= 0) {
       for (let i = 0; i < 8; i++) {
@@ -847,10 +908,14 @@
       if (Math.abs(vy) > .01 && !blocked(FRODO.x, FRODO.y + vy)) { FRODO.y += vy; moved = true; }
     }
     if (moved) { FRODO.step += dt * (FRODO.wander ? 4 : 9); FRODO.stuck = 0; FRODO.idleAnim = 0; FRODO.action = 'idle'; }
-    else if ((FRODO.stuck += dt) > (dist > 100 ? 1.0 : 2.0)) {
-      // far from Arek and stuck behind a fence or wall (e.g. running back from Edytka): catch up next to him
-      if (dist > 100) placeFrodoNearArek();
-      FRODO.wander = 0; FRODO.wanderWait = .5; FRODO.stuck = 0;
+    else if ((FRODO.stuck += dt) > (FRODO.returning ? 2.5 : dist > 100 ? 1.0 : 2.0)) {
+      // After Edytka's visit Frodo must visibly travel back. Give him a short
+      // side-step around the obstacle instead of teleporting immediately.
+      if (FRODO.returning && FRODO.returningT < 10) {
+        const side = Math.atan2(ty - FRODO.y, tx - FRODO.x) + (Math.random() < .5 ? 1 : -1) * Math.PI / 2;
+        FRODO.wander = .8; FRODO.wanderX = FRODO.x + Math.cos(side) * 55; FRODO.wanderY = FRODO.y + Math.sin(side) * 55;
+      } else if (dist > 100) { placeFrodoNearArek(); }
+      FRODO.wander = FRODO.wander || 0; FRODO.wanderWait = .5; FRODO.stuck = 0;
     }
   }
   function update(dt) {
@@ -884,7 +949,7 @@
     P.moving = m > .01;
     if (P.moving) {
       ix /= Math.max(1, m); iy /= Math.max(1, m);
-      P.dir = Math.abs(ix) > Math.abs(iy) * .9 ? (ix < 0 ? 'left' : 'right') : (iy < 0 ? 'up' : 'down');
+      P.dir = direction8(ix, iy);
       const clickMove = !manual && !joy.active && clickTarget.active;
       const run = clickMove ? 1 : keys.has('ShiftLeft') || keys.has('ShiftRight') || (joy.active && m > .95) ? 1.8 : 1;
       const terrain = HOOKS.speed.reduce((k, f) => k * f(P.x, P.y), 1) * (TERRAIN_SPEED[terrainAt(P.x, P.y)] || 1);
@@ -917,6 +982,12 @@
       popToast(`+1 ${T.mushroom}  ${mushroomCount()}/${MUSHROOMS_NEEDED}`);
       for (let k = 0; k < 14; k++) fx.push({ x: m.x, y: m.y - 6, vx: (Math.random() - .5) * 90, vy: -Math.random() * 120, t: 0, c: k % 2 ? '#fff0ba' : '#8bdc66' });
     });
+    (Q.trashSpots || []).forEach((t, i) => {
+      if ((Q.trash || []).includes(i) || Math.hypot(P.x - t.x, P.y - t.y) > 16) return;
+      Q.trash.push(i); save();
+      popToast(`+1 ${T.trash}  ${trashCount()}/${TRASH_TOTAL}`);
+      for (let k = 0; k < 14; k++) fx.push({ x: t.x, y: t.y - 6, vx: (Math.random() - .5) * 90, vy: -Math.random() * 120, t: 0, c: k % 2 ? '#c8cee0' : '#2b2f3a' });
+    });
     if (!Q.cap && Math.hypot(P.x - ITEMS.cap.x, P.y - ITEMS.cap.y) < 16) {
       Q.cap = true; save(); popToast('+ ' + T.cap); say('arek', T.gotCap);
       for (let k = 0; k < 20; k++) fx.push({ x: ITEMS.cap.x, y: ITEMS.cap.y - 6, vx: (Math.random() - .5) * 110, vy: -Math.random() * 140, t: 0, c: '#ffd21f' });
@@ -943,12 +1014,15 @@
     const m = inCemetery ? 70 : 25;
     return (inCemetery = Math.abs(P.x - c.x) < CEM_HALF[0] + m && Math.abs(P.y - c.y) < CEM_HALF[1] + m);
   }
+  function spriteAnim(meta, prefix, dir) {
+    return meta.anims[prefix + dir] || meta.anims[prefix + cardinalDir(dir)] || meta.anims[prefix + 'down'];
+  }
   function drawArek(sx, sy, s) {
     const h = CHAR_H * s, zk = 1 - P.z / JUMP_H * .45;
     ctx.globalAlpha = zk; shadow(sx, sy, s * zk); ctx.globalAlpha = 1;
     sy -= P.z * s;
     const { meta } = SPR, sheet = (inCemetery && selectedCharacter === 'arek' && SPR.bare) || SPR.sheet;   // no-glasses sheet exists only for Arek
-    const anim = meta.anims[(P.moving || P.air ? 'walk_' : 'idle_') + P.dir] || meta.anims['walk_' + P.dir];
+    const anim = spriteAnim(meta, P.moving || P.air ? 'walk_' : 'idle_', P.dir) || spriteAnim(meta, 'walk_', P.dir);
     const f = anim.frames[P.air ? 2 % anim.frames.length : P.moving ? Math.floor(P.step) % anim.frames.length : 0];
     const scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
     ctx.save(); ctx.translate(sx, sy + meta.foot * scale);
@@ -960,7 +1034,7 @@
     ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
   function drawArekPose(sx, sy, s, dir, step, alpha = 1) {   // used for the race ghost
-    const { meta, sheet } = SPR, anim = meta.anims['walk_' + dir], f = anim.frames[Math.floor(step) % anim.frames.length];
+    const { meta, sheet } = SPR, anim = spriteAnim(meta, 'walk_', dir), f = anim.frames[Math.floor(step) % anim.frames.length];
     const h = CHAR_H * s, scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
     ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
     ctx.imageSmoothingEnabled = true; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
@@ -973,11 +1047,29 @@
     ctx.fillStyle = '#7b4b24'; ctx.fillRect(-4 * s, -5 * s, 2 * s, 10 * s); ctx.fillRect(7 * s, -5 * s, 2 * s, 10 * s);
     ctx.restore();
   }
+  function drawClouds(ox, oy, zoom, sx0, sy0, sw, sh) {
+    // Visual-only weather: drifting translucent cloud shadows and soft puffs.
+    // They never touch SOLID or gameplay state, and seven bounded sprites keep
+    // the cost low on mobile.
+    ctx.save();
+    for (const cloud of CLOUDS) {
+      const x = (cloud.x + time * cloud.speed) % MAP.w, y = cloud.y;
+      if (x < sx0 - 150 || x > sx0 + sw + 150 || y < sy0 - 90 || y > sy0 + sh + 90) continue;
+      const sx = ox + x * zoom, sy = oy + y * zoom, w = 72 * cloud.scale * zoom, h = 22 * cloud.scale * zoom;
+      ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(90,100,116,${cloud.alpha})`;
+      ctx.beginPath(); ctx.ellipse(sx, sy + 8 * zoom, w, h, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(255,255,255,${cloud.alpha * .34})`;
+      for (const [dx, dy, r] of [[-.55, 0, .6], [-.18, -.25, .72], [.22, -.12, .8], [.58, .05, .52]]) {
+        ctx.beginPath(); ctx.ellipse(sx + dx * w, sy + dy * h, r * w * .62, r * h, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
   function drawFrodo(sx, sy, s) {
     shadow(sx, sy, s * .78, 6);
     const row = { down: 0, up: 1, right: 2, left: 3 }[FRODO.dir] || 0;
     const col = FRODO.moving ? Math.floor(FRODO.step) % 2 : 0;
-    const size = 27 * s, top = sy - size * 29 / 32;
+    const lickScale = FRODO.action === 'lick' ? .8 : 1, size = 27 * s * lickScale, top = sy - size * 29 / 32;
     ctx.imageSmoothingEnabled = false;
     const IDLE_POSE = { sit: [0], pant: [1, 2], scratch: [3, 0], sniff: [4], lie: [5], lick: [6, 7, 8, 7, 8, 9] };
     const poses = FRODO_IDLE && !FRODO.moving && IDLE_POSE[FRODO.action];
@@ -988,7 +1080,7 @@
       return;
     }
     ctx.drawImage(DOGIMG, col * 32, row * 32, 32, 32, sx - size / 2, top, size, size);
-    if (FRODO.action === 'lick') { ctx.fillStyle = '#ef8b9b'; ctx.fillRect(sx + (FRODO.dir === 'left' ? -7 : 5) * s, sy - 10 * s, 2 * s, 4 * s); }
+    if (FRODO.action === 'lick') { ctx.fillStyle = '#ef8b9b'; ctx.fillRect(sx + (FRODO.dir === 'left' ? -7 : 5) * s * lickScale, sy - 10 * s * lickScale, 2 * s * lickScale, 4 * s * lickScale); }
     if (FRODO.action === 'scratch') {
       ctx.fillStyle = '#e6c38a';
       const side = FRODO.dir === 'left' ? -1 : 1, bob = Math.sin(FRODO.idleAnim * 18) * 2;
@@ -1043,6 +1135,17 @@
     const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s - b, w * s, h * s); };
     px(-1, -5, 2, 5, '#fffdf2'); px(-4, -7, 8, 3, '#fffdf2'); px(-3, -9, 6, 2, '#ffffff'); px(-2, -8, 1, 1, '#d9d3c3'); px(1, -8, 1, 1, '#d9d3c3');
     ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 3 * s, sy + 1 * s, 6 * s, 1.5 * s);
+  }
+  function drawTrashBag(sx, sy, s) {   // tied black bag, cell 2 of img/trash.png (32 px); pixel fallback until it loads
+    const b = Math.sin(time * 2.4 + sx * .07) * s * .35;
+    ctx.fillStyle = 'rgba(20,34,12,.35)'; ctx.fillRect(sx - 5 * s, sy + .5 * s, 10 * s, 1.5 * s);
+    if (TRASH_IMG) {
+      const d = 16 * s; ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(TRASH_IMG, 2 * 32, 0, 32, 32, sx - d / 2, sy - d + 2 * s - b, d, d);
+      return;
+    }
+    const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s - b, w * s, h * s); };
+    px(-5, -8, 10, 8, '#1c1f27'); px(-4, -9, 8, 1, '#1c1f27'); px(-1, -11, 2, 2, '#2b2f3a'); px(-3, -7, 2, 3, '#4a5061');
   }
   function drawCap(sx, sy, s) {
     const b = Math.sin(time * 3) * s;
@@ -1156,6 +1259,7 @@
     ctx.drawImage(GROUND, sx0, sy0, sw, sh, ox + sx0 * zoom, oy + sy0 * zoom, sw * zoom, sh * zoom);
     const S = (x, y) => [ox + x * zoom, oy + y * zoom];
     lastCam = { ox, oy, zoom, S, toWorld: (px, py) => [(px - ox) / zoom, (py - oy) / zoom] };
+    drawClouds(ox, oy, zoom, sx0, sy0, sw, sh);
     for (const d of dust) { const k = d.t / .5; ctx.fillStyle = `rgba(235,220,180,${.55 * (1 - k)})`; const s = (2 + k * 3) * zoom; ctx.fillRect(ox + (d.x - 2 - k * 4) * zoom, oy + (d.y - 2 - k * 3) * zoom, s, s); }
 
     // everything that stands on the ground, sorted by baseline
@@ -1166,6 +1270,7 @@
     else if (!ROOM) {
     ITEMS.apples.forEach((a, i) => { if (!Q.apples.includes(i) && inView(a.x, a.y)) draw.push({ base: a.y, fn: () => drawApple(...S(a.x, a.y), zoom) }); });
     (Q.mushroomSpots || []).forEach((m, i) => { if (!(Q.mushrooms || []).includes(i) && inView(m.x, m.y)) draw.push({ base: m.y, fn: () => drawMushroom(...S(m.x, m.y), zoom) }); });
+    (Q.trashSpots || []).forEach((t, i) => { if (!(Q.trash || []).includes(i) && inView(t.x, t.y)) draw.push({ base: t.y, fn: () => drawTrashBag(...S(t.x, t.y), zoom) }); });
     if (!Q.cap && inView(ITEMS.cap.x, ITEMS.cap.y)) draw.push({ base: ITEMS.cap.y, fn: () => drawCap(...S(ITEMS.cap.x, ITEMS.cap.y), zoom) });
     for (const b of BALES) if (inView(b.x, b.y)) draw.push({ base: b.y, fn: () => drawBale(b, ...S(b.x, b.y), zoom) });
     for (const n of ITEMS.npcs) if (inView(n.x, n.y)) draw.push({ base: n.y, fn: () => drawNpc(n, ...S(n.x, n.y), zoom) });
@@ -1200,7 +1305,7 @@
     }
     // HUD: apples + quest log
     if (scene === 'play' || scene === 'end') {
-      const qx = U * 2, qy = U * 2, qw = U * 34, lines = [];
+      const qx = U * 2, qy = U * 2, qw = U * 40, lines = [];
       if (Q.kasia) lines.push([`${T.quests[0]} (${Math.min(mushroomCount(), MUSHROOMS_NEEDED)}/${MUSHROOMS_NEEDED})`, Q.kasia === 2]);
       if (Q.damian) lines.push([T.quests[1], Q.damian === 2]);
       if (Q.marcin) lines.push([T.quests[2], Q.marcin === 2]);
@@ -1217,7 +1322,11 @@
       const mxh = qx + U * 13.8, myh = ay;
       ctx.fillStyle = '#fffdf2'; ctx.fillRect(mxh - U * .35, myh - U * 1.1, U * .7, U * 1.4); ctx.fillStyle = '#ffffff'; ctx.fillRect(mxh - U * 1.3, myh - U * 1.8, U * 2.6, U * .75);
       ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${mushroomCount()}/${MUSHROOMS_TOTAL}`, mxh + U * 2, myh);
-      ctx.fillStyle = '#ffd21f'; ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 7, ay);
+      const txh = qx + U * 24.6;   // trash-bag counter: small black bag icon
+      ctx.fillStyle = '#1c1f27'; ctx.fillRect(txh - U * 1, myh - U * 1.1, U * 2, U * 1.6); ctx.fillRect(txh - U * .3, myh - U * 1.6, U * .6, U * .5);
+      ctx.fillStyle = '#6a7082'; ctx.fillRect(txh - U * .7, myh - U * .8, U * .4, U * .6);
+      ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${trashCount()}/${TRASH_TOTAL}`, txh + U * 1.6, myh);
+      ctx.fillStyle = '#ffd21f'; ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 5.6, ay);
       ctx.font = `${U * 1.45}px Silkscreen`;
       lines.forEach(([txt, done], i) => {
         const ly = qy + U * (6.1 + i * 2.6);
@@ -1352,12 +1461,15 @@
     ]);
     const [g, o, c, terrainImg, npcs, dog, _font, _churchArt, memories] = loaded;
     MEMORY_ART = memories;
+    const [arek8, arek8meta] = await Promise.all([load('img/arek_sheet_8dir.png'), fetch('img/arek_sheet_8dir.json').then(r => r.json())]);
+    PLAYER_SHEETS.arek = { sheet: arek8, meta: arek8meta, sheetName: 'arek_sheet_8dir' };
     GROUND = g; OBJ = o; SPR = PLAYER_SHEETS[selectedCharacter] || PLAYER_SHEETS.arek; NPCIMG = npcs; DOGIMG = dog;
     load('img/frodo_idle.png').then(img => { FRODO_IDLE = img; }, () => { });   // optional idle poses (sit, lick...)
-    load('img/arek_sheet_noglasses.png').then(img => {
+    load('img/trash.png').then(img => { TRASH_IMG = img; }, () => { });   // trash bag pickup art (pixel fallback until loaded)
+    load('img/arek_sheet_8dir_noglasses.png').then(img => {
       PLAYER_SHEETS.arek.bare = img;
       if (selectedCharacter === 'arek') SPR = PLAYER_SHEETS.arek;
-    }, () => { });   // Arek without sunglasses (cemetery)
+    }, () => { });   // optional no-glasses variant with the same 8-direction layout
     {   // walking speed and mushroom placement use the same terrain classification
       const t = document.createElement('canvas'); t.width = terrainImg.width; t.height = terrainImg.height;
       const tx2 = t.getContext('2d', { willReadFrequently: true }); tx2.drawImage(terrainImg, 0, 0);
@@ -1374,7 +1486,8 @@
     P.x = MAP.spawn.x; P.y = MAP.spawn.y;
     hasSave = loadSave();
     buildReachableMask();
-    if (ensureMushrooms() && hasSave) save();
+    const newMush = ensureMushrooms(), newTrash = ensureTrash();   // old saves get trash bags on load
+    if ((newMush || newTrash) && hasSave) save();
     if (params.has('x') && params.has('y')) { P.x = +params.get('x'); P.y = +params.get('y'); }   // e.g. ?x=1243&y=901
     unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y;
     resize(); requestAnimationFrame(loop);
@@ -1390,7 +1503,10 @@
       load,
     };
     window.dispatchEvent(new Event('ark-ready'));
-    window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: { left: '← DUŃCY', right: 'WIELKIE KSIĘSTWO LITEWSKIE →' }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
+    window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
+      const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
+      return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: { left: '← DUŃCY', right: 'WIELKIE KSIĘSTWO LITEWSKIE →' }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();
