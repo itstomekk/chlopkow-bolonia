@@ -4,7 +4,9 @@
      krakowiak — 2/4, syncopated 16th-8th-16th "hop" rhythm, G major with a Góral raised-4th (C#) in part B  (village)
      mazurka   — 3/4, dotted first beat, accents on 2 and 3, C major                                         (title, village alt.)
      oberek    — fast 3/4 whirling eighths, um-pa-PA accompaniment, D major                                   (minigames)
-     pastoralka— slow 3/4 lullaby, soft organ-like pads, F major                                              (church, memories)
+     pastoralka— slow 3/4 lullaby, soft pads, F major                                    (village, after ~25 s of standing still)
+     choral    — sacred organ hymn in D Dorian, 4/4 half notes, a church bell on each section           (church interior)
+     nokturn   — Chopin-style nocturne in A minor, rolling left-hand arpeggios, ornamented melody  (cemetery, memory archive)
    Every pass is re-arranged: section order, a second fiddle in thirds, octave jumps, grace notes and drum fills
    are chosen at random, so the loop never repeats exactly.
    K toggles the music ("kapela"); the choice is remembered. ?music=0 disables it for a session.
@@ -58,7 +60,7 @@
       forms: ['AABB', 'ABAB', 'AAB'],
     },
     pastoralka: {
-      bpm: 74, bar: 12, beat: 4, key: 5, scale: [0, 2, 4, 5, 7, 9, 10], drone: null, drums: null, acc: 'pad',
+      bpm: 74, bar: 12, beat: 4, key: 5, scale: [0, 2, 4, 5, 7, 9, 10], drone: null, drums: null, acc: 'pad', style: 'soft', range: [.75, 1],
       A: { chords: 'F C Bb F Bb F C F', mel: `
         C5:6 A4:2 F4:4   E4:4 G4:4 C5:4   D5:6 C5:2 Bb4:4   A4:8 C5:4
         Bb4:6 D5:2 F5:4   C5:6 A4:2 F4:4   G4:4 A4:2 G4:2 E4:4   F4:12` },
@@ -67,7 +69,28 @@
         A4:6 C5:2 F5:4   D5:6 C5:2 Bb4:4   A4:4 G4:4 E4:4   F4:12` },
       forms: ['AB', 'AAB', 'ABA'],
     },
+    choral: {   // Polish church-song feel: modal (Dorian), plain half notes, organ with pedal bass
+      bpm: 60, bar: 16, beat: 4, key: 2, scale: [0, 2, 3, 5, 7, 9, 10], drone: null, drums: null, acc: 'organ', style: 'organ', range: [.8, 1], bell: true,
+      A: { chords: 'Dm Dm C Dm F C A Dm', mel: `
+        D5:8 E5:4 F5:4   E5:8 D5:8   C5:4 D5:4 E5:4 C5:4   D5:16
+        F5:8 G5:4 A5:4   G5:8 E5:8   F5:4 E5:4 D5:4 C#5:4   D5:16` },
+      B: { chords: 'F C Dm A Bb F Gm A', mel: `
+        A5:8 A5:4 G5:4   E5:4 F5:4 G5:8   F5:8 E5:4 D5:4   E5:16
+        D5:8 F5:4 D5:4   C5:8 A4:8   Bb4:8 A4:4 G4:4   A4:16` },
+      forms: ['AB', 'AAB', 'ABA'],
+    },
+    nokturn: {  // night piece for the cemetery: rolling arpeggios under a singing, ornamented line
+      bpm: 66, bar: 12, beat: 4, key: 9, scale: [0, 2, 3, 5, 7, 8, 11], drone: null, drums: null, acc: 'nocturne', style: 'piano', range: [.8, 1], second: false,
+      A: { chords: 'Am Am Dm E Am F E7 Am', mel: `
+        E5:8 D5:2 C5:2   B4:4 C5:4 A4:4   F5:6 E5:2 D5:2 F5:2   E5:6 D5:1 C5:1 B4:4
+        A5:8 G#5:2 A5:2   C6:6 B5:2 A5:2 F5:2   E5:4 G#4:4 B4:2 D5:2   C5:4 B4:2 A4:6` },
+      B: { chords: 'C G Am Em F C Dm E', mel: `
+        G5:8 E5:2 G5:2   D5:8 B4:2 D5:2   C5:6 B4:2 C5:2 E5:2   B4:12
+        A5:6 G5:2 F5:2 A5:2   G5:6 F5:2 E5:2 C5:2   F5:4 E5:2 D5:2 C5:2 D5:2   B4:8 G#4:4` },
+      forms: ['AB', 'AAB', 'ABAB'],
+    },
   };
+  CHORD.Gm = [43, [0, 3, 7]]; CHORD.E7 = [52, [0, 4, 7, 10]];
   CHORD.Am = [45, [0, 3, 7]];
   for (const s of Object.values(SONGS)) for (const p of ['A', 'B']) { s[p].notes = parse(s[p].mel); s[p].chords = s[p].chords.split(' '); }
 
@@ -88,7 +111,7 @@
   function arrange(song, pass) {
     const ev = [], form = rnd(song.forms), barLen = song.bar;
     let t = 0;
-    const second = pass > 0 && Math.random() < .6, octaveB = Math.random() < .3, graces = pass > 0 ? .25 : .1;
+    const second = song.second !== false && pass > 0 && Math.random() < .6, octaveB = Math.random() < .3, graces = pass > 0 ? .25 : .1;
     for (const [si, part] of [...form].entries()) {
       const sec = song[part], repeat = form.slice(0, si).includes(part);
       // lead + optional second fiddle a diatonic third below (only on repeats, like a village band joining in)
@@ -96,7 +119,7 @@
       for (const n of sec.notes) {
         if (n.m != null) {
           let m = n.m + (part === 'B' && octaveB && n.m < 72 ? 12 : 0);
-          if (n.len >= 2 && Math.random() < graces && song !== SONGS.pastoralka) {   // fiddle grace note from above
+          if (n.len >= 2 && Math.random() < graces && (song.style || 'folk') !== 'soft' && song.style !== 'organ') {   // grace note from above (fiddle / Chopin turn)
             ev.push({ t: st, d: .5, ch: 'lead', m: diatonic(song, m, 1), v: .7 }); ev.push({ t: st + .5, d: n.len - .5, ch: 'lead', m, v: 1 });
           } else ev.push({ t: st, d: n.len, ch: 'lead', m, v: 1 });
           if (second && repeat) ev.push({ t: st, d: n.len, ch: 'second', m: diatonic(song, m, -2), v: 1 });
@@ -116,6 +139,13 @@
         } else if (song.acc === 'oberek') {   // um-pa-PA
           ev.push({ t: bt, d: 3, ch: 'bass', m: root }); ev.push({ t: bt + 6, d: 2, ch: 'bass', m: root + 7 });
           ev.push({ t: bt + 4, d: 2, ch: 'chord', ms: tones, v: .7 }); ev.push({ t: bt + 8, d: 3, ch: 'chord', ms: tones, v: 1.1 });
+        } else if (song.acc === 'organ') {    // pedal note + full held chord, a bell at the top of each section
+          ev.push({ t: bt, d: barLen, ch: 'bass', m: root });
+          ev.push({ t: bt, d: barLen, ch: 'organ', ms: tones });
+          if (song.bell && b === 0) ev.push({ t: bt, ch: 'bell', m: root + 24 });
+        } else if (song.acc === 'nocturne') { // left hand: low root, fifth, tenth... rolling in eighths, pedal held
+          const third = iv[1], pat = [0, 7, 12 + third, 19, 12 + third, 7];
+          pat.forEach((o, k) => ev.push({ t: bt + k * 2, d: 6, ch: 'harp', m: root - 12 + o + 12, v: k === 0 ? 1 : .75 }));
         } else {                              // pad: held bass, slow rolled chord
           ev.push({ t: bt, d: barLen, ch: 'bass', m: root });
           tones.forEach((m, k) => ev.push({ t: bt + k * 2, d: barLen - k * 2, ch: 'pad', m, v: .9 }));
@@ -159,9 +189,10 @@
     waves = { p12: pulse(.125), p25: pulse(.25), p50: pulse(.5) };
     return true;
   }
-  function env(g, t, a, peak, hold, rel) {
+  function env(g, t, a, peak, hold, rel, decay = 1) {   // decay < 1: the note fades while held (piano/harp)
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a);
-    g.gain.setValueAtTime(peak, t + a + hold); g.gain.linearRampToValueAtTime(0, t + a + hold + rel);
+    if (decay < 1) g.gain.linearRampToValueAtTime(peak * decay, t + a + hold); else g.gain.setValueAtTime(peak, t + a + hold);
+    g.gain.linearRampToValueAtTime(0, t + a + hold + rel);
     return t + a + hold + rel;
   }
   function tone(out, wave, m, t, dur, vol, o = {}) {
@@ -174,7 +205,7 @@
       l.connect(lg); lg.connect(osc.detune); l.start(t); l.stop(t + dur + .2);
     }
     if (o.slide) { osc.frequency.setValueAtTime(freq(m) * .94, t); osc.frequency.exponentialRampToValueAtTime(freq(m), t + .04); }
-    const end = env(g, t, o.a ?? .005, vol, Math.max(0, dur - (o.a ?? .005) - (o.r ?? .04)), o.r ?? .04);
+    const end = env(g, t, o.a ?? .005, vol, Math.max(0, dur - (o.a ?? .005) - (o.r ?? .04)), o.r ?? .04, o.decay);
     osc.connect(g); g.connect(out); osc.start(t); osc.stop(end + .02);
   }
   function noise(out, t, dur, vol, type, f) {
@@ -183,6 +214,11 @@
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
     s.connect(fl); fl.connect(g); g.connect(out); s.start(t, Math.random() * .5); s.stop(t + dur + .02);
   }
+  function partial(out, f, t, vol, len) {   // one sine partial of a bell
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + len);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t + len + .05);
+  }
   function kick(out, t, vol) {
     const o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle';
     o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + .12);
@@ -190,9 +226,18 @@
     o.connect(g); g.connect(out); o.start(t); o.stop(t + .18);
   }
   const VOICE = {   // per song-type timbre tweaks
-    lead: (e, t, d, s) => tone(e.out, s === SONGS.pastoralka ? 'p50' : 'p25', e.m, t, d * .92, .15 * (e.v ?? 1), { vib: 14, slide: s !== SONGS.pastoralka && Math.random() < .15, a: s === SONGS.pastoralka ? .04 : .004, r: s === SONGS.pastoralka ? .18 : .05 }),
+    lead: (e, t, d, s) => {
+      const v = e.v ?? 1;
+      if (s.style === 'organ') { tone(e.out, 'p50', e.m, t, d * .97, .11 * v, { a: .06, r: .25 }); tone(e.out, 'p25', e.m - 12, t, d * .97, .05 * v, { a: .08, r: .25 }); return; }
+      if (s.style === 'piano') { tone(e.out, 'p25', e.m, t, d * 1.05, .24 * v, { a: .004, r: .35, decay: .4, vib: 6 }); return; }
+      const soft = s.style === 'soft';
+      tone(e.out, soft ? 'p50' : 'p25', e.m, t, d * .92, .15 * v, { vib: 14, slide: !soft && Math.random() < .15, a: soft ? .04 : .004, r: soft ? .18 : .05 });
+    },
+    organ: (e, t, d) => { e.ms.forEach(m => { tone(e.out, 'p50', m, t, d * .98, .03, { a: .12, r: .3 }); tone(e.out, 'p12', m + 12, t, d * .98, .012, { a: .15, r: .3 }); }); },
+    harp: (e, t, d) => tone(e.out, 'p50', e.m, t, d, .085 * (e.v ?? 1), { a: .004, r: .4, decay: .2 }),
+    bell: (e, t) => { for (const [r, v, len] of [[1, .12, 3], [2.76, .05, 1.6], [5.4, .03, .9], [.5, .06, 3.5]]) partial(e.out, freq(e.m) * r, t, v, len); },
     second: (e, t, d, s) => tone(e.out, 'p12', e.m, t, d * .9, .07, { vib: 10 }),
-    bass: (e, t, d, s) => tone(e.out, 'tri', e.m - 12 + (s === SONGS.pastoralka ? 12 : 0), t, d * .85, s === SONGS.pastoralka ? .2 : .45, { r: .03 }),
+    bass: (e, t, d, s) => { const soft = s.style === 'soft' || s.style === 'organ'; tone(e.out, 'tri', e.m - 12 + (s.style === 'soft' ? 12 : 0), t, d * (soft ? .98 : .85), soft ? .22 : .45, { r: soft ? .2 : .03, a: soft ? .05 : .005 }); },
     chord: (e, t, d) => { e.ms.forEach((m, k) => tone(e.out, 'p50', m, t + k * .012, d, .035 * (e.v ?? 1), { r: .03 })); },
     pad: (e, t, d) => tone(e.out, 'p50', e.m, t, d, .04 * (e.v ?? 1), { a: .25, r: .5, vib: 6 }),
     drone: (e, t, d) => tone(e.out, 'p12', e.m, t, d, .025, { a: .3, r: .4 }),
@@ -209,9 +254,10 @@
   const P = { name: null, song: null, arr: null, pass: 0, idx: 0, fT: 0, fS: 0, out: null, want: null };
   let VILLAGE = 'krakowiak', PICK = null, ACTIVITY = null;
   const LOOKAHEAD = .25;
-  const TEMPO = { idle: .5, max: 1.5, still: .8,   // x written BPM; `still` is used on the title and memory screens
-    rampUp: 14, rampRun: 7, rampDown: 4,            // seconds of walking / running to reach max, seconds to calm down
-    capChurch: 1 };                                 // the church lullaby never goes above 1x
+  const TEMPO = { idle: .4, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
+    rampUp: 20, rampRun: 10, rampDown: 1.5,         // slow build-up (walking / running seconds to max), quick calm-down
+    glideUp: 1.2, glideDown: 7 };                   // how fast the audible tempo follows the target, per second
+  // quiet pieces (church hymn, nocturne, lullaby) set song.range, e.g. [.8, 1], so they stay slow and dignified
   let energy = 0, tempo = TEMPO.still, lastTick = performance.now();
   function updateTempo() {
     const now = performance.now(), dt = Math.min(.25, (now - lastTick) / 1000); lastTick = now;
@@ -221,16 +267,18 @@
     else {
       if (a.moving) energy = Math.min(1, energy + dt / (a.running ? TEMPO.rampRun : TEMPO.rampUp));
       else energy = Math.max(0, energy - dt / TEMPO.rampDown);
-      target = TEMPO.idle + energy * (TEMPO.max - TEMPO.idle);
-      if (P.name === 'pastoralka') target = Math.min(target, TEMPO.capChurch);
+      const [lo, hi] = (P.song && P.song.range) || [TEMPO.idle, TEMPO.max];
+      target = lo + energy * (hi - lo);
     }
-    tempo += (target - tempo) * Math.min(1, dt * 2.5);   // glide, no sudden jumps
+    tempo += (target - tempo) * Math.min(1, dt * (target > tempo ? TEMPO.glideUp : TEMPO.glideDown));   // slow up, fast down
   }
   function startSong(name) {
     if (!ac) return;
     const now = ac.currentTime;
     if (P.out) { const old = P.out; old.gain.cancelScheduledValues(now); old.gain.setValueAtTime(old.gain.value, now); old.gain.linearRampToValueAtTime(0, now + .5); setTimeout(() => { try { old.disconnect(); } catch (e) { } }, 900); }
+    const prev = P.name;
     P.name = name; P.song = SONGS[name]; P.pass = 0; P.idx = 0;
+    sting(prev, name, now);
     P.out = ac.createGain(); P.out.gain.value = 1; P.out.connect(bus);
     P.arr = arrange(P.song, 0); P.fT = now + .15; P.fS = 0;
   }
@@ -267,6 +315,25 @@
     if (!ac) return; const now = ac.currentTime; bus.gain.cancelScheduledValues(now);
     bus.gain.setValueAtTime(bus.gain.value, now); bus.gain.linearRampToValueAtTime(.25, now + .05);
     bus.gain.setValueAtTime(.25, now + sec); bus.gain.linearRampToValueAtTime(1, now + sec + .6);
+  }
+  // a short cue whenever the scene changes the song, so the change is clearly heard
+  function sting(from, to, now) {
+    if (muted) return; const t = now + .05;
+    if (SCENE_START && to === 'krakowiak') { SCENE_START = false; jingle(); return; }   // game start: "hej!" fanfare
+    if (!from) return;
+    if (to === 'choral') { VOICE.bell({ out: master, m: midi('D5') }, t); VOICE.bell({ out: master, m: midi('A4') }, t + 1.1); }
+    else if (to === 'nokturn') VOICE.bell({ out: master, m: midi('A4') }, t);
+    else if (from === 'choral' || from === 'nokturn') ['G4', 'D5', 'G5'].forEach((n, i) => tone(master, 'p25', midi(n), t + i * .08, .08, .1, { r: .02 }));   // back outside
+  }
+  let SCENE_START = true;
+  function bark() {   // "hau!": a falling nasal square yelp through a mouth-like band-pass, plus breath noise
+    if (!ac || muted || rendering) return; const t = ac.currentTime + .01;
+    const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
+    o.setPeriodicWave(waves.p25); o.frequency.setValueAtTime(420, t); o.frequency.linearRampToValueAtTime(620, t + .03); o.frequency.exponentialRampToValueAtTime(260, t + .16);
+    f.type = 'bandpass'; f.Q.value = 3; f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(1500, t + .04); f.frequency.exponentialRampToValueAtTime(600, t + .16);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.5, t + .015); g.gain.exponentialRampToValueAtTime(.001, t + .19);
+    o.connect(f); f.connect(g); g.connect(master); o.start(t); o.stop(t + .22);
+    noise(master, t, .06, .1, 'bandpass', 1400);
   }
   function jingle() {   // "hej!" fanfare: rising G-major arpeggio and a stamp
     if (!ac || muted || rendering) return; duck(1.3); const t = ac.currentTime + .05, s = .09;
@@ -316,19 +383,49 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, TEMPO };
+  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
     const A = window.ARK, { HOOKS } = A;
+    // cemetery zone: the OSM landuse rectangle around the cemetery POI (about 110 x 100 m), with hysteresis at the edge
+    const CEM = A.MAP.pois.find(q => q.key === 'cemetery'), CEM_HALF = [112, 97];
+    let inCem = false;
+    const nearCemetery = () => {
+      if (!CEM || A.room) return false;
+      const m = inCem ? 70 : 25, dx = Math.abs(A.P.x - CEM.x), dy = Math.abs(A.P.y - CEM.y);
+      return (inCem = dx < CEM_HALF[0] + m && dy < CEM_HALF[1] + m);
+    };
+    let idleFor = 0, lastT = performance.now();
+    setInterval(() => { const n = performance.now(); idleFor = A.scene === 'play' && !A.P.moving && !A.talk ? idleFor + (n - lastT) / 1000 : 0; lastT = n; }, 200);
     const pick = () => {
       const sc = A.scene;
       if (sc === 'title') return 'mazurka';
-      if (sc === 'end' || A.room) return 'pastoralka';
+      if (A.room) return 'choral';
+      if (sc === 'end' || nearCemetery()) return 'nokturn';
       if (A.minigame && A.minigame()) return 'oberek';
+      if (idleFor > 25) return 'pastoralka';   // standing still for a while: the band plays a lullaby
       return VILLAGE;
     };
-    ACTIVITY = () => A.scene === 'play' ? { moving: !!A.P.moving, running: A.keys.has('ShiftLeft') || A.keys.has('ShiftRight') } : null;
+    ACTIVITY = () => A.scene === 'play' ? { moving: !!A.P.moving, running: A.keys.has('ShiftLeft') || A.keys.has('ShiftRight') } : A.scene === 'end' ? { moving: false } : null;
+    // "HAU!" whenever Arek touches Frodo (walks into him); a speech bubble pops above the dog
+    let hau = null, touching = false;
+    setInterval(() => {
+      const F = A.FRODO; if (A.scene !== 'play' || !F) { touching = false; return; }
+      const d = Math.hypot(A.P.x - F.x, A.P.y - F.y);
+      if (!touching && d < 18 && (!hau || performance.now() - hau.t > 800)) { touching = true; bark(); hau = { t: performance.now() }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
+      else if (touching && d > 28) touching = false;
+    }, 50);
+    HOOKS.hud.push(U => {
+      if (!hau) return; const age = (performance.now() - hau.t) / 1000; if (age > .9) return;
+      const cam = A.camera, F = A.FRODO; if (!cam) return;
+      const [x, y0] = cam.S(F.x, F.y), y = y0 - 18 * cam.zoom, c = A.ctx;
+      c.globalAlpha = Math.min(1, (0.9 - age) * 4); c.font = `${U * 2.2}px Silkscreen`; c.textAlign = 'center';
+      const yy = y - U * 4 - age * U * 3, w = c.measureText('HAU!').width + U * 1.6;
+      c.fillStyle = '#fff'; c.fillRect(x - w / 2, yy - U * 2.2, w, U * 3); c.fillStyle = '#10163a'; c.fillText('HAU!', x, yy);
+      c.globalAlpha = 1;
+    });
+    if (!OFF_PARAM) { initAudio(); if (ac && ac.state === 'suspended') ac.resume().catch(() => { }); }
     PICK = pick;   // polled by tick(): HOOKS.update does not run on the title, end screen or during dialogue
     const pt = A.popToast;   // game.js itself calls MUSIC.jingle() in celebrate() and MUSIC.ding() in popToast()
     addEventListener('keydown', e => {   // a plain listener, so K also works on the title and during dialogue

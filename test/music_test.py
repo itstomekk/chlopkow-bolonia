@@ -16,16 +16,29 @@ with sync_playwright() as p:
     assert st[0] == 'running' and st[1] in ('krakowiak', 'mazurka') and not st[2], st
 
     # tempo follows the player: idle drifts toward 0.5x, running builds it up, standing still calms it again
-    time.sleep(2.5); idle = pg.evaluate("MUSIC.tempo"); print("idle tempo", round(idle, 2)); assert idle < .62, idle
+    time.sleep(2.5); idle = pg.evaluate("MUSIC.tempo"); print("idle tempo", round(idle, 2)); assert idle < .5, idle
     pg.keyboard.down("ShiftLeft")
     for k in ["ArrowLeft", "ArrowRight"] * 3: pg.keyboard.down(k); time.sleep(.8); pg.keyboard.up(k)
     pg.keyboard.up("ShiftLeft")
     fast = pg.evaluate("MUSIC.tempo"); print("after running", round(fast, 2)); assert fast > idle + .25, fast
-    time.sleep(4); calm = pg.evaluate("MUSIC.tempo"); print("calmed", round(calm, 2)); assert calm < fast - .2, calm
+    assert fast <= 1.31, fast
+    time.sleep(1.5); calm = pg.evaluate("MUSIC.tempo"); print("calmed after 1.5 s", round(calm, 2)); assert calm < fast - .2, calm   # quick calm-down
+
+    # touching Frodo barks
+    pg.evaluate("(() => { const g = __game; g.P.x = g.FRODO.x; g.P.y = g.FRODO.y; })()"); time.sleep(.3)
+    print("barks", pg.evaluate("MUSIC.barks")); assert pg.evaluate("MUSIC.barks") >= 1
+    pg.screenshot(path="test/music_hau.png")
+
+    # cemetery -> nokturn
+    cem = pg.evaluate("__game.MAP.pois.find(p => p.key === 'cemetery')")
+    pg.evaluate(f"__game.P.x = {cem['x']}; __game.P.y = {cem['y']} + 60"); time.sleep(.8)
+    print("cemetery", pg.evaluate("MUSIC.current")); assert pg.evaluate("MUSIC.current") == 'nokturn'
+    pg.evaluate(f"__game.P.x = {cem['x']} + 600"); time.sleep(.8)
+    assert pg.evaluate("MUSIC.current") in ('krakowiak', 'mazurka'), pg.evaluate("MUSIC.current")
 
     # church -> pastoralka
     pg.evaluate("__game.enterChurch()"); time.sleep(1.2)
-    print("church", pg.evaluate("MUSIC.current")); assert pg.evaluate("MUSIC.current") == 'pastoralka'
+    print("church", pg.evaluate("MUSIC.current")); assert pg.evaluate("MUSIC.current") == 'choral'
 
     # K toggles mute and is remembered
     pg.keyboard.press("KeyK"); time.sleep(.2)

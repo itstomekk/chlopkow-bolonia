@@ -49,25 +49,36 @@ Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigam
 - Codex tip: when Hermes reports "No Codex credentials" after a 429, run `hermes auth reset openai-codex` once the cooldown shows "ready to retry".
 
 ## Music (added 2026-09-28, `docs/js/music.js`)
-- Procedural 8-bit Polish folk chiptune. There are no audio files: WebAudio synthesises pulse leads, a triangle bass, noise drums and a bagpipe drone.
-- Four original tunes in the tracker format (`"NOTE:len"`, where len is in 16th steps, plus one chord symbol per bar):
-  - village: **krakowiak** (2/4, G major, Góral C# in part B), alternating with a **mazurka** (3/4); the mazurka also plays on the title;
-  - minigames: **oberek**;
-  - church and memories: **pastorałka**.
-- **Adaptive tempo** (the `TEMPO` object in `music.js`):
-  - standing still: 0.5× the written BPM;
-  - moving: the tempo builds up to 1.5× (about 14 s walking, 7 s running with Shift);
-  - after stopping: it calms back to 0.5× in about 4 s;
-  - the church lullaby is capped at 1×;
-  - title and memory screens: a steady 0.8×.
-- The scheduler keeps a time↔step frontier (`P.fT`/`P.fS`), so tempo changes never jump. `MUSIC.tempo` shows the current factor; `renderWav` renders at 0.8×.
-- Every pass is re-arranged at random: section form, a second fiddle in thirds, grace notes, an octave-up part B, drum fills.
-- `celebrate()` plays a "hej!" fanfare and `popToast()` plays a pickup blip; the music ducks under both.
-- **K** mutes the music (remembered in `localStorage`); on touch screens, tap the note icon at the bottom left. `?music=0` disables the music for a session.
-- Audio starts on the first key press or tap (browser autoplay rule).
-- `MUSIC.renderWav(name, passes)` renders a track offline to WAV (for previews and videos).
-- `test/music_test.py` is part of `run_all.py` (11 tests).
-- Next: "swojski" sound upgrades (accordion/fiddle timbres, real public-domain folk tunes, optional MIDI import). See the options discussed in the session.
+- Procedural 8-bit Polish folk chiptune. There are no audio files: WebAudio synthesises pulse leads, a triangle bass, noise drums, a bagpipe drone, an organ and a bell. All six tunes are original.
+- Which track plays where (`pick()` in the ark-ready block):
+
+| Where | Track | Notes |
+|---|---|---|
+| Title | mazurka | |
+| Village | krakowiak ↔ mazurka | alternate every 2 passes |
+| Village, 25 s of standing still | pastorałka | lullaby |
+| Minigames | oberek | |
+| Church interior | chorał | organ hymn in D Dorian, 2 bell tolls on entry |
+| Cemetery zone and memory archive | nokturn | Chopin-style nocturne in A minor, 1 bell toll |
+
+- The cemetery zone is the OSM landuse rectangle around the cemetery POI (half-size 112×97 px), with hysteresis.
+- Scene changes are audible:
+  - game start plays the "hej!" fanfare;
+  - leaving church or cemetery plays a short upbeat cue;
+  - `celebrate()` plays the fanfare and `popToast()` the pickup blip.
+- **Adaptive tempo** (the `TEMPO` object):
+  - standing still: 0.4× the written BPM;
+  - moving: slowly builds up to 1.3× (about 20 s walking, 10 s running);
+  - stopping: falls back fast (about 1.5 s);
+  - quiet pieces (chorał, nokturn, pastorałka) stay within `song.range` = [0.8, 1];
+  - title: 0.8×.
+- The scheduler keeps a time↔step frontier (`P.fT`/`P.fS`), so tempo changes never jump.
+- **Frodo barks** ("HAU!" sound plus a speech bubble) whenever Arek touches him, with a 0.8 s cooldown. Tomek wrote "Marty"; we assumed the dog Frodo, so confirm.
+- **K** or the note icon (bottom-left, above the coordinates) mutes the music. `?music=0` disables it.
+- Debug: `MUSIC.tempo`, `MUSIC.current`, `MUSIC.barks`.
+- `MUSIC.renderWav(name, passes)` exports a track to WAV at 0.8×.
+- Covered by `test/music_test.py`: scene switching, tempo, bark, cemetery.
+- Ideas: MIDI import, recognisable public-domain folk tunes (e.g. "Czerwone jabłuszko" for Kasia), accordion timbre, a recorded "hej!".
 
 ## Minigame tuning (in `minigames.js`)
 - `MEDAL` thresholds (bronze/silver/gold): race — beat Damian / 15.5 s / 14.0 s; pig — 30 s / 15 s / 8 s; dogs — win / 28 s / 18 s; skeet — 10 / 12 / 14 hits.
