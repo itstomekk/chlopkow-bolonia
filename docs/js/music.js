@@ -1,5 +1,7 @@
-/* MUZYKA — procedural 8-bit Polish folk chiptune for Arek w Chłopkowie. No audio files: everything is synthesised
-   live with WebAudio (NES-style pulse leads, triangle bass, noise drums, a bagpipe drone).
+/* MUZYKA - procedural 8-bit Polish folk chiptune for Arek w Chłopkowie, plus a rotating Ogg/Opus recording playlist.
+   Procedural tracks are synthesised live with WebAudio (NES-style pulse leads, triangle bass, noise drums, a bagpipe drone).
+   The entrance screen plays the printed Polka Dziadek alone; village and field share one "default" zone that
+   plays the recorded playlist at random. Church, cemetery, forest, shop, barn and minigames keep the procedural tracks.
    Tracks (all original tunes written in folk-dance idioms):
      krakowiak — 2/4, syncopated 16th-8th-16th "hop" rhythm, G major with a Góral raised-4th (C#) in part B  (village)
      mazurka   — 3/4, dotted first beat, accents on 2 and 3, C major                                         (title, village alt.)
@@ -282,8 +284,19 @@
      advances it at the current tempo, so a tempo change never makes the music jump. */
   const P = { name: null, song: null, arr: null, pass: 0, idx: 0, fT: 0, fS: 0, out: null, want: null };
   let VILLAGE = 'krakowiak', PICK = null, ACTIVITY = null;
-  const MAIN_TRACK = 'audio/Polka_Dziadek_true_chiptune_NES.ogg';
-  let mainTrack = null, mainTrackOn = false;
+  // Ogg/Opus is supported by modern browsers and keeps the recorded 8-bit tracks small enough for Pages.
+  // The printed Polka Dziadek belongs to the entrance screen alone; the village/field "default" zone plays
+  // the recorded list below in random order.
+  const TITLE_TRACKS = ['audio/Polka_Dziadek_true_chiptune_NES.ogg'];
+  const DEFAULT_TRACKS = [
+    'audio/track-number-4.ogg',
+    'audio/track-number-5.ogg',
+    'audio/track-poland-anthem.ogg',
+    'audio/track-ucieczka.ogg',
+    'audio/track-polska-przydrozna.ogg',
+    'audio/track-ona-tanczy.ogg',
+  ];
+  let mainTrack = null, mainTrackSrc = null, mainTrackZone = null, mainTrackOn = false;
   const LOOKAHEAD = .25;
   const TEMPO = { idle: .2, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
     rampUp: 30, rampRun: 20, rampDown: 20 };        // linear energy seconds to max (walking / running / stopping)
@@ -312,18 +325,40 @@
     P.out = ac.createGain(); P.out.gain.value = 1; P.out.connect(bus);
     P.arr = arrange(P.song, 0); P.fT = now + .15; P.fS = 0;
   }
-  function setMainTrack(enabled) {
-    if (!mainTrack) {
-      mainTrack = new Audio(MAIN_TRACK);
-      mainTrack.loop = true;
-      mainTrack.preload = 'auto';
-      mainTrack.volume = .62;
-      mainTrack.muted = muted;
+  function pickMainTrack(zone) {
+    if (zone === 'title') return TITLE_TRACKS[0];   // the entrance screen repeats its one printed track
+    if (DEFAULT_TRACKS.length === 1) return DEFAULT_TRACKS[0];
+    let src = mainTrackSrc, n = 0;
+    while (src === mainTrackSrc && n++ < 24) src = DEFAULT_TRACKS[(Math.random() * DEFAULT_TRACKS.length) | 0];
+    return src;                                     // random, never the same track twice in a row
+  }
+  function loadMainTrack(src) {
+    const track = new Audio(src);
+    track.loop = false;
+    track.preload = 'metadata';
+    track.volume = .62;
+    track.muted = muted;
+    track.addEventListener('ended', () => {
+      if (mainTrack !== track || !mainTrackOn) return;
+      loadMainTrack(pickMainTrack(mainTrackZone));
+      mainTrack.play().catch(() => { });
+    });
+    mainTrack = track; mainTrackSrc = src;
+  }
+  function setMainTrack(zone) {      // zone: 'title', 'main', or null when a procedural track owns the moment
+    if (!zone) {
+      if (mainTrack) { mainTrack.pause(); mainTrack.currentTime = 0; }
+      mainTrackOn = false; mainTrackZone = null;
+      return;
     }
-    if (mainTrackOn === enabled) return;
-    mainTrackOn = enabled;
-    if (enabled) mainTrack.play().catch(() => { });
-    else { mainTrack.pause(); mainTrack.currentTime = 0; }
+    if (mainTrackZone !== zone) {    // entered a recorded zone: start a fresh pick for it
+      mainTrackZone = zone;
+      loadMainTrack(pickMainTrack(zone));
+      mainTrackOn = true;
+      mainTrack.play().catch(() => { });
+      return;
+    }
+    if (!mainTrackOn) { mainTrackOn = true; mainTrack.play().catch(() => { }); }
   }
   function setSynthEnabled(enabled) {
     if (!bus || !ac) return;
@@ -340,12 +375,16 @@
     } else P.pass++;
     P.idx = 0; P.arr = arrange(P.song, P.pass);
   }
-  // The recorded "Polka Dziadek" follows the same walking tempo as the synth band. A recording stretched below
-  // half speed turns to mush (and some browsers mute media under 0.25x), so it bottoms out at 0.5x.
-  const MAIN_RATE_MIN = .5;
+  // The recorded tracks follow the player's activity. The village/field playlist runs linearly from 0.4x
+  // (standing still) to 1.3x (full energy); the entrance screen keeps its own gentle 0.8x.
+  const MAIN_RATE_MIN = .4;
+  function mainTrackRate() {
+    if (mainTrackZone === 'title') return TEMPO.still;
+    return MAIN_RATE_MIN + energy * (TEMPO.max - MAIN_RATE_MIN);
+  }
   function syncMainTrackRate() {
     if (!mainTrack) return;
-    const rate = Math.max(MAIN_RATE_MIN, Math.min(TEMPO.max, tempo));
+    const rate = Math.max(MAIN_RATE_MIN, Math.min(TEMPO.max, mainTrackRate()));
     if (Math.abs(mainTrack.playbackRate - rate) > .01) { mainTrack.preservesPitch = true; mainTrack.playbackRate = rate; }
   }
   function tick() {
@@ -353,12 +392,11 @@
     syncMainTrackRate();
     if (!ac || rendering || ac.state !== 'running') return;
     if (PICK) {
-      const zone = PICK();
-      const field = zone === 'field';
-      const main = zone === 'main';
-      setMainTrack(main);
-      setSynthEnabled(!main);
-      P.want = field || main ? 'krakowiak' : zone;
+      const zone = PICK();                                   // 'title' | 'main' | a procedural song name
+      const recorded = zone === 'title' || zone === 'main';
+      setMainTrack(recorded ? zone : null);
+      setSynthEnabled(!recorded);
+      P.want = recorded ? 'krakowiak' : zone;
     }
     if (P.want && P.want !== P.name) startSong(P.want);
     if (!P.song) startSong('krakowiak');
@@ -459,7 +497,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, MAIN_RATE_MIN, TEMPO };
+  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, MAIN_RATE_MIN, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
@@ -480,12 +518,11 @@
     };
     const pick = () => {
       const sc = A.scene;
-      if (sc === 'title') return 'main';
+      if (sc === 'title') return 'title';   // the printed Polka Dziadek is the entrance screen only
       if (A.room && A.room.soltys) return 'choral';
       if (A.room && A.room.shop) return 'mazurka';
       if (sc === 'end' || nearCemetery()) return 'nokturn';
       if (A.minigame && A.minigame()) return 'oberek';
-      if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'field') return 'field';
       if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'forest') return 'pastoralka';
       if (sc === 'play' && nearJazz()) return 'jazz';
       if (sc === 'play') return 'main';

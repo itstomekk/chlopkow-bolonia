@@ -1,10 +1,14 @@
 # HANDOFF — Chłopków Bolonia
 
 ## CURRENT STATE — read before historical notes below
+- **Unified Luna plan (2026-09-28, not started):** `plans/2026-09-28-unified-luna-execution-plan.md` is now the **single execution queue**. It incorporates all 15 requests from `C:\Users\Lenovo\Hermes\.hermes\plans\2026-09-28_150437-temp-gameplay-quality-handoff.md` plus the earlier architecture/game-growth plan, ordered as small A00–Z00 cards with file ownership, RED/GREEN tests and supervisor gates. The earlier `plans/2026-09-28-game-growth-luna-tasks.md` is superseded as a queue; editor E2 stays linked, not duplicated. Outdoor home checkpoints by default, selected interiors only; same-size map, single overworld hero, later local simultaneous minigames, Nostr results deferred. Forest collision must be measured before changing it; minigames retain oberek by default. No game code/assets/release changed by this planning work.
+- **Asset-style handoff (2026-09-28):** Tomek chose to refine the existing pixel-art style, not reset it. He will decide which current assets stay as style references and which change; none are approved anchors yet. New roadmap: `plans/2026-09-28-asset-style-roadmap.md` (A0–A4). GPT Luna's first **asset-style** job is A0 only: inventory game-used images and procedural scenery, trace source/build/runtime links, make a safe review sheet of shipped/generated art, then stop for Tomek's keep/adjust/regenerate/retire labels. No general sprite generation/replacement or style reset before those gates; Tomek separately requested restoring the verifiable earlier red-car art (B07 in the unified plan). Do not rerender the map, invent a palette, or build an asset-manager UI as part of A0.
+- Asset safety: `references/` and original human photos remain local/gitignored; versioning of reviewed, safe game resources is allowed. `docs/img/church/manifest.json` is a loader list, not an asset-provenance system. `gen/PROMPTS-*.md` and `PHOTOS-WANTED.md` are partial/historical; flag absent source photos instead of claiming an exact regeneration. Renderer draws many houses/trees procedurally in `osm/render_map.py`, so do not assume every visible object has its own PNG. The map-editor generator hooks are a separate unfinished workstream in `plans/2026-09-28-map-editor.md`.
 - Current project roadmap: `plans/2026-09-27-chlopkow-bolonia-roadmap.md`, indexed by `PLAN.md`. It includes Tomek's new terrain, player-name, diagonal-animation, duck-hunt, shooting, metadata, README and dialogue requests.
-- GitHub repo: https://github.com/itstomekk/chlopkow-bolonia; **published** at commit `ba64220e797adc4bc8842b8f82483c3749bf356d` to https://itstomekk.github.io/chlopkow-bolonia/. The exact-commit Pages build reports `built`; index, scripts, sprites and ground image read back. JSON bytes were minified by Pages but parsed objects match. Public `python test/run_all.py https://itstomekk.github.io/chlopkow-bolonia/index.html` passed 11/11. The old Pages URL has a separate redirect repository.
-- Published batch: expanded map (3896×5860), north forest, BUDKA, football pitch, PPM range, Irenka/Kuba/car art, optional Nostr overlay, world-life animals/car, cemetery art, map and navigation changes, Polish README and HTML metadata. This is an interim playable update: mushrooms, new Professor, duck-target replacement, new target range and other roadmap features are NOT yet implemented. Most old facts below describe the previous map and are historical.
-- Local `main` and `origin/main` match at `ba64220`; no local gameplay changes remain. Local-only `PLAN.md`, `HANDOFF.md`, roadmap and raw source images remain uncommitted. Do not add private reference photos or raw source images to the public repo. The minigame test prints `FAILED: none` when its failure list is empty and exits 0; this is confusing wording, not a failed assertion.
+- GitHub repo: https://github.com/itstomekk/chlopkow-bolonia; live at `d34ff94eac7d56ce2e5149bcd587b19c553d6071`. GitHub Pages build status for that commit was `built`; live index, game script, character sheets and NPC atlas returned HTTP 200.
+- The current published build includes the expanded map/world batch, DJ Renik, trash pickups, Arek's 8-direction sheet, clouds/tractors, NPC updates, and title-screen selection for Arek, Marcin, Damian, Edytka and Renik. Local selector/sprite code is not a pending deploy.
+- A local follow-up rebuilt Patryk's NPC sprite using four gitignored reference photos. `gen/npc_src/patryk.png` and atlas cell 8 in `docs/img/npcs.png` were updated; all other atlas cells were preserved. This Patryk revision is **not deployed**. Never commit the reference photos or raw source images.
+- The shared working tree contains other local edits; inspect `git status` before staging and do not publish the whole tree as one batch.
 - Coordinate source for new requests is the *previous* 3897×2698 map. Convert through `osm/geo.py:pre_expansion_i()`: Sołtys near (1887,1237), shrine old (2298,1423) → new (1744,1271), pond near (270,1893), second store near (2150,2506), duck hunt near (3145,2629), pitchfork near (3366,410).
 - Michał is the real shooting-range operator and Kuba is also there. Use village flavor in dialogue, but do not attribute wrongdoing, addiction or suicide to named private residents, and independently confirm the municipal status before any factual claim about Platerów.
 
@@ -65,36 +69,42 @@ Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigam
 - Codex tip: when Hermes reports "No Codex credentials" after a 429, run `hermes auth reset openai-codex` once the cooldown shows "ready to retry".
 
 ## Music (added 2026-09-28, `docs/js/music.js`)
-- Procedural 8-bit Polish folk chiptune. There are no audio files: WebAudio synthesises pulse leads, a triangle bass, noise drums, a bagpipe drone, an organ and a bell. All six tunes are original.
-- Which track plays where (`pick()` in the ark-ready block):
+- Hybrid soundtrack: seven procedural tunes are synthesized live by WebAudio (pulse leads, triangle bass, noise drums, bagpipe drone, organ and bells), plus seven recorded Ogg/Opus tracks in `docs/audio/`. The printed Polka Dziadek belongs to the entrance screen only; village and field share the recorded default playlist. `docs/audio/` holds final playable assets only - source WAV/SID/MP3 files and the uncompressed `Ona Tanczy` master were archived to `_archive/2026-09-28-audio-source-files/`.
+- Track routing (`pick()` in the ark-ready block):
 
 | Where | Track | Notes |
 |---|---|---|
-| Title | mazurka | |
-| Village | krakowiak ↔ mazurka | alternate every 2 passes |
-| Village, 25 s of standing still | pastorałka | lullaby |
-| Minigames | oberek | |
-| Church interior | chorał | organ hymn in D Dorian, 2 bell tolls on entry |
-| Cemetery zone and memory archive | nokturn | Chopin-style nocturne in A minor, 1 bell toll |
+| Title / entrance screen | Polka Dziadek Ogg, on repeat | `TITLE_TRACKS` - this is the only zone that plays it |
+| Village and field (default zone) | recorded playlist, picked at random | `DEFAULT_TRACKS`, six Ogg/Opus tracks, never the same one twice in a row |
+| Forest | pastoralka | procedural |
+| Shop interior | mazurka | procedural |
+| Minigames | oberek | procedural |
+| Barn jazz zone | jazz | procedural |
+| Church interior | choral | D Dorian organ hymn; 2 bell tolls on entry |
+| Cemetery zone and ending | nokturn | A minor nocturne; 1 bell toll |
 
+- Other procedural compositions are selected/arranged in `docs/js/music.js`; the title and the village/field default zone play the recorded playlist instead. MIDI source attribution/redistribution terms for the existing Polka Dziadek arrangement have not been verified.
+- No formal third-party music licensing policy is documented in `DEVELOPMENT.md`; do not add commercial recordings or MIDI-derived arrangements to the public game until redistribution rights are confirmed.
+- Six recorded tracks back the default zone: `track-number-4.ogg`, `track-number-5.ogg`, `track-poland-anthem.ogg`, `track-ucieczka.ogg`, `track-polska-przydrozna.ogg` and `track-ona-tanczy.ogg`, all mono Ogg/Opus below 500 KB and listed in `DEFAULT_TRACKS`. `track-ona-tanczy.ogg` is a 16 kbps/24 kHz re-encode of the 245 s "Ona Tanczy Dla Mnie" C64 rendition (492 KB, down from 1.0 MB). The entrance screen uses `Polka_Dziadek_true_chiptune_NES.ogg` (356 KB, mono 32 kbps, versus 1.43 MB for the archived WAV) as `TITLE_TRACKS`. Nothing here is published yet; rights have not been verified.
 - The cemetery zone is the OSM landuse rectangle around the cemetery POI (half-size 112×97 px), with hysteresis.
 - Scene changes are audible:
   - game start plays the "hej!" fanfare;
   - leaving church or cemetery plays a short upbeat cue;
   - `celebrate()` plays the fanfare and `popToast()` the pickup blip.
 - **Adaptive tempo** (the `TEMPO` object):
-  - standing still: 0.4× the written BPM;
-  - moving: slowly builds up to 1.3× (about 20 s walking, 10 s running);
-  - stopping: falls back fast (about 1.5 s);
-  - quiet pieces (chorał, nokturn, pastorałka) stay within `song.range` = [0.8, 1];
-  - title: 0.8×.
+  - idle floor: 0.2× the written BPM;
+  - title: 0.8×;
+  - moving: slowly builds up to 1.3× (30 s walking, 20 s running);
+  - stopping: linearly falls back over 20 s;
+  - quiet pieces (chorał, nokturn, pastorałka) stay within `song.range` = [0.8, 1].
+- **Recorded-track speed** (`mainTrackRate()`, `MAIN_RATE_MIN` = 0.4): the default playlist follows activity linearly, from 0.4x standing still to 1.3x at full energy; the entrance screen holds a constant 0.8x.
 - The scheduler keeps a time↔step frontier (`P.fT`/`P.fS`), so tempo changes never jump.
 - **Frodo barks** ("HAU!" sound plus a speech bubble) whenever Arek touches him, with a 0.8 s cooldown. Tomek wrote "Marty"; we assumed the dog Frodo, so confirm.
 - **K** or the note icon (bottom-left, above the coordinates) mutes the music. `?music=0` disables it.
 - Debug: `MUSIC.tempo`, `MUSIC.current`, `MUSIC.barks`.
-- `MUSIC.renderWav(name, passes)` exports a track to WAV at 0.8×.
+- `MUSIC.renderWav(name, passes)` exports a procedural track to WAV at 0.8×.
 - Covered by `test/music_test.py`: scene switching, tempo, bark, cemetery.
-- Ideas: MIDI import, recognisable public-domain folk tunes (e.g. "Czerwone jabłuszko" for Kasia), accordion timbre, a recorded "hej!".
+- Before importing MIDI, confirm the composition and arrangement rights.
 
 ## Map extension + cemetery sunglasses (2026-09-28)
 - **Map:** `osm/geo.py` BBOX grew 10% south (minlat 52.2585 -> 52.25585) and 20% east (maxlon 22.8872 -> 22.89292): 3896x5860 -> 4675x6446 px. The NW corner is the pixel origin, so all existing art coordinates stay valid. New OSM data came from Overpass via `python osm/fetch_osm.py 52.25585 22.8586 52.285 22.89292 --old 52.2585 22.8586 52.285 22.8872`, which merges by (type, id), never removes anything and (with `--old`) leaves the already-drawn area untouched.

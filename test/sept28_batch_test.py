@@ -72,9 +72,9 @@ with sync_playwright() as p:
     page.wait_for_timeout(100)
     check("click outside closes map", page.evaluate("__game.showMap") is False)
 
-    # 5. Polka Dziadek follows the tempo (floor 0.5x)
+    # 5. Polka Dziadek is the entrance screen only; the village playlist slows to a 0.4x floor
     rate = page.evaluate("MUSIC.MAIN_RATE_MIN")
-    check("main track rate floor", rate == .5, rate)
+    check("main track rate floor", rate == .4, rate)
 
     # 6. Frodo keeps his position across save/reload and never jumps while on screen
     page.evaluate("ARK.teleport(__game.MAP.football_pitch.cx + 80, __game.MAP.football_pitch.cy + 120)")

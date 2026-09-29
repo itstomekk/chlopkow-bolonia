@@ -24,6 +24,8 @@ The old coordinates refer to the 3897×2698 map before northern expansion; use
       and small terrain-specific walking speeds.
 - [x] Batch A partial: Polish player-facing README, English DEVELOPMENT.md,
       HTML description/Open Graph metadata and updated favicon; focused metadata test passed.
+- [x] Compress the existing Polka Dziadek chiptune asset to mono Ogg Opus for the game (356 KB, down from 1.43 MB); archive the WAV source outside `docs/audio/`.
+- [x] Download five requested YouTube sources as final mono Ogg Opus files below 500 KB each; the printed Polka Dziadek is now the entrance-screen track alone and village/field share a random default playlist, with a linear 0.4x-1.3x activity tempo. Duplicate MP3/Opus variants were removed from `docs/audio/` and source files archived; nothing is published until rights and final track selection are reviewed.
 - [ ] Batch B: Kasia's 10/15 mushrooms, Sołtys as farmer at old-map (1887,1237),
       relocated shrine/school, pond, second shop and richer varied dialogue.
 - [ ] Batch C: Michał and Kuba at a target range, duck hunt, pitchfork throw,
@@ -31,8 +33,19 @@ The old coordinates refer to the 3897×2698 map before northern expansion; use
 - [ ] Map editor (local tool in `editor/`, edits in `osm/edits.json` applied by the
       generator, satellite basemap, extensible tool registry). Design and ordered worker
       tasks E1–E7: [`plans/2026-09-28-map-editor.md`](plans/2026-09-28-map-editor.md).
+- [ ] Asset consistency, **planning stage**: refine the existing pixel-art look, with
+      Tomek choosing which existing assets are style anchors and which need changes.
+      GPT Luna's first asset-style task is A0 (safe inventory + review sheet); wait for
+      Tomek's labels before a style guide, generation or implementation. Ordered
+      gates A0–A4: [`plans/2026-09-28-asset-style-roadmap.md`](plans/2026-09-28-asset-style-roadmap.md).
+- [ ] **Canonical Luna execution queue, plan only:** all 15 gameplay/visual/audio
+      quality requests plus expandable outdoor house missions, legacy-save safety,
+      editor E2, and later local competitive minigames. Narrow cards A00–Z00, one
+      writer/test/review gate each: [`plans/2026-09-28-unified-luna-execution-plan.md`](plans/2026-09-28-unified-luna-execution-plan.md).
+      The previous G0–G9 plan is historical context, not a second queue. Nostr
+      scores and mass-populating houses are deferred; no implementation started.
 - [x] Publish the current playable batch and verify the Pages build at `ba64220` plus 11/11 tests against the public site. Future batches need their own release gates and fresh remote fetch.
-- [x] Local-only character sprite batch: Codex-generated 4-direction sheets for Marcin, Damian and Edytka; title-screen selector with saved selection; NPC atlas includes new Zbyszek and Wesołych Świąt portraits. Targeted selector/start-flow/sprite-key tests pass. Not deployed; full suite still has unrelated failures recorded in `HANDOFF.md`.
+- [x] Character selector and sprite batch for Arek, Marcin, Damian, Edytka and Renik are live at `d34ff94`. Local follow-up: rebuilt Patryk's NPC sprite from four private reference photos; not deployed.
 
 Use GPT Luna for narrow implementation tasks and Sol for architecture, integration,
 review and deployment. No unverified allegations about identifiable village residents.
