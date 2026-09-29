@@ -792,7 +792,17 @@ for p in orch:
 tree_pts.sort(key=lambda t: t[1]); kept = []
 for t_ in tree_pts:
     if all(math.hypot(t_[0] - k_[0], t_[1] - k_[1]) > (t_[2] + k_[2]) * .9 for k_ in kept[-60:]): kept.append(t_)
-for x, y, r, kind in kept: tree(x, y, r, kind)
+# E3 trees edits hook (osm/edits.py 'trees' stage, verified at C03): clear polygons
+# drop ONLY the generated tree feet inside them from this final list (the orchard
+# ring around the polygon is untouched), and explicit trees.add entries are
+# appended and drawn like village trees. The draw loop below normalises the bool
+# `dark` flag from edits.py into the default deciduous species so map.json stats
+# keys stay strings.
+edits.apply('trees', EDITS, dict(tree_pts=kept, W=W, H=H))
+for x, y, r, kind in kept:
+    if not isinstance(kind, str):
+        kind = 'deciduous'   # trees.add tuples carry (x, y, r, dark): draw the default village tree
+    tree(x, y, r, kind)
 
 # forests: species are mixed on the ground layer, preserving walkable forest-floor collision.
 fy, fx = np.nonzero(forest_mask)
@@ -918,6 +928,11 @@ objects_img.save('docs/img/map_objects.png')
 low &= ~(pm | dm)   # roads and tracks cross the Białka on bridges: walkable, not a jump
 collide &= ~(pm | dm)   # nothing solid on roads/tracks (woods and bridges included)
 cm = np.where(collide, 255, np.where(low, 128, 0)).astype(np.uint8)
+# E3 collision edits hook (osm/edits.py 'collision' stage, final, verified at C03):
+# block/free are the last word on the 0/128/255 map; road_m (paved|dirt) is then
+# force-walkable, so a block polygon can never wall off a road and a free polygon
+# re-opens walkable ground (e.g. a corridor through a block).
+edits.apply('collision', EDITS, dict(collide_img=cm, road_m=pm | dm))
 Image.fromarray(cm).save('docs/img/map_collide.png')   # 255 tall, 128 low (jumpable)
 # terrain classes for walking speed, 1/4 scale: 0 grass, 60 paved road, 100 dirt road, 160 crop field, 220 forest floor
 terr = np.zeros((H, W), np.uint8)

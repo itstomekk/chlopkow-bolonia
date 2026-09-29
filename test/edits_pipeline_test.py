@@ -124,7 +124,9 @@ FOREST_FILL = (31, 79, 36)          # exact hexc('#1f4f24') forest-floor base
 
 
 def _fixture_layout():
-    """Pixel boxes (y0, x0, y1, x1) of the sample fixture's forest/water polygons."""
+    """Pixel boxes of the sample fixture's polygons: returns (forest_boxes, c03).
+    forest_boxes = (forest.add, forest.remove, water.add) boxes like C02.
+    c03 = dict with trees.clear box, trees.add foot px, collision block/free boxes."""
     data = json.load(open(SAMPLE_FIXTURE, encoding='utf-8'))
     def poly(layer, key):
         return data['layers'][layer][key][0]['poly']
@@ -133,23 +135,46 @@ def _fixture_layout():
         ys = [_P(lat, lon)[1] for lat, lon in points]
         return (int(min(ys)) - pad, int(min(xs)) - pad,
                 int(max(ys)) + 1 + pad, int(max(xs)) + 1 + pad)
-    return box(poly('forest', 'add'), 2), box(poly('forest', 'remove'), 0), box(poly('water', 'add'), 2)
+    fa = box(poly('forest', 'add'), 2)
+    hole = box(poly('forest', 'remove'), 0)
+    wa = box(poly('water', 'add'), 2)
+    trees = data['layers']['trees']
+    clr = box(trees['clear'][0]['poly'], 0)
+    add = trees['add'][0]
+    ax, ay = _P(add['lat'], add['lon'])
+    col = data['layers']['collision']
+    blk = box(col['block'][0]['poly'], 2)
+    # free: the polygon's lat/lon round-trips to fractional pixel edges, so the
+    # truthful walkable interior is the polygon rasterised on pixel centres
+    # (point_in_poly semantics), not the int-rounded bounding box. Keep the exact
+    # raster mask and its window.
+    import edits as _edits
+    _fx0, _fy0, _fm = _edits.poly_window_mask(col['free'][0]['poly'], 5143, 7091, pad=0)
+    fre = (_fy0, _fx0, _fy0 + _fm.shape[0], _fx0 + _fm.shape[1])
+    free_mask = (_fx0, _fy0, _fm)
+    c03 = dict(clear=clr, add=(ax, ay, add['r']), block=blk, free=fre, free_mask=free_mask)
+    return (fa, hole, wa), c03
 
 
-def _map_stats(boxes, outdir=None):
-    """Count forest-fill/terrain-220/water-blue/collide pixels in the fixture windows.
-    When outdir is given, save before/after crops of each window there (2x scale)."""
+def _map_stats(boxes, c03, outdir=None):
+    """Count forest-fill/terrain-220/water-blue/collide pixels in the fixture windows,
+    plus C03 tree/collision stats. When outdir is given, save before/after crops."""
     import numpy as np
     from PIL import Image
+    import edits  # noqa: E402  (osm/edits.py already on sys.path)
     g = np.array(Image.open('docs/img/map_ground.png').convert('RGB'))
     t = np.array(Image.open('docs/img/map_terrain.png').convert('L'))
     c = np.array(Image.open('docs/img/map_collide.png').convert('L'))
+    o = np.array(Image.open('docs/img/map_objects.png').convert('RGBA'))
     fa, hole, wa = boxes
     fill = (g[..., 0] == FOREST_FILL[0]) & (g[..., 1] == FOREST_FILL[1]) & (g[..., 2] == FOREST_FILL[2])
     blue = (g[..., 2] > g[..., 0] + 20) & (g[..., 2] > g[..., 1] + 10)
     def terr(box):
         y0, x0, y1, x1 = box
         return t[y0 // 4:y1 // 4, x0 // 4:x1 // 4]
+    # full-resolution road mask from terrain (60=paved, 100=dirt), matching pm|dm
+    road = np.zeros((t.shape[0] * 4, t.shape[1] * 4), bool)
+    road[2::4, 2::4] = (t == 60) | (t == 100)
     stats = dict(
         fa_fill=int(fill[fa[0]:fa[2], fa[1]:fa[3]].sum()),
         fa_t220=int((terr(fa) == 220).sum()),
@@ -163,6 +188,48 @@ def _map_stats(boxes, outdir=None):
         wa_c255=int((c[wa[0]:wa[2], wa[1]:wa[3]] == 255).sum()),
         wa_c128=int((c[wa[0]:wa[2], wa[1]:wa[3]] == 128).sum()),
     )
+    # ---- C03: trees + collision
+    mj = json.load(open('docs/map.json', encoding='utf-8'))
+    clr_y0, clr_x0, clr_y1, clr_x1 = c03['clear']
+    add_x, add_y, add_r = c03['add']
+    blk_y0, blk_x0, blk_y1, blk_x1 = c03['block']
+    # tree objects (kind=='tree') inside the clear polygon's pixel box. The clear
+    # polygon is axis-aligned in art px (generated via to_latlon), and edits.py's
+    # point_in_poly removes exactly the tree feet inside it. map.json objects store
+    # x = left edge and w, so the foot is x + w//2 (the crown is centred on the
+    # foot); base is the foot y.
+    def foot(o):
+        return o['x'] + o['w'] // 2, o['base']
+    trees_in_clear = int(sum(1 for o in mj['objects'] if o.get('kind') == 'tree'
+                             and clr_x0 <= foot(o)[0] <= clr_x1 and clr_y0 <= foot(o)[1] <= clr_y1))
+    ring_y0, ring_x0, ring_y1, ring_x1 = clr_y0 - 70, clr_x0 - 70, clr_y1 + 70, clr_x1 + 70
+    trees_ring = int(sum(1 for o in mj['objects'] if o.get('kind') == 'tree'
+                         and ring_x0 <= foot(o)[0] <= ring_x1 and ring_y0 <= foot(o)[1] <= ring_y1
+                         and not (clr_x0 <= foot(o)[0] <= clr_x1 and clr_y0 <= foot(o)[1] <= clr_y1)))
+    # added tree: object near the add foot + trunk collide + canopy pixels
+    def near_foot(o):
+        return o.get('kind') == 'tree' and abs(foot(o)[0] - add_x) <= 16 and abs(foot(o)[1] - add_y) <= 16
+    add_objs = int(sum(1 for o in mj['objects'] if near_foot(o)))
+    add_trunk = int((c[int(add_y) - 3:int(add_y) + 1, int(add_x) - 3:int(add_x) + 4] == 255).sum())
+    cy = int(add_y) - int(1.25 * add_r)  # canopy centre (tree(): cy = y - r*1.25)
+    canopy = o[int(cy) - add_r - 2:int(add_y) + 2, int(add_x) - add_r - 2:int(add_x) + add_r + 2]
+    add_canopy = int((canopy[..., 3] > 0).sum())
+    # block/free collision: solid pixels, road pixels staying walkable
+    blk_c255 = int((c[blk_y0:blk_y1, blk_x0:blk_x1] == 255).sum())
+    blk_road = int((road[blk_y0:blk_y1, blk_x0:blk_x1]).sum())
+    blk_road_c255 = int((c[blk_y0:blk_y1, blk_x0:blk_x1][road[blk_y0:blk_y1, blk_x0:blk_x1]] == 255).sum())
+    # free corridor: only the polygon's rasterised interior (same mask paint()
+    # uses) must be walkable 0; the surrounding block stays 255.
+    fmx0, fmy0, fm = c03['free_mask']
+    free_c255 = int((c[fmy0:fmy0 + fm.shape[0], fmx0:fmx0 + fm.shape[1]][fm] == 255).sum())
+    free_c128 = int((c[fmy0:fmy0 + fm.shape[0], fmx0:fmx0 + fm.shape[1]][fm] == 128).sum())
+    free_px = int(fm.sum())
+    stats.update(dict(
+        add_objs=add_objs, add_trunk=add_trunk, add_canopy=add_canopy,
+        trees_in_clear=trees_in_clear, trees_ring=trees_ring,
+        blk_c255=blk_c255, blk_road=blk_road, blk_road_c255=blk_road_c255,
+        free_c255=free_c255, free_c128=free_c128, free_px=free_px,
+    ))
     if outdir:
         os.makedirs(outdir, exist_ok=True)
         ar = lambda a, box: Image.fromarray(a[box[0]:box[2], box[1]:box[3]]).resize(
@@ -171,6 +238,12 @@ def _map_stats(boxes, outdir=None):
         ar(c, wa).save(os.path.join(outdir, 'water_collide.png'))
         ar(g, fa).save(os.path.join(outdir, 'forest_ground.png'))
         ar(t, (fa[0] // 4, fa[1] // 4, fa[2] // 4, fa[3] // 4)).save(os.path.join(outdir, 'forest_terrain.png'))
+        ar(g, c03['clear']).save(os.path.join(outdir, 'trees_clear_ground.png'))
+        ar(o, (clr_y0, clr_x0, clr_y1, clr_x1)).save(os.path.join(outdir, 'trees_clear_objects.png'))
+        ar(c, c03['block']).save(os.path.join(outdir, 'block_collide.png'))
+        ar(c, c03['free']).save(os.path.join(outdir, 'free_collide.png'))
+        ax0, ay0, ax1, ay1 = int(add_x) - add_r - 4, int(cy) - add_r - 4, int(add_x) + add_r + 4, int(add_y) + 4
+        ar(o, (ay0, ax0, ay1, ax1)).save(os.path.join(outdir, 'added_tree_objects.png'))
     return stats
 
 
@@ -198,16 +271,16 @@ def main():
     try:
         if fixture_mode:
             check(os.path.exists(SAMPLE_FIXTURE), 'fixture test/fixtures/edits_sample.json exists')
-            boxes = _fixture_layout()
+            boxes, c03 = _fixture_layout()
             crops_dir = os.path.join(backup_dir, 'fixture-crops')
-            st0 = _map_stats(boxes, os.path.join(crops_dir, 'before'))   # committed/today's pixels
+            st0 = _map_stats(boxes, c03, os.path.join(crops_dir, 'before'))   # committed/today's pixels
             bad = run_pipeline(SAMPLE_FIXTURE)
             check(not bad, f'pipeline completed with SAMPLE edits ({len(bad)} failing step(s))')
             if bad:
                 for s, rc, t in bad:
                     print(f'   {s} exit {rc}: {t}')
-            st = _map_stats(boxes, os.path.join(crops_dir, 'after'))     # fixture-run pixels
-            # C02 forest/water content assertions (trees + entities arrive with C03/C04).
+            st = _map_stats(boxes, c03, os.path.join(crops_dir, 'after'))     # fixture-run pixels
+            # C02 forest/water content assertions.
             check(st0['fa_fill'] < 100 and st0['fa_t220'] < 50,
                   'fixture forest box starts on open grass (window not already forest)')
             check(st0['wa_blue'] < 100 and st0['wa_c255'] < 100,
@@ -226,6 +299,37 @@ def main():
                   f'water.add marks solid collision 255 on map_collide.png ({st0["wa_c255"]} -> {st["wa_c255"]} px)')
             check(st['wa_c128'] == 0,
                   f'water.add collision is solid 255, not low/jumpable 128 ({st["wa_c128"]} px)')
+            # C03 tree assertions: explicit add appears (map.json object + trunk collide
+            # + canopy pixels), clear removes only the trees inside its polygon, and the
+            # surrounding orchard ring is untouched.
+            check(st0['add_objs'] == 0 and st0['add_trunk'] == 0 and st0['add_canopy'] == 0,
+                  'fixture trees.add spot starts empty (no tree object/trunk/canopy)')
+            check(st['add_objs'] == 1,
+                  f'trees.add creates exactly one tree object in map.json near the foot ({st["add_objs"]})')
+            check(st['add_trunk'] > 0,
+                  f'trees.add trunk collision 255 at the foot on map_collide.png ({st["add_trunk"]} px)')
+            check(st['add_canopy'] >= 80,
+                  f'trees.add canopy pixels drawn on map_objects.png near the foot ({st["add_canopy"]} px)')
+            check(st0['trees_in_clear'] >= 10,
+                  f'fixture trees.clear polygon covers generated orchard trees in baseline ({st0["trees_in_clear"]})')
+            check(st['trees_in_clear'] == 0,
+                  f'trees.clear removes every tree inside its polygon ({st0["trees_in_clear"]} -> {st["trees_in_clear"]})')
+            check(st['trees_ring'] == st0['trees_ring'] and st['trees_ring'] >= 20,
+                  f'trees.clear leaves the orchard ring outside the polygon untouched ({st0["trees_ring"]} -> {st["trees_ring"]})')
+            # C03 collision assertions: block paints grass solid, free re-opens a corridor
+            # inside the block, and the road pixels inside the block window stay walkable.
+            check(st0['blk_c255'] < 100 and st0['blk_road_c255'] == 0,
+                  'fixture collision.block window starts on open grass with walkable road')
+            check(st['blk_c255'] - st0['blk_c255'] >= 3000,
+                  f'collision.block paints solid 255 over the open window ({st0["blk_c255"]} -> {st["blk_c255"]} px)')
+            check(st0['blk_road'] >= 5,
+                  f'fixture collision.block window crosses a real road ({st0["blk_road"]} road px)')
+            check(st['blk_road_c255'] == 0,
+                  f'collision.block does NOT block the road inside the window ({st["blk_road_c255"]} px of 255 on road)')
+            check(st['free_c255'] == 0 and st['free_c128'] == 0,
+                  f'collision.free re-opens the corridor to walkable 0 ({st["free_px"]} corridor px cleared, {st["free_c255"]} px of 255, {st["free_c128"]} of 128)')
+            check(st['blk_c255'] >= 5000,
+                  f'block stays solid around the freed corridor ({st["blk_c255"]} px of 255 in the block window)')
             print('fixture window crops (before/after) in:', crops_dir)
         else:
             check(os.path.exists(EMPTY_FIXTURE), 'fixture test/fixtures/edits_empty.json exists')
