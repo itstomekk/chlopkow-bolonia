@@ -45,8 +45,9 @@
   const DUPLICATE_WINDOW = 120;       // same author + same text within 2 min is shown once
 
   const state = {
-    open: false,
-    started: false,
+      open: false,
+      userClosed: false,   // set when the user minimised during this session (title-screen default-open must then stay away)
+      started: false,
     connected: false,
     tools: null,
     secretKey: null,
@@ -73,35 +74,41 @@
   style.textContent = `
     #arek-global-chat, #arek-global-chat * { box-sizing: border-box; }
     #arek-global-chat {
-      position: fixed; z-index: 10000; left: 12px; bottom: 96px;   /* bottom-left, above the music button; laid out by placeChat() */
+      position: fixed; z-index: 10000; right: 12px; bottom: 96px;   /* right-side overlay; laid out by placeChat() */
       width: min(300px, calc(100vw - 24px));
       color: #fff7d6; font: 12px/1.35 "Silkscreen", monospace;
-      text-shadow: 2px 2px #10163a; pointer-events: none;
+      /* Readable on any terrain without an enclosing box: layered outline + soft glow. */
+      text-shadow: 1px 1px 0 #10163a, 2px 2px 0 #10163a, 0 0 7px rgba(16,22,58,.9);
+      pointer-events: none; text-align: right;
     }
     #arek-global-chat button, #arek-global-chat input, #arek-global-chat textarea {
       color: #fff7d6; background: transparent; border: 0;
       border-radius: 0; font: inherit; text-shadow: inherit;
     }
     #arek-global-chat button { cursor: pointer; padding: 7px 9px; }
-    #arek-global-chat button:hover, #arek-global-chat button:focus-visible {
-      background: #26385b; border-color: #ffd21f; outline: none;
+    #arek-global-chat button:hover { color: #ffd21f; }
+    #arek-global-chat button:focus-visible {
+      outline: 1px dashed #ffd21f; outline-offset: 2px; color: #ffd21f;
     }
     #arek-chat-launch {
-      display: block; margin-right: auto; pointer-events: auto;
-      background: rgba(14, 24, 52, .82); color: #fff7d6; padding: 4px 7px;
-      border: 1px solid rgba(255,247,214,.55);
+      display: inline-block; pointer-events: auto; text-align: right;
+      background: transparent; color: #fff7d6; padding: 2px 0;
+      border: 0; text-transform: uppercase;
     }
     #arek-chat-panel {
-      display: none; pointer-events: auto; overflow: hidden;
-      padding: 3px 7px 6px; border: 1px solid rgba(255,247,214,.42);
-      background: rgba(14, 24, 52, .78);
+      display: none; pointer-events: none; overflow: hidden;
+      padding: 3px 7px 6px; border: 0; background: transparent;
+      text-align: left;
     }
-    #arek-chat-header { display: flex; align-items: center; gap: 8px; padding: 2px 0 4px; }
+    /* Only the chat's own controls are interactive; the message area and the rest of
+       the panel pass pointer events through to the game canvas underneath. */
+    #arek-chat-header, #arek-chat-form { pointer-events: auto; }
+    #arek-chat-header { display: flex; align-items: center; gap: 6px; padding: 1px 0 2px; }
     #arek-chat-title { flex: 1; color: #ffd21f; }
     #arek-chat-close { padding: 3px 7px !important; }
     #arek-chat-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     #arek-chat-messages {
-      height: 96px; overflow: hidden; padding: 3px 0 5px;
+      height: 52px; overflow: hidden; padding: 2px 0 4px;
       background: transparent;
       display: flex; flex-direction: column; justify-content: flex-end;
       mask-image: linear-gradient(to bottom, transparent 0, #000 24%, #000 100%);
@@ -113,16 +120,16 @@
     .arek-chat-message[data-own="true"] .arek-chat-name { color: #b8ff9c; }
     .arek-chat-day { display: none; }
     .arek-chat-empty { color: #fff7d6; opacity: .7; }
-    #arek-chat-form { padding: 4px 0 0; }
-    #arek-chat-text { display: block; width: calc(100% - 36px); padding: 5px 0; border-bottom: 1px solid rgba(255,247,214,.8) !important; outline: none; }
+    #arek-chat-form { padding: 2px 0 0; }
+    #arek-chat-text { display: block; width: calc(100% - 36px); padding: 3px 0; border-bottom: 1px solid rgba(255,247,214,.8) !important; outline: none; }
     #arek-chat-text::placeholder { color: #fff7d6; opacity: .7; }
-    #arek-chat-actions { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    #arek-chat-actions { display: flex; align-items: center; gap: 8px; margin-top: 0; }
     #arek-chat-count { display: none; }
     #arek-chat-send { color: #fff7d6; background: transparent; padding: 0; text-shadow: inherit; }
     #arek-chat-send:disabled { cursor: wait; opacity: .6; }
     #arek-global-chat.arek-chat-away { visibility: hidden; }
     @media (max-width: 480px) {
-      #arek-global-chat { left: 8px; width: min(280px, calc(100vw - 16px)); }
+      #arek-global-chat { right: 8px; width: min(280px, calc(100vw - 16px)); }
       #arek-chat-messages { height: 84px; }
     }
   `;
@@ -406,29 +413,50 @@
   }
 
   function openChat(focusInput = false, persist = true) {
-    state.open = true;
-    launch.style.display = 'none';
-    panel.style.display = 'block';
-    if (focusInput) text.focus();
-    if (persist) { try { localStorage.removeItem(CHAT_MINIMIZED_STORAGE); } catch (e) { /* keep chat usable when storage is disabled */ } }
-    start();
-  }
+      state.open = true;
+      state.userClosed = false;
+      launch.style.display = 'none';
+      panel.style.display = 'block';
+      if (focusInput) text.focus();
+      if (persist) { try { localStorage.removeItem(CHAT_MINIMIZED_STORAGE); } catch (e) { /* keep chat usable when storage is disabled */ } }
+      start();
+    }
 
-  function closeChat(persist = true) {
-    state.open = false;
-    panel.style.display = 'none';
-    launch.style.display = 'block';
-    if (persist) { try { localStorage.setItem(CHAT_MINIMIZED_STORAGE, '1'); } catch (e) { /* session can still minimise */ } }
-  }
+    function closeChat(persist = true) {
+      state.open = false;
+      state.userClosed = true;
+      panel.style.display = 'none';
+      launch.style.display = 'block';
+      if (persist) { try { localStorage.setItem(CHAT_MINIMIZED_STORAGE, '1'); } catch (e) { /* session can still minimise */ } }
+    }
 
-  // Layout: bottom-left, just above the game's music button (drawn at H - 7.2U, U = min(W, 1.6H) / 100), so the
-  // quest list (top-left), minimap (top-right) and joystick/A button stay clear. It steps aside while a dialogue box,
-  // the big map or the shop minigame is on screen, and returns by itself.
+  // Layout: a transparent overlay on the right edge. placeChat() pins it into the vertical
+  // band between the two right-side touch zones (map toggle above 30% of the height,
+  // jump/interact below 60%), so it never covers the minimap (top-right), the dialogue box
+  // (bottom strip), the big M-map or the touch controls. It steps aside (the arek-chat-away
+  // class) while a dialogue box, the big map or the shop minigame is on screen, and returns
+  // by itself without losing the draft input or the loaded messages.
   function placeChat() {
-    const U = Math.min(innerWidth, innerHeight * 1.6) / 100;
-    root.style.bottom = `${Math.round(U * 7.6 + 6)}px`;
+    const H = innerHeight;
+    // Right-side touch zones (map toggle above 30% of the height, jump/interact below
+    // 60%) frame a free corridor; the top-right minimap never reaches below it. Pin the
+    // panel into the corridor just above the jump zone - its interactive chrome (form,
+    // header) then sits below the hero's screen-centre, and the display-only messages
+    // area is pointer-transparent, so the game canvas keeps every pointer event except
+    // the chat's own controls. Very short screens bottom-anchor instead.
+    const zoneBottom = H * .3;
+    const jumpTop = H * .6;
+    const panelH = panel.offsetHeight || 150;   // panel is display:none while minimised
+    let top = jumpTop - 8 - panelH;
+    let bottom = H - (top + panelH);
+    if (bottom < 8 || top < zoneBottom + 4) {   // corridor too short: bottom-anchor
+      bottom = 12;
+      bottom = Math.max(8, Math.min(bottom, H - panelH - 8));
+    }
+    root.style.bottom = `${Math.round(bottom)}px`;
     const g = window.__game, typing = document.activeElement === text;
-    const busy = !!(g && (g.talk || g.showMap || document.querySelector('.shop-game, #shop-game')));
+    const busy = !!(g && (g.talk || g.showMap || document.querySelector('.shop-game, #shop-game')
+                           || document.querySelector('#player-name-input')));
     root.classList.toggle('arek-chat-away', busy && !typing);
   }
   addEventListener('resize', placeChat);
@@ -463,9 +491,17 @@
     close: closeChat,
   });
   try {
-    if (localStorage.getItem(CHAT_MINIMIZED_STORAGE) === '1') closeChat(false);
-    else openChat(false, false);
-  } catch (e) {
-    openChat(false, false);
-  }
-})();
+      if (localStorage.getItem(CHAT_MINIMIZED_STORAGE) === '1') closeChat(false);
+      // Open by default only once the play scene is running: on the title screen
+      // the panel would sit over the character selector / name prompt (touch
+      // layouts measure it right on top of the buttons). maybeOpenWhenPlay()
+      // below re-checks every placeChat tick, so fresh visitors still get the
+      // overlay automatically the moment the game starts.
+    } catch (e) { /* keep chat usable when storage is disabled */ }
+    function maybeOpenWhenPlay() {
+      if (state.open || state.userClosed) return;
+      const g = window.__game;
+      if (g && g.scene === 'play') openChat(false, false);
+    }
+    setInterval(maybeOpenWhenPlay, 200);
+  })();

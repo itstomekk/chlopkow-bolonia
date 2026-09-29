@@ -497,7 +497,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-  window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, MAIN_RATE_MIN, TEMPO };
+window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, get mainSrc() { return mainTrack ? mainTrack.src : null; }, get mainPlaying() { return mainTrack ? !mainTrack.paused && !mainTrack.ended : false; }, get mainMuted() { return mainTrack ? mainTrack.muted : null; }, get busGain() { return bus ? bus.gain.value : null; }, MAIN_RATE_MIN, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
@@ -520,11 +520,14 @@
       const sc = A.scene;
       if (sc === 'title') return 'title';   // the printed Polka Dziadek is the entrance screen only
       if (A.room && A.room.soltys) return 'choral';
-      if (A.room && A.room.shop) return 'mazurka';
+      if (A.room && A.room.kind === 'shop') return 'mazurka';
       if (sc === 'end' || nearCemetery()) return 'nokturn';
       if (A.minigame && A.minigame()) return 'oberek';
+      // Fields and the JAZZ W STODOLE yard play the recorded main track too:
+      // village, fields and the barn share the default Ogg playlist (no krakowiak/jazz switch).
+      if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'field') return 'main';
       if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'forest') return 'pastoralka';
-      if (sc === 'play' && nearJazz()) return 'jazz';
+      if (sc === 'play' && nearJazz()) return 'main';
       if (sc === 'play') return 'main';
       return VILLAGE;
     };
