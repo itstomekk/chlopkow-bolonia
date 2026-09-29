@@ -646,6 +646,22 @@
       }
     }
 
+    /* A02: read-only world hover hit shapes (map px, unzoomed) for the game.js
+       picker - no second animal/car registry there. The boxes mirror the real
+       draw extents: cars/tractors use their 60 px sprite boxes, critters use
+       the CRIT height, and flying birds/butterflies keep their current z. */
+    function hitShapes() {
+      const out = [];
+      for (const c of state.cars) out.push({ kind: 'car', x: c.x, y: c.y, base: c.y, halfW: 30, top: 32, bottom: 6 });
+      for (const t of state.tractors) out.push({ kind: 'tractor', x: t.x, y: t.y, base: t.y, halfW: 30, top: 38, bottom: 4 });
+      for (const o of state.animals) {
+        const c = CRIT[o.kind], z = o.z || 0;
+        if (o.kind === 'butterfly') { out.push({ kind: 'butterfly', x: o.x, y: o.y, base: o.y, halfW: 8, top: 8 + z, bottom: 1 + z }); continue; }
+        out.push({ kind: o.kind, x: o.x, y: o.y, base: o.y, halfW: c ? 32 * c.h / c.px : 10, top: (c ? c.h : 12) + z, bottom: 1 + z });
+      }
+      return out;
+    }
+
     HOOKS.near.push(() => state.cars.map((car, i) => ({ x: car.x, y: car.y, r: 34, onInteract: () => buyRide(i) })));
     HOOKS.speed.push(() => state.ride > 0 ? RIDE_SPEED : 1);
     function animalNeedsUpdate(o) {
@@ -707,8 +723,9 @@
         if (chaseTarget && chaseTarget.kind === kind) { A.FRODO.chase = null; chaseTarget = null; }
       },
       balance: appleBalance,
-      buyRide,
-      resetCars() {
+            buyRide,
+            hitShapes,
+            resetCars() {
         const q = Q();
         if (!q.worldLife) q.worldLife = {};
         q.worldLife.cars = null;
