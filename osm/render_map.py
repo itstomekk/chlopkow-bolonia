@@ -17,6 +17,8 @@ from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, 'osm'); sys.path.insert(0, 'gen')
 from geo import A, BBOX, W, H, P, to_latlon, legacy_i, pre_expansion_i, REAL_POIS, PRE_EXPANSION_ADDITIONS
 from slice_sheet import key as chroma_key
+import edits          # osm/edits.py: manual add/remove layers keyed by pipeline stage
+EDITS = edits.load()  # ARK_EDITS or osm/edits.json; a missing file is empty edits (no-op)
 
 OSM = 'osm/chlopkow.json'
 rnd = random.Random(7)
@@ -131,7 +133,12 @@ for e in ways:
     tg = e['tags']
     if tg.get('natural') == 'water': ponds.append(pts(e))
     elif tg.get('waterway') in ('stream', 'river', 'ditch', 'canal'): river_lines.append((pts(e), (7 if tg['waterway'] != 'ditch' else 4) * A))
-wm = mask_of(ponds, river_lines)
+# E2 water edits hook (osm/edits.py 'water' stage, verified at C02): added ponds
+# are painted into pond_m + collide BEFORE the derived masks/art below, so an
+# added pond gets water colour, solid collision and low/bank exclusion in one pass.
+pond_m = mask_of(ponds)
+edits.apply('water', EDITS, dict(pond_m=pond_m, collide=collide))
+wm = pond_m | mask_of([], river_lines)
 bank = mask_of(ponds, [(l, w + 6) for l, w in river_lines]) & ~wm
 wn = noise2(W, H, 6, 51)[..., None]
 wcol = np.array(hexc('#3f86c9')) * (1 - wn) + np.array(hexc('#2f6fb0')) * wn
@@ -139,7 +146,6 @@ g[bank] = np.array(hexc('#4a7a34'))
 g[wm] = wcol[wm]
 sp = (np.random.rand(H, W) > .985) & wm
 g[sp] = hexc('#9fd0f0')
-pond_m = mask_of(ponds)
 collide |= pond_m
 low |= wm & ~pond_m
 
@@ -754,6 +760,12 @@ def village_tree_type(x, y):
 
 res_mask = mask_of(classes.get('residential', []) + classes.get('religious', []) + classes.get('cemetery', []))
 forest_mask = mask_of(classes.get('forest', []) + classes.get('wood', []))
+# E2 forest edits hook (osm/edits.py 'forest' stage, verified at C02): add/remove
+# polygons are painted into forest_mask BEFORE the ground fill, tree generation
+# and terrain class below, so forest.add grows forest floor + trees and
+# forest.remove restores the underlying ground and terrain class. Forest stays
+# walkable here - trunk collision policy is owned by C05.
+edits.apply('forest', EDITS, dict(forest_mask=forest_mask))
 orch = classes.get('orchard', [])
 tree_pts = []
 # residential gardens
