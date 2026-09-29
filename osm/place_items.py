@@ -8,6 +8,8 @@ import numpy as np
 from PIL import Image
 sys.path.insert(0, 'osm')
 from geo import legacy_i, pre_expansion_i, P, PRE_EXPANSION_ADDITIONS
+import edits          # osm/edits.py: manual add/remove layers keyed by pipeline stage
+EDITS = edits.load()  # ARK_EDITS or osm/edits.json; a missing file is empty edits (no-op)
 
 m = json.load(open('docs/map.json'))
 W, H = m['w'], m['h']
@@ -171,6 +173,28 @@ if 'jazz' in m: npcs.append(dict(id='patryk', **at(m['jazz']['x'] + 50, m['jazz'
 npcs.append(dict(id='wesoly_swiat', **at(1692, 650)))
 if 'football_pitch' in m: npcs.append(dict(id='renik', **at(m['football_pitch']['cx'] + 80, m['football_pitch']['cy'])))
 npcs.append(dict(id='edytka', **at(120, 3869)))
+
+# ---------------------------------------------------------------- E2 entity hooks (C04)
+# Entities are the place_items stage of the edits pipeline (the same load/apply API the
+# render_map hooks use): a "kind:id" override moves a known npc to its EXACT lat/lon,
+# entities.remove drops one, entities.add creates one at its exact lat/lon, and people
+# zones then relocate a npc to a venue anchor. Unknown ids/venues raise - the pipeline
+# fails loudly on a typo instead of silently ignoring it. Overrides/additions are pinned
+# exactly, so every npc is re-checked for reachable walkable ground right here.
+ent_target = {f'npc:{n["id"]}': n for n in npcs}
+edits.apply('entities', EDITS, dict(target=ent_target, target_list=npcs))
+anchor = {}
+for vk in ('shop', 'church', 'windmill', 'rectory', 'cemetery'):
+    if vk in poi: anchor[vk] = (poi[vk]['x'], poi[vk]['y'])
+for vk in ('jazz', 'range', 'gravel'):
+    if vk in m: anchor[vk] = (m[vk]['x'], m[vk]['y'])
+for vk in ('corral', 'track', 'football_pitch'):
+    if vk in m: anchor[vk] = (m[vk]['cx'], m[vk]['cy'])
+if 'meadow' in m: anchor['meadow'] = ((m['meadow']['x0'] + m['meadow']['x1']) // 2, (m['meadow']['y0'] + m['meadow']['y1']) // 2)
+edits.apply('zones', EDITS, dict(target=ent_target, target_list=npcs, venues=anchor, spot=at))
+for n in npcs:
+    assert free(n['x'], n['y'], 10), f'{n["id"]} is not on reachable walkable ground'
+
 for n in npcs:
     for b in boards:
         assert math.hypot(n['x'] - b['x'], n['y'] - b['y']) > 45, f"{n['id']} blocks the {b['spot']} signboard"

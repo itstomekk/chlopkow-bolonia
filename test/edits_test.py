@@ -93,12 +93,59 @@ ctx = {'collide_img': img, 'road_m': road}
 edits.apply('collision', {'layers': {'collision': {'block': [{'poly': square(100, 100, 20)}]}}}, ctx)
 check(img[90, 100] == 255 and img[100, 100] == 0, 'collision block, roads stay walkable')
 
-# stage: entities
-tgt = {'npc:soltys': {'id': 'soltys', 'x': 1, 'y': 1, 'secret': True}}
+# stage: entities - override moves in place, add appends, remove drops, unknown ids FAIL LOUDLY
+tgt = {'npc:soltys': {'id': 'soltys', 'x': 1, 'y': 1, 'secret': True}, 'npc:halina': {'id': 'halina', 'x': 2, 'y': 2}}
+lst = [tgt['npc:soltys'], tgt['npc:halina']]
 lat, lon = geo.to_latlon(1234, 2345)
-edits.apply('entities', {'layers': {'entities': {'npc:soltys': {'lat': lat, 'lon': lon}, 'npc:ghost': {'lat': lat, 'lon': lon}}}}, {'target': tgt})
-check(tgt['npc:soltys']['x'] == 1234 and tgt['npc:soltys']['y'] == 2345 and tgt['npc:soltys']['secret'], 'entity override moves, keeps other fields')
-check('npc:ghost' not in tgt, 'unknown entity ids are ignored, not invented')
+edoc = {'layers': {'entities': {
+    'npc:soltys': {'lat': lat, 'lon': lon},
+    'remove': ['npc:halina'],
+    'add': [{'kind': 'npc', 'id': 'gosia', 'lat': lat, 'lon': lon, 'secret': True}],
+}}}
+check(edits.validate(edoc) == [], 'entities add/remove doc validates')
+edits.apply('entities', edoc, {'target': tgt, 'target_list': lst})
+check(tgt['npc:soltys']['x'] == 1234 and tgt['npc:soltys']['y'] == 2345 and tgt['npc:soltys']['secret'],
+      'entity override moves in place, keeps other fields')
+check(lst[0] is tgt['npc:soltys'], 'override mutates the generator record (list identity)')
+check('npc:gosia' in tgt and tgt['npc:gosia']['x'] == 1234 and tgt['npc:gosia']['y'] == 2345
+      and tgt['npc:gosia']['secret'] is True and lst[-1] is tgt['npc:gosia'],
+      'entities.add appends a new record at the exact lat/lon')
+check('npc:halina' not in tgt and all(n['id'] != 'halina' for n in lst),
+      'entities.remove drops the record from target and the generator list')
+try:
+    edits.apply('entities', {'layers': {'entities': {'npc:ghost': {'lat': lat, 'lon': lon}}}}, {'target': tgt})
+    check(False, 'unknown entity override raises')
+except ValueError as e:
+    check('npc:ghost' in str(e), 'unknown entity override raises with the id')
+try:
+    edits.apply('entities', {'layers': {'entities': {'remove': ['npc:ghost']}}}, {'target': tgt})
+    check(False, 'unknown entity remove raises')
+except ValueError:
+    check(True, 'unknown entity remove raises')
+bad4 = {'version': 1, 'layers': {'entities': {'add': [{'kind': 'npc', 'lat': 52.26, 'lon': 22.86}], 'remove': ['halina']}}}
+check(len(edits.validate(bad4)) == 2, 'bad entities add (missing id) and remove (no kind:) rejected')
+
+# stage: zones - a people zone moves its npc to the venue anchor; music stays runtime data
+tgt2 = {'npc:kuba': {'id': 'kuba', 'x': 1, 'y': 1}}
+edits.apply('zones', {'layers': {'zones': {'items': [{'id': 'yard', 'kind': 'people',
+    'poly': square(100, 100, 10), 'props': {'npc': 'kuba', 'venue': 'church'}}]}}},
+    {'target': tgt2, 'venues': {'church': (3000, 4000)}, 'spot': lambda x, y: dict(x=round(x), y=round(y))})
+check(tgt2['npc:kuba']['x'] == 3000 and tgt2['npc:kuba']['y'] == 4000,
+      'people zone moves the npc to the venue anchor')
+try:
+    edits.apply('zones', {'layers': {'zones': {'items': [{'id': 'x', 'kind': 'people',
+        'poly': square(50, 50, 5), 'props': {'npc': 'kuba', 'venue': 'nowhere'}}]}}},
+        {'target': tgt2, 'venues': {'church': (1, 1)}})
+    check(False, 'unknown zone venue raises')
+except ValueError:
+    check(True, 'unknown zone venue raises')
+try:
+    edits.apply('zones', {'layers': {'zones': {'items': [{'id': 'x', 'kind': 'people',
+        'poly': square(50, 50, 5), 'props': {'npc': 'ghost', 'venue': 'church'}}]}}},
+        {'target': tgt2, 'venues': {'church': (1, 1)}})
+    check(False, 'unknown zone npc raises')
+except ValueError:
+    check(True, 'unknown zone npc raises')
 
 # stage: buildings
 lat, lon = geo.to_latlon(1000, 2000)

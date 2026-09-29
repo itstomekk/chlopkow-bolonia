@@ -4,7 +4,8 @@
                                                    # reproducible baseline byte-for-byte (SHA-256)
     python test/edits_pipeline_test.py --fixture   # smoke run with test/fixtures/edits_sample.json;
                                                    # C02 asserts forest.add/remove and water.add change
-                                                   # ground/terrain/collision in the expected windows
+                                                   # ground/terrain/collision in the expected windows,
+                                                   # C03 trees/collision, C04 entities/zones
 
 Safety model
 ------------
@@ -50,13 +51,13 @@ as part of landing its hooks.
 
 Exit code: 0 all good, 1 any failure.
 """
-import glob, hashlib, json, os, shutil, subprocess, sys, tempfile
+import glob, hashlib, json, math, os, shutil, subprocess, sys, tempfile
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 sys.path.insert(0, os.path.join(ROOT, 'osm'))
-from geo import P as _P  # fixture lat/lon -> art pixels, so the assertion boxes follow the map geometry
+from geo import P as _P, W as _W, H as _H  # fixture lat/lon -> art pixels; map size for reachability
 
 PROTECTED = ['docs/map.json', 'docs/items.json'] + \
             sorted(glob.glob('docs/img/map_*.png'))
@@ -124,9 +125,11 @@ FOREST_FILL = (31, 79, 36)          # exact hexc('#1f4f24') forest-floor base
 
 
 def _fixture_layout():
-    """Pixel boxes of the sample fixture's polygons: returns (forest_boxes, c03).
+    """Pixel boxes of the sample fixture's polygons: returns (forest_boxes, c03, c04).
     forest_boxes = (forest.add, forest.remove, water.add) boxes like C02.
-    c03 = dict with trees.clear box, trees.add foot px, collision block/free boxes."""
+    c03 = dict with trees.clear box, trees.add foot px, collision block/free boxes.
+    c04 = dict with entities/zones geometry: soltys override pixel, add id+pixel,
+    removed id, zone npc/venue."""
     data = json.load(open(SAMPLE_FIXTURE, encoding='utf-8'))
     def poly(layer, key):
         return data['layers'][layer][key][0]['poly']
@@ -153,7 +156,17 @@ def _fixture_layout():
     fre = (_fy0, _fx0, _fy0 + _fm.shape[0], _fx0 + _fm.shape[1])
     free_mask = (_fx0, _fy0, _fm)
     c03 = dict(clear=clr, add=(ax, ay, add['r']), block=blk, free=fre, free_mask=free_mask)
-    return (fa, hole, wa), c03
+    # ---- C04: entities + zones
+    ent = data['layers'].get('entities', {})
+    so_lat, so_lon = ent.get('npc:soltys', {}).get('lat'), ent.get('npc:soltys', {}).get('lon')
+    c04 = dict(soltys_override=(int(round(_P(so_lat, so_lon)[0])), int(round(_P(so_lat, so_lon)[1]))) if so_lat is not None else None)
+    adds = ent.get('add', [])
+    c04['add'] = tuple((o['id'], (int(round(_P(o['lat'], o['lon'])[0])), int(round(_P(o['lat'], o['lon'])[1])))) for o in adds)
+    rm = ent.get('remove', [])
+    c04['remove'] = set(rm)
+    z = (data['layers'].get('zones', {}).get('items') or [None])[0]
+    c04['zone'] = dict(npc=z['props'].get('npc'), venue=z['props'].get('venue')) if z and z.get('props') else {}
+    return (fa, hole, wa), c03, c04
 
 
 def _map_stats(boxes, c03, outdir=None):
@@ -247,6 +260,95 @@ def _map_stats(boxes, c03, outdir=None):
     return stats
 
 
+def _venue_px(mj, vk):
+    """Pixel anchor of a named venue: POI first, then map.json venue records."""
+    for p in mj.get('pois', []):
+        if p['key'] == vk:
+            return p['x'], p['y']
+    v = mj.get(vk)
+    if not v:
+        return None
+    if 'cx' in v:
+        return v['cx'], v['cy']
+    if 'x0' in v:
+        return (v['x0'] + v['x1']) // 2, (v['y0'] + v['y1']) // 2
+    return v['x'], v['y']
+
+
+def _c04_stats(c04, outdir=None):
+    """C04 entity stats from docs/items.json after a fixture run, plus an independent
+    reachable-route check (same flood-fill place_items uses) for every npc."""
+    import numpy as np
+    from PIL import Image
+    from scipy import ndimage
+    ij = json.load(open('docs/items.json', encoding='utf-8'))
+    mj = json.load(open('docs/map.json', encoding='utf-8'))
+    npcs = ij['npcs']
+    byid = {n['id']: n for n in npcs}
+    cmask = np.array(Image.open('docs/img/map_collide.png').convert('L'))
+    solid = cmask > 127
+    C = 4
+    foot = ndimage.binary_dilation(cmask > 64, structure=np.ones((7, 15), bool))
+    hh, ww = _H // C, _W // C
+    passable = (~foot[:hh * C, :ww * C]).reshape(hh, C, ww, C).any(axis=(1, 3))
+    lab, _ = ndimage.label(passable)
+    sp = mj['spawn']
+    reach = lab == lab[sp['y'] // C, sp['x'] // C]
+    def ok(x, y):
+        x, y = int(x), int(y)
+        if y < 40 or x < 10 or x >= _W - 10 or y >= _H - 10: return False
+        return reach[min(hh - 1, y // C), min(ww - 1, x // C)] and not solid[y - 10:y + 3, x - 10:x + 10].any()
+    gid = c04['add'][0][0] if c04['add'] else None
+    gpx = c04['add'][0][1] if c04['add'] else None
+    removed = {r.split(':')[1] for r in c04['remove']}
+    kuba = byid.get('kuba')
+    st = dict(n=len(npcs), ids=sorted(byid),
+              soltys=(byid['soltys']['x'], byid['soltys']['y']) if 'soltys' in byid else None,
+              gid=gid, gosia=(byid[gid]['x'], byid[gid]['y']) if gid in byid else None,
+              gosia_ok=ok(*gpx) if gid in byid else False,
+              removed_absent=all(i not in byid for i in removed),
+              kuba=(kuba['x'], kuba['y']) if kuba is not None else None,
+              kuba_ok=ok(kuba['x'], kuba['y']) if kuba is not None else False,
+              all_reachable=all(ok(n['x'], n['y']) for n in npcs))
+    vpx = _venue_px(mj, c04['zone'].get('venue'))
+    st['kuba_d_venue'] = (math.hypot(kuba['x'] - vpx[0], kuba['y'] - vpx[1])
+                          if kuba is not None and vpx else None)
+    st['unchanged'] = {i: (byid[i]['x'], byid[i]['y']) for i in byid
+                       if i not in ('soltys', gid, 'kuba') and i not in removed}
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
+        g = np.array(Image.open('docs/img/map_ground.png').convert('RGB'))
+        from PIL import ImageDraw
+        def marker(img, x, y, col, r=6, cross=False):
+            d = ImageDraw.Draw(img)
+            d.ellipse([x - r, y - r, x + r, y + r], outline=col, width=2)
+            if cross:
+                d.line([x - r - 3, y, x + r + 3, y], fill=col, width=1)
+                d.line([x, y - r - 3, x, y + r + 3], fill=col, width=1)
+            return img
+        # overview: quarter-scale map with every npc (baseline white, moved/added red)
+        ov = Image.fromarray(g[::4, ::4]).convert('RGB')
+        for n in npcs:
+            marker(ov, n['x'] // 4, n['y'] // 4, (255, 70, 70) if n['id'] in ('soltys', gid, 'kuba') else (255, 255, 255), r=5)
+        ov.save(os.path.join(outdir, 'npcs_overview.png'))
+        def spot(name, x, y, extra=()):
+            pad = 60
+            x0, y0 = max(0, x - pad), max(0, y - pad)
+            x1, y1 = min(_W, x + pad), min(_H, y + pad)
+            im = Image.fromarray(g[y0:y1, x0:x1]).resize(((x1 - x0) * 2, (y1 - y0) * 2), Image.Resampling.NEAREST)
+            im = marker(im, (x - x0) * 2, (y - y0) * 2, (255, 40, 40), r=7, cross=True)
+            for ex, ey, c in extra:
+                im = marker(im, (ex - x0) * 2, (ey - y0) * 2, c, r=5)
+            im.save(os.path.join(outdir, name))
+        if c04['soltys_override']:
+            spot('soltys_override_spot.png', *c04['soltys_override'])
+        if gpx:
+            spot('gosia_add_spot.png', *gpx)
+        if vpx and kuba is not None:
+            spot('kuba_venue_spot.png', vpx[0], vpx[1], extra=((kuba['x'], kuba['y'], (70, 160, 255)),))
+    return st
+
+
 def main():
     fixture_mode = '--fixture' in sys.argv
     backup_dir = tempfile.mkdtemp(prefix='chlopkow-pipeline-')
@@ -271,15 +373,17 @@ def main():
     try:
         if fixture_mode:
             check(os.path.exists(SAMPLE_FIXTURE), 'fixture test/fixtures/edits_sample.json exists')
-            boxes, c03 = _fixture_layout()
+            boxes, c03, c04 = _fixture_layout()
             crops_dir = os.path.join(backup_dir, 'fixture-crops')
             st0 = _map_stats(boxes, c03, os.path.join(crops_dir, 'before'))   # committed/today's pixels
+            st0c = _c04_stats(c04, os.path.join(crops_dir, 'before'))
             bad = run_pipeline(SAMPLE_FIXTURE)
             check(not bad, f'pipeline completed with SAMPLE edits ({len(bad)} failing step(s))')
             if bad:
                 for s, rc, t in bad:
                     print(f'   {s} exit {rc}: {t}')
             st = _map_stats(boxes, c03, os.path.join(crops_dir, 'after'))     # fixture-run pixels
+            stc = _c04_stats(c04, os.path.join(crops_dir, 'after'))
             # C02 forest/water content assertions.
             check(st0['fa_fill'] < 100 and st0['fa_t220'] < 50,
                   'fixture forest box starts on open grass (window not already forest)')
@@ -330,6 +434,29 @@ def main():
                   f'collision.free re-opens the corridor to walkable 0 ({st["free_px"]} corridor px cleared, {st["free_c255"]} px of 255, {st["free_c128"]} of 128)')
             check(st['blk_c255'] >= 5000,
                   f'block stays solid around the freed corridor ({st["blk_c255"]} px of 255 in the block window)')
+            # C04 entity assertions: npc override in place, add at exact lat/lon with a
+            # reachable route, remove works, people-zone venue override moves npc:kuba
+            # to the church anchor, the 9 untouched OSM npcs keep their exact positions.
+            check(st0c['n'] == 12, f'baseline items.json has exactly 12 npcs (got {st0c["n"]})')
+            check(st0c['soltys'] == (1887, 4399),
+                  f'soltys sits at his canonical spot in the baseline ({st0c["soltys"]})')
+            check(st0c['gid'] and st0c['gosia'] is None, 'baseline has no npc:gosia')
+            check(st0c['removed_absent'] is False, 'baseline still contains npc:halina')
+            check(stc['n'] == 12, f'fixture keeps 12 npcs (12 - 1 remove + 1 add, got {stc["n"]})')
+            check(stc['soltys'] == c04['soltys_override'],
+                  f'npc:soltys override moves him to the exact lat/lon ({st0c["soltys"]} -> {stc["soltys"]})')
+            check(stc['gosia'] == c04['add'][0][1] and stc['gosia_ok'],
+                  f'entities.add places npc:{stc["gid"]} at its exact lat/lon with a reachable route ({stc["gosia"]})')
+            check(stc['removed_absent'], f'entities.remove drops {sorted(c04["remove"])} from items.json')
+            check(stc['kuba'] != st0c['kuba'] and stc['kuba'] is not None,
+                  f'zone override moves npc:kuba ({st0c["kuba"]} -> {stc["kuba"]})')
+            check(stc['kuba_ok'], 'zone-moved npc:kuba sits on reachable walkable ground')
+            check(stc['kuba_d_venue'] is not None and stc['kuba_d_venue'] <= 200,
+                  f'zone-moved npc:kuba lands within 200 px of the {c04["zone"].get("venue")} venue anchor ({stc["kuba_d_venue"]:.1f} px)')
+            check(stc['all_reachable'], 'every post-fixture npc has a reachable route (walkable + reachable from spawn)')
+            same = all(st0c['unchanged'][i] == stc['unchanged'].get(i) for i in st0c['unchanged'])
+            check(same and len(st0c['unchanged']) >= 8,
+                  f'the {len(st0c["unchanged"])} untouched OSM npcs keep their exact baseline positions')
             print('fixture window crops (before/after) in:', crops_dir)
         else:
             check(os.path.exists(EMPTY_FIXTURE), 'fixture test/fixtures/edits_empty.json exists')

@@ -16,12 +16,21 @@ Stages and the ctx keys they use:
     trees       tree_pts (list of (x, y, r, dark)), W, H   trees.clear / trees.add (adds `keep` flag list)
     water       pond_m (bool HxW), collide (bool HxW)      water.add
     collision   collide_img (uint8 HxW: 0/128/255), road_m   collision.block / collision.free
-    entities    target (dict key -> dict with x/y)          entities.<kind>:<id>
+        entities    target (dict 'kind:id' -> the generator's own record dict with x/y),
+                target_list (the generator's list of those same records)
+                entities.<kind>:<id> = {lat, lon, ...freely replaced fields...} moves the
+                  entity to the EXACT lat/lon (unknown id raises); entities.remove =
+                  ['kind:id', ...] drops records (unknown raises); entities.add =
+                  [{kind, id, lat, lon, ...}] appends a new record at its exact lat/lon.
     buildings   buildings (generator list of dicts: id, kind, c, ax, nx, L, Wd)
                                                             buildings.remove / .modify / .add
                 (hook right after the OSM building list is built, before footprint fitting;
                  records with fixed=True must keep their size: skip the 1.25-2.3x exaggeration)
-    zones       (not applied by generators; exported for the game runtime later)
+    zones       target / target_list, venues (dict venue-name -> (x, y) px anchor),
+                spot (callable anchor -> reachable {x, y}, generator's own spot finder)
+                zones.items[] with kind 'people' and props {npc: id, venue: key} move that
+                npc to the venue anchor (snapped to reachable ground); music/animals/custom
+                zones stay runtime-only data.
 
 An empty or missing edits file must leave every output unchanged.
 """
@@ -171,12 +180,24 @@ def _v_collision(layer, w):
 def _v_entities(layer, w):
     errs = []
     for k, o in layer.items():
+        if k in ('add', 'remove'):
+            continue            # handled below
         if ':' not in k:
             errs.append(f'{w}.{k}: key must look like kind:id, e.g. npc:soltys')
         elif not isinstance(o, dict):
             errs.append(f'{w}.{k}: must be an object')
         else:
             errs += _latlon_errors(o, f'{w}.{k}')
+    def entity(o, where):
+        e = _latlon_errors(o, where)
+        if not (isinstance(o.get('kind'), str) and o.get('kind')
+                and isinstance(o.get('id'), str) and o.get('id')):
+            e.append(f'{where}: kind and id (non-empty strings) are required')
+        return e
+    errs += _list(layer, 'add', w, entity)
+    rm = layer.get('remove', [])
+    if not isinstance(rm, list) or not all(isinstance(i, str) and ':' in i for i in rm):
+        errs.append(f'{w}.remove: must be a list of kind:id strings (e.g. "npc:halina")')
     return errs
 
 
@@ -291,12 +312,76 @@ def _a_collision(layer, ctx):
 
 
 def _a_entities(layer, ctx):
+    """Move existing entities, add new ones and drop others, all in place.
+
+    ctx['target'] maps 'kind:id' -> the GENERATOR's own record dict; ctx['target_list']
+    is the generator's collection holding those same dict objects, so append/remove
+    keep the generator's list as the single source of truth. Overrides and adds place
+    the entity at the EXACT lat/lon - the generator must check reachability (a pin
+    drawn by an editor on a blocked spot fails loudly in the pipeline instead of
+    being silently re-snapped by a later at() call). Unknown ids RAISE: a typo in the
+    edits file must break the build, not move the wrong (or no) entity.
+    """
     target = ctx['target']
+    tlist = ctx.get('target_list')
     for k, o in layer.items():
-        if k in target:
-            x, y = to_px(o['lat'], o['lon'])
-            target[k] = dict(target[k], x=int(round(x)), y=int(round(y)),
-                             **{kk: vv for kk, vv in o.items() if kk not in ('lat', 'lon')})
+        if k in ('add', 'remove'):
+            continue
+        if k not in target:
+            raise ValueError(f'entities.{k}: unknown entity (known ids: {sorted(target)})')
+        rec = target[k]
+        x, y = to_px(o['lat'], o['lon'])
+        rec.update(x=int(round(x)), y=int(round(y)),
+                   **{kk: vv for kk, vv in o.items() if kk not in ('lat', 'lon')})
+    for k in layer.get('remove', []):
+        if k not in target:
+            raise ValueError(f'entities.remove: unknown entity {k!r} (known ids: {sorted(target)})')
+        if tlist is not None:
+            tlist.remove(target[k])
+        del target[k]
+    for o in layer.get('add', []):
+        key = f"{o['kind']}:{o['id']}"
+        if key in target:
+            raise ValueError(f'entities.add {key}: already exists - use the "kind:id" override form to move it')
+        x, y = to_px(o['lat'], o['lon'])
+        rec = dict(id=o['id'], x=int(round(x)), y=int(round(y)),
+                   **{kk: vv for kk, vv in o.items() if kk not in ('kind', 'id', 'lat', 'lon')})
+        target[key] = rec
+        if tlist is not None:
+            tlist.append(rec)
+
+
+def _a_zones(layer, ctx):
+    """People zones can move their NPC to a venue anchor; music/animals/custom zones
+    stay runtime-only data.
+
+    A zone item with kind 'people' and props {'npc': id, 'venue': key} relocates that
+    npc to the venue's anchor. When ctx['spot'] (the generator's own reachable-spot
+    finder, usually its at()) is provided, the npc is snapped to reachable ground near
+    the anchor; otherwise it is placed on the anchor pixel itself. Unknown npc ids and
+    venue names raise - the pipeline fails loudly instead of silently ignoring a typo.
+    """
+    target = ctx.get('target') or {}
+    venues = ctx.get('venues') or {}
+    spot = ctx.get('spot')
+    for z in layer.get('items', []):
+        p = z.get('props') or {}
+        nid, ven = p.get('npc'), p.get('venue')
+        if not nid or not ven:
+            continue            # zone without a move directive is runtime data
+        zid = z.get('id') or '?'
+        if z.get('kind') != 'people':
+            raise ValueError(f'zones.{zid}: zone->npc moves need kind "people" (got {z.get("kind")!r})')
+        key = nid if ':' in nid else f'npc:{nid}'
+        if key not in target:
+            raise ValueError(f'zones.{zid}: unknown npc {nid!r} (known ids: {sorted(target)})')
+        if ven not in venues:
+            raise ValueError(f'zones.{zid}: unknown venue {ven!r} (known: {sorted(venues)})')
+        if spot is not None:
+            target[key].update(spot(*venues[ven]))
+        else:
+            x, y = venues[ven]
+            target[key].update(x=int(round(x)), y=int(round(y)))
 
 
 class LayerSpec:
@@ -313,7 +398,7 @@ LAYERS = {
     'collision': LayerSpec(_v_collision, 'collision', _a_collision),
     'entities': LayerSpec(_v_entities, 'entities', _a_entities),
     'buildings': LayerSpec(_v_buildings, 'buildings', _a_buildings),
-    'zones': LayerSpec(_v_zones, None, None),   # read by the game runtime in a later version
+    'zones': LayerSpec(_v_zones, 'zones', _a_zones),   # people zones move NPCs to venue anchors
 }
 
 

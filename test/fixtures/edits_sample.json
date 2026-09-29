@@ -1,8 +1,8 @@
 {
  "version": 1,
  "meta": {
-  "note": "E2 pipeline fixture: C02 forest/water + C03 trees/collision. trees.clear targets 24 generated orchard trees; collision.block crosses a real road; collision.free re-opens a corridor inside block."
- },
+   "note": "E2 pipeline fixture: C02 forest/water + C03 trees/collision + C04 entities/zones. trees.clear targets 24 generated orchard trees; collision.block crosses a real road; collision.free re-opens a corridor inside block. entities: npc:soltys override (exact), remove npc:halina, add npc:gosia (exact); zones: people zone 'church_yard' moves npc:kuba to the church venue anchor."
+  },
  "layers": {
   "trees": {
    "add": [
@@ -153,10 +153,51 @@
       ]
   },
   "entities": {
-   "npc:soltys": {
-    "lat": 52.2651038,
-    "lon": 22.8773162
+     "npc:soltys": {
+      "lat": 52.2651038,
+      "lon": 22.8773162
+     },
+     "remove": [
+      "npc:halina"
+     ],
+     "add": [
+      {
+       "kind": "npc",
+       "id": "gosia",
+       "lat": 52.2632951,
+       "lon": 22.8839953
+      }
+     ]
+    },
+    "zones": {
+     "items": [
+      {
+       "id": "church_yard",
+       "kind": "people",
+       "poly": [
+        [
+         52.2609030,
+         22.8771914
+        ],
+        [
+         52.2609030,
+         22.8783658
+        ],
+        [
+         52.2601795,
+         22.8783658
+        ],
+        [
+         52.2601795,
+         22.8771914
+        ]
+       ],
+       "props": {
+        "npc": "kuba",
+        "venue": "church"
+       }
+      }
+     ]
+    }
    }
   }
- }
-}
