@@ -223,7 +223,7 @@
   let hasSave = false, memoryIndex = 0, savedDog = null;
   const keys = new Set();
   const joy = { active: false, id: null, cx: 0, cy: 0, x: 0, y: 0 };
-  const pointer = { x: 0, y: 0, seen: false };   // last mouse/touch position in canvas pixels (used for aiming)
+  const pointer = { x: 0, y: 0, seen: false, kind: null };   // last pointer position in canvas px + its type ('mouse'/'touch'/'pen'); the world hover label shows only for a real mouse
   const clickTarget = { active: false, x: 0, y: 0 };
   const mapCursor = { seen: false, x: 0, y: 0 };
 
@@ -582,6 +582,87 @@
     const t = terrainAt(x, y);
     return TERRAIN_NAMES[t] || null;
   }
+  /* ---------- world hover picker (A02) ----------
+     Side-effect-free read-only query: which small hover label belongs to the
+     world point (wx, wy)? Unlike mapHoverLabel() (big M-map floating box), it
+     works in the normal world and mirrors the y-sorted render: among all
+     objects whose draw extent (map px, unzoomed) contains the point, the
+     front-most wins - highest baseline, ties go to the layer drawn last.
+     Types owned by world-life.js (cars, tractors, animals) are read through
+     its read-only hitShapes() adapter, never duplicated here. */
+  const WORLD_HOVER = LANG === 'pl'
+    ? { building: 'BUDYNEK', tree: 'DRZEWO', bale: 'BELA', car: 'SAMOCHÓD', tractor: 'TRAKTOR',
+        animal: { mouse: 'MYSZ', bird: 'PTAK', chicken: 'KURA', dog: 'PIES', boar: 'DZIK', hare: 'ZAJĄC', pig: 'ŚWINIA', fox: 'LIS', stork: 'BOCIAN', butterfly: 'MOTYL' } }
+    : { building: 'BUILDING', tree: 'TREE', bale: 'BALE', car: 'CAR', tractor: 'TRACTOR',
+        animal: { mouse: 'MOUSE', bird: 'BIRD', chicken: 'CHICKEN', dog: 'DOG', boar: 'BOAR', hare: 'HARE', pig: 'PIG', fox: 'FOX', stork: 'STORK', butterfly: 'BUTTERFLY' } };
+  const worldAnimalLabel = kind => (WORLD_HOVER.animal[kind] || String(kind).toUpperCase());
+  // Hit boxes in map pixels, mirroring the draw functions' sprite sizes / art offsets.
+  const EXTENT_HERO = { halfW: 10, top: 40, bottom: 5 };   // drawArek: CHAR_H 40, ~20 px wide
+  const EXTENT_FRODO = { halfW: 13, top: 27, bottom: 1 };  // drawFrodo: 27 px box
+  const EXTENT_NPC = { halfW: 18, top: 46, bottom: 2 };    // drawNpc: atlas cell scaled to ~40 px
+  const EXTENT_BALE = { halfW: 12, top: 10, bottom: 1 };   // drawBale: 23x10 art
+  const EXTENT_PICKUP = { halfW: 7, top: 13, bottom: 1 };  // drawApple/drawMushroom: 13x12 art
+  const EXTENT_TRASH = { halfW: 9, top: 17, bottom: 2 };   // drawTrashBag: 16 px bag above the ground
+  function worldPickAt(wx, wy) {
+    if (!MAP || !ITEMS || ROOM) return null;   // rooms (church/shop) keep the coordinates-only HUD
+    const hit = e => Math.abs(wx - e.x) <= e.halfW && wy >= e.y - e.top && wy <= e.y + e.bottom;
+    let best = null;
+    const take = cand => { if (!best || cand.base >= best.base) best = cand; };   // drawn-last wins ties
+    // Iterate in the render() push order (back-most first); with the >= rule
+    // above, every equal-baseline tie goes to the front-most layer that is
+    // actually drawn on top - the mirror image of the y-sort at render().
+    for (const o of MAP.objects || []) {
+      // Static scenery: wide sprites are buildings, tall-narrow sprites are trees; other props stay anonymous.
+      // Wayside-shrine sprites sit at MAP.shrines positions - label them with the same
+      // KAPLICZKA name the big map uses instead of mislabelling them as trees.
+      const cx = o.x + o.w / 2;
+      const shrine = (MAP.shrines || []).find(s => Math.abs(s.x - cx) <= 24 && s.y >= o.base - o.h && s.y <= o.base + 2);
+      if (shrine) {
+        if (hit({ x: shrine.x, y: shrine.y, halfW: 16, top: 64, bottom: 1 })) take({ label: 'KAPLICZKA', kind: 'shrine', x: shrine.x, y: shrine.y, base: shrine.y });
+        continue;
+      }
+      const box = { x: cx, y: o.base, halfW: o.w / 2, top: o.h, bottom: 1 };
+      if (o.w >= 40 && o.h >= 30 && o.w <= 200) { if (hit(box)) take({ label: WORLD_HOVER.building, kind: 'building', x: o.x, y: o.y, base: o.base }); }
+      else if (o.w < 40 && o.h >= 40) { if (hit(box)) take({ label: WORLD_HOVER.tree, kind: 'tree', x: o.x, y: o.y, base: o.base }); }
+    }
+    ITEMS.apples.forEach((a, i) => {
+      if (Q.apples.includes(i)) return;   // picked-up apples are no longer drawn
+      if (hit(Object.assign({ x: a.x, y: a.y }, EXTENT_PICKUP))) take({ label: T.apple, kind: 'apple', x: a.x, y: a.y, base: a.y });
+    });
+    (Q.mushroomSpots || []).forEach((m, i) => {
+      if ((Q.mushrooms || []).includes(i)) return;
+      if (hit(Object.assign({ x: m.x, y: m.y }, EXTENT_PICKUP))) take({ label: T.mushroom, kind: 'mushroom', x: m.x, y: m.y, base: m.y });
+    });
+    (Q.trashSpots || []).forEach((t, i) => {
+      if ((Q.trash || []).includes(i)) return;
+      if (hit(Object.assign({ x: t.x, y: t.y }, EXTENT_TRASH))) take({ label: T.trash, kind: 'trash', x: t.x, y: t.y, base: t.y });
+    });
+    // cap is pushed after the pickups in render(), so it draws on top - keep it last here too.
+    if (!Q.cap && hit(Object.assign({ x: ITEMS.cap.x, y: ITEMS.cap.y }, EXTENT_PICKUP))) take({ label: T.cap, kind: 'cap', x: ITEMS.cap.x, y: ITEMS.cap.y, base: ITEMS.cap.y });
+    for (const b of BALES) if (hit(Object.assign({ x: b.x, y: b.y }, EXTENT_BALE))) take({ label: WORLD_HOVER.bale, kind: 'bale', x: b.x, y: b.y, base: b.y });
+    for (const n of ITEMS.npcs || []) {
+      if (n.secret || !T.names[n.id]) continue;   // private people stay anonymous
+      if (hit(Object.assign({ x: n.x, y: n.y }, EXTENT_NPC))) take({ label: String(T.names[n.id]).toUpperCase(), kind: 'npc', x: n.x, y: n.y, base: n.y });
+    }
+    if (hit(Object.assign({ x: P.x, y: P.y }, EXTENT_HERO))) take({ label: heroName().toUpperCase(), kind: 'hero', x: P.x, y: P.y, base: P.y });
+    if (hit(Object.assign({ x: FRODO.x, y: FRODO.y }, EXTENT_FRODO))) take({ label: 'FRODO', kind: 'frodo', x: FRODO.x, y: FRODO.y, base: FRODO.y });
+    if (window.__worldLife && typeof window.__worldLife.hitShapes === 'function') {
+      for (const s of window.__worldLife.hitShapes()) {
+        if (!hit(s)) continue;
+        take({ label: s.kind === 'car' ? WORLD_HOVER.car : s.kind === 'tractor' ? WORLD_HOVER.tractor : worldAnimalLabel(s.kind), kind: s.kind, x: s.x, y: s.y, base: s.base });
+      }
+    }
+    if (best) return best;
+    const t = terrainAt(wx, wy);
+    return { label: TERRAIN_NAMES[t] || null, kind: 'ground', x: wx, y: wy, base: -Infinity };
+  }
+  function worldHoverLabel(wx, wy) { const p = worldPickAt(+wx, +wy); return p ? p.label : null; }
+  // Screen-space entry point: canvas pixels -> world via the live camera inverse, then pick.
+  function worldHoverLabelAtCanvas(px, py) {
+    if (!lastCam) return null;
+    const [wx, wy] = lastCam.toWorld(+px, +py);
+    return worldHoverLabel(wx, wy);
+  }
   function mapCoordinateText(x, y) {
     const b = MAP.bbox, s = MAP.scale || 2;
     const lat = b[2] - y / (110574 * s), lon = b[1] + x / (111320 * Math.cos((b[0] + b[2]) / 2 * Math.PI / 180) * s);
@@ -613,7 +694,7 @@
       return;
     }
     const [px, py] = toCanvas(e);
-    pointer.x = px; pointer.y = py; pointer.seen = true;
+    pointer.x = px; pointer.y = py; pointer.seen = true; pointer.kind = e.pointerType;
     if (!talk && HOOKS.pointer.some(f => f(px, py))) return;
     if (showMap) {
       const point = mapPoint(px, py);
@@ -632,7 +713,7 @@
     Object.assign(joy, { active: true, id: e.pointerId, cx: px, cy: py, x: 0, y: 0 });
   });
   cvs.addEventListener('pointermove', e => {
-    [pointer.x, pointer.y] = toCanvas(e); pointer.seen = true;
+    [pointer.x, pointer.y] = toCanvas(e); pointer.seen = true; pointer.kind = e.pointerType;
     if (showMap && e.pointerType === 'mouse') { const point = mapPoint(pointer.x, pointer.y); if (point) { mapCursor.seen = true; mapCursor.x = point.x; mapCursor.y = point.y; } else mapCursor.seen = false; }
     if (!joy.active || e.pointerId !== joy.id) return;
     const [px, py] = toCanvas(e);
@@ -642,6 +723,9 @@
   });
   const endJoy = e => { if (e.pointerId === joy.id) Object.assign(joy, { active: false, x: 0, y: 0 }); };
   cvs.addEventListener('pointerup', endJoy); cvs.addEventListener('pointercancel', endJoy);
+  // A mouse leaving the canvas must drop the world hover label (touch/pen have no
+  // leave in the same sense, and their aiming is gated by pointer.kind anyway).
+  cvs.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { pointer.seen = false; pointer.kind = null; } });
 
   /* ---------- rooms (church interior) ---------- */
   function fade(fn) { if (!trans) trans = { t: 0, fn, done: false }; }
@@ -1272,6 +1356,13 @@
       const tw = ctx.measureText(player).width;
       ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(U * 1.2, H - U * 2.4, tw + U * .8, U * 2);
       ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(player, U * 1.6, H - U * 1.35);
+      // A03: one small world hover label beside the coordinates (state fn above).
+      const hl = worldHoverLabelState(U, cvs.width, H);
+      if (hl.shown) {
+        ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
+        ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(hl.x, hl.y, hl.w, hl.h);
+        ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(hl.text, hl.x + U * .4, hl.y + hl.h * .55);
+      }
       return;
     }
     const cursor = mapCursor.seen ? `KURSOR ${Math.round(mapCursor.x)},${Math.round(mapCursor.y)}  ${mapCoordinateText(mapCursor.x, mapCursor.y)}` : 'KURSOR / TAP - kliknij mapę';
@@ -1281,6 +1372,36 @@
     ctx.fillStyle = 'rgba(8,12,40,.84)'; ctx.fillRect(x, y, tw, U * 4.2);
     ctx.fillStyle = '#f5f0e0'; ctx.fillText(player, x + U, y + U * 1.25);
     ctx.fillStyle = '#ffd21f'; ctx.fillText(cursor, x + U, y + U * 3);
+  }
+
+  /* ---------- A03: small world hover label in the coordinate HUD ----------
+     One short strip directly above the bottom-left coordinate readout, painted
+     from the A02 picker (worldPickAt) at the live pointer's world position.
+     It is deliberately NOT the big M-map floating box (mapHoverLabel keeps its
+     own independent draw). Rules: only a real mouse pointer on the canvas (a
+     touch tap/pen aiming must never leave a stuck label), no label on ground/
+     terrain (the HUD already shows coordinates), none in title/end scenes,
+     rooms, dialogue or over the big M-map, none after pointerleave, and the
+     measured text is clamped with an ellipsis so the strip never leaves the
+     viewport. The same function feeds the draw call and the test accessor
+     __game.worldHoverLabelState(), so tests assert exactly what is painted. */
+  function worldHoverLabelState(U, W, H) {
+    const none = { shown: false, text: '', x: 0, y: 0, w: 0, h: 0 };
+    if (scene !== 'play' || ROOM || showMap || talk) return none;
+    if (!lastCam || !pointer.seen || pointer.kind !== 'mouse') return none;
+    const [wx, wy] = lastCam.toWorld(pointer.x, pointer.y);
+    const p = worldPickAt(wx, wy);
+    if (!p || !p.label || p.kind === 'ground') return none;   // terrain stays anonymous
+    let text = String(p.label);
+    ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
+    const maxW = W - U * 2.0;   // keep the strip fully inside the viewport
+    if (ctx.measureText(text).width > maxW) {
+      while (text.length > 1 && ctx.measureText(text + '…').width > maxW) text = text.slice(0, -1);
+      text += '…';
+    }
+    const tw = ctx.measureText(text).width, h = U * 1.6, w = tw + U * .8;
+    const x = U * 1.2, y = H - U * 2.4 - h;   // sits directly above the coordinate box
+    return { shown: true, text, x, y, w, h };
   }
 
   /* ---------- title / splash screen: pixel-art remake of the "Chłopków" sign + church photo ---------- */
@@ -1411,6 +1532,7 @@
       if (Q.marcin) lines.push([T.quests[2], Q.marcin === 2]);
       if (Q.edytka) lines.push([`${T.edytkaQuest} (${Math.min(Q.edytkaN || 0, EDYTKA_TIMES)}/${EDYTKA_TIMES})`, Q.edytka === 2]);
       if (Q.grandpa || questsDone() >= 3) lines.push([T.quests[3], Q.grandpa === 2]);
+      lines.push([`${T.trash} (${trashCount()}/${TRASH_TOTAL})`, trashCount() >= TRASH_TOTAL]);   // A04: trash is a quest-list row, not a primary-HUD counter
       HOOKS.questLog.forEach(f => f(lines));
       const qh = U * (5.2 + lines.length * 2.6);
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(qx, qy, qw, qh);
@@ -1422,10 +1544,6 @@
       const mxh = qx + U * 13.8, myh = ay;
       drawPixels(MUSH_PX, mxh - U * 1.3, myh - U * 1.95, U * .2);
       ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${mushroomCount()}/${MUSHROOMS_TOTAL}`, mxh + U * 2, myh);
-      const txh = qx + U * 24.6;   // trash-bag counter: small black bag icon
-      ctx.fillStyle = '#1c1f27'; ctx.fillRect(txh - U * 1, myh - U * 1.1, U * 2, U * 1.6); ctx.fillRect(txh - U * .3, myh - U * 1.6, U * .6, U * .5);
-      ctx.fillStyle = '#6a7082'; ctx.fillRect(txh - U * .7, myh - U * .8, U * .4, U * .6);
-      ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${trashCount()}/${TRASH_TOTAL}`, txh + U * 1.6, myh);
       ctx.fillStyle = '#ffd21f'; ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 5.6, ay);
       ctx.font = `${U * 1.45}px Silkscreen`;
       lines.forEach(([txt, done], i) => {
@@ -1608,7 +1726,7 @@
     window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
-    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

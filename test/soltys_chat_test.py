@@ -14,15 +14,17 @@ with sync_playwright() as p:
     page.reload()
     page.wait_for_function("window.__game && window.__arekGlobalChat")
 
-    assert page.locator("#arek-chat-panel").is_visible(), "global chat is not open for a fresh visitor"
-    assert page.evaluate(f"localStorage.getItem('{CHAT_MINIMIZED_KEY}')") is None
-    assert page.evaluate("document.activeElement !== document.querySelector('#arek-chat-text')"), "default-open chat stole keyboard focus"
-
-    # Starting the game with the visible chat open proves it does not consume game keys.
+    # Start the game first: the chat overlay opens by default once the play scene
+    # runs (on the title screen the panel would sit over the character selector /
+    # name prompt on touch layouts, so default-open is asserted in play).
     page.keyboard.press("KeyN")
     page.locator("#player-name-input").fill("Test")
     page.locator("#player-name-submit").click()
     page.wait_for_function("__game.scene === 'play'")
+
+    assert page.locator("#arek-chat-panel").is_visible(), "global chat is not open for a fresh visitor"
+    assert page.evaluate(f"localStorage.getItem('{CHAT_MINIMIZED_KEY}')") is None
+    assert page.evaluate("document.activeElement !== document.querySelector('#arek-chat-text')"), "default-open chat stole keyboard focus"
 
     assert page.evaluate("__game.enterChurch instanceof Function"), "church scene entry hook is unavailable"
     page.evaluate("__game.enterChurch()")

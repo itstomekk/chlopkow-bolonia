@@ -1,7 +1,16 @@
 """Music: the engine starts on the first key press, picks the track by scene, K mutes/unmutes, and every
-song arranges and plays without errors."""
+song arranges and plays without errors.
+
+A05 routing matrix: title/village/field/Jazz barn -> the main Ogg
+(`audio/Polka_Dziadek_true_chiptune_NES.ogg`); forest -> pastoralka; shop -> mazurka;
+church -> choral; cemetery/end -> nokturn; minigame -> oberek.
+Exactly one audible source at a time (Ogg XOR synth bus)."""
 import os, time
 from playwright.sync_api import sync_playwright
+
+URL = os.environ.get("ARK_URL", "http://127.0.0.1:8790/index.html")
+MAIN_OGG = 'audio/Polka_Dziadek_true_chiptune_NES.ogg'
+MAIN_RATE_MIN = .5   # matches music.js MAIN_RATE_MIN (recorded Ogg floors at half speed)
 
 errors = []
 with sync_playwright() as p:
@@ -16,7 +25,7 @@ with sync_playwright() as p:
     })();
     """)
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    pg.goto(os.environ.get("ARK_URL", "http://127.0.0.1:8765/index.html")); pg.wait_for_function("window.__game && window.MUSIC", timeout=30000)
+    pg.goto(URL); pg.wait_for_function("window.__game && window.MUSIC", timeout=30000)
     pg.evaluate("localStorage.removeItem('arek-music-muted')")
     pg.keyboard.press("Enter")
     if pg.locator("#player-name-input").count():
@@ -90,6 +99,161 @@ with sync_playwright() as p:
         # the scene picker overrides play() every frame, so just check that arranging/playing throws nothing
     pg.evaluate("MUSIC.jingle(); MUSIC.ding()"); time.sleep(.5)
     pg.screenshot(path="test/music_hud.png")
+    b.close()
+
+# ---------------------------------------------------------------------------
+# A05 routing matrix: title/village/field/Jazz barn -> the main Ogg;
+# forest -> pastoralka; shop -> mazurka; church -> choral;
+# cemetery/end -> nokturn; minigame -> oberek. Exactly one audible source.
+# ---------------------------------------------------------------------------
+with sync_playwright() as p:
+    b = p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
+    pg = b.new_page(viewport={"width": 1280, "height": 720})
+    errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+
+    def boot(pg):
+        pg.goto(URL); pg.wait_for_function("window.__game && window.MUSIC && window.ARK && window.__features", timeout=30000)
+        pg.evaluate("localStorage.removeItem('arek-music-muted')")
+        pg.reload(); pg.wait_for_function("window.__game && window.MUSIC && window.__features", timeout=30000)
+
+    def snap(pg):
+        return pg.evaluate("""({ current: MUSIC.current, src: MUSIC.mainSrc, playing: MUSIC.mainPlaying,
+            bus: MUSIC.busGain, rate: MUSIC.mainTrackRate, tempo: MUSIC.tempo, muted: MUSIC.muted, mainMuted: MUSIC.mainMuted })""")
+
+    def route(pg, x, y, main_ogg, synth=None, label=""):
+        """main_ogg=True expects the Ogg to be the single audible source; else the synth `current`."""
+        pg.evaluate(f"__game.P.x = {x}; __game.P.y = {y}")
+        time.sleep(1.0)
+        s = snap(pg)
+        assert s['src'] and s['src'].endswith(MAIN_OGG), ("src", s, label)
+        if main_ogg:
+            assert s['playing'] and s['bus'] < .05, ("want Ogg", s, label)
+            assert not s['current'] or s['current'] in ('krakowiak', 'mazurka'), ("silent synth name", s, label)
+        else:
+            assert not s['playing'] and s['bus'] > .95, ("want synth", s, label)
+            assert s['current'] == synth, ("synth", s, label)
+        print("route", label, {k: (round(v, 3) if isinstance(v, float) else v) for k, v in s.items()})
+
+    boot(pg)
+    # title (before any Enter) -> main Ogg
+    ts = snap(pg)
+    assert ts['src'].endswith(MAIN_OGG) and ts['playing'] and pg.evaluate("__game.scene") == 'title', ts
+    print("title", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in ts.items()})
+    pg.keyboard.press("Enter")
+    if pg.locator("#player-name-input").count():
+        pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+
+    route(pg, 2651, 5421, True, label="village grass")
+    fx = pg.evaluate("(() => { const g=__game; for(let y=100;y<g.MAP.h;y+=50)for(let x=200;x<g.MAP.w;x+=50) if(g.terrainAt(x,y)==='field') return [x,y]; return null; })()")
+    assert fx, "no field pixel found"
+    route(pg, fx[0], fx[1], True, label=f"yellow field {fx}")
+    j = pg.evaluate("__game.MAP.jazz")
+    route(pg, j['x'], j['y'], True, label="jazz barn center")
+    # jazz edge on grass: sample repeatedly, no flapping back to a synth.
+    # Some barn sides touch the forest, where pastoralka wins by exception
+    # precedence, so ask the game for a grass point just outside the circle.
+    JE = "(j) => { for (const rr of [j.r + 18, j.r + 30]) { for (let a = 0; a < 6.3; a += .4) { const x = Math.round(j.x + rr * Math.cos(a)), y = Math.round(j.y + rr * Math.sin(a)); if (__game.terrainAt(x, y) === 'grass') return [x, y]; } } return null; }"
+    je = pg.evaluate(JE, j)
+    assert je, "no grass edge near jazz"
+    for k in range(4):
+        route(pg, je[0], je[1], True, label=f"jazz edge {k} {je}")
+
+    fxp = pg.evaluate("(() => { const g=__game; for(let y=100;y<g.MAP.h;y+=50)for(let x=200;x<g.MAP.w;x+=50) if(g.terrainAt(x,y)==='forest') return [x,y]; return null; })()")
+    assert fxp, "no forest pixel found"
+    route(pg, fxp[0], fxp[1], False, synth='pastoralka', label=f"forest {fxp}")
+
+    # cemetery: enter, hysteresis while inside, leave
+    cem = pg.evaluate("__game.MAP.pois.find(p => p.key === 'cemetery')")
+    route(pg, cem['x'], cem['y'], False, synth='nokturn', label="cemetery enter")
+    route(pg, cem['x'] + 130, cem['y'], False, synth='nokturn', label="cemetery hysteresis (130 px)")
+    route(pg, cem['x'] + 200, cem['y'], True, label="cemetery left")
+
+    # church interior
+    pg.evaluate("__game.enterChurch()"); time.sleep(1.2)
+    cs = snap(pg)
+    assert not cs['playing'] and cs['bus'] > .95 and cs['current'] == 'choral', cs
+    print("church", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in cs.items()})
+
+    # shop interior (teleport to the POI and press E like the shop integration test)
+    boot(pg)
+    pg.keyboard.press("Enter")
+    if pg.locator("#player-name-input").count():
+        pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+    shop = pg.evaluate("__game.MAP.pois.find(p => p.key === 'shop')")
+    pg.evaluate(f"__game.P.x = {shop['x']}; __game.P.y = {shop['y']}")
+    pg.keyboard.press("KeyE")
+    pg.wait_for_function("__game.room && __game.room.kind === 'shop'", timeout=5000)
+    time.sleep(1.0)
+    ss = snap(pg)
+    assert not ss['playing'] and ss['bus'] > .95 and ss['current'] == 'mazurka', ss
+    print("shop", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in ss.items()})
+
+    # minigame -> oberek
+    boot(pg)
+    pg.keyboard.press("Enter")
+    if pg.locator("#player-name-input").count():
+        pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+    pg.evaluate("__features.startMG('skeet')"); time.sleep(1.2)
+    ms = snap(pg)
+    assert not ms['playing'] and ms['bus'] > .95 and ms['current'] == 'oberek', ms
+    print("minigame", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in ms.items()})
+
+    # end scene -> nokturn
+    pg.evaluate("__game.scene = 'end'"); time.sleep(1.0)
+    es = snap(pg)
+    assert not es['playing'] and es['bus'] > .95 and es['current'] == 'nokturn', es
+    print("end", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in es.items()})
+
+    # mute: K must mute the main Ogg element too
+    pg.keyboard.press("KeyK"); time.sleep(.3)
+    mk = snap(pg)
+    assert mk['muted'] and mk['mainMuted'], mk
+    print("muted", mk['muted'], mk['mainMuted'])
+    pg.keyboard.press("KeyK"); time.sleep(.3)
+    assert not snap(pg)['muted'] and not snap(pg)['mainMuted']
+
+    # adaptive main-track rate: idle floor in a field, rise while moving, fall after stopping
+    boot(pg)
+    pg.keyboard.press("Enter")
+    if pg.locator("#player-name-input").count():
+        pg.locator("#player-name-input").fill("Test"); pg.keyboard.press("Enter")
+    pg.wait_for_function("__game.scene === 'play'")
+    route(pg, fx[0], fx[1], True, label="field (tempo setup)")
+    time.sleep(3.0)                       # let energy drain to idle
+    idle_r = snap(pg)
+    assert abs(idle_r['rate'] - MAIN_RATE_MIN) < .02, idle_r
+    print("field idle rate", round(idle_r['rate'], 3), "tempo", round(idle_r['tempo'], 3))
+    pg.keyboard.down("ShiftLeft")
+    for k in ["ArrowLeft", "ArrowRight"] * 4:   # jiggle in place, ~8 s total movement
+        pg.keyboard.down(k); time.sleep(1.0); pg.keyboard.up(k)
+    pg.keyboard.up("ShiftLeft")
+    run_r = snap(pg)
+    assert run_r['rate'] > idle_r['rate'] + .05, run_r
+    assert abs(run_r['rate'] - max(MAIN_RATE_MIN, min(1.3, run_r['tempo']))) < .02, run_r
+    print("field run rate", round(run_r['rate'], 3), "tempo", round(run_r['tempo'], 3))
+    time.sleep(1.5)                        # linear fall: strictly between idle and running
+    mid_r = snap(pg)
+    assert idle_r['rate'] < mid_r['rate'] < run_r['rate'] - .02, (idle_r, mid_r, run_r)
+    print("field 1.5s after stop", round(mid_r['rate'], 3), "tempo", round(mid_r['tempo'], 3))
+    time.sleep(6.0)
+    slow_r = snap(pg)
+    assert abs(slow_r['rate'] - MAIN_RATE_MIN) < .02, slow_r
+    print("field settled rate", round(slow_r['rate'], 3), "tempo", round(slow_r['tempo'], 3))
+
+    # single audible source invariant across all samples: never Ogg + synth together
+    for x, y in [(2651, 5421), (fx[0], fx[1]), (j['x'], j['y']), (fxp[0], fxp[1]), (cem['x'], cem['y'])]:
+        pg.evaluate(f"__game.P.x = {x}; __game.P.y = {y}"); time.sleep(.7)
+        s = snap(pg)
+        assert not (s['playing'] and s['bus'] > .05), ("overlap", s, (x, y))
+        assert s['src'] and s['src'].endswith(MAIN_OGG), ("src drift", s)
+    print("single-source invariant ok")
+
+    assert not errs, errs
+    print("music routing ok")
     b.close()
 
 print("errors", errors)
