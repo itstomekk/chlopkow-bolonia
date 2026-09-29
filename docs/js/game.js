@@ -600,7 +600,7 @@
   const EXTENT_HERO = { halfW: 10, top: 40, bottom: 5 };   // drawArek: CHAR_H 40, ~20 px wide
   const EXTENT_FRODO = { halfW: 13, top: 27, bottom: 1 };  // drawFrodo: 27 px box
   const EXTENT_NPC = { halfW: 18, top: 46, bottom: 2 };    // drawNpc: atlas cell scaled to ~40 px
-  const EXTENT_BALE = { halfW: 12, top: 10, bottom: 1 };   // drawBale: 23x10 art
+  const EXTENT_BALE = { halfW: 12, top: 16, bottom: 1 };  // drawBale: 24x16 art
   const EXTENT_PICKUP = { halfW: 7, top: 13, bottom: 1 };  // drawApple/drawMushroom: 13x12 art
   const EXTENT_TRASH = { halfW: 9, top: 17, bottom: 2 };   // drawTrashBag: 16 px bag above the ground
   function worldPickAt(wx, wy) {
@@ -955,8 +955,8 @@
       const sp = Math.hypot(b.vx, b.vy);
       if (sp > 150) { b.vx *= 150 / sp; b.vy *= 150 / sp; }
       const nx = b.x + b.vx * dt, ny = b.y + b.vy * dt;
-      if (solidAt(nx - 11, b.y, false) || solidAt(nx + 11, b.y, false) || nx < 30 || nx > MAP.w - 30) b.vx *= -.25; else b.x = nx;
-      if (solidAt(b.x, ny, false) || solidAt(b.x, ny - 8, false) || ny < (MAP.top || 40) + 20 || ny > MAP.h - 20) b.vy *= -.25; else b.y = ny;
+      if (solidAt(nx - 12, b.y, false) || solidAt(nx + 12, b.y, false) || nx < 30 || nx > MAP.w - 30) b.vx *= -.25; else b.x = nx;
+      if (solidAt(b.x, ny - 12, false) || ny < (MAP.top || 40) + 20 || ny > MAP.h - 20) b.vy *= -.25; else b.y = ny;
       b.roll += (Math.abs(b.vx) + Math.abs(b.vy)) * dt * .35;
       b.vx *= Math.max(0, 1 - dt * 3.2); b.vy *= Math.max(0, 1 - dt * 3.2);
     }
@@ -1194,14 +1194,24 @@
     ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
     ctx.imageSmoothingEnabled = true; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
-  // Round straw bale lying on its side (23x10 art px), end face with rings on the right. Mirrored every few px of
+  // Round straw bale lying on its side (24x16 art px), end face with rings on the right. Mirrored every few px of
   // rolling so it visibly tumbles when pushed.
-  const BALE_PX = [[4,0,15,"q"],[3,1,1,"q"],[4,1,4,"y"],[8,1,1,"N"],[9,1,5,"y"],[14,1,1,"N"],[15,1,3,"y"],[18,1,3,"q"],[2,2,1,"q"],[3,2,1,"y"],[4,2,1,"Y"],[5,2,3,"y"],[8,2,1,"N"],[9,2,3,"y"],[12,2,1,"Y"],[13,2,1,"y"],[14,2,1,"N"],[15,2,2,"y"],[17,2,1,"q"],[18,2,1,"N"],[19,2,1,"x"],[20,2,1,"N"],[21,2,1,"q"],[1,3,1,"q"],[2,3,4,"y"],[6,3,1,"Y"],[7,3,1,"y"],[8,3,1,"N"],[9,3,1,"y"],[10,3,1,"Y"],[11,3,3,"y"],[14,3,1,"N"],[15,3,1,"y"],[16,3,1,"Y"],[17,3,1,"q"],[18,3,1,"x"],[19,3,2,"Y"],[21,3,1,"x"],[22,3,1,"q"],[1,4,1,"q"],[2,4,2,"Y"],[4,4,1,"y"],[5,4,3,"Y"],[8,4,1,"N"],[9,4,3,"Y"],[12,4,1,"y"],[13,4,1,"Y"],[14,4,1,"N"],[15,4,2,"Y"],[17,4,1,"q"],[18,4,1,"N"],[19,4,1,"Y"],[20,4,1,"n"],[21,4,1,"Y"],[22,4,1,"q"],[1,5,1,"q"],[2,5,1,"Y"],[3,5,1,"n"],[4,5,3,"Y"],[7,5,1,"n"],[8,5,1,"N"],[9,5,2,"Y"],[11,5,1,"n"],[12,5,2,"Y"],[14,5,1,"N"],[15,5,1,"Y"],[16,5,1,"n"],[17,5,1,"q"],[18,5,1,"x"],[19,5,1,"n"],[20,5,1,"N"],[21,5,1,"n"],[22,5,1,"q"],[1,6,1,"q"],[2,6,1,"n"],[3,6,2,"Y"],[5,6,1,"n"],[6,6,2,"Y"],[8,6,1,"N"],[9,6,1,"Y"],[10,6,1,"n"],[11,6,2,"Y"],[13,6,1,"n"],[14,6,1,"N"],[15,6,2,"Y"],[17,6,1,"q"],[18,6,1,"N"],[19,6,1,"Y"],[20,6,1,"n"],[21,6,1,"Y"],[22,6,1,"q"],[1,7,1,"q"],[2,7,6,"n"],[8,7,1,"N"],[9,7,5,"n"],[14,7,1,"N"],[15,7,2,"n"],[17,7,1,"q"],[18,7,1,"x"],[19,7,2,"Y"],[21,7,1,"x"],[22,7,1,"q"],[1,8,1,"q"],[2,8,1,"n"],[3,8,1,"N"],[4,8,2,"n"],[6,8,1,"N"],[7,8,1,"n"],[8,8,1,"N"],[9,8,2,"n"],[11,8,1,"N"],[12,8,2,"n"],[14,8,1,"N"],[15,8,1,"n"],[16,8,1,"N"],[17,8,2,"q"],[19,8,1,"N"],[20,8,1,"x"],[21,8,1,"N"],[22,8,1,"q"],[2,9,20,"q"]];
+  const BALE_PX = [[9, 0, 5, "q"], [7, 1, 2, "q"], [9, 1, 3, "y"], [12, 1, 2, "n"], [14, 1, 2, "q"], [5, 2, 2, "q"], [7, 2, 5, "y"], [12, 2, 2, "n"], [14, 2, 4, "q"], [3, 3, 2, "q"], [5, 3, 4, "Y"], [9, 3, 2, "y"], [11, 3, 1, "Y"], [12, 3, 2, "n"], [14, 3, 6, "q"], [2, 4, 1, "q"], [3, 4, 4, "Y"], [7, 4, 1, "n"], [8, 4, 1, "Y"], [9, 4, 1, "y"], [10, 4, 2, "Y"], [12, 4, 2, "n"], [14, 4, 1, "q"], [15, 4, 2, "x"], [17, 4, 3, "y"], [20, 4, 1, "x"], [1, 5, 1, "q"], [2, 5, 1, "y"], [3, 5, 4, "Y"], [7, 5, 1, "n"], [8, 5, 1, "Y"], [9, 5, 1, "y"], [10, 5, 2, "Y"], [12, 5, 2, "n"], [14, 5, 1, "x"], [15, 5, 1, "y"], [16, 5, 5, "N"], [21, 5, 1, "y"], [0, 6, 1, "q"], [1, 6, 1, "Y"], [2, 6, 1, "y"], [3, 6, 4, "Y"], [7, 6, 1, "n"], [8, 6, 1, "Y"], [9, 6, 1, "y"], [10, 6, 2, "Y"], [12, 6, 1, "n"], [13, 6, 1, "x"], [14, 6, 1, "n"], [15, 6, 1, "N"], [16, 6, 1, "y"], [17, 6, 2, "N"], [19, 6, 2, "y"], [21, 6, 1, "N"], [22, 6, 1, "x"], [0, 7, 1, "q"], [1, 7, 1, "Y"], [2, 7, 1, "y"], [3, 7, 4, "Y"], [7, 7, 1, "n"], [8, 7, 1, "Y"], [9, 7, 1, "y"], [10, 7, 2, "Y"], [12, 7, 1, "n"], [13, 7, 1, "x"], [14, 7, 1, "N"], [15, 7, 1, "y"], [16, 7, 1, "N"], [17, 7, 2, "Y"], [19, 7, 1, "N"], [20, 7, 1, "y"], [21, 7, 1, "N"], [22, 7, 1, "y"], [23, 7, 1, "q"], [0, 8, 1, "q"], [1, 8, 2, "Y"], [3, 8, 1, "y"], [4, 8, 1, "Y"], [5, 8, 1, "y"], [6, 8, 2, "n"], [8, 8, 1, "y"], [9, 8, 2, "Y"], [11, 8, 1, "y"], [12, 8, 1, "n"], [13, 8, 1, "x"], [14, 8, 3, "N"], [17, 8, 2, "Y"], [19, 8, 1, "N"], [20, 8, 1, "y"], [21, 8, 1, "N"], [22, 8, 1, "y"], [23, 8, 1, "q"], [0, 9, 1, "q"], [1, 9, 2, "Y"], [3, 9, 1, "y"], [4, 9, 1, "Y"], [5, 9, 1, "y"], [6, 9, 2, "n"], [8, 9, 1, "y"], [9, 9, 2, "Y"], [11, 9, 1, "y"], [12, 9, 1, "n"], [13, 9, 1, "x"], [14, 9, 1, "n"], [15, 9, 1, "N"], [16, 9, 4, "y"], [20, 9, 2, "N"], [22, 9, 1, "x"], [1, 10, 1, "q"], [2, 10, 1, "Y"], [3, 10, 1, "y"], [4, 10, 1, "Y"], [5, 10, 1, "y"], [6, 10, 2, "n"], [8, 10, 1, "y"], [9, 10, 2, "Y"], [11, 10, 1, "y"], [12, 10, 2, "n"], [14, 10, 1, "x"], [15, 10, 1, "y"], [16, 10, 5, "N"], [21, 10, 1, "x"], [2, 11, 1, "q"], [3, 11, 3, "Y"], [6, 11, 2, "n"], [8, 11, 4, "Y"], [12, 11, 2, "n"], [14, 11, 2, "q"], [16, 11, 2, "x"], [18, 11, 1, "y"], [19, 11, 2, "x"], [3, 12, 2, "q"], [5, 12, 1, "Y"], [6, 12, 1, "n"], [7, 12, 5, "Y"], [12, 12, 2, "n"], [14, 12, 6, "q"], [5, 13, 2, "q"], [7, 13, 7, "n"], [14, 13, 4, "q"], [7, 14, 2, "q"], [9, 14, 5, "n"], [14, 14, 2, "q"], [9, 15, 5, "q"]];
+  // Art-space bounds of BALE_PX, shared by drawBale (offsets), the hover extent and the test hook.
+  const BALE_DRAW = (() => {
+  let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    for (const [rx, ry, rw] of BALE_PX) {
+    minX = Math.min(minX, rx); minY = Math.min(minY, ry);
+    maxX = Math.max(maxX, rx + rw); maxY = Math.max(maxY, ry + 1);
+  }
+    const w = maxX - minX, h = maxY - minY;
+    return { w, h, halfW: w / 2, top: h, minX, minY, maxX, maxY, aspect: Math.round(w / h * 100) / 100, area: w * h };
+  })();
   function drawBale(bale, sx, sy, s) {
-    shadow(sx, sy, s * 1.1, 13);
+    shadow(sx, sy, s * 1.15, 14);
     const u = s, flip = Math.floor(bale.roll / 5) % 2;
     ctx.save(); ctx.translate(Math.round(sx), 0); if (flip) ctx.scale(-1, 1);
-    drawPixels(BALE_PX, -11.5 * u, sy - 10 * u, u); ctx.restore();
+    drawPixels(BALE_PX, -BALE_DRAW.halfW * u, sy - BALE_DRAW.top * u, u); ctx.restore();
   }
   const DIRECTION_SIGNS = { left: '← DUŃCY', right: 'WIELKIE KSIĘSTWO LITEWSKIE →' };
   function directionSignEdges(W) {   // screen x of the map's west/east edge and how visible each sign is (0..1)
@@ -1211,25 +1221,53 @@
     // the camera stops at the edge (leftX = 0 / rightX = W); the sign fades in over the last quarter screen before it
     return { leftX: Math.max(0, leftX), rightX: Math.min(W, rightX), left: fade((leftX + W * .25) / (W * .25)), right: fade((W * 1.25 - rightX) / (W * .25)) };
   }
+  // Large lumpy clouds (B06): each cloud is one connected, non-uniform silhouette made of
+  // overlapping blobs, drawn as a single path so one fill paints the whole layer (no naive
+  // per-area fill inflation). Blob coordinates live in 50 px cloud-local units at scale 1
+  // (cached geometry); PUFF_BLOBS is the same silhouette shrunk 62% and tucked a touch
+  // higher, so the soft white body sits inside the darker multiply shade.
+  const CLOUD_UNIT = 50, CLOUD_ALPHA_CAP = .22;   // shadows ~2x darker than before, but capped
+  const CLOUD_BLOBS = [
+    [0, .9, 7.6, 2.0], [-3.0, -.6, 4.3, 2.7], [3.1, -.4, 4.1, 2.5],
+    [-.4, -2.5, 4.7, 2.2], [-4.7, -2.3, 3.0, 1.9], [4.6, -1.9, 2.8, 1.7], [1.7, -3.7, 2.3, 1.4],
+  ];
+  const PUFF_BLOBS = CLOUD_BLOBS.map(b => [b[0] * .62, b[1] * .62 - .12, b[2] * .62, b[3] * .62]);
+  // Culling margins derive from the actual silhouette bounds (x largest cloud), so a cloud
+  // renders whenever its shape can reach the screen and is skipped otherwise.
+  const CLOUD_GEOM = (() => {
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    for (const [dx, dy, rx, ry] of CLOUD_BLOBS) {
+      minX = Math.min(minX, dx - rx); maxX = Math.max(maxX, dx + rx);
+      minY = Math.min(minY, dy - ry); maxY = Math.max(maxY, dy + ry);
+    }
+    const unitW = (maxX - minX) * CLOUD_UNIT, unitH = (maxY - minY) * CLOUD_UNIT;
+    const maxScale = Math.max(...CLOUDS.map(c => c.scale));
+    return { unitW, unitH, halfW: unitW / 2, halfH: unitH / 2,
+             marginX: Math.ceil(unitW / 2 * maxScale) + 8, marginY: Math.ceil(unitH / 2 * maxScale) + 8,
+             blobs: CLOUD_BLOBS.length };
+  })();
   function drawClouds(ox, oy, zoom, sx0, sy0, sw, sh) {
-    // Visual-only weather: drifting translucent cloud shadows and soft puffs.
-    // They never touch SOLID or gameplay state, and seven bounded sprites keep
-    // the cost low on mobile.
+    // Visual-only weather: drifting translucent cloud shadows and soft puffs. They never touch
+    // SOLID or gameplay state, and seven bounded sprites keep the cost low on mobile.
     ctx.save();
     for (const cloud of CLOUDS) {
       const x = (cloud.x + time * cloud.speed) % MAP.w, y = cloud.y;
-      if (x < sx0 - 150 || x > sx0 + sw + 150 || y < sy0 - 90 || y > sy0 + sh + 90) continue;
-      const sx = ox + x * zoom, sy = oy + y * zoom, w = 72 * cloud.scale * zoom, h = 22 * cloud.scale * zoom;
-      ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(90,100,116,${cloud.alpha})`;
-      ctx.beginPath(); ctx.ellipse(sx, sy + 8 * zoom, w, h, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(255,255,255,${cloud.alpha * .34})`;
-      for (const [dx, dy, r] of [[-.55, 0, .6], [-.18, -.25, .72], [.22, -.12, .8], [.58, .05, .52]]) {
-        ctx.beginPath(); ctx.ellipse(sx + dx * w, sy + dy * h, r * w * .62, r * h, 0, 0, Math.PI * 2); ctx.fill();
-      }
+      if (x < sx0 - CLOUD_GEOM.marginX || x > sx0 + sw + CLOUD_GEOM.marginX ||
+          y < sy0 - CLOUD_GEOM.marginY || y > sy0 + sh + CLOUD_GEOM.marginY) continue;
+      const sx = ox + x * zoom, sy = oy + y * zoom, k = cloud.scale * zoom * CLOUD_UNIT;
+      const shadowA = Math.min(cloud.alpha * 2, CLOUD_ALPHA_CAP);
+      ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(90,100,116,${shadowA})`;
+      ctx.beginPath();
+      for (const [dx, dy, rx, ry] of CLOUD_BLOBS) ctx.ellipse(sx + dx * k, sy + dy * k, rx * k, ry * k, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(255,255,255,${shadowA * .34})`;
+      ctx.beginPath();
+      for (const [dx, dy, rx, ry] of PUFF_BLOBS) ctx.ellipse(sx + dx * k, sy + dy * k, rx * k, ry * k, 0, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.restore();
   }
-  function drawFrodo(sx, sy, s) {
+function drawFrodo(sx, sy, s) {
     shadow(sx, sy, s * .78, 6);
     const row = { down: 0, up: 1, right: 2, left: 3 }[FRODO.dir] || 0;
     const col = FRODO.moving ? Math.floor(FRODO.step) % 2 : 0;
@@ -1726,7 +1764,7 @@
     window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
-    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length };
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs }) };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

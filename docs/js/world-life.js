@@ -3,11 +3,38 @@
    two procedurally drawn red vintage hatchbacks. Loaded before game.js. */
 'use strict';
 (() => {
-  const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35;
-  // Keep domestic birds out of the forest; wild animals are selected by terrain.
-  const CHICKENS = 12, DOGS = 7, BOARS = 4, MICE = 10, HARES = 6, PIGS = 5, BUTTERFLIES = 8, BIRD_FLOCKS = 6, STORKS = 3, FOXES = 2, TRACTORS = 2, SITE_STEP = 36, MIN_PLAYER_GAP = 30;
-  // docs/img/critters.png rows (64px cells, facing right); px = sheet height, h = map height.
-  const CRIT = { chicken: { row: 0, px: 30, h: 12 }, dog: { row: 1, px: 40, h: 19 }, bird: { row: 2, px: 22, h: 7 }, stork: { row: 3, px: 56, h: 30 }, fox: { row: 4, px: 40, h: 17 }, boar: { row: 5, px: 44, h: 21 }, mouse: { row: 6, px: 18, h: 9 }, hare: { row: 7, px: 28, h: 15 }, pig: { row: 8, px: 42, h: 18 }, butterfly: { row: 9, px: 21, h: 5 } };
+  const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35, SITE_STEP = 36, MIN_PLAYER_GAP = 30, TRACTORS = 2;
+
+  /* B01: single extensible registry for every animal kind (previously split
+     across the CHICKENS..FOXES consts, the CRIT atlas table, wildlifeAllowed
+     and several inline radius/speed maps). habitat: 'notForest' or a list of
+     allowed terrain tokens, where 'meadow' means inside MAP.meadow. spawn:
+     'any' | 'river' (stork, near water) | 'buildings' (fox, by building
+     fronts) | 'farmyard' (pig, tied to farm homes) | 'flock' (bird, in small
+     flocks - flocks x 3..5 birds). flies marks the airborne kinds (own update
+     path, elevated z). Counts and ANIMAL_ORDER must stay baseline
+     (12/7/4/10/6/5/8/3/2/24) - the seeded tests pin spawn positions and
+     per-kind indices. */
+  const ANIMAL_TYPES = {
+    /* B03: noShadow marks art that must never receive A.shadow, in the atlas
+       path (drawCritter) or the procedural fallbacks (drawChicken,
+       drawSmallWildlife). Chicken/mouse/bird are excluded; dogs, boars and all
+       other species keep their shadows. Mouse atlas px 18 -> 72 quarters the
+       drawn cell (64*9/72 = 8 units vs the 32-unit baseline) in BOTH width and
+       height; physics (radius/step/speeds) stay untouched. */
+    chicken: { category: 'domestic', atlas: { row: 0, px: 30, h: 12 }, count: 12, habitat: 'notForest', radius: 90, step: 5, shy: 78, approachSpeed: 22, speed: 12, spawn: 'any', flies: false, noShadow: true, shadowScale: .8, shadowBlur: 7 },
+    dog: { category: 'domestic', atlas: { row: 1, px: 40, h: 19 }, count: 7, habitat: 'notForest', radius: 150, step: 7, shy: 78, approachSpeed: 30, speed: 18, spawn: 'any', flies: false, shadowScale: .8, shadowBlur: 7 },
+    bird: { category: 'wild', atlas: { row: 2, px: 22, h: 7 }, count: 24, flocks: 6, habitat: 'notForest', radius: 40, step: 8, shy: 78, approachSpeed: 22, speed: 12, spawn: 'flock', flies: true, noShadow: true, shadowScale: .4, shadowBlur: 3 },
+    stork: { category: 'wild', atlas: { row: 3, px: 56, h: 30 }, count: 3, habitat: 'notForest', radius: 90, step: 3, shy: 110, approachSpeed: 26, speed: 9, spawn: 'river', flies: false, shadowScale: 1, shadowBlur: 7 },
+    fox: { category: 'wild', atlas: { row: 4, px: 40, h: 17 }, count: 2, habitat: 'notForest', radius: 200, step: 10, shy: 150, approachSpeed: 85, speed: 48, spawn: 'buildings', flies: false, shadowScale: .8, shadowBlur: 7 },
+    boar: { category: 'wild', atlas: { row: 5, px: 44, h: 21 }, count: 4, habitat: ['forest'], radius: 140, step: 5, shy: 78, approachSpeed: 44, speed: 28, spawn: 'any', flies: false, shadowScale: .8, shadowBlur: 7 },
+    mouse: { category: 'wild', atlas: { row: 6, px: 72, h: 9 }, count: 10, habitat: ['forest', 'field'], radius: 70, step: 5, shy: 78, approachSpeed: 24, speed: 16, spawn: 'any', flies: false, noShadow: true, shadowScale: .8, shadowBlur: 7 },
+    hare: { category: 'wild', atlas: { row: 7, px: 28, h: 15 }, count: 6, habitat: ['field', 'grass', 'meadow'], radius: 120, step: 5, shy: 78, approachSpeed: 38, speed: 24, spawn: 'any', flies: false, shadowScale: .8, shadowBlur: 7 },
+    pig: { category: 'domestic', atlas: { row: 8, px: 42, h: 18 }, count: 5, habitat: 'notForest', radius: 80, step: 5, shy: 78, approachSpeed: 25, speed: 16, spawn: 'farmyard', flies: false, shadowScale: .8, shadowBlur: 7 },
+    butterfly: { category: 'wild', atlas: { row: 9, px: 21, h: 5 }, count: 8, habitat: ['field', 'grass', 'meadow'], radius: 110, step: 5, shy: 78, approachSpeed: 22, speed: 12, spawn: 'any', flies: true, shadowScale: .8, shadowBlur: 3 },
+  };
+  // Spawn order drives the per-kind index of every id (e.g. chicken:0..11).
+  const ANIMAL_ORDER = ['chicken', 'dog', 'boar', 'mouse', 'hare', 'pig', 'butterfly', 'stork', 'fox', 'bird'];
   const READY = () => {
     const A = window.ARK;
     if (!A || A.__worldLifeInstalled) return;
@@ -16,8 +43,14 @@
     const { HOOKS, P, MAP, ITEMS, ctx } = A;
     const Q = () => A.Q;
     const PL = A.LANG === 'pl';
-    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, vehicleImage: null, critters: null, waterPoints: [] };
+    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, vehicleImage: null, critters: null, waterPoints: [], lastRestoredIds: [] };
     const lastInteraction = Object.create(null), interactionCooldown = Object.create(null);
+    /* B02b: animal identity snapshot. Only stable ids, kind and bounded positions
+       are persisted into the existing Q.worldLife (same save key, no per-frame
+       localStorage writes): on a bounded interval during play, when leaving for the
+       title screen, and in a final pagehide/visibilitychange snapshot. Restored
+       against the freshly built baseline by kind:index id after per-entry validation. */
+    let animalSaveInterval = 10, animalSaveT = 0, lastSceneForSave = 'title';
     A.load('img/car_red.png').then(image => { state.carImage = image; }, () => {});
     A.load('img/vehicles.png').then(image => { state.vehicleImage = image; }, () => {});
     A.load('img/critters.png').then(image => { state.critters = image; }, () => {});
@@ -179,11 +212,9 @@
       return !!m && s.x >= m.x0 && s.x <= m.x1 && s.y >= m.y0 && s.y <= m.y1;
     };
     const wildlifeAllowed = (kind, s) => {
-      const terrain = A.terrainAt(s.x, s.y);
-      if (kind === 'boar') return terrain === 'forest';
-      if (kind === 'mouse') return terrain === 'forest' || terrain === 'field';
-      if (kind === 'hare') return terrain === 'field' || inMeadow(s) || terrain === 'grass';
-      if (kind === 'butterfly') return terrain === 'field' || terrain === 'grass' || inMeadow(s);
+      const def = ANIMAL_TYPES[kind], h = def && def.habitat, terrain = A.terrainAt(s.x, s.y);
+      if (h === 'notForest') return terrain !== 'forest';
+      if (Array.isArray(h)) return h.includes(terrain) || (h.includes('meadow') && inMeadow(s));
       return terrain !== 'forest';
     };
     function animalSite(kind, extra, preferred = () => true) {
@@ -232,42 +263,105 @@
     function makeAnimals() {
       const extra = state.cars.slice();
       const animals = [];
+      const counters = Object.create(null);
       const add = (kind, site) => {
         if (kind === 'stork' && !site) return null;
-        const a = newAnimal(kind, extra.concat(animals), site || undefined); animals.push(a); return a;
+        const a = newAnimal(kind, extra.concat(animals), site || undefined);
+        // Stable per-session identity in spawn order, e.g. 'chicken:0'. Not saved yet (B02b).
+        const n = counters[kind] || 0; a.id = `${kind}:${n}`; counters[kind] = n + 1;
+        animals.push(a); return a;
       };
-      for (let i = 0; i < CHICKENS; i++) add('chicken', animalSite('chicken', extra.concat(animals)));
-      for (let i = 0; i < DOGS; i++) add('dog', animalSite('dog', extra.concat(animals)));
-      for (let i = 0; i < BOARS; i++) add('boar', animalSite('boar', extra.concat(animals)));
-      for (let i = 0; i < MICE; i++) add('mouse', animalSite('mouse', extra.concat(animals)));
-      for (let i = 0; i < HARES; i++) add('hare', animalSite('hare', extra.concat(animals)));
+      // Roaming wildlife first; ANIMAL_ORDER keeps every per-kind index stable.
+      for (const kind of ['chicken', 'dog', 'boar', 'mouse', 'hare']) {
+        for (let i = 0; i < ANIMAL_TYPES[kind].count; i++) add(kind, animalSite(kind, extra.concat(animals)));
+      }
       // Pigs stay by a subset of accessible building fronts rather than becoming
       // generic roaming wildlife. This gives the village a few lived-in farmyards.
       const pigHomes = buildingSpots().filter((s, i, all) => all.slice(0, i).every(v => Math.hypot(v.x - s.x, v.y - s.y) > 260));
-      for (let i = 0; i < PIGS; i++) {
+      for (let i = 0; i < ANIMAL_TYPES.pig.count; i++) {
         const home = pigHomes[i % Math.max(1, pigHomes.length)];
         const site = home ? (pigHomeSite(home, extra.concat(animals)) || animalSite('pig', extra.concat(animals), s => Math.hypot(s.x - home.x, s.y - home.y) < 130)) : animalSite('pig', extra.concat(animals));
         add('pig', site);
       }
-      for (let i = 0; i < BUTTERFLIES; i++) {
+      for (let i = 0; i < ANIMAL_TYPES.butterfly.count; i++) {
         const b = animalSite('butterfly', extra.concat(animals), s => wildlifeAllowed('butterfly', s));
         if (b) { const a = add('butterfly', b); a.mood = Math.random() < .5 ? -1 : 1; a.color = ['#ff5a8a', '#ffd21f', '#6fd0ff', '#a67cff'][i % 4]; }
       }
-      for (let i = 0; i < STORKS; i++) {
+      for (let i = 0; i < ANIMAL_TYPES.stork.count; i++) {
         const site = animalSite('stork', extra.concat(animals), nearRiver);
         if (site) add('stork', site);
       }
-      for (let i = 0; i < FOXES; i++) { const b = buildingSpots(); add('fox', animalSite('fox', extra.concat(animals), s => b.length && b.some(v => Math.hypot(v.x - s.x, v.y - s.y) < 90))); }
-      for (let f = 0; f < BIRD_FLOCKS; f++) {   // small flocks of sparrows, half of them in the empty north
+      for (let i = 0; i < ANIMAL_TYPES.fox.count; i++) { const b = buildingSpots(); add('fox', animalSite('fox', extra.concat(animals), s => b.length && b.some(v => Math.hypot(v.x - s.x, v.y - s.y) < 90))); }
+      for (let f = 0; f < ANIMAL_TYPES.bird.flocks; f++) {   // small flocks of sparrows, half of them in the empty north
         const c = f % 2 ? animalSite('bird', extra.concat(animals), s => s.y < MAP.h * .4) : animalSite('bird', extra.concat(animals));
         if (!c) continue;
         for (let k = 0; k < 3 + (f % 3); k++) {
-          const b = newAnimal('bird', [], { x: c.x + (Math.random() - .5) * 40, y: c.y + (Math.random() - .5) * 30 });
+          const b = add('bird', { x: c.x + (Math.random() - .5) * 40, y: c.y + (Math.random() - .5) * 30 });
           if (!standable(b.x, b.y, [], true)) { b.x = c.x; b.y = c.y; }
-          b.homeX = c.x; b.homeY = c.y; animals.push(b);
+          b.homeX = c.x; b.homeY = c.y;
         }
       }
       return animals;
+    }
+
+    /* ---- B02b: animal identity/location persistence (not a simulation save) ---- */
+    const animalSpotValid = (x, y, allowBlocked) => {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+      if (x < 18 || y < (MAP.top || 40) + 18 || x > MAP.w - 18 || y > MAP.h - 18) return false;
+      return allowBlocked || !A.blocked(x, y);
+    };
+    const ANIMAL_ID_RE = /^([a-z]+):(\d+)$/;
+    function animalSnapshot() {
+      // Floor (not round): A.blocked() floors, so a floored saved position always
+      // stays in the pixel the animal actually occupied - rounding could shift a
+      // walkable float onto the first blocked pixel of an adjacent wall/water edge.
+      return state.animals.map(a => ({
+        id: a.id, kind: a.kind,
+        x: Math.floor(a.x), y: Math.floor(a.y),
+        homeX: Math.floor(a.homeX), homeY: Math.floor(a.homeY),
+        tx: Math.floor(a.tx), ty: Math.floor(a.ty),
+      }));
+    }
+    function flushAnimalSave() {
+      const q = Q();
+      // A session that never named a hero has nothing meaningful to persist
+      // (game.loadSave() ignores it anyway) - skip the write entirely.
+      if (!q.playerName) return;
+      // Never create a save out of thin air during unload: pagehide/title leaks can
+      // otherwise resurrect a save the player (or the test suite) just cleared.
+      // Only refresh a save that already exists on disk (game.js SAVE_KEY layout).
+      if (!localStorage.getItem('arek-chlopkow-save-v1')) return;
+      if (!q.worldLife || typeof q.worldLife !== 'object') q.worldLife = {};
+      q.worldLife.animals = animalSnapshot();
+      A.save();
+    }
+    /* Restore each validated saved entry onto the freshly built baseline animal
+       with the same kind:index id. Malformed/unknown ids, NaN or out-of-bounds
+       coords, solid-map spots (grounded kinds only - flying birds/butterflies can
+       legitimately sit above water/walls), duplicate ids and id/kind mismatches are
+       skipped, leaving that baseline animal at its own fresh position. */
+    function applyAnimalSnapshot(list) {
+      state.lastRestoredIds = [];
+      if (!Array.isArray(list) || !list.length) return;
+      const byId = new Map(state.animals.map(a => [a.id, a]));
+      const seen = new Set();
+      for (const e of list) {
+        if (!e || typeof e !== 'object' || typeof e.id !== 'string' || seen.has(e.id)) continue;
+        const kind = e.kind, def = ANIMAL_TYPES[kind], m = ANIMAL_ID_RE.exec(e.id);
+        if (!def || !m || m[1] !== kind) continue;
+        const idx = Number(m[2]);
+        if (!Number.isInteger(idx) || idx < 0 || idx >= def.count) continue;
+        const a = byId.get(e.id);
+        if (!a) continue;
+        const flies = !!def.flies;
+        if (!animalSpotValid(e.x, e.y, flies)) continue;
+        a.x = e.x; a.y = e.y;
+        if (animalSpotValid(e.homeX, e.homeY, flies)) { a.homeX = e.homeX; a.homeY = e.homeY; }
+        if (Number.isFinite(e.tx) && Number.isFinite(e.ty) &&
+            e.tx >= 18 && e.tx <= MAP.w - 18 && e.ty >= (MAP.top || 40) + 18 && e.ty <= MAP.h - 18) { a.tx = e.tx; a.ty = e.ty; }
+        seen.add(e.id);
+        state.lastRestoredIds.push(e.id);
+      }
     }
 
     function syncState() {
@@ -285,6 +379,8 @@
       }
       state.tractors = makeTractors();
       state.animals = makeAnimals();
+      // Legacy saves have no snapshot; a malformed one is ignored entry-by-entry.
+      applyAnimalSnapshot(w.animals);
       state.ride = Math.max(0, Math.min(RIDE_SECONDS, Number(w.rideRemaining) || 0));
       state.car = Number.isInteger(w.rideCar) ? w.rideCar : -1;
       state.saveT = 0;
@@ -313,7 +409,7 @@
         const b = buildingSpots().filter(s => { const d = Math.hypot(s.x - o.x, s.y - o.y); return d > 120 && d < 700; });
         if (b.length) { const s = b[(Math.random() * b.length) | 0]; o.tx = s.x; o.ty = s.y; o.wait = 14; return; }
       }
-      const radius = { chicken: 90, dog: 150, boar: 140, mouse: 70, hare: 120, pig: 80, butterfly: 110, stork: 90, bird: 40, fox: 200 }[o.kind] || 120;
+      const radius = (ANIMAL_TYPES[o.kind] || {}).radius || 120;
       for (let i = 0; i < 18; i++) {
         const a = Math.random() * Math.PI * 2, d = Math.random() * radius;
         const x = o.homeX + Math.cos(a) * d, y = o.homeY + Math.sin(a) * d;
@@ -332,7 +428,7 @@
         if (!standable(nx, ny, others) || Math.hypot(P.x - nx, P.y - ny) < MIN_PLAYER_GAP) continue;
         o.x = nx; o.y = ny; o.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
         if (Math.abs(vx) > .2) o.face = vx < 0 ? 'left' : 'right';
-        o.step += dt * ({ dog: 7, fox: 10, stork: 3, bird: 8 }[o.kind] || 5); o.moving = .15; return true;
+        o.step += dt * ((ANIMAL_TYPES[o.kind] || {}).step || 5); o.moving = .15; return true;
       }
       return false;
     }
@@ -365,7 +461,6 @@
     }
     function updateInteraction(o, dt) {
       o.sayT = Math.max(0, (o.sayT || 0) - dt);
-      if (o.hiddenT > 0) { o.hiddenT = Math.max(0, o.hiddenT - dt); return; }
       const fd = frodoDistance(o), pd = distance(o, P);
       if (o.kind === 'mouse') {
         if (fd < 120 && !chaseTarget && A.time >= chaseAfter) startFrodoChase(o, 2.4);
@@ -373,7 +468,11 @@
           if (!o.fleeT) { o.fleeT = 1.6; rememberInteraction(o, 'squeak!'); }
           o.fleeT = Math.max(0, o.fleeT - dt);
           flee(o, fd < 110 ? A.FRODO.x : P.x, fd < 110 ? A.FRODO.y : P.y, 160, 62, dt);
-          if (o.fleeT === 0) { o.hiddenT = 2; o.tx = o.homeX; o.ty = o.homeY; }
+          if (o.fleeT === 0) { o.tx = o.homeX; o.ty = o.homeY; }
+        } else if (o.fleeT > 0) {
+          // B02: threat left mid-flee. End the flight at once so the mouse
+          // returns home with normal movement - never frozen, never invisible.
+          o.fleeT = 0; o.tx = o.homeX; o.ty = o.homeY;
         }
       } else if (o.kind === 'hare') {
         if (fd < 120 || pd < 115) {
@@ -381,26 +480,52 @@
           o.fleeT = Math.max(0, o.fleeT - dt);
           if (fd < 105 && o.chaseTry !== Math.floor(A.time / 20)) { o.chaseTry = Math.floor(A.time / 20); if (Math.random() < .28) startFrodoChase(o, 1.8); }
           flee(o, fd < 120 ? A.FRODO.x : P.x, fd < 120 ? A.FRODO.y : P.y, 130, 66, dt, true);
+        } else if (o.fleeT > 0) {
+          // B02: same class as mouse - never freeze mid-flee after the threat leaves.
+          o.fleeT = 0;
         }
       } else if (o.kind === 'chicken') {
         if (fd < 75 || pd < 65) {
           if (!o.scatterT) { o.scatterT = .9; o.z = 5; rememberInteraction(o, 'bok!'); }
           o.scatterT = Math.max(0, o.scatterT - dt); o.z = Math.max(0, o.z - dt * 7);
           flee(o, fd < 75 ? A.FRODO.x : P.x, fd < 75 ? A.FRODO.y : P.y, 80, 78, dt);
+        } else if (o.scatterT > 0) {
+          // B02: same class as mouse - chicken can never be stranded mid-scatter.
+          o.scatterT = 0; o.z = 0;
         }
       } else if (o.kind === 'dog') {
-        if (fd < 95 && !o.sniffT && !o.leaveT) { o.sniffT = 2.2; rememberInteraction(o, 'hau!'); }
+        /* B04: friendly greet. Once per cooldown the dog sidles up to Frodo
+           (sniff -> play hop -> head home). The cooldown is in-memory only:
+           the B02b snapshot whitelist never persists these fields, so nothing
+           ephemeral leaks into Q. While the cooldown is active the dog ignores
+           Frodo entirely - no re-greet, no tailing, no endless chase. */
+        if (!(o.sniffT > 0) && !(o.playT > 0) && !(o.leaveT > 0)) {
+          o.greetCdT = Math.max(0, (o.greetCdT || 0) - dt);
+          if (fd < 95 && o.greetCdT === 0) { o.sniffT = 1.2; o.greetCdT = 12; rememberInteraction(o, 'hau!'); }
+        }
         if (o.sniffT > 0) {
           o.sniffT = Math.max(0, o.sniffT - dt);
           const orbit = A.time * 2.5, tx = A.FRODO.x + Math.cos(orbit) * 24, ty = A.FRODO.y + Math.sin(orbit) * 18;
-          const d = Math.hypot(tx - o.x, ty - o.y); if (d > 4) tryMove(o, (tx-o.x)/d, (ty-o.y)/d, 26, dt);
-          if (!o.sniffT) { o.leaveT = 5; o.tx = o.x + (o.x - A.FRODO.x) * 5; o.ty = o.y + (o.y - A.FRODO.y) * 5; }
+          const d = Math.hypot(tx - o.x, ty - o.y); if (d > 4) tryMove(o, (tx - o.x) / d, (ty - o.y) / d, 26, dt);
+          if (!o.sniffT) { o.playT = 1.4; o.say = 'au!'; o.sayT = 1.4; }
+          return;
+        }
+        if (o.playT > 0) {
+          o.playT = Math.max(0, o.playT - dt);
+          const orbit = A.time * 3.2, tx = A.FRODO.x + Math.cos(orbit) * 30, ty = A.FRODO.y + Math.sin(orbit) * 22;
+          const d = Math.hypot(tx - o.x, ty - o.y); if (d > 6) tryMove(o, (tx - o.x) / d, (ty - o.y) / d, 32, dt);
+          o.z = Math.floor(o.playT * 10) % 2 ? 5 : 0;   // playful hop
+          if (!o.playT) { o.z = 0; o.leaveT = 3; o.tx = o.homeX; o.ty = o.homeY; }
           return;
         }
         if (o.leaveT > 0) {
           o.leaveT = Math.max(0, o.leaveT - dt);
-          const dx=o.tx-o.x, dy=o.ty-o.y, d=Math.hypot(dx,dy); if(d>4) tryMove(o,dx/d,dy/d,24,dt);
-        } else if (fd < 180) { const d = fd || 1; tryMove(o, (A.FRODO.x-o.x)/d, (A.FRODO.y-o.y)/d, 18, dt); }
+          const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
+          if (d > 4) tryMove(o, dx / d, dy / d, 24, dt);
+          if (!o.leaveT) { o.tx = o.homeX; o.ty = o.homeY; }
+          return;
+        }
+        if (o.greetCdT === 0 && fd < 180) { const d = fd || 1; tryMove(o, (A.FRODO.x - o.x) / d, (A.FRODO.y - o.y) / d, 18, dt); }
       } else if (o.kind === 'pig') {
         if (pd < 120 && !o.curiosityT) { o.curiosityT = 3.2; rememberInteraction(o, 'chrum!'); }
         if (o.curiosityT > 0) {
@@ -423,6 +548,9 @@
           if (!o.fleeT) { o.fleeT = 1.4; rememberInteraction(o, 'yip!'); }
           o.fleeT = Math.max(0, o.fleeT - dt); flee(o, A.FRODO.x, A.FRODO.y, 170, 88, dt);
           if (fd < 110 && !chaseTarget && A.time >= chaseAfter) startFrodoChase(o, 1.8);
+        } else if (o.fleeT > 0) {
+          // B02: same class as mouse - the fox must never be stranded mid-flee.
+          o.fleeT = 0;
         }
       } else if (o.kind === 'stork') {
         if (pd < 105 && !o.clatterT) { o.clatterT=2.4; rememberInteraction(o,'kle-kle'); }
@@ -466,17 +594,16 @@
     }
     function updateAnimal(o, dt) {
       updateInteraction(o, dt);
-      if (o.hiddenT > 0) return;
       if (o.kind === 'bird') return updateBird(o, dt);
       if (o.kind === 'butterfly') return updateButterfly(o, dt);
       o.peck += dt; o.moving = Math.max(0, (o.moving || 0) - dt);
       if (o.kind === 'boar' && o.chargeT > 0) return;
-      if (o.kind === 'mouse' && o.fleeT > 0 || o.kind === 'hare' && o.fleeT > 0 || o.kind === 'chicken' && o.scatterT > 0 || o.kind === 'fox' && o.fleeT > 0 || o.kind === 'stork' && o.clatterT > 0 || o.kind === 'pig' && o.curiosityT > 0 || o.kind === 'dog' && (o.sniffT > 0 || o.leaveT > 0)) return;
+      if (o.kind === 'mouse' && o.fleeT > 0 || o.kind === 'hare' && o.fleeT > 0 || o.kind === 'chicken' && o.scatterT > 0 || o.kind === 'fox' && o.fleeT > 0 || o.kind === 'stork' && o.clatterT > 0 || o.kind === 'pig' && o.curiosityT > 0 || o.kind === 'dog' && (o.sniffT > 0 || o.playT > 0 || o.leaveT > 0)) return;
       const pdx = o.x - P.x, pdy = o.y - P.y, pd = Math.hypot(pdx, pdy);
-      const shy = o.kind === 'fox' ? 150 : o.kind === 'stork' ? 110 : 78;
+      const shy = (ANIMAL_TYPES[o.kind] || {}).shy || 78;
       if (pd < shy) {
         const d = pd || 1;
-        if (tryMove(o, pdx / d, pdy / d, { dog: 30, boar: 44, mouse: 24, hare: 38, pig: 25, fox: 85, stork: 26 }[o.kind] || 22, dt)) return;
+        if (tryMove(o, pdx / d, pdy / d, (ANIMAL_TYPES[o.kind] || {}).approachSpeed || 22, dt)) return;
       }
       if (o.kind === 'fox' && Math.hypot(o.tx - o.x, o.ty - o.y) < 8) {
         if (!o.rest) o.rest = 2 + Math.random() * 4;
@@ -485,7 +612,7 @@
       }
       if ((o.wait -= dt) <= 0 || Math.hypot(o.tx - o.x, o.ty - o.y) < 8) chooseTarget(o);
       const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
-      if (d > 3) tryMove(o, dx / d, dy / d, { dog: 18, boar: 28, mouse: 16, hare: 24, pig: 16, fox: 48, stork: 9 }[o.kind] || 12, dt);
+      if (d > 3) tryMove(o, dx / d, dy / d, (ANIMAL_TYPES[o.kind] || {}).speed || 12, dt);
     }
     function updateButterfly(o, dt) {
       if (o.landed) { o.x=P.x; o.y=P.y-22; o.z=0; o.step+=dt*8; return; }
@@ -523,7 +650,7 @@
       if (!t.puffT) t.puffT = .7;
     }
 
-    // sprite frames per kind (see CRIT / critters.json): walk cycle while moving, an idle pose otherwise
+    // sprite frames per kind (see ANIMAL_TYPES / critters.json): walk cycle while moving, an idle pose otherwise
     function critterFrame(o) {
       const walk2 = Math.floor(o.step) % 2;
       switch (o.kind) {
@@ -541,14 +668,14 @@
       return 0;
     }
     function drawCritter(o, sx, sy, s) {
-      if (o.hiddenT > 0) return;
-      const c = CRIT[o.kind], img = state.critters;
+      const c = ANIMAL_TYPES[o.kind], img = state.critters;
       if (!img || !c) return (o.kind === 'dog' ? drawDog : o.kind === 'chicken' ? drawChicken : drawSmallWildlife)(o, sx, sy, s);
-      const size = 64 * c.h * s / c.px, f = critterFrame(o), z = (o.z || 0) * s;
-      A.shadow(sx, sy, s * (o.kind === 'stork' ? 1 : o.kind === 'bird' ? .4 : .8) * (z ? .7 : 1), o.kind === 'bird' || o.kind === 'butterfly' ? 3 : 7);
+      const size = 64 * c.atlas.h * s / c.atlas.px, f = critterFrame(o), z = (o.z || 0) * s;
+      // B03: noShadow kinds (chicken/mouse/bird) never get a ground shadow.
+      if (!c.noShadow) A.shadow(sx, sy, s * c.shadowScale * (z ? .7 : 1), c.shadowBlur);
       ctx.save(); ctx.imageSmoothingEnabled = false; ctx.translate(sx, sy - z);
       if ((o.face || o.dir) === 'left') ctx.scale(-1, 1);
-      ctx.drawImage(img, f * 64, c.row * 64, 64, 64, -size / 2, -size + 2 * size / 64, size, size);
+      ctx.drawImage(img, f * 64, c.atlas.row * 64, 64, 64, -size / 2, -size + 2 * size / 64, size, size);
       ctx.restore();
       if (o.sayT > 0 && o.say) {
         const w = Math.max(26 * s, o.say.length * 6 * s + 8 * s), h = 13 * s, y = sy - size - z - h;
@@ -569,7 +696,8 @@
 
     function px(sx, sy, s, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s, w * s, h * s); }
     function drawChicken(o, sx, sy, s) {
-      A.shadow(sx, sy, s * .8, 6);
+      // B03: chicken declares noShadow, so the fallback must not add a shadow either.
+      if (!(ANIMAL_TYPES[o.kind] || {}).noShadow) A.shadow(sx, sy, s * .8, 6);
       const peck = Math.sin(o.peck * 5) > .55 ? 2 : 0, bob = Math.sin(o.step * 2) * .35;
       px(sx, sy, s, -6, -10 + bob, 11, 8, '#f2ead4'); px(sx, sy, s, -3, -12 + bob - peck, 7, 5, '#fff8e8');
       px(sx, sy, s, 3, -11 + bob - peck, 3, 2, '#d8262c'); px(sx, sy, s, 5, -9 + bob - peck, 3, 2, '#e09b22');
@@ -577,7 +705,8 @@
       px(sx, sy, s, -7, -8, 3, 3, '#d6c6a2');
     }
     function drawDog(o, sx, sy, s) {
-      A.shadow(sx, sy, s * .9, 8);
+      // B03: dogs keep their shadow (no noShadow flag in the registry).
+      if (!(ANIMAL_TYPES[o.kind] || {}).noShadow) A.shadow(sx, sy, s * .9, 8);
       ctx.save(); ctx.translate(sx, sy); if (o.dir === 'left') ctx.scale(-1, 1);
       const bob = Math.sin(o.step * 2) * .6;
       px(0, 0, s, -10, -12 + bob, 18, 9, '#665444'); px(0, 0, s, 7, -15 + bob, 8, 8, '#806b58');
@@ -588,7 +717,9 @@
       ctx.restore();
     }
     function drawSmallWildlife(o, sx, sy, s) {
-      A.shadow(sx, sy, s * .7, o.kind === 'boar' || o.kind === 'pig' ? 8 : 4);
+      // B03: the same noShadow gate covers mouse and bird here; boars, pigs and
+      // the generic species (hare/stork/fox/butterfly) keep their shadows.
+      if (!(ANIMAL_TYPES[o.kind] || {}).noShadow) A.shadow(sx, sy, s * .7, o.kind === 'boar' || o.kind === 'pig' ? 8 : 4);
       ctx.save(); ctx.translate(sx, sy); if ((o.face || o.dir) === 'left') ctx.scale(-1, 1);
       const bob = Math.sin(o.step * 2) * .4;
       if (o.kind === 'boar') {
@@ -649,15 +780,15 @@
     /* A02: read-only world hover hit shapes (map px, unzoomed) for the game.js
        picker - no second animal/car registry there. The boxes mirror the real
        draw extents: cars/tractors use their 60 px sprite boxes, critters use
-       the CRIT height, and flying birds/butterflies keep their current z. */
+       the ANIMAL_TYPES atlas height, and flying birds/butterflies keep their current z. */
     function hitShapes() {
       const out = [];
       for (const c of state.cars) out.push({ kind: 'car', x: c.x, y: c.y, base: c.y, halfW: 30, top: 32, bottom: 6 });
       for (const t of state.tractors) out.push({ kind: 'tractor', x: t.x, y: t.y, base: t.y, halfW: 30, top: 38, bottom: 4 });
       for (const o of state.animals) {
-        const c = CRIT[o.kind], z = o.z || 0;
+        const c = ANIMAL_TYPES[o.kind], z = o.z || 0;
         if (o.kind === 'butterfly') { out.push({ kind: 'butterfly', x: o.x, y: o.y, base: o.y, halfW: 8, top: 8 + z, bottom: 1 + z }); continue; }
-        out.push({ kind: o.kind, x: o.x, y: o.y, base: o.y, halfW: c ? 32 * c.h / c.px : 10, top: (c ? c.h : 12) + z, bottom: 1 + z });
+        out.push({ kind: o.kind, x: o.x, y: o.y, base: o.y, halfW: c ? 32 * c.atlas.h / c.atlas.px : 10, top: (c ? c.atlas.h : 12) + z, bottom: 1 + z });
       }
       return out;
     }
@@ -681,11 +812,25 @@
         state.ride = Math.max(0, state.ride - dt); state.saveT += dt;
         if (state.saveT >= 1 || state.ride === 0) { state.saveT = 0; saveRideState(); }
       }
+      // B02b: bounded snapshots only - when leaving play for the title screen (the
+      // game saves there too) and on a slow interval; never on every frame.
+      if (lastSceneForSave !== A.scene) {
+        if (A.scene === 'title' && lastSceneForSave === 'play') flushAnimalSave();
+        lastSceneForSave = A.scene;
+      }
+      if (A.scene === 'play') {
+        animalSaveT += dt;
+        if (animalSaveT >= animalSaveInterval) { animalSaveT = 0; flushAnimalSave(); }
+      }
       if (A.scene !== 'play') return;
       for (const t of state.tractors) updateTractor(t, dt);
       for (const o of state.animals) if (animalNeedsUpdate(o)) updateAnimal(o, dt);
       syncFrodoChase(dt);
     });
+    /* B02b: final pagehide / tab-hidden snapshot so a reload or tab close keeps the
+       last valid animal positions (the sandboxed save already round-trips them). */
+    window.addEventListener('pagehide', () => { try { flushAnimalSave(); } catch (e) { } });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { try { flushAnimalSave(); } catch (e) { } } });
     HOOKS.world.push((push, S, inView) => {
       syncState();
       for (const car of state.cars) if (inView(car.x, car.y)) push(car.y, () => drawCar(car, ...S(car.x, car.y), A.zoom));
@@ -716,15 +861,29 @@
       get waterPoints() { return waterSources(); },
       get lastInteraction() { return { ...lastInteraction }; },
       get vehicleSpritesLoaded() { return !!state.vehicleImage; },
+      get crittersLoaded() { return !!state.critters; },
+      get animalTypes() { return ANIMAL_TYPES; },
+      get speciesOrder() { return ANIMAL_ORDER.slice(); },
       get rideSeconds() { return state.ride; },
       stepInteractions(dt = .05) { for (const o of state.animals) updateAnimal(o, dt); syncFrodoChase(dt); },
       resetInteractionCooldown(kind) {
         delete lastInteraction[kind]; interactionCooldown[kind] = 0; chaseAfter = 0;
         if (chaseTarget && chaseTarget.kind === kind) { A.FRODO.chase = null; chaseTarget = null; }
+        /* B04: clear the ephemeral per-dog greet fields too, so a test/session
+           restart starts from a clean cooldown (they never reach Q/save). */
+        for (const a of state.animals) if (a.kind === kind) { a.sniffT = 0; a.playT = 0; a.leaveT = 0; a.greetCdT = 0; a.z = 0; }
       },
       balance: appleBalance,
             buyRide,
             hitShapes,
+            /* B02b debug/test surface: read the last validated restore set, control
+               the bounded save interval, force a snapshot, or rebuild animals from
+               the current Q.worldLife snapshot (keeps cars/tractors untouched). */
+            get lastRestored() { return state.lastRestoredIds.slice(); },
+            get saveIntervalSec() { return animalSaveInterval; },
+            set saveIntervalSec(v) { const n = Number(v); if (Number.isFinite(n) && n > 0) animalSaveInterval = n; },
+            flushSave() { flushAnimalSave(); },
+            reloadAnimals() { state.q = null; syncState(); },
             resetCars() {
         const q = Q();
         if (!q.worldLife) q.worldLife = {};
