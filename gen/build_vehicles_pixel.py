@@ -69,18 +69,10 @@ def back_tractor(d, phase):
 
 
 def car_sprite(d, phase):
-    # Side-profile Polski hatchback, deliberately brighter and more detailed than the old blocks.
-    wheel(d,17,47,7,phase); wheel(d,47,47,7,phase)
-    d.polygon([(4,39),(8,34),(18,32),(24,23),(31,18),(43,19),(51,29),(58,32),(61,39),(59,45),(53,47),(51,41),(45,39),(39,41),(24,41),(21,47),(12,47),(10,42),(5,42)],fill=C['ink'])
-    d.polygon([(7,38),(11,35),(20,34),(26,25),(32,20),(42,21),(49,30),(56,33),(58,38),(57,42),(52,42),(50,39),(45,37),(40,39),(24,39),(21,42),(13,42),(11,39)],fill=C['red'])
-    d.polygon([(26,25),(32,21),(41,22),(47,30),(39,29),(29,29)],fill=C['glass_s'])
-    d.polygon([(29,25),(33,22),(39,23),(39,28),(29,28)],fill=C['glass']); d.rectangle((33,22,35,23),fill=C['glass_l'])
-    d.polygon([(40,22),(42,22),(47,29),(41,29)],fill=C['glass'])
-    d.rectangle((8,35,19,36),fill=C['red_l']); d.rectangle((22,32,46,34),fill=C['red_l'])
-    d.rectangle((4,37,8,40),fill=C['light']); d.rectangle((55,36,59,39),fill="#d95d50")
-    d.rectangle((28,38,36,39),fill=C['red_s']); d.point((31,38),fill=C['metal'])
-    d.rectangle((12,40,21,42),fill=C['ink']); d.rectangle((41,40,51,42),fill=C['ink'])
-    d.line((25,29,22,34),fill=C['red_s'],width=1); d.rectangle((49,31,53,33),fill=C['red_s'])
+    # B07: removed - the previous red car art (git ba64220:docs/img/car_red.png)
+    # is restored by old_car_tile() below; keep the old name in the rows list so
+    # the atlas layout (row 3 = car, frames idle1-4) and metadata stay unchanged.
+    raise NotImplementedError("car sprite is composed from restored art in main()")
 
 
 def main():
@@ -88,10 +80,34 @@ def main():
     atlas=Image.new("RGBA",(CELL*4,CELL*len(rows)),(0,0,0,0))
     for row,(name,draw_fn,view) in enumerate(rows):
         for frame in range(4):
-            tile=Image.new("RGBA",(CELL,CELL),(0,0,0,0)); draw_fn(ImageDraw.Draw(tile),frame); atlas.alpha_composite(tile,(frame*CELL,row*CELL))
+            if name == "car":
+                # B07: the car row is composed from the restored previous red-car
+                # art (old_car_tile), not drawn by the retired hatchback car_sprite.
+                tile = old_car_tile()
+            else:
+                tile=Image.new("RGBA",(CELL,CELL),(0,0,0,0)); draw_fn(ImageDraw.Draw(tile),frame)
+            atlas.alpha_composite(tile,(frame*CELL,row*CELL))
     atlas.save(OUT,optimize=True)
     meta={"cell":CELL,"rows":{name:{"row":i,"view":view,"frames":["wheel1","wheel2","wheel3","wheel4"] if name.startswith("tractor") else ["idle1","idle2","idle3","idle4"]} for i,(name,_,view) in enumerate(rows)}}
     META.write_text(json.dumps(meta,indent=1)+"\n",encoding="utf-8")
     print(f"vehicle pixel atlas: {atlas.width}x{atlas.height}, rows={','.join(x[0] for x in rows)}")
+
+# B07: previous red car art restored from git commit ba64220 (docs/img/car_red.png,
+# 128x87 RGBA - the only surviving copy of the old blocky crimson car). The renderer
+# samples cell (0, row 3) frame 0 of vehicles.png and squashes the 64x64 cell to
+# 60x38 map units in drawCar, so the art is NEAREST-scaled (matching the old canvas
+# imageSmoothingEnabled=false draw) to a 60x41 footprint and pasted at (2,9): the
+# old car fills the cell like the hatchback it replaces, with its keyed-transparent
+# background intact. All four frames are byte-identical on purpose - drawCar reads
+# frame 0 only and the old car is a static view (the game draws its own shadow).
+CAR_SRC = ROOT / "gen/car_red_ba64220.png"
+CAR_PASTE = (2, 9)
+CAR_SIZE = (60, 41)
+
+def old_car_tile():
+    art = Image.open(CAR_SRC).convert("RGBA").resize(CAR_SIZE, Image.NEAREST)
+    tile = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
+    tile.alpha_composite(art, CAR_PASTE)
+    return tile
 
 if __name__=="__main__": main()

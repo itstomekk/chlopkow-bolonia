@@ -31,6 +31,40 @@ tractor_frames = [VEHICLE_IMAGE.crop((i * 64, 0, (i + 1) * 64, 64)).tobytes() fo
 assert len(set(tractor_frames)) == 4, "tractor wheel frames must all show rotation"
 assert {"tractor_side", "tractor_front", "tractor_back", "car"} <= set(VEHICLE_META["rows"])
 
+# ---- B07: restore the previous red car art (only), atlas cell mapping unchanged.
+# The renderer samples vehicles.png cell (0, row 3) frame 0 via drawCar; the old
+# blocky crimson car lives only as docs/img/car_red.png @ commit ba64220 (128x87),
+# which gen/build_vehicles_pixel.py pastes into every row-3 tile (NEAREST 60x41 at
+# offset (2,9)). All four car frames stay identical: drawCar reads frame 0 only and
+# the old art is a static side view - keep the mapping and behavior untouched.
+assert list(VEHICLE_META["rows"]) == ["tractor_side", "tractor_front", "tractor_back", "car"], VEHICLE_META["rows"]
+assert VEHICLE_META["rows"]["car"]["row"] == 3 and VEHICLE_META["rows"]["car"]["frames"] == ["idle1", "idle2", "idle3", "idle4"]
+B07_CAR_SRC = ROOT / "gen/car_red_ba64220.png"
+old_car = Image.open(B07_CAR_SRC).convert("RGBA")
+assert old_car.size == (128, 87), old_car.size  # provenance: git ba64220:docs/img/car_red.png
+expected_cell = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+expected_cell.alpha_composite(old_car.resize((60, 41), Image.NEAREST), (2, 9))
+car_frames = [VEHICLE_IMAGE.crop((i * 64, 3 * 64, (i + 1) * 64, 4 * 64)).tobytes() for i in range(4)]
+assert len(set(car_frames)) == 1, "B07: car frames must stay identical (drawCar samples frame 0 only)"
+assert car_frames[0] == expected_cell.tobytes(), "B07: row-3 frame 0 does not match the restored car_red (ba64220) art"
+
+
+def _b07_sig(cell_bytes):
+    teal = crimson = n = 0
+    for i in range(0, len(cell_bytes), 4):
+        r, g, b, a = cell_bytes[i], cell_bytes[i + 1], cell_bytes[i + 2], cell_bytes[i + 3]
+        if a > 128:
+            n += 1
+            if abs(r - 0x78) < 40 and abs(g - 0xB5) < 40 and abs(b - 0xC3) < 40:
+                teal += 1  # the new hatchback's glass panes (#78b5c3 family)
+            if r > 120 and g < 110 and b < 110:
+                crimson += 1
+    return teal, crimson, n
+
+
+_b07_teal, _b07_crimson, _b07_n = _b07_sig(car_frames[0])
+assert _b07_teal < 30 and _b07_crimson > 500 and _b07_n > 600, ("B07 cell signature", _b07_teal, _b07_crimson, _b07_n)
+
 # Fixed seed so every run boots the exact same game (and, for B01, the exact
 # same spawn positions). Reproduced by mulberry32-style LCG.
 SEED_JS = """
@@ -547,9 +581,90 @@ with sync_playwright() as p:
         im.crop((x0, y0, x1, y1)).save(SHOTS_DIR / f"b03_{kind}_crop.png")
     print("b03 shots:", sorted(p.name for p in SHOTS_DIR.glob("b03_*.png")))
 
+    # ---- B07: car render contract at runtime - drawCar samples vehicles.png
+    # cell (0, row 3) frame 0 and draws it 60x38 map units (behavior untouched),
+    # plus desktop/mobile visual evidence of the restored car in-game.
+    B07_SHOTS_DIR = Path(os.environ.get("HERMES_SCRATCH", r"C:\Users\Lenovo\AppData\Local\hermes\cache\scratch")) / "chlopkow-b07-impl"
+    B07_SHOTS_DIR.mkdir(parents=True, exist_ok=True)
+    b07_car = page.evaluate("""() => {
+      const A = window.ARK, W = window.__worldLife;
+      const canvas = document.querySelector('canvas');
+      const cctx = canvas.getContext('2d');
+      const car = W.cars[0], zoom = A.zoom;
+      const saved = { a: W.animals.slice(), t: W.tractors.map(t => ({ x: t.x, y: t.y })) };
+      W.animals.length = 0;
+      for (const t of W.tractors) { t.x += 9000; t.y += 9000; }
+      const ox = canvas.width / 2 - car.x * zoom, oy = canvas.height / 2 - car.y * zoom;
+      const S = (x, y) => [ox + x * zoom, oy + y * zoom];
+      let cap = null;
+      for (const h of A.HOOKS.world) {
+        const c = [];
+        h((b, f) => c.push({ b, f }), S, (x, y) => Math.hypot(x - car.x, y - car.y) < 220);
+        if (c.length === 1 && Math.abs(c[0].b - car.y) < 1) { cap = c; break; }
+      }
+      if (!cap) throw new Error('B07: car world hook not found');
+      const origDraw = cctx.drawImage;
+      let last = null;
+      cctx.drawImage = function (img, sx, sy, sw, sh, dx, dy, dw, dh) {
+        if (dw !== undefined) last = { dw, dh, sx, sy, sw, sh };
+        return origDraw.apply(this, arguments);
+      };
+      try { cap[0].f(); } finally { cctx.drawImage = origDraw; }
+      W.animals.length = 0; W.animals.push(...saved.a);
+      W.tractors.forEach((t, i) => { t.x = saved.t[i].x; t.y = saved.t[i].y; });
+      return { dw: last ? last.dw : null, dh: last ? last.dh : null, sx: last ? last.sx : null, sy: last ? last.sy : null, sw: last ? last.sw : null, sh: last ? last.sh : null, zoom };
+    }""")
+    assert b07_car["dw"] is not None, "B07: car not drawn through the atlas path"
+    assert b07_car["sw"] == 64 and b07_car["sh"] == 64 and b07_car["sx"] == 0 and b07_car["sy"] == 192, ("B07: atlas cell mapping changed", b07_car)
+    assert abs(b07_car["dw"] / b07_car["zoom"] - 60) <= 1 and abs(b07_car["dh"] / b07_car["zoom"] - 38) <= 1, ("B07: car draw size changed", b07_car)
+    # desktop visual evidence: park the player just under the first car so the
+    # camera centers it (camera follows the player; car at screen mid-width)
+    page.evaluate("""() => {
+      const A = window.ARK, W = window.__worldLife;
+      const c = W.cars[0];
+      const put = (dx, dy) => { const x = Math.round(c.x + dx), y = Math.round(c.y + dy); A.teleport(x, y); };
+      const free = (x, y) => x > 60 && x < A.MAP.w - 60 && y > 130 && y < A.MAP.h - 60 && !A.blocked(x, y);
+      if (free(c.x, c.y + 18)) put(0, 18);
+      else if (free(c.x + 160, c.y)) put(160, 0);
+      else put(-160, 0);
+    }""")
+    page.wait_for_timeout(450)
+    page.screenshot(path=str(B07_SHOTS_DIR / "b07_car_desktop.png"))
+    # mobile evidence: same boot flow in a 390x844 viewport
+    mob = browser.new_page(viewport={"width": 390, "height": 844})
+    mob_errors = []
+    mob.on("pageerror", lambda error: mob_errors.append(str(error)))
+    mob.add_init_script(SEED_JS)
+    mob.goto(PINNED_URL)
+    mob.wait_for_function("window.ARK && window.__game", timeout=30000)
+    mob.evaluate("localStorage.clear()")
+    mob.reload()
+    mob.wait_for_function("window.ARK && window.__game", timeout=30000)
+    mob.keyboard.press("KeyN")
+    mob.locator("#player-name-input").fill("B07")
+    mob.locator("#player-name-submit").click()
+    mob.wait_for_function("__game.scene === 'play' && window.__worldLife && __worldLife.vehicleSpritesLoaded", timeout=30000)
+    mob.evaluate("""() => {
+      const A = window.ARK, W = window.__worldLife;
+      const c = W.cars[0];
+      const put = (dx, dy) => { const x = Math.round(c.x + dx), y = Math.round(c.y + dy); A.teleport(x, y); };
+      const free = (x, y) => x > 60 && x < A.MAP.w - 60 && y > 130 && y < A.MAP.h - 60 && !A.blocked(x, y);
+      if (free(c.x, c.y + 18)) put(0, 18);
+      else if (free(c.x + 160, c.y)) put(160, 0);
+      else put(-160, 0);
+    }""")
+    mob.wait_for_timeout(450)
+    mob.screenshot(path=str(B07_SHOTS_DIR / "b07_car_mobile.png"))
+    assert not mob_errors, mob_errors
+    mob.close()
+    print("b07 shots:", sorted(p.name for p in B07_SHOTS_DIR.glob("b07_*.png")))
+
     print("animals: PASS", {"species": len(EXPECTED_SPECIES), "total": 81, "perKind": registry["summary"],
                             "seededRebootStable": True, "vehicleRows": len(VEHICLE_META["rows"]),
                             "b03": {"mouseQuarterW": mouse_r["dw"] / mouse_r["zoom"], "mouseQuarterH": mouse_r["dh"] / mouse_r["zoom"],
                                     "noShadow": [k for k in ("chicken", "mouse", "bird") if b03[k]["shadowCalls"] == 0],
-                                    "atlasPath": True, "fallbackPath": True}})
+                                    "atlasPath": True, "fallbackPath": True},
+                            "b07": {"carCell": (b07_car["sx"], b07_car["sy"], b07_car["sw"], b07_car["sh"]),
+                                    "drawSize": (round(b07_car["dw"] / b07_car["zoom"]), round(b07_car["dh"] / b07_car["zoom"])),
+                                    "restored": True}})
     browser.close()
