@@ -197,7 +197,7 @@
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
-  let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, SPLASH = null, MEMORY_ART = [];
+  let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, SPLASH = null, MEMORY_ART = [], FOREST_STATS = null;
   let ROOM = null, OUT = null, trans = null, shopGame = null;   // OUT: the village to return to
 
   /* ---------- state ---------- */
@@ -622,8 +622,12 @@
         continue;
       }
       const box = { x: cx, y: o.base, halfW: o.w / 2, top: o.h, bottom: 1 };
-      if (o.w >= 40 && o.h >= 30 && o.w <= 200) { if (hit(box)) take({ label: WORLD_HOVER.building, kind: 'building', x: o.x, y: o.y, base: o.base }); }
-      else if (o.w < 40 && o.h >= 40) { if (hit(box)) take({ label: WORLD_HOVER.tree, kind: 'tree', x: o.x, y: o.y, base: o.base }); }
+            // C06: generated trees carry kind:'tree' - never classify a tree by sprite
+            // dims (broad oak crowns w >= 40/h >= 30 used to read as BUILDING and the
+            // remaining trees fell through to the anonymous ground label).
+            if (o.kind === 'tree') { if (hit(box)) take({ label: WORLD_HOVER.tree, kind: 'tree', x: o.x, y: o.y, base: o.base }); continue; }
+            if (o.w >= 40 && o.h >= 30 && o.w <= 200) { if (hit(box)) take({ label: WORLD_HOVER.building, kind: 'building', x: o.x, y: o.y, base: o.base }); }
+            else if (o.w < 40 && o.h >= 40) { if (hit(box)) take({ label: WORLD_HOVER.tree, kind: 'tree', x: o.x, y: o.y, base: o.base }); }
     }
     ITEMS.apples.forEach((a, i) => {
       if (Q.apples.includes(i)) return;   // picked-up apples are no longer drawn
@@ -1732,6 +1736,84 @@ function drawFrodo(sx, sy, s) {
       const px = tx2.getImageData(0, 0, terrainImg.width, terrainImg.height).data; TERRAIN = { w: terrainImg.width, h: terrainImg.height, k: MAP.w / terrainImg.width, v: new Uint8Array(terrainImg.width * terrainImg.height) };
       for (let i = 0; i < TERRAIN.v.length; i++) TERRAIN.v[i] = px[i * 4];
     }
+    {   // C06: deterministic forest-floor texture polish (RUNTIME only - the
+        // generated docs/img/map_*.png stay byte-identical). The generator paints
+        // a flat #1f4f24 forest floor; here we bake low-contrast moss/litter tones
+        // plus coarse dappled shade onto floor pixels ONLY (canopy/trunk art is
+        // left untouched), with a fixed seed so every load reproduces the exact
+        // same texture. One-time init cost; the per-frame render path is unchanged.
+        const FLOOR = [31, 79, 36];   // #1f4f24 generator fill
+        const TONES = [[22, 58, 26], [24, 64, 29], [28, 71, 32], [30, 76, 35], [33, 80, 37],
+                       [35, 86, 40], [36, 83, 39], [38, 92, 42], [40, 88, 40], [42, 95, 45]];
+        const SEED = 0x2D06C029 | 0;   // fixed C06 seed
+        const FC_START = performance.now();
+        const gw = g.width, gh = g.height;
+        const gc = document.createElement('canvas');
+        gc.width = gw; gc.height = gh;
+        const gx = gc.getContext('2d');
+        gx.drawImage(g, 0, 0);
+        const img = gx.getImageData(0, 0, gw, gh), d = img.data;
+        // cheap deterministic spatial hash (no PRNG stream, no call overhead): a
+        // full bake touches ~6.5M floor pixels, and each pixel needs ~3 draws
+        const draw = (x, y, salt) => {
+          let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(salt, 1442695041)) | 0;
+          h = Math.imul(h ^ h >>> 13, 1274126177) ^ SEED;
+          return ((h ^ h >>> 16) >>> 0) / 4294967296;
+        };
+        let touched = 0, outside = 0, canopyKept = 0;
+        let n = 0, sR = 0, sG = 0, sB = 0, ssR = 0, ssG = 0, ssB = 0, maxD = 0, baseExact = 0;
+        let fnv = 2166136261 >>> 0;
+        const distinct = new Set();
+        const note = (r, gg, b) => {
+          n++; sR += r; sG += gg; sB += b; ssR += r * r; ssG += gg * gg; ssB += b * b;
+          distinct.add((r >> 2) + ':' + (gg >> 2) + ':' + (b >> 2));
+          const dd = Math.abs(r - FLOOR[0]) + Math.abs(gg - FLOOR[1]) + Math.abs(b - FLOOR[2]);
+          if (dd > maxD) maxD = dd;
+          if (dd === 0) baseExact++;
+          fnv ^= r; fnv = Math.imul(fnv, 16777619) >>> 0;
+          fnv ^= gg; fnv = Math.imul(fnv, 16777619) >>> 0;
+          fnv ^= b; fnv = Math.imul(fnv, 16777619) >>> 0;
+        };
+        // terrain cells map to 4x4 art-res blocks with the generator's (2,2) offset
+        for (let ty = 0; ty < TERRAIN.h; ty++) {
+          const y0 = 2 + ty * 4;
+          if (y0 >= gh) break;
+          for (let tx = 0; tx < TERRAIN.w; tx++) {
+            if (TERRAIN.v[ty * TERRAIN.w + tx] !== 220) continue;
+            const x0 = 2 + tx * 4;
+            if (x0 >= gw) continue;
+            const vw = Math.min(4, gw - x0), vh = Math.min(4, gh - y0);
+            const dapple = draw(tx, ty, 1);      // coarse canopy shade per block
+            const dm = dapple < 0.30 ? 0.86 : dapple > 0.73 ? 1.06 : 1;
+            for (let yy = 0; yy < vh; yy++) for (let xx = 0; xx < vw; xx++) {
+              const ax = x0 + xx, ay = y0 + yy, pi = (ay * gw + ax) * 4;
+              const r = d[pi], gg = d[pi + 1], b = d[pi + 2];
+              // floor-classified pixels only: close to the flat fill, never canopy/trunk
+              if (r >= 60 || gg < 50 || gg > 100 || b >= 60 || gg - r <= 15) { canopyKept++; continue; }
+              if (draw(ax, ay, 2) >= 0.52) {
+                const t0 = TONES[(draw(ax, ay, 3) * TONES.length) | 0];
+                const j = ((draw(ax, ay, 4) - 0.5) * 7) | 0;
+                // stay inside the floor colour box so every written pixel remains
+                // floor-classified and the bake never touches canopy/trunk art
+                d[pi] = Math.min(59, Math.max(0, ((t0[0] + j) * dm) | 0));
+                d[pi + 1] = Math.min(100, Math.max(50, ((t0[1] + j) * dm) | 0));
+                d[pi + 2] = Math.min(59, Math.max(20, ((t0[2] + (j >> 1)) * dm) | 0));
+              }
+              if (n < 900000) note(d[pi], d[pi + 1], d[pi + 2]);
+              touched++;
+            }
+          }
+        }
+        gx.putImageData(img, 0, 0);
+        GROUND = gc;   // rendered ground is now the baked canvas (per-frame same as before)
+        FOREST_STATS = {
+          seed: '0x2D06C029', floorTouched: touched, outsideForest: outside, canopyKept,
+          buildMs: performance.now() - FC_START, sampled: n,
+          floorMean: [sR / n, sG / n, sB / n],
+          floorStdev: [Math.sqrt(ssR / n - (sR / n) ** 2), Math.sqrt(ssG / n - (sG / n) ** 2), Math.sqrt(ssB / n - (sB / n) ** 2)],
+          distinctColors: distinct.size, baseExactShare: baseExact / n, cohesionMax: maxD, fnv,
+        };
+    }
     NPC_HOME = Object.fromEntries(ITEMS.npcs.filter(n => !n.secret).map(n => [n.id, { x: n.x, y: n.y }]));
     const tc = document.createElement('canvas'); tc.width = MAP.w; tc.height = MAP.h;
     const tx = tc.getContext('2d', { willReadFrequently: true }); tx.drawImage(c, 0, 0);
@@ -1764,7 +1846,7 @@ function drawFrodo(sx, sy, s) {
     window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
-    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs }) };
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs }), forestTextureStats: () => FOREST_STATS };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();
