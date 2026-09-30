@@ -1085,6 +1085,7 @@
     if (trans) { trans.t += dt; if (!trans.done && trans.t >= .25) { trans.done = true; trans.fn(); } if (trans.t >= .5) trans = null; else return; }
     if (scene !== 'play') return;
     Q.playTime += dt;
+    updateWeatherSound(dt);
     if (shopGame) { P.moving = false; return; }
     if (talk) { talkT += dt; P.moving = false; return; }
     HOOKS.update.forEach(f => f(dt));
@@ -1230,10 +1231,15 @@
   // per-area fill inflation). Blob coordinates live in 50 px cloud-local units at scale 1
   // (cached geometry); PUFF_BLOBS is the same silhouette shrunk 62% and tucked a touch
   // higher, so the soft white body sits inside the darker multiply shade.
-  const CLOUD_UNIT = 50, CLOUD_ALPHA_CAP = .22;   // shadows ~2x darker than before, but capped
+  const CLOUD_UNIT = 50, CLOUD_ALPHA_CAP = .30;   // P08: shadows ~2.6x darker than B06 (still capped, gameplay readable)
+  // P08: smooth cumulus silhouette - four rounded, close-proportioned blobs instead of
+  // B06's seven jittery bumps (small/large radius ratio 0.51 vs 0.30), so the union edge
+  // reads as one soft cloud, not a ragged outline.
   const CLOUD_BLOBS = [
-    [0, .9, 7.6, 2.0], [-3.0, -.6, 4.3, 2.7], [3.1, -.4, 4.1, 2.5],
-    [-.4, -2.5, 4.7, 2.2], [-4.7, -2.3, 3.0, 1.9], [4.6, -1.9, 2.8, 1.7], [1.7, -3.7, 2.3, 1.4],
+    [0, .8, 7.6, 2.2],      // main body: broad, gentle base
+    [-3.1, .6, 4.6, 2.0],   // left shoulder: rounded, low bump
+    [3.1, .6, 4.6, 2.0],    // right shoulder
+    [0, -1.9, 3.9, 1.6],    // top dome: one smooth crown
   ];
   const PUFF_BLOBS = CLOUD_BLOBS.map(b => [b[0] * .62, b[1] * .62 - .12, b[2] * .62, b[3] * .62]);
   // Culling margins derive from the actual silhouette bounds (x largest cloud), so a cloud
@@ -1248,7 +1254,8 @@
     const maxScale = Math.max(...CLOUDS.map(c => c.scale));
     return { unitW, unitH, halfW: unitW / 2, halfH: unitH / 2,
              marginX: Math.ceil(unitW / 2 * maxScale) + 8, marginY: Math.ceil(unitH / 2 * maxScale) + 8,
-             blobs: CLOUD_BLOBS.length };
+             blobs: CLOUD_BLOBS.length, cap: CLOUD_ALPHA_CAP,
+             radii: CLOUD_BLOBS.map(b => b[2]).sort((a, b) => a - b) };
   })();
   function drawClouds(ox, oy, zoom, sx0, sy0, sw, sh) {
     // Visual-only weather: drifting translucent cloud shadows and soft puffs. They never touch
@@ -1259,7 +1266,7 @@
       if (x < sx0 - CLOUD_GEOM.marginX || x > sx0 + sw + CLOUD_GEOM.marginX ||
           y < sy0 - CLOUD_GEOM.marginY || y > sy0 + sh + CLOUD_GEOM.marginY) continue;
       const sx = ox + x * zoom, sy = oy + y * zoom, k = cloud.scale * zoom * CLOUD_UNIT;
-      const shadowA = Math.min(cloud.alpha * 2, CLOUD_ALPHA_CAP);
+      const shadowA = Math.min(cloud.alpha * 2.6, CLOUD_ALPHA_CAP);   // P08: clearly darker, hard-capped
       ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(90,100,116,${shadowA})`;
       ctx.beginPath();
       for (const [dx, dy, rx, ry] of CLOUD_BLOBS) ctx.ellipse(sx + dx * k, sy + dy * k, rx * k, ry * k, 0, 0, Math.PI * 2);
@@ -1270,6 +1277,75 @@
       ctx.fill();
     }
     ctx.restore();
+  }
+  /* ---------- P08: weather sound (cheap WebAudio rain/wind simulation) ----------
+     While Arek stands inside a cloud's shadow, a quiet filtered-noise gust
+     (rain or wind) SOMETIMES plays: one gust at a time, low volume, fade in/out,
+     at least ~5 s of silence between gusts - never always-on. Outside the shadow
+     everything stays silent. The JS state machine runs unconditionally (tests
+     read it through __game.weatherSoundState()); the audio wiring is best-effort
+     and can never throw, so headless/no-audio environments just stay mute. */
+  const WEATHER = { ac: null, master: null, noiseBuf: null, inShadow: false, playing: false,
+                    kind: null, stopAt: -1, nextGustAt: 0, gustCount: 0, rainCount: 0, windCount: 0 };
+  function weatherAudio() {
+    try {
+      if (WEATHER.ac) return WEATHER.ac;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      WEATHER.ac = new Ctx();
+      WEATHER.master = WEATHER.ac.createGain();
+      WEATHER.master.gain.value = .9;                       // per-gust gain below keeps it quiet
+      WEATHER.master.connect(WEATHER.ac.destination);
+      WEATHER.noiseBuf = WEATHER.ac.createBuffer(1, WEATHER.ac.sampleRate, WEATHER.ac.sampleRate);
+      const d = WEATHER.noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      if (WEATHER.ac.state === 'suspended') WEATHER.ac.resume().catch(() => {});
+      return WEATHER.ac;
+    } catch (e) { return null; }
+  }
+  function inCloudShadow(x, y) {   // world-point test vs every cloud's silhouette bbox (7 clouds -> trivial)
+    for (const c of CLOUDS) {
+      const cx = (c.x + time * c.speed) % MAP.w;
+      if (Math.abs(x - cx) < CLOUD_GEOM.halfW * c.scale && Math.abs(y - c.y) < CLOUD_GEOM.halfH * c.scale) return true;
+    }
+    return false;
+  }
+  function stopWeatherGust() { WEATHER.playing = false; WEATHER.kind = null; }
+  function startWeatherGust() {
+    const ac = weatherAudio();
+    const kind = WEATHER.gustCount % 3 === 2 ? 'rain' : 'wind';
+    const dur = kind === 'rain' ? 1.6 + Math.random() * 1.2 : 3 + Math.random() * 2.5;
+    const peak = kind === 'rain' ? .055 : .075;              // very quiet, well under the music bus
+    WEATHER.playing = true; WEATHER.kind = kind;
+    WEATHER.stopAt = time + dur;
+    WEATHER.gustCount++; if (kind === 'rain') WEATHER.rainCount++; else WEATHER.windCount++;
+    WEATHER.nextGustAt = time + dur + 5 + Math.random() * 9;   // >= 5 s of silence between gusts
+    if (ac && WEATHER.master && WEATHER.noiseBuf) {
+      try {
+        const t0 = ac.currentTime;
+        const src = ac.createBufferSource(); src.buffer = WEATHER.noiseBuf;
+        src.loop = true;
+        const fl = ac.createBiquadFilter();
+        fl.type = kind === 'rain' ? 'bandpass' : 'lowpass';
+        fl.frequency.value = kind === 'rain' ? 2400 : 360;
+        fl.Q.value = kind === 'rain' ? .9 : .5;
+        const g = ac.createGain();
+        g.gain.setValueAtTime(.0001, t0);
+        g.gain.exponentialRampToValueAtTime(peak, t0 + .8);       // fade in
+        g.gain.setValueAtTime(peak, Math.max(t0 + .8, t0 + dur - .9));
+        g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);     // fade out
+        src.connect(fl); fl.connect(g); g.connect(WEATHER.master);
+        src.start(t0, Math.random() * .5); src.stop(t0 + dur + .05);
+      } catch (e) { }
+    }
+  }
+  function updateWeatherSound(dt) {
+    if (scene !== 'play' || ROOM) { WEATHER.inShadow = false; stopWeatherGust(); return; }
+    WEATHER.inShadow = inCloudShadow(P.x, P.y);
+    if (WEATHER.inShadow) {
+      if (WEATHER.playing && time >= WEATHER.stopAt) stopWeatherGust();
+      if (!WEATHER.playing && time >= WEATHER.nextGustAt) startWeatherGust();
+    } else if (WEATHER.playing) stopWeatherGust();
   }
 function drawFrodo(sx, sy, s) {
     shadow(sx, sy, s * .78, 6);
@@ -1390,9 +1466,19 @@ function drawFrodo(sx, sy, s) {
   }
   const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
-  // Position readout: map pixels and real-world lat/lon from map.json's bbox.
+  // P04: map grid sectors (A5, B6 style). Each 512 px cell; the Chłopków map
+  // (5143x7091) yields letters A..K and digits 1..14. The HUD readout shows the
+  // sector the player stands in instead of raw pixel coordinates.
+  const SECTOR_SIZE = 512;
+  function sectorAt(x, y) {
+    const col = Math.min(Math.ceil(MAP.w / SECTOR_SIZE) - 1, Math.max(0, Math.floor(x / SECTOR_SIZE)));
+    const row = Math.min(Math.ceil(MAP.h / SECTOR_SIZE) - 1, Math.max(0, Math.floor(y / SECTOR_SIZE))) + 1;
+    return String.fromCharCode(65 + col) + row;
+  }
+
+  // Position readout: the grid sector (A5, B6 style) under the player / cursor.
   function drawCoords(U, H, big, mx, my, mw, mh) {
-    const player = `${heroName()} ${Math.round(P.x)},${Math.round(P.y)}  ${mapCoordinateText(P.x, P.y)}`;
+    const player = `${heroName()} ${sectorAt(P.x, P.y)}`;
     if (!big) {
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
       const tw = ctx.measureText(player).width;
@@ -1407,7 +1493,7 @@ function drawFrodo(sx, sy, s) {
       }
       return;
     }
-    const cursor = mapCursor.seen ? `KURSOR ${Math.round(mapCursor.x)},${Math.round(mapCursor.y)}  ${mapCoordinateText(mapCursor.x, mapCursor.y)}` : 'KURSOR / TAP - kliknij mapę';
+    const cursor = mapCursor.seen ? `KURSOR ${sectorAt(mapCursor.x, mapCursor.y)}` : 'KURSOR / TAP - kliknij mapę';
     ctx.font = `${U * 1.25}px Silkscreen`; ctx.textAlign = 'left';
     const tw = Math.max(ctx.measureText(player).width, ctx.measureText(cursor).width) + U * 2;
     const x = Math.max(U, mx), y = Math.min(H - U * 5.2, my + mh + U);
@@ -1583,10 +1669,14 @@ function drawFrodo(sx, sy, s) {
       drawPixels(APPLE_PX, ax - U * 1.3, ay - U * 1.95, U * .2);   // same pixel art as on the map
       ctx.font = `${U * 2}px Silkscreen`; ctx.fillStyle = '#f5f0e0'; ctx.textAlign = 'left';
       ctx.fillText(`× ${appleCount()}`, ax + U * 2, ay);
-      const mxh = qx + U * 13.8, myh = ay;
+      const mxh = qx + U * 12.2, myh = ay;   // P07: mushroom column nudged left so the right-aligned clock below never collides
       drawPixels(MUSH_PX, mxh - U * 1.3, myh - U * 1.95, U * .2);
       ctx.fillStyle = '#f5f0e0'; ctx.fillText(`× ${mushroomCount()}/${MUSHROOMS_TOTAL}`, mxh + U * 2, myh);
-      ctx.fillStyle = '#ffd21f'; ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 5.6, ay);
+      // P07: the clock is right-aligned at a fixed inset so long playtimes always
+      // fit inside the HUD box (it used to overflow past the box's right edge).
+      ctx.textAlign = 'right'; ctx.fillStyle = '#ffd21f';
+      ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 1.2, ay);
+      ctx.textAlign = 'left';
       ctx.font = `${U * 1.45}px Silkscreen`;
       lines.forEach(([txt, done], i) => {
         const ly = qy + U * (6.1 + i * 2.6);
@@ -1641,8 +1731,6 @@ function drawFrodo(sx, sy, s) {
           }
         }
       }
-      ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.75)';
-      ctx.fillText('© OPENSTREETMAP CONTRIBUTORS', W - U * 1.5, H - U * 1.2);
       drawCoords(U, H, big, mx, my, mw, mh);
     }
     // Direction signs sit only at the board's edges: "← DUŃCY" when the west edge of the map is in view,
@@ -1846,7 +1934,18 @@ function drawFrodo(sx, sy, s) {
     window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
-    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs }), forestTextureStats: () => FOREST_STATS };
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, sectorAt, clockGeometry: () => {
+      const u = Math.min(cvs.width, cvs.height * 1.6) / 100;
+      ctx.font = `${u * 2}px Silkscreen`; ctx.textAlign = 'left';
+      const text = fmtTime(Q.playTime);
+      const tw = ctx.measureText(text).width;
+      const qx = u * 2, qy = u * 2, qw = u * 40, ay = qy + u * 2.8;
+      const rightX = qx + qw - u * 1.2;
+      const mushW = ctx.measureText(`× ${mushroomCount()}/${MUSHROOMS_TOTAL}`).width;
+      return { text, textW: tw, textLeft: rightX - tw, textRight: rightX, textBottom: ay + u, textTop: ay - u,
+               boxLeft: qx, boxRight: qx + qw, bandBottom: qy + u * 5.2,
+               mushroomRight: qx + u * 12.2 + u * 2 + mushW };
+    }, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs, cap: CLOUD_GEOM.cap, radii: CLOUD_GEOM.radii }), cloudShadowAt: (x, y) => inCloudShadow(+x, +y), weatherSoundState: () => ({ inShadow: WEATHER.inShadow, playing: WEATHER.playing, kind: WEATHER.kind, gustCount: WEATHER.gustCount, rainCount: WEATHER.rainCount, windCount: WEATHER.windCount, hasAudio: !!(WEATHER.ac && WEATHER.master) }), forestTextureStats: () => FOREST_STATS };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

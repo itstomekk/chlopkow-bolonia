@@ -59,6 +59,16 @@ with sync_playwright() as p:
     assert all(t.startswith('audio/') and t.endswith('.ogg') for t in defaults), defaults
     assert not any('Polka_Dziadek' in t for t in defaults), defaults
     assert pg.evaluate("MUSIC.mainTrackZone") == 'main', pg.evaluate("MUSIC.mainTrackZone")
+    # P01 title-only invariant: the printed Polka belongs to the entrance screen. Entering
+    # gameplay must silence it — no element carrying Polka_Dziadek may still be playing,
+    # because that would be an audibly leaking ghost underneath the village track.
+    def polka_leaks():
+        return pg.evaluate("""MUSIC.allMainEls
+            .filter(e => e.src.endsWith('Polka_Dziadek_true_chiptune_NES.ogg'))
+            .map(e => ({ src: e.src, paused: e.paused, ended: e.ended }))""")
+    leaks = polka_leaks()
+    print("polka elements in play", leaks)
+    assert leaks and not any(not l['paused'] and not l['ended'] for l in leaks), leaks
     names = [t.rsplit('/', 1)[-1] for t in defaults]
     src = pg.evaluate("MUSIC.mainTrackSource")
     assert src.rsplit('/', 1)[-1] in names, (src, names)

@@ -2,11 +2,15 @@
 
 RED/GREEN checks against docs/js/game.js drawClouds:
   * each linear footprint of a rendered cloud grows >= 5x (per-cloud, scale-normalised)
-  * the cloud shadow gets about 2x darker but stays capped
+  * the cloud shadow darkens ~2.6x (P08) but stays capped
+  * the silhouette is smooth (P08): <= 5 round blobs, min/max radius ratio >= 0.45
   * a cloud whose centre lies beyond the old +/-150/+-90 culling margins still renders
     as long as its silhouette overlaps the viewport (margins recalculated for new bounds),
     and one whose silhouette truly does not overlap is culled
   * cloud count and weather stay purely visual; no gameplay collision
+  * P08 weather sound: standing in a cloud's shadow sometimes triggers a quiet
+    fading rain/wind/cloud gust (bounded duty cycle, >= 1 gust in 20 s, <= 4),
+    outside any shadow nothing ever plays; shadow tests and frame rate stay cheap
 
 Measurement: the game's ctx.ellipse calls are recorded (transform checked), so the test
 asserts on what is actually painted, not on formulas. Frames whose cloud ellipse radii
@@ -30,7 +34,7 @@ SHOTS = Path(os.environ.get("B06_SHOTS", r"C:\Users\Lenovo\AppData\Local\hermes\
 # shadow ellipse rx = 72 * scale * zoom, union footprint ~144 x 51.3 world px at scale 1,
 # shadow alpha 0.07..0.106, culling margins +/-150 (x) and +/-90 (y).
 OLD = {"unitW": 144.0, "unitH": 51.3, "alphaMin": 0.07, "alphaMax": 0.106,
-       "marginX": 150, "marginY": 90}
+       "marginX": 150, "marginY": 90, "blobs": 7, "radiusRatio": 2.3 / 7.6}
 
 PROBE_JS = """() => {
   const ctx = window.ARK.ctx, orig = ctx.ellipse;
@@ -169,7 +173,7 @@ def measure_cloud_frame(pg, cloud, geom, attempts=8):
         clouds = pg.evaluate("window.__game.clouds()")
         cur = cloud_at(clouds, cloud["x"], cloud["y"])
         blobs = blobs_of_cloud(pg, rec, cam, cur)
-        if len(blobs) >= 5:
+        if len(blobs) >= 4:
             w, h = cloud_union_world(blobs, cam)
             alpha = shadow_alpha(blobs[0][1])
             return (w / cur["scale"], h / cur["scale"], alpha, cam, cur, len(blobs))
@@ -189,7 +193,7 @@ def place_and_check(pg, cloud, target_p, geom):
         clouds = pg.evaluate("window.__game.clouds()")
         cur = cloud_at(clouds, cloud["x"], cloud["y"])
         last_cam, last_cur = cam, cur
-        if len(blobs_of_cloud(pg, rec, cam, cur)) >= 5:
+        if len(blobs_of_cloud(pg, rec, cam, cur)) >= 4:
             return cur, cam, True
     return last_cur, last_cam, False
 
@@ -233,13 +237,27 @@ def main():
         # focus screenshot of the cloud in view
         pg.screenshot(path=str(SHOTS / "b06_cloud_after.png"))
 
-        # ---------- 2. shadow about 2x darker but capped ----------
+        # ---------- 2. shadow clearly darker than B06 but capped ----------
         declared = target["alpha"]
-        print(f"shadow alpha: rendered {alpha} vs declared {declared} (expect ~2x, capped)")
+        print(f"shadow alpha: rendered {alpha} vs declared {declared} (expect ~2.6x, capped at {geom['cap']})")
+        assert alpha >= 2.3 * declared - 0.005, (alpha, declared)      # P08: meaningfully darker
         assert alpha >= 1.8 * declared - 0.005, (alpha, declared)
-        assert alpha <= 0.25, alpha
+        assert alpha <= 0.32, alpha
+        assert alpha <= 0.30 + 0.005, alpha                            # hard cap, never unbounded
         cap = max(c["alpha"] for c in clouds)
-        assert alpha <= cap * 2 + 0.01, (alpha, cap)              # capped, not unbounded for the largest alpha
+        assert alpha <= cap * 2.6 + 0.01, (alpha, cap)                 # matches the per-cloud factor, not unbounded
+
+        # ---------- 2b. P08: smooth silhouette, not jagged ----------
+        # Fewer, rounder bumps: blob count drops from B06's 7 and the smallest
+        # blob radius is at least 45% of the widest (jagged spikes are gone).
+        blobs_n = geom["blobs"]
+        radii = geom["radii"]
+        ratio = radii[0] / radii[-1]
+        print(f"smoothing: blobs {OLD['blobs']} -> {blobs_n}, radius min/max ratio {ratio:.2f} "
+              f"(was {OLD['radiusRatio']:.2f})")
+        assert blobs_n <= 5, f"P08: silhouette not smoothed, still {blobs_n} bumps"
+        assert ratio >= 0.45, f"P08: jagged bump radii remain: {radii}"
+        assert ratio >= 1.4 * OLD["radiusRatio"] - 0.005, (ratio, OLD["radiusRatio"])
 
         # marginal sanity: declared margins cover the largest cloud silhouette
         max_scale = max(c["scale"] for c in clouds)
@@ -307,6 +325,83 @@ def main():
         dist = start[0] - end[0]
         assert 45 <= dist <= 85, (start, end)          # 0.6 s at SPEED 110, no early stop
         assert pg.evaluate("window.__game.cloudCount") == 7
+
+        # ---------- 4. P08: weather sound only in a cloud's shadow, occasional, bounded ----------
+        has_ws = pg.evaluate("typeof window.__game.weatherSoundState === 'function' && typeof window.__game.cloudShadowAt === 'function'")
+        assert has_ws, "P08: weatherSoundState()/cloudShadowAt() hooks missing"
+        clouds = pg.evaluate("window.__game.clouds()")
+        wc = good_cloud(pg, clouds, need_y_headroom=False)
+        fx, fy = free_cell_near(pg, wc["x"], wc["y"])
+        pg.evaluate("ARK.teleport(%d, %d)" % (fx, fy))
+        pg.wait_for_timeout(1400)
+        assert pg.evaluate("([x, y]) => window.__game.cloudShadowAt(x, y)", [fx, fy]), "P08: not inside the cloud shadow"
+        st0 = pg.evaluate("window.__game.weatherSoundState()")
+        assert st0["inShadow"] is True, st0
+        samples = []
+        for _ in range(40):                       # 20 s inside the shadow
+            pg.wait_for_timeout(500)
+            samples.append(pg.evaluate("window.__game.weatherSoundState()"))
+        gusted = sum(1 for s in samples if s["playing"])
+        kinds = sorted({s["kind"] for s in samples if s["playing"]})
+        print(f"weather in shadow (20 s): {gusted}/40 samples audible, "
+              f"gustCount {st0['gustCount']} -> {samples[-1]['gustCount']}, kinds={kinds}")
+        assert samples[-1]["gustCount"] > st0["gustCount"], "P08: no weather gust inside the shadow"
+        assert samples[-1]["gustCount"] - st0["gustCount"] <= 4, "P08: gusts too frequent (always-on-ish)"
+        assert gusted <= 24, f"P08: weather audible {gusted}/40 samples - too continuous"
+        assert kinds, "P08: gust kind never set"
+        assert all(k in ("rain", "wind", "cloud") for k in kinds), kinds
+        pg.screenshot(path=str(SHOTS / "p08_in_shadow.png"))
+
+        # -------- 4b. outside any shadow: no new gust ever starts --------
+        free_out = pg.evaluate("""() => {
+          const g = window.__game;
+          for (let r = 60; r <= 2600; r += 40) for (let a = 0; a < 6.283; a += 0.4) {
+            const x = 700 + Math.cos(a) * r, y = 700 + Math.sin(a) * r;
+            if (x < 80 || y < 80 || x > g.MAP.w - 80 || y > g.MAP.h - 80 || g.blocked(x, y)) continue;
+            if (!g.cloudShadowAt(x, y)) return [Math.round(x), Math.round(y)];
+          }
+          return null;
+        }""")
+        assert free_out, "P08: no shadow-free cell found"
+        if samples[-1]["playing"]:
+            for _ in range(16):                   # let any mid-air gust finish and its cooldown pass
+                if not pg.evaluate("window.__game.weatherSoundState().playing"):
+                    break
+                pg.wait_for_timeout(500)
+        pg.evaluate("ARK.teleport(%d, %d)" % (free_out[0], free_out[1]))
+        pg.wait_for_timeout(1200)
+        st_out0 = pg.evaluate("window.__game.weatherSoundState()")
+        assert st_out0["inShadow"] is False, st_out0
+        outs = [st_out0]
+        for _ in range(8):                        # 4 s outside
+            pg.wait_for_timeout(500)
+            outs.append(pg.evaluate("window.__game.weatherSoundState()"))
+        print(f"weather outside (4 s): audible {sum(1 for s in outs if s['playing'])}/8, "
+              f"gustCount {st_out0['gustCount']} -> {outs[-1]['gustCount']}")
+        assert outs[-1]["gustCount"] == st_out0["gustCount"], "P08: gusts started outside the shadow"
+        assert not any(s["playing"] for s in outs), "P08: weather audible outside the shadow"
+
+        # -------- 4c. P08 perf: shadow tests are trivial, frame rate stays sane --------
+        perf = pg.evaluate("""() => {
+          const t0 = performance.now();
+          let hits = 0;
+          for (let i = 0; i < 20000; i++) if (window.__game.cloudShadowAt(i % 5143, (i * 7) % 7091)) hits++;
+          return { ms: performance.now() - t0, hits };
+        }""")
+        print(f"weather perf: cloudShadowAt 20k calls {perf['ms']:.2f} ms ({perf['ms'] / 20:.3f} us/call)")
+        assert perf["ms"] < 40, perf
+        frames = pg.evaluate("""() => new Promise(res => {
+          const marks = [performance.now()];
+          let n = 0;
+          const tick = () => { marks.push(performance.now()); if (++n < 100) requestAnimationFrame(tick); else {
+            const avg = (marks[marks.length - 1] - marks[0]) / n;
+            res({ n, avg, p95: marks.slice(1).map((t, i) => t - marks[i]).sort((a, b) => a - b)[95] });
+          } };
+          requestAnimationFrame(tick);
+        })""")
+        print(f"weather perf: frame avg {frames['avg']:.1f} ms, p95 {frames['p95']:.1f} ms (headless)")
+        assert frames["avg"] < 60, frames          # headless software rendering floor
+
         assert not errs, errs
 
         browser.close()

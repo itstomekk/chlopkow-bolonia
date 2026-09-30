@@ -297,6 +297,7 @@
     'audio/track-ona-tanczy.ogg',
   ];
   let mainTrack = null, mainTrackSrc = null, mainTrackZone = null, mainTrackOn = false;
+  const MAIN_ELS = [];   // every <audio> created for the recorded playlists (debug: lets tests see ghost elements)
   const LOOKAHEAD = .25;
   const TEMPO = { idle: .2, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
     rampUp: 30, rampRun: 20, rampDown: 20 };        // linear energy seconds to max (walking / running / stopping)
@@ -326,13 +327,22 @@
     P.arr = arrange(P.song, 0); P.fT = now + .15; P.fS = 0;
   }
   function pickMainTrack(zone) {
-    if (zone === 'title') return TITLE_TRACKS[0];   // the entrance screen repeats its one printed track
-    if (DEFAULT_TRACKS.length === 1) return DEFAULT_TRACKS[0];
+    // The printed Polka Dziadek belongs to the entrance screen ALONE. Selection is
+    // guarded by zone: only 'title' ever draws from TITLE_TRACKS, and the gameplay
+    // bucket explicitly filters the title track out, so a gameplay zone can never
+    // request it (nor can it leak into the village/field playlist by drift).
+    if (zone === 'title') return TITLE_TRACKS[0];
+    const gameplay = DEFAULT_TRACKS.filter(t => !TITLE_TRACKS.includes(t));
+    if (gameplay.length === 1) return gameplay[0];
     let src = mainTrackSrc, n = 0;
-    while (src === mainTrackSrc && n++ < 24) src = DEFAULT_TRACKS[(Math.random() * DEFAULT_TRACKS.length) | 0];
+    while (src === mainTrackSrc && n++ < 24) src = gameplay[(Math.random() * gameplay.length) | 0];
     return src;                                     // random, never the same track twice in a row
   }
   function loadMainTrack(src) {
+    // Stop the previous element before replacing it: a plain reassignment left the
+    // old <audio> playing on top of the new one, so the title Polka kept sounding
+    // into gameplay (invisible to mainSrc/mainPlaying, which only read mainTrack).
+    if (mainTrack) { try { mainTrack.pause(); mainTrack.currentTime = 0; } catch (e) { } }
     const track = new Audio(src);
     track.loop = false;
     track.preload = 'metadata';
@@ -344,6 +354,7 @@
       mainTrack.play().catch(() => { });
     });
     mainTrack = track; mainTrackSrc = src;
+    MAIN_ELS.push(track);
   }
   function setMainTrack(zone) {      // zone: 'title', 'main', or null when a procedural track owns the moment
     if (!zone) {
@@ -497,7 +508,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, get mainSrc() { return mainTrack ? mainTrack.src : null; }, get mainPlaying() { return mainTrack ? !mainTrack.paused && !mainTrack.ended : false; }, get mainMuted() { return mainTrack ? mainTrack.muted : null; }, get busGain() { return bus ? bus.gain.value : null; }, MAIN_RATE_MIN, TEMPO };
+window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, get mainSrc() { return mainTrack ? mainTrack.src : null; }, get mainPlaying() { return mainTrack ? !mainTrack.paused && !mainTrack.ended : false; }, get mainMuted() { return mainTrack ? mainTrack.muted : null; }, get busGain() { return bus ? bus.gain.value : null; }, get allMainEls() { return MAIN_ELS.map(t => ({ src: t.src, paused: t.paused, ended: t.ended })); }, MAIN_RATE_MIN, TEMPO };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {

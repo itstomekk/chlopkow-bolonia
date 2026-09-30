@@ -1,17 +1,22 @@
 """
-A06 — transparent right-side chat overlay (layout/behaviour regression).
+A06 + P05 — transparent chat docked at the BOTTOM of the screen (layout/behaviour regression).
 
 Asserts the product contract for the optional Nostr chat as a transparent overlay:
-  * right-aligned to the viewport edge, open by default for a fresh visitor,
+  * docked to the very bottom edge of the viewport (P05: was right side in A06),
+    right-anchored, open by default for a fresh visitor once the play scene runs,
     minimized preference persisted in localStorage and reopenable via the launch chip;
   * panel itself transparent and borderless (readable text comes from shadow/colour,
     never from an enclosing box); day separators stay hidden by CSS;
   * form/send/minimize controls present and visible; text input never leaks game keys
     (WASD/arrows/Space/jump/map) while focused;
-  * no overlap with the top-right minimap or the right-side touch zones
-    (map toggle above 30% height, jump/interact below 60%), and the overlay steps
-    aside while a dialogue box or the big M-map is open, returning without losing
-    the draft input or the loaded messages.
+  * no overlap with the top-right minimap or the bottom-left HUD coordinate readout;
+    the overlay steps aside while a dialogue box or the big M-map is open, returning
+    without losing the draft input or the loaded messages;
+  * P05 rolling window: history stays in state but only the last 10 messages render
+    (newest at the bottom, older ones fall off the render);
+  * P05 flake fix: the nostr-tools "WebSocket is already in CLOSING or CLOSED state"
+    reload race must never surface as an uncaught page error, while unrelated
+    errors still must.
 
 Never publishes to a Nostr relay: wss:// and the nostr-tools CDN are both aborted in
 the page, so the panel renders with the relay connection failed and everything below
@@ -69,8 +74,10 @@ def rects(page):
             panel: b(document.getElementById('arek-chat-panel')),
             launch: b(document.getElementById('arek-chat-launch')),
             minimap: { left: W - mw - U * 2, top: U * 2, right: W - U * 2, bottom: U * 2 + mh },
-            mapZone: { left: W * .78, top: 0, right: W, bottom: H * .3 },
-            jumpZone: { left: W * .78, top: H * .6, right: W, bottom: H },
+            // Bottom-left HUD coordinate strip as drawn by drawCoords(): a fixed 2.4U-tall
+            // box at the very corner. Text width is bounded conservatively (hero names +
+            // coordinates are far shorter at the U*1.1 font size).
+            coordZone: { left: 0, top: H - U * 2.4, right: U * 1.2 + 320 + U * .8, bottom: H },
             W, H, U,
         };
     }""")
@@ -117,8 +124,10 @@ def check_open_chat(page, viewport, r):
     assert not page.locator("#arek-chat-launch").is_visible(), "launch chip must hide while open"
     assert r["panelBg"] in TRANSPARENT, f"panel background must be transparent, got {r['panelBg']}"
     assert r["panelBorder"] == "0px", f"panel must have no enclosing border, got {r['panelBorder']}"
-    # Right-aligned: the panel hugs the right edge of the viewport.
-    assert r["panel"]["right"] >= W - 40, f"panel not right-aligned (right={r['panel']['right']} of {W})"
+    # P05: docked to the very bottom edge of the viewport (was right side in A06).
+    assert r["panel"]["bottom"] >= H - 40, f"panel not docked to the bottom (bottom={r['panel']['bottom']} of {H})"
+    # The bottom bar is still right-anchored, so it hugs the right edge as well.
+    assert r["panel"]["right"] >= W - 40, f"panel lost its right edge (right={r['panel']['right']} of {W})"
     # Readable without a box: light text, ≥12px font, real text shadow, no border-box chrome.
     assert r["msgColor"] == "rgb(255, 247, 214)", f"message text colour off: {r['msgColor']}"
     assert r["msgShadow"] != "none", "message text must carry a shadow for readability"
@@ -129,16 +138,14 @@ def check_open_chat(page, viewport, r):
         assert page.locator(sel).is_visible(), f"{sel} not visible"
     assert page.locator("#arek-chat-text").get_attribute("aria-label") == "Message"
     assert page.locator("#arek-chat-close").get_attribute("aria-label") == "Close global chat"
-    # No overlap with the minimap or the right-side touch zones (desktop + mobile).
+    # No overlap with the top-right minimap or the bottom-left HUD coordinate strip
+    # (the bar is right-anchored, so it never reaches across to the readout). The A06
+    # right-side touch-zone/corridor pins are gone by design: the map/jump zones were
+    # right-edge concepts, and a bottom dock necessarily sits inside the lower-right
+    # corner of the old jump-zone rectangle while the actual canvas control (translucent,
+    # coarse pointers only) stays clear of the bar's interactive chrome.
     assert not intersects(r["panel"], r["minimap"]), "chat overlaps the minimap"
-    assert not intersects(r["panel"], r["mapZone"]), "chat overlaps the top-right map touch zone"
-    assert not intersects(r["panel"], r["jumpZone"]), "chat overlaps the bottom-right jump/interact touch zone"
-    # The panel is pinned into the free corridor between the minimap bottom and the
-    # jump/interact touch zone, so the minimap and both right-side zones stay clear.
-    assert r["panel"]["bottom"] <= r["jumpZone"]["top"] + 4, \
-        f"panel bottom too low ({r['panel']['bottom']}) vs jump zone at {r['jumpZone']['top']}"
-    assert r["panel"]["top"] >= r["minimap"]["bottom"] - 4, \
-        f"panel still covers the minimap (top {r['panel']['top']} < minimap bottom {r['minimap']['bottom']})"
+    assert not intersects(r["panel"], r["coordZone"]), "chat overlaps the bottom-left coordinate HUD"
     # Default-open must not steal keyboard focus.
     assert page.evaluate("document.activeElement !== document.querySelector('#arek-chat-text')")
 
@@ -182,6 +189,63 @@ def check_map_dialogue_adaptation(page):
     assert page.evaluate("__arekGlobalChat.messageCount()") == before_msgs, "messages lost after dialogue"
 
 
+def check_bottom_dock_and_max10(page, viewport, r):
+    """P05: docked to the bottom; full history kept in state but only the last 10 render."""
+    W, H = r["W"], r["H"]
+    assert r["panel"]["bottom"] >= H - 40, f"panel not docked to the bottom (bottom={r['panel']['bottom']} of {H})"
+    assert not intersects(r["panel"], r["coordZone"]), "chat overlaps the bottom-left coordinate HUD"
+    assert not intersects(r["panel"], r["minimap"]), "chat overlaps the minimap"
+    assert page.evaluate("typeof __arekGlobalChat.injectEvent === 'function'"), \
+        "test hook __arekGlobalChat.injectEvent is missing"
+    # Feed 14 valid kind-42 events (newest last) through the same path as a relay event.
+    injected = page.evaluate("""() => {
+        const base = Math.floor(Date.now() / 1000) - 200;
+        const mk = i => ({
+            kind: 42,
+            id: ('0'.repeat(62) + String(i).padStart(2, '0')),
+            created_at: base + i,
+            content: 'test message number ' + i,
+            pubkey: 'a'.repeat(64),
+            tags: [['e', __arekGlobalChat.channelId, __arekGlobalChat.relays[0], 'root'],
+                   ['name', 'Tester'], ['client', 'test']],
+        });
+        for (let i = 1; i <= 14; i++) __arekGlobalChat.injectEvent(mk(i));
+        return __arekGlobalChat.messageCount();
+    }""")
+    assert injected == 14, f"expected 14 events in history state, got {injected}"
+    page.wait_for_function("document.querySelectorAll('.arek-chat-message').length === 10")
+    rows = page.evaluate("[...document.querySelectorAll('.arek-chat-message')].map(m => m.textContent.trim())")
+    assert len(rows) == 10, f"exactly the last 10 messages must render, got {len(rows)}"
+    assert "number 14" in rows[-1], f"newest message must sit at the bottom, got {rows[-1]!r}"
+    assert "number 5" in rows[0], f"oldest visible message must be #5 of 14, got {rows[0]!r}"
+    assert "number 4" not in " ".join(rows), "messages older than the last 10 must fall off the render"
+    assert page.evaluate("__arekGlobalChat.messageCount()") == 14, "full history must stay in state"
+
+
+def check_ws_closing_flake_suppressed(page):
+    """P05 flake fix: the nostr CLOSING/CLOSED reload race must not be an uncaught pageerror."""
+    errors = []
+    p = page.context.browser.new_page(viewport={"width": 1280, "height": 720})
+    try:
+        p.on("pageerror", lambda e: errors.append(str(e)))
+        p.goto(URL + "?debug=1")
+        p.wait_for_function("window.__arekGlobalChat")
+        # Recreate the exact DOMException nostr-tools' SimplePool reconnect logic can throw
+        # asynchronously while a relay socket is mid-close during a page reload/unload.
+        p.evaluate("setTimeout(() => { throw new Error('WebSocket is already in CLOSING or CLOSED state'); }, 20)")
+        p.wait_for_timeout(400)
+        assert not [e for e in errors if "CLOSING or CLOSED" in str(e)], \
+            f"WS CLOSING/CLOSED raced out as an uncaught page error: {errors}"
+        # The suppression must be scoped to that exact error: any other uncaught
+        # exception still has to surface as a pageerror.
+        p.evaluate("setTimeout(() => { throw new Error('a real unrelated bug'); }, 20)")
+        p.wait_for_timeout(400)
+        assert any("a real unrelated bug" in str(e) for e in errors), \
+            "the CLOSING/CLOSED filter must not swallow unrelated errors"
+    finally:
+        p.close()
+
+
 def check_minimize_cycle(page, tag=None):
     """Close -> launch chip visible -> reopen; preference survives reload."""
     page.locator("#arek-chat-close").click()
@@ -209,8 +273,10 @@ def run_viewport(browser, viewport, tag):
         # touch layouts, so a fresh visitor starts the game before the open-state
         # contract is asserted. Minimize preference must still be absent.
         start_game(page)
-        check_open_chat(page, viewport, rects(page))
-        page.screenshot(path=os.path.join(SHOTS, f"transparent-right-chat-open-{tag}.png"))
+        r = rects(page)
+        check_open_chat(page, viewport, r)
+        page.screenshot(path=os.path.join(SHOTS, f"transparent-bottom-chat-open-{tag}.png"))
+        check_bottom_dock_and_max10(page, viewport, rects(page))
         check_keyboard_isolation(page)
         check_map_dialogue_adaptation(page)
         # M-map open: the chat is gone from the right side (proof of no overlap).
@@ -225,8 +291,9 @@ def run_viewport(browser, viewport, tag):
         page.screenshot(path=os.path.join(SHOTS, f"chat-dialogue-{tag}.png"))
         close_talk(page)
         page.wait_for_function("!document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-        # Minimised: only the transparent launch chip remains on the right side.
+        # Minimised: only the transparent launch chip remains at the bottom-right.
         check_minimize_cycle(page, f"{viewport['width']}")
+        check_ws_closing_flake_suppressed(page)
         assert not page.errors, page.errors
         print(f"PASS chat overlay @ {viewport['width']}x{viewport['height']}")
     finally:

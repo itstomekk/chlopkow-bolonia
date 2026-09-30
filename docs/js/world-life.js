@@ -4,6 +4,12 @@
 'use strict';
 (() => {
   const COST = 10, RIDE_SECONDS = 15, RIDE_SPEED = 2.35, SITE_STEP = 36, MIN_PLAYER_GAP = 30, TRACTORS = 2;
+  /* P02: dogs rest a moment after each wander leg (they used to retarget mid-walk
+     and change position almost continuously). P03: occasionally a dog chases a
+     nearby chicken - short, bounded, ends on its own, cooldown-gated like the
+     B04 greet; never a catch, never a kill, and the hen keeps its own timers. */
+  const DOG_REST_MIN = 1.0, DOG_REST_MAX = 3.5;
+  const DOG_HUNT_RANGE = 170, DOG_HUNT_SECONDS = 2.6, DOG_HUNT_COOLDOWN = 15, DOG_HUNT_CHANCE = 0.6, DOG_HUNT_SPEED = 34;
 
   /* B01: single extensible registry for every animal kind (previously split
      across the CHICKENS..FOXES consts, the CRIT atlas table, wildlifeAllowed
@@ -525,6 +531,35 @@
           if (!o.leaveT) { o.tx = o.homeX; o.ty = o.homeY; }
           return;
         }
+        /* P03: occasionally chase a nearby chicken. Short and bounded, ends on
+           its own (dog heads home), gated by an in-memory cooldown like the
+           B04 greet; never while greeting; no kill - the hen is never removed
+           and keeps its own flight timers. Uses the same tryMove gate. */
+        if (!(o.sniffT > 0) && !(o.playT > 0) && !(o.leaveT > 0) && !(o.huntT > 0)) {
+          o.huntCdT = Math.max(0, (o.huntCdT || 0) - dt);
+          if (o.huntCdT === 0) {
+            let hen = null, best = DOG_HUNT_RANGE;
+            for (const a of state.animals) {
+              if (a === o || a.kind !== 'chicken') continue;
+              const d = Math.hypot(a.x - o.x, a.y - o.y);
+              if (d < best) { best = d; hen = a; }
+            }
+            if (hen && Math.random() < DOG_HUNT_CHANCE * dt) {
+              o.huntT = DOG_HUNT_SECONDS; o.huntTarget = hen; o.huntCdT = DOG_HUNT_COOLDOWN;
+              rememberInteraction(o, 'hau!');
+            }
+          }
+        }
+        if (o.huntT > 0) {
+          o.huntT = Math.max(0, o.huntT - dt);
+          const hen = o.huntTarget;
+          if (hen && hen.kind === 'chicken') {
+            const dx = hen.x - o.x, dy = hen.y - o.y, d = Math.hypot(dx, dy);
+            if (d > 6) tryMove(o, dx / d, dy / d, DOG_HUNT_SPEED, dt);
+          }
+          if (!o.huntT) { o.tx = o.homeX; o.ty = o.homeY; o.huntTarget = null; }
+          return;
+        }
         if (o.greetCdT === 0 && fd < 180) { const d = fd || 1; tryMove(o, (A.FRODO.x - o.x) / d, (A.FRODO.y - o.y) / d, 18, dt); }
       } else if (o.kind === 'pig') {
         if (pd < 120 && !o.curiosityT) { o.curiosityT = 3.2; rememberInteraction(o, 'chrum!'); }
@@ -598,7 +633,7 @@
       if (o.kind === 'butterfly') return updateButterfly(o, dt);
       o.peck += dt; o.moving = Math.max(0, (o.moving || 0) - dt);
       if (o.kind === 'boar' && o.chargeT > 0) return;
-      if (o.kind === 'mouse' && o.fleeT > 0 || o.kind === 'hare' && o.fleeT > 0 || o.kind === 'chicken' && o.scatterT > 0 || o.kind === 'fox' && o.fleeT > 0 || o.kind === 'stork' && o.clatterT > 0 || o.kind === 'pig' && o.curiosityT > 0 || o.kind === 'dog' && (o.sniffT > 0 || o.playT > 0 || o.leaveT > 0)) return;
+      if (o.kind === 'mouse' && o.fleeT > 0 || o.kind === 'hare' && o.fleeT > 0 || o.kind === 'chicken' && o.scatterT > 0 || o.kind === 'fox' && o.fleeT > 0 || o.kind === 'stork' && o.clatterT > 0 || o.kind === 'pig' && o.curiosityT > 0 || o.kind === 'dog' && (o.sniffT > 0 || o.playT > 0 || o.leaveT > 0 || o.huntT > 0)) return;
       const pdx = o.x - P.x, pdy = o.y - P.y, pd = Math.hypot(pdx, pdy);
       const shy = (ANIMAL_TYPES[o.kind] || {}).shy || 78;
       if (pd < shy) {
@@ -610,7 +645,20 @@
         if ((o.rest -= dt) > 0) return;
         o.rest = 0; chooseTarget(o);
       }
-      if ((o.wait -= dt) <= 0 || Math.hypot(o.tx - o.x, o.ty - o.y) < 8) chooseTarget(o);
+      const wx = o.tx - o.x, wy = o.ty - o.y, wd = Math.hypot(wx, wy);
+      if (o.kind === 'dog') {
+        // P02: dogs change position less often - they only pick a new wander
+        // target once they actually reached the current one, then rest a moment
+        // before moving again (no mid-walk retargeting, no instant re-wander).
+        if (wd < 8) {
+          if (!o.restT) o.restT = DOG_REST_MIN + Math.random() * (DOG_REST_MAX - DOG_REST_MIN);
+          if ((o.restT -= dt) > 0) return;
+          o.restT = 0;
+          chooseTarget(o);
+        }
+      } else if ((o.wait -= dt) <= 0 || wd < 8) {
+        chooseTarget(o);
+      }
       const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
       if (d > 3) tryMove(o, dx / d, dy / d, (ANIMAL_TYPES[o.kind] || {}).speed || 12, dt);
     }
@@ -871,7 +919,8 @@
         if (chaseTarget && chaseTarget.kind === kind) { A.FRODO.chase = null; chaseTarget = null; }
         /* B04: clear the ephemeral per-dog greet fields too, so a test/session
            restart starts from a clean cooldown (they never reach Q/save). */
-        for (const a of state.animals) if (a.kind === kind) { a.sniffT = 0; a.playT = 0; a.leaveT = 0; a.greetCdT = 0; a.z = 0; }
+        /* P02/P03: and the wander rest / chicken-chase fields (same ephemeral rule). */
+        for (const a of state.animals) if (a.kind === kind) { a.sniffT = 0; a.playT = 0; a.leaveT = 0; a.greetCdT = 0; a.restT = 0; a.huntT = 0; a.huntCdT = 0; a.huntTarget = null; a.z = 0; }
       },
       balance: appleBalance,
             buyRide,

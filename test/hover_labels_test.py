@@ -43,7 +43,10 @@ const LAB = __LANG__ === 'pl'
   : { building: 'BUILDING', tree: 'TREE', bale: 'BALE', car: 'CAR', tractor: 'TRACTOR',
       mouse: 'MOUSE', bird: 'BIRD', ground: 'MEADOW' };
 const isBuilding = o => o.w >= 40 && o.h >= 30 && o.w <= 200;
-const isTree = o => !isBuilding(o) && o.w < 40 && o.h >= 40;
+// C06: generated trees carry kind:'tree' and are classified by that first in
+// game.js worldPickAt - a kind:'tree' object is a tree whatever its sprite
+// dims (broad oak crowns must not read as buildings or vanish from extents).
+const isTree = o => o.kind === 'tree' || (!isBuilding(o) && o.w < 40 && o.h >= 40);
 
 function allExtents() {
   const out = [];
@@ -317,7 +320,17 @@ TIE_JS = r"""
     out.heroNpc = { ok: !!(p && p.kind === 'hero'), got: p && p.label, kind: p && p.kind, at: [npc.x, npc.y] };
   }
   // Probe 2: a bale exactly on an uncollected apple (equal baselines) - bale wins.
-  const appleIdx = g.ITEMS.apples.findIndex((a, i) => !g.Q.apples.includes(i));
+  // Pick an apple whose point is clear of static objects (C06 forest trees are
+  // classified by kind:'tree', whatever their crown dims) so only the intended
+  // bale/ground layers share the spot.
+  const isTree = o => o.kind === 'tree' || (!(o.w >= 40 && o.h >= 30 && o.w <= 200) && o.w < 40 && o.h >= 40);
+  const isBld = o => o.kind !== 'tree' && o.w >= 40 && o.h >= 30 && o.w <= 200;
+  const underObject = (x, y) => (g.MAP.objects || []).some(o => {
+    if (!isTree(o) && !isBld(o)) return false;
+    const cx = o.x + o.w / 2;
+    return Math.abs(x - cx) <= o.w / 2 && y >= o.base - o.h && y <= o.base + 1;
+  });
+  const appleIdx = g.ITEMS.apples.findIndex((a, i) => !g.Q.apples.includes(i) && !underObject(a.x, a.y - 6));
   if (appleIdx >= 0) {
     const a = g.ITEMS.apples[appleIdx], bale = g.bales[0];
     if (bale) {

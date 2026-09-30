@@ -41,8 +41,24 @@
   const MAX_MESSAGE_CHARS = 100;      // what this client lets you type
   const MAX_SHOWN_CHARS = 280;        // longer messages from other clients are ignored as spam
   const MAX_EVENTS = 500;
+  const MAX_VISIBLE = 10;             // P05: rolling window - render only the newest N, keep full history in state
   const MAX_NICKNAME_CHARS = 24;
   const DUPLICATE_WINDOW = 120;       // same author + same text within 2 min is shown once
+
+  // P05 flake fix (reported 2026-09-29): nostr-tools' SimplePool (enableReconnect) can throw a
+  // DOMException "WebSocket is already in CLOSING or CLOSED state" from its own async
+  // reconnect/close machinery while a relay socket is mid-close - typically when the page is
+  // reloading/unloading and the pool's timers race the teardown. That throw happens long after
+  // subscribeMany()/publish() returned, so no try/catch at the call site can contain it and it
+  // surfaces as an uncaught page error. Swallow exactly that error at the window level so it
+  // never reaches the page-error paths; every other error still propagates untouched.
+  const isWsClosingError = e => {
+    const m = e && (typeof e.message === 'string' ? e.message : (e.error && e.error.message) || (e.reason && e.reason.message));
+    return typeof m === 'string' && /WebSocket is already in (CLOSING or CLOSED state)/i.test(m);
+  };
+  for (const type of ['error', 'unhandledrejection']) {
+    addEventListener(type, event => { if (isWsClosingError(event)) event.preventDefault(); });
+  }
 
   const state = {
       open: false,
@@ -74,8 +90,8 @@
   style.textContent = `
     #arek-global-chat, #arek-global-chat * { box-sizing: border-box; }
     #arek-global-chat {
-      position: fixed; z-index: 10000; right: 12px; bottom: 96px;   /* right-side overlay; laid out by placeChat() */
-      width: min(300px, calc(100vw - 24px));
+      position: fixed; z-index: 10000; right: 12px; bottom: 10px;   /* P05: bottom-docked bar (was right side) */
+      width: min(400px, calc(100vw - 24px));
       color: #fff7d6; font: 12px/1.35 "Silkscreen", monospace;
       /* Readable on any terrain without an enclosing box: layered outline + soft glow. */
       text-shadow: 1px 1px 0 #10163a, 2px 2px 0 #10163a, 0 0 7px rgba(16,22,58,.9);
@@ -108,12 +124,12 @@
     #arek-chat-close { padding: 3px 7px !important; }
     #arek-chat-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     #arek-chat-messages {
-      height: 52px; overflow: hidden; padding: 2px 0 4px;
+      height: 206px; overflow: hidden; padding: 2px 0 4px;   /* fits the rolled-in last 10 messages */
       background: transparent;
       display: flex; flex-direction: column; justify-content: flex-end;
       mask-image: linear-gradient(to bottom, transparent 0, #000 24%, #000 100%);
     }
-    .arek-chat-message { margin: 0 0 7px; overflow-wrap: anywhere; opacity: var(--chat-opacity, 1); transition: opacity .25s; }
+    .arek-chat-message { margin: 0 0 4px; overflow-wrap: anywhere; opacity: var(--chat-opacity, 1); transition: opacity .25s; }
     .arek-chat-message:last-child { margin-bottom: 0; }
     .arek-chat-meta { color: #fff7d6; font-size: 10px; }
     .arek-chat-name { color: #fff7d6; }
@@ -129,8 +145,8 @@
     #arek-chat-send:disabled { cursor: wait; opacity: .6; }
     #arek-global-chat.arek-chat-away { visibility: hidden; }
     @media (max-width: 480px) {
-      #arek-global-chat { right: 8px; width: min(280px, calc(100vw - 16px)); }
-      #arek-chat-messages { height: 84px; }
+      #arek-global-chat { right: 8px; width: min(340px, calc(100vw - 16px)); }
+      #arek-chat-messages { height: 206px; }
     }
   `;
   document.head.appendChild(style);
@@ -236,14 +252,16 @@
       blank.className = 'arek-chat-empty';
       return;
     }
+    // P05: old entries stay in state but only the newest MAX_VISIBLE render, newest at the bottom.
+    const visible = list.slice(-MAX_VISIBLE);
     let lastDay = '', prev = null;
-    for (let index = 0; index < list.length; index++) {
-      const event = list[index];
+    for (let index = 0; index < visible.length; index++) {
+      const event = visible[index];
       const day = dayKey(event.created_at);
       if (day !== lastDay) { el('div', `— ${dayLabel(event.created_at)} —`, messages).className = 'arek-chat-day'; lastDay = day; prev = null; }
       const row = el('div', undefined, messages);
       row.className = 'arek-chat-message';
-      row.style.setProperty('--chat-opacity', String(Math.max(.12, Math.min(1, .18 + (index + 1) / list.length * .82))));
+      row.style.setProperty('--chat-opacity', String(Math.max(.35, Math.min(1, .35 + (index + 1) / visible.length * .65))));
       row.dataset.own = event.pubkey === state.pubkey ? 'true' : 'false';
       // consecutive messages from the same person within 5 minutes share one name/time line
       const grouped = prev && prev.pubkey === event.pubkey && prev.nickname === event.nickname && event.created_at - prev.created_at < 300;
@@ -430,30 +448,15 @@
       if (persist) { try { localStorage.setItem(CHAT_MINIMIZED_STORAGE, '1'); } catch (e) { /* session can still minimise */ } }
     }
 
-  // Layout: a transparent overlay on the right edge. placeChat() pins it into the vertical
-  // band between the two right-side touch zones (map toggle above 30% of the height,
-  // jump/interact below 60%), so it never covers the minimap (top-right), the dialogue box
-  // (bottom strip), the big M-map or the touch controls. It steps aside (the arek-chat-away
-  // class) while a dialogue box, the big map or the shop minigame is on screen, and returns
-  // by itself without losing the draft input or the loaded messages.
+  // Layout: a transparent bar docked to the bottom edge of the screen (P05 - was a
+  // right-side overlay). It is right-anchored at `bottom: 10px` so it never reaches
+  // across to the bottom-left coordinate readout or up to the top-right minimap; the
+  // message area stays pointer-transparent, so the game canvas keeps every pointer
+  // event except the chat's own controls. placeChat() only manages the step-aside:
+  // the bar hides (the arek-chat-away class) while a dialogue box, the big M-map,
+  // the shop minigame or the name prompt is on screen, and returns by itself without
+  // losing the draft input or the loaded messages.
   function placeChat() {
-    const H = innerHeight;
-    // Right-side touch zones (map toggle above 30% of the height, jump/interact below
-    // 60%) frame a free corridor; the top-right minimap never reaches below it. Pin the
-    // panel into the corridor just above the jump zone - its interactive chrome (form,
-    // header) then sits below the hero's screen-centre, and the display-only messages
-    // area is pointer-transparent, so the game canvas keeps every pointer event except
-    // the chat's own controls. Very short screens bottom-anchor instead.
-    const zoneBottom = H * .3;
-    const jumpTop = H * .6;
-    const panelH = panel.offsetHeight || 150;   // panel is display:none while minimised
-    let top = jumpTop - 8 - panelH;
-    let bottom = H - (top + panelH);
-    if (bottom < 8 || top < zoneBottom + 4) {   // corridor too short: bottom-anchor
-      bottom = 12;
-      bottom = Math.max(8, Math.min(bottom, H - panelH - 8));
-    }
-    root.style.bottom = `${Math.round(bottom)}px`;
     const g = window.__game, typing = document.activeElement === text;
     const busy = !!(g && (g.talk || g.showMap || document.querySelector('.shop-game, #shop-game')
                            || document.querySelector('#player-name-input')));
@@ -483,12 +486,16 @@
     relays: RELAYS.slice(),
     historySince: HISTORY_SINCE,
     maxMessageChars: MAX_MESSAGE_CHARS,
+    maxVisible: MAX_VISIBLE,
     playerName: getNickname,
     messageCount: () => state.events.size,
     isConnected: () => state.connected,
     unicodeLength,
     open: openChat,
     close: closeChat,
+    // Test-only: push a fully-formed kind-42 event through the same validation/duplicate
+    // path as a relay event (tests abort wss:// and the CDN, so nothing else can feed it).
+    injectEvent: addEvent,
   });
   try {
       if (localStorage.getItem(CHAT_MINIMIZED_STORAGE) === '1') closeChat(false);

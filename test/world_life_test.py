@@ -429,6 +429,182 @@ with sync_playwright() as p:
     assert b04["idsSame"] and b04["countsSame"], f"B04: animal ids/counts changed: {b04}"
     assert b04["wlKeysSame"] and b04["snapshotClean"], f"B04: Q.worldLife payload changed: {b04}"
     print(f"B04: greet={b04['sayBubble']} resolve={b04['resolveSteps']} steps, cooldown={b04['cdMid']:.1f}s, re-greet={b04['reGreetPlay']}, chaseAlive={b04['chaseAlive']}")
+
+    # ---- P02: dogs change position less often (deterministic pack metric).
+    # A pinned 7-dog pack in a far clear arena (off-camera and >1100 map units
+    # from the player and Frodo, so only stepInteractions drives them), with
+    # deterministic Math.random and the cars moved out of the way. Counts pack
+    # movement events (a dog-step where the dog actually displaced) and total
+    # distance over 40 simulated seconds. A modest rest after each wander leg
+    # must cut the event rate; the pack must keep moving (bounded, not frozen)
+    # and every step must stay within gated movement speed (no teleports).
+    p02 = page.evaluate("""() => {
+      const A = window.ARK, W = window.__worldLife, MAP = A.MAP;
+      const inside = (x, y) => x > 100 && x < MAP.w - 100 && y > 150 && y < MAP.h - 100;
+      const clearDisk = (cx, cy, R) => {
+        if (!inside(cx, cy) || A.blocked(cx, cy)) return false;
+        for (let r = 30; r <= R; r += 30) for (let k = 0; k < 8; k++) {
+          const a = k / 8 * Math.PI * 2, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+          if (!inside(x, y) || A.blocked(x, y)) return false;
+        }
+        return true;
+      };
+      // deterministic grid search: first strict max by clearance, row-major
+      let center = null;
+      for (let y = 400; y < MAP.h - 400; y += 60) for (let x = 300; x < MAP.w - 300; x += 60) {
+        if (Math.hypot(x - MAP.spawn.x, y - MAP.spawn.y) < 1100) continue;
+        let R = 0;
+        for (const cand of [120, 150, 180, 210, 240]) if (clearDisk(x, y, cand)) R = cand;
+        if (R > (center ? center.R : 0)) center = { x, y, R };
+      }
+      if (!center || center.R < 150) throw new Error('P02: no far clear arena found: ' + JSON.stringify(center));
+      A.teleport(MAP.spawn.x, MAP.spawn.y);
+      A.FRODO.x = MAP.spawn.x; A.FRODO.y = MAP.spawn.y;
+      const corner = (() => {
+        const cands = [{ x: 200, y: 200 }, { x: MAP.w - 200, y: 200 }, { x: 200, y: MAP.h - 200 }, { x: MAP.w - 200, y: MAP.h - 200 }];
+        let best = cands[0];
+        for (const c of cands) if (Math.hypot(c.x - center.x, c.y - center.y) > Math.hypot(best.x - center.x, best.y - center.y)) best = c;
+        return best;
+      })();
+      for (const a of W.animals) if (a.kind !== 'dog') { a.x = corner.x; a.y = corner.y; a.homeX = a.x; a.homeY = a.y; a.tx = a.x; a.ty = a.y; a.wait = 1e9; }
+      const dogs = W.animals.filter(a => a.kind === 'dog');
+      const homes = dogs.map((d, i) => {
+        const t = i / dogs.length * Math.PI * 2;
+        return { x: Math.round(center.x + Math.cos(t) * 55), y: Math.round(center.y + Math.sin(t) * 55) };
+      });
+      dogs.forEach((d, i) => {
+        const h = homes[i];
+        Object.assign(d, { x: h.x, y: h.y, homeX: h.x, homeY: h.y, tx: h.x, ty: h.y, wait: 0, restT: 0 });
+        d.sniffT = 0; d.playT = 0; d.leaveT = 0; d.greetCdT = 0; d.z = 0;
+      });
+      const carPos = W.cars.map(c => ({ x: c.x, y: c.y }));
+      for (const c of W.cars) { c.x += 8000; c.y += 8000; }
+      // deterministic LCG seed: whole measure is one synchronous evaluate, so no
+      // live-frame Math.random draws can interleave with the 800 stepping loop
+      const origRandom = Math.random;
+      let s = 555111;
+      Math.random = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+      let events = 0, dist = 0, maxStep = 0;
+      const prev = dogs.map(d => ({ x: d.x, y: d.y }));
+      const STEPS = 800;   // 40 simulated seconds at dt = 0.05
+      for (let i = 0; i < STEPS; i++) {
+        W.stepInteractions(0.05);
+        dogs.forEach((d, k) => {
+          const mv = Math.hypot(d.x - prev[k].x, d.y - prev[k].y);
+          if (mv > 0.5) { events++; dist += mv; }
+          maxStep = Math.max(maxStep, mv);
+          prev[k].x = d.x; prev[k].y = d.y;
+        });
+      }
+      Math.random = origRandom;
+      W.cars.forEach((c, i) => { c.x = carPos[i].x; c.y = carPos[i].y; });
+      return { events, dist, maxStep, arena: { x: center.x, y: center.y, R: center.R }, pack: dogs.length, corner };
+    }""")
+    assert p02["pack"] == 7, p02
+    assert p02["maxStep"] < 2.0, f"P02: dog teleport step detected: {p02}"
+    assert 100 < p02["dist"], f"P02: pack nearly frozen - arena broken: {p02}"
+    # Baseline (pre-P02, same deterministic arena/seed) was 5599 pack events in
+    # 40 s. Dogs must now move at least ~21% less often (bounded: 4400 = 0.79x)
+    # but still keep moving (1600 = lower bound, not frozen).
+    assert 1600 < p02["events"] <= 4400, p02
+    print(f"P02: pack movement events/40s={p02['events']} dist={p02['dist']:.0f}px maxStep={p02['maxStep']:.2f}")
+
+    # ---- P03: a dog sometimes chases a nearby chicken - short, bounded, ends
+    # on its own (returns home), cooldown-gated like the B04 greet, no kills,
+    # existing chicken flight timers untouched, greet/Frodo-chase unaffected.
+    # Deterministic trigger: Math.random stubbed low so every cooldown-expired
+    # per-second chance check fires; the cooldown gate itself is what prevents
+    # an immediate re-chase while the hen stays glued to the dog.
+    p03 = page.evaluate("""() => {
+      const A = window.ARK, W = window.__worldLife, MAP = A.MAP;
+      const inside = (x, y) => x > 100 && x < MAP.w - 100 && y > 150 && y < MAP.h - 100;
+      const clearDisk = (cx, cy, R) => {
+        if (!inside(cx, cy) || A.blocked(cx, cy)) return false;
+        for (let r = 30; r <= R; r += 30) for (let k = 0; k < 8; k++) {
+          const a = k / 8 * Math.PI * 2, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+          if (!inside(x, y) || A.blocked(x, y)) return false;
+        }
+        return true;
+      };
+      let center = null;
+      for (let y = 400; y < MAP.h - 400; y += 60) for (let x = 300; x < MAP.w - 300; x += 60) {
+        if (Math.hypot(x - MAP.spawn.x, y - MAP.spawn.y) < 1100) continue;
+        let R = 0;
+        for (const cand of [120, 150, 180, 210, 240]) if (clearDisk(x, y, cand)) R = cand;
+        if (R > (center ? center.R : 0)) center = { x, y, R };
+      }
+      if (!center || center.R < 150) throw new Error('P03: no far clear arena found: ' + JSON.stringify(center));
+      A.teleport(MAP.spawn.x, MAP.spawn.y);
+      A.FRODO.x = MAP.spawn.x; A.FRODO.y = MAP.spawn.y;
+      const corner = (() => {
+        const cands = [{ x: 200, y: 200 }, { x: MAP.w - 200, y: 200 }, { x: 200, y: MAP.h - 200 }, { x: MAP.w - 200, y: MAP.h - 200 }];
+        let best = cands[0];
+        for (const c of cands) if (Math.hypot(c.x - center.x, c.y - center.y) > Math.hypot(best.x - center.x, best.y - center.y)) best = c;
+        return best;
+      })();
+      for (const a of W.animals) if (a.kind !== 'dog' && a.kind !== 'chicken') { a.x = corner.x; a.y = corner.y; a.homeX = a.x; a.homeY = a.y; a.tx = a.x; a.ty = a.y; a.wait = 1e9; }
+      const dogs = W.animals.filter(a => a.kind === 'dog');
+      const dog = dogs[0], hen = W.animals.find(a => a.kind === 'chicken');
+      for (let i = 1; i < dogs.length; i++) { const d = dogs[i]; d.x = corner.x + 40; d.y = corner.y + 40; d.homeX = d.x; d.homeY = d.y; d.tx = d.x; d.ty = d.y; d.wait = 1e9; }
+      Object.assign(dog, { x: center.x, y: center.y, homeX: center.x, homeY: center.y, tx: center.x, ty: center.y, wait: 1e9, restT: 0 });
+      dog.sniffT = 0; dog.playT = 0; dog.leaveT = 0; dog.greetCdT = 0; dog.z = 0;
+      Object.assign(hen, { x: center.x + 70, y: center.y, homeX: center.x + 70, homeY: center.y, tx: center.x + 70, ty: center.y, wait: 1e9 });
+      hen.scatterT = 0; hen.z = 0;
+      W.resetInteractionCooldown('dog');
+      const carPos = W.cars.map(c => ({ x: c.x, y: c.y }));
+      for (const c of W.cars) { c.x += 8000; c.y += 8000; }
+      const origRandom = Math.random;
+      Math.random = () => 0.01;   // every cooldown-expired chance check fires
+      const idsBefore = W.animals.map(a => a.id).sort().join(',');
+      const hensBefore = W.animals.filter(a => a.kind === 'chicken').length;
+      const wlKeysBefore = Object.keys(A.Q.worldLife).sort().join(',');
+      let huntStarts = 0, maxHuntT = 0, illegalDuringCd = 0;
+      let firstEndStep = -1, returnedHome = false, gapToSecond = -1;
+      let prevInHunt = false, prev = { x: dog.x, y: dog.y }, huntMaxStep = 0;
+      const STEPS = 420, DT = 0.05, HUNT_MAX = 2.7;
+      for (let i = 0; i < STEPS; i++) {
+        const cdBefore = dog.huntCdT || 0;
+        W.stepInteractions(DT);
+        const mv = Math.hypot(dog.x - prev.x, dog.y - prev.y);
+        if (mv > 0.5) huntMaxStep = Math.max(huntMaxStep, mv);
+        prev = { x: dog.x, y: dog.y };
+        const h = dog.huntT || 0;
+        if (h > 0 && !prevInHunt) {
+          huntStarts++;
+          if (cdBefore > 0.06) illegalDuringCd++;
+          if (huntStarts === 2) gapToSecond = i - firstEndStep;
+        }
+        if (h > 0) maxHuntT = Math.max(maxHuntT, h);
+        if (h === 0 && prevInHunt) {
+          firstEndStep = i;
+          returnedHome = dog.tx === dog.homeX && dog.ty === dog.homeY;
+          // keep the hen next door so a cooldown violation would fire instantly
+          hen.x = dog.x + 60; hen.y = dog.y; hen.homeX = hen.x; hen.homeY = hen.y; hen.tx = hen.x; hen.ty = hen.y;
+        }
+        prevInHunt = h > 0;
+      }
+      Math.random = origRandom;
+      W.cars.forEach((c, i) => { c.x = carPos[i].x; c.y = carPos[i].y; });
+      const idsAfter = W.animals.map(a => a.id).sort().join(',');
+      const hensAfter = W.animals.filter(a => a.kind === 'chicken').length;
+      const wlKeysAfter = Object.keys(A.Q.worldLife).sort().join(',');
+      const snapshotClean = !JSON.stringify(A.Q.worldLife.animals).includes('hunt') &&
+                            !JSON.stringify(A.Q.worldLife.animals).includes('restT');
+      return { huntStarts, maxHuntT, illegalDuringCd, firstEndStep, returnedHome, gapToSecond,
+               huntMaxStep, henAlive: hensAfter === hensBefore && hensAfter === 12,
+               idsSame: idsBefore === idsAfter, wlKeysSame: wlKeysBefore === wlKeysAfter, snapshotClean };
+    }""")
+    # P02-style guard: the chase must be bounded in duration and end by itself.
+    assert p03["huntStarts"] >= 2, f"P03: dog never chased the hen (or never re-chased after cooldown): {p03}"
+    assert p03["maxHuntT"] <= 2.7 and p03["firstEndStep"] >= 0, f"P03: chase not bounded/ended by itself: {p03}"
+    assert p03["returnedHome"], f"P03: dog did not head home when the chase ended: {p03}"
+    assert p03["illegalDuringCd"] == 0, f"P03: dog re-chased while cooldown was active: {p03}"
+    assert p03["gapToSecond"] >= 250, f"P03: cooldown did not hold between chases: {p03}"
+    assert p03["huntMaxStep"] < 2.0, f"P03: chase teleport step detected: {p03}"
+    assert p03["henAlive"] and p03["idsSame"], f"P03: hen killed/replaced or animal identity changed: {p03}"
+    assert p03["wlKeysSame"] and p03["snapshotClean"], f"P03: Q.worldLife payload changed: {p03}"
+    print(f"P03: hunts={p03['huntStarts']} maxChase={p03['maxHuntT']:.2f}s endStep={p03['firstEndStep']} "
+          f"cdViolations={p03['illegalDuringCd']} gap={p03['gapToSecond']} steps")
     assert not errors, errors
     print("world life: PASS", facts)
     browser.close()

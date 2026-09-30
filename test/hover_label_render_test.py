@@ -167,11 +167,12 @@ def run_desktop(page, lang, out):
     assert_label(page, info, info["expected"], "building hover")
     assert_near_coords(page, st)
     assert painted(page, info["expected"]) > 0, f"{info['expected']} never painted on canvas"
-    # the coordinate line itself still paints (hero name + map coords)
+    # the coordinate line itself still paints (hero name + grid sector, P04)
     hn = page.evaluate("() => window.__game.playerName")
-    coord_re = re.compile(rf"^{re.escape(str(hn))} \d+,\d+  ")
-    assert any(coord_re.match(e["t"]) for e in page.evaluate("() => window.__a3trace")), \
-        "coordinate readout line not painted"
+    coord_re = re.compile(rf"^{re.escape(str(hn))} [A-K]\d{{1,2}}$")
+    coords_painted = [e["t"] for e in page.evaluate("() => window.__a3trace") if coord_re.match(e["t"])]
+    assert coords_painted, f"coordinate readout line not painted: {page.evaluate('() => window.__a3trace')[:20]}"
+    assert not re.search(r"\d+,\d+", coords_painted[-1]), f"raw pixels still in the readout: {coords_painted[-1]}"
     page.screenshot(path=SCRATCH / f"1280x720_{lang}_hover_building.png")
 
     # --- 2. correct text after the pointer moves ---
