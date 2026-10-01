@@ -28,6 +28,8 @@
   const DEBUG = params.get('debug') === '1';
   const SAVE_KEY = 'arek-chlopkow-save-v1';
   const CHARACTER_KEY = 'arek-chlopkow-character-v1';
+  const SAVE_VERSION = 2;   // D04: explicit payload version; a missing `v` means a legacy v1 save
+  let saveFrozen = false;   // D04: a newer-version save must never be overwritten this session
   const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 5;
   const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik'];
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
@@ -230,12 +232,45 @@
   function npcSavePositions() {
     return ITEMS && ITEMS.npcs ? ITEMS.npcs.filter(n => !n.secret).map(n => ({ id: n.id, x: n.x, y: n.y })) : [];
   }
-  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ Q, x: ROOM ? OUT.x : P.x, y: ROOM ? OUT.y : P.y, dog: ROOM ? OUT.dog : { x: FRODO.x, y: FRODO.y }, npcs: npcSavePositions() })); } catch (e) { } }
+  // D04: mission progress must be a plain object { missionId: { stepId: bool } };
+  // anything else (string, array, null) is malformed and gets dropped.
+  function normalizeMissions(m) {
+    if (m === null || typeof m !== 'object' || Array.isArray(m)) return {};
+    const out = {};
+    for (const [mid, steps] of Object.entries(m)) {
+      if (steps !== null && typeof steps === 'object' && !Array.isArray(steps)) out[mid] = steps;
+    }
+    return out;
+  }
+  function showFutureSaveWarning() {
+    let el = document.getElementById('save-future-warning');
+    if (el) return;
+    el = document.createElement('div');
+    el.id = 'save-future-warning';
+    el.textContent = LANG === 'pl' ? 'ZAPIS Z NOWSZEJ WERSJI - zapisywanie wyłączone'
+                                   : 'SAVE FROM A NEWER VERSION - saving disabled';
+    el.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:999;' +
+      'background:#7a1f1f;color:#fff;padding:6px 14px;font:bold 14px monospace;border:2px solid #ffd21f;border-radius:4px;';
+    document.body.appendChild(el);
+  }
+  function save() {
+    if (saveFrozen) return;   // D04: never overwrite a save from a newer game version
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: SAVE_VERSION, Q, x: ROOM ? OUT.x : P.x, y: ROOM ? OUT.y : P.y, dog: ROOM ? OUT.dog : { x: FRODO.x, y: FRODO.y }, npcs: npcSavePositions() })); } catch (e) { }
+  }
   function loadSave() {
     try {
-      const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+      const raw = localStorage.getItem(SAVE_KEY);
+      const s = JSON.parse(raw || 'null');
       if (s && s.Q) {
+        const ver = typeof s.v === 'number' ? s.v : 1;   // missing v = legacy v1 save
+        if (ver > SAVE_VERSION) {
+          // D04: newer schema than this build knows. Never overwrite it: warn,
+          // freeze writes, and still load what we can so the game stays playable.
+          saveFrozen = true;
+          showFutureSaveWarning();
+        }
         Q = Object.assign(Q, s.Q);
+        Q.missions = normalizeMissions(s.Q.missions);   // D04: only the new mission fields are normalized
         Q.playerName = sanitizePlayerName(Q.playerName);
         if (Q.playerName.toUpperCase() === 'AREK') Q.playerName = '';
         if (!Q.playerName) return false;
@@ -1922,6 +1957,7 @@ function drawFrodo(sx, sy, s) {
     // API for features.js
     window.ARK = {
       HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
+      get saveVersion() { return SAVE_VERSION; }, get saveFrozen() { return saveFrozen; },
       get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; }, get room() { return ROOM; },
       pointer, clickTarget, mapCursor, copyMapCoordinates, get camera() { return lastCam; },
       save, say, popToast, heroText, celebrate, blocked, unstick, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
