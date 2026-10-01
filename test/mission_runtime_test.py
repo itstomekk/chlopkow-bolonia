@@ -73,7 +73,8 @@ with sync_playwright() as p:
         })()""")
 
     rows0 = quest_log_rows()
-    check(any("home-example" in r for r in rows0), f"mission row present before interaction (got {rows0})")
+    check(any(("home-example" in r) or ("Odwiedziny" in r) or ("Visit the first house" in r) for r in rows0),
+          f"mission row present before interaction (got {rows0})")
     check(len(mission_points()) >= 1, "mission interact point registered at the pilot home")
 
     # ---- B: explicit interaction at the mission spot advances once
@@ -116,7 +117,8 @@ with sync_playwright() as p:
 
     # ---- F: quest log gained one mission row (PL/EN label)
     rows = quest_log_rows()
-    check(any("home-example" in r for r in rows), f"quest log has a mission row for home-example (got {rows})")
+    check(any(("home-example" in r) or ("Odwiedziny" in r) or ("Visit the first house" in r) for r in rows),
+          f"quest log shows the pilot mission (got {rows})")
 
     # ---- G: quiz board still interactive (quiz wins distance ties / own radius)
     ev(f"window.ARK.P.x = {BOARD['x']}; window.ARK.P.y = {BOARD['y']}")

@@ -49,11 +49,16 @@ window.addEventListener('ark-ready', () => {
         }
       }
 
+      const missionTitle = m => {
+        const t = m && m.title;
+        if (t && typeof t === 'object') return (PL ? t.pl : t.en) || m.id;
+        return m.id;
+      };
       HOOKS.questLog.push(lines => {
         for (const m of list) {
           if (!m || !Array.isArray(m.steps) || !m.id) continue;
           const all = m.steps.every(st => st && st.id && done(m.id, st.id));
-          lines.push([`${LBL}: ${m.id}`, all]);
+          lines.push([`${LBL}: ${missionTitle(m)}`, all]);
         }
       });
     })

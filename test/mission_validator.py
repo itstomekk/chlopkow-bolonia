@@ -71,6 +71,12 @@ def validate_missions(missions, items, map_data, buildings):
             errors.append(f"mission {mid!r}: steps must be a non-empty list")
             continue
 
+        for field, what in (("title", "title"), ("desc", "description")):
+            v = mission.get(field)
+            if v is not None:
+                if not isinstance(v, dict) or not isinstance(v.get("pl"), str) or not v["pl"].strip()                         or not isinstance(v.get("en"), str) or not v["en"].strip():
+                    errors.append(f"mission {mid!r}: {what} must be {{pl, en}} non-empty strings")
+
         step_ids = set()
         for step in steps:
             if not isinstance(step, dict):

@@ -5,8 +5,18 @@
       {
         "id": "visit",
         "kind": "interact",
-        "anchor": { "boardSpot": "house01" }
+        "anchor": {
+          "boardSpot": "house01"
+        }
       }
-    ]
+    ],
+    "title": {
+      "pl": "Odwiedziny u pierwszego domu",
+      "en": "Visit the first house"
+    },
+    "desc": {
+      "pl": "Zajrzyj do zagrody przy znaku zapytania na wschodzie wsi.",
+      "en": "Take a look at the farmstead by the question mark in the east of the village."
+    }
   }
 ]
