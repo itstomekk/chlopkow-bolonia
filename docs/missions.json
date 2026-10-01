@@ -1,0 +1,12 @@
+[
+  {
+    "id": "home-example",
+    "steps": [
+      {
+        "id": "visit",
+        "kind": "interact",
+        "anchor": { "boardSpot": "house01" }
+      }
+    ]
+  }
+]

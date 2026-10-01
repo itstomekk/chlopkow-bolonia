@@ -6,7 +6,9 @@
      ducks  (south-east wetland)        ducks fly across the southern-east fields; aim & shoot, 2 barrels
      mowing (football pitch)            mow every strip of the pitch before time runs out
    Shared: 3-2-1 lights, bronze/silver/gold medals, records and retry. Venues come from map.json (osm/render_map.py).
-   Save: Q.mg[type] = { tries, won, best, medal, ghost? }  — best = time (s) or hits (skeet). */
+   Save: Q.mg[type] = { tries, won, best, medal, ghost?, unit? } — best is a time (s) for
+  race/pig/dogs/mowing (lower is better) and a hit count /15 for skeet/ducks (higher is
+  better; marked unit:'hits'). A pre-fix duck record (seconds, no unit) migrates once. */
 'use strict';
 window.addEventListener('ark-ready', () => {
   const A = window.ARK, { HOOKS, P, MAP, ctx } = A;
@@ -61,9 +63,25 @@ window.addEventListener('ark-ready', () => {
     skeet: { lower: false, t: [10, 12, 14] }, ducks: { lower: false, t: [10, 12, 14] }, mowing: { lower: true, t: [Infinity, 35, 22] },
   };
   const medalFor = (type, score) => { const m = MEDAL[type]; let r = 0; m.t.forEach((th, i) => { if (m.lower ? score <= th : score >= th) r = i + 1; }); return r; };
+  const HIT_GAMES = ['skeet', 'ducks'];
+  // One-time migration: before D01 a ducks record stored its best as time in seconds
+  // (lower-is-better) with no unit marker. Archive that value instead of casting it
+  // into a hit count, reset the hit-based record safely, and mark the unit so a later
+  // run cannot re-migrate. Skeet already stored hits; it only gains the unit marker.
+  function migrateHitScore(type, rec) {
+    if (!rec || rec.unit === 'hits') return false;
+    if (type === 'ducks') { rec.legacyBest = rec.best; rec.legacyMedal = rec.medal; rec.best = 0; rec.medal = 0; }
+    rec.unit = 'hits';
+    return true;
+  }
   const MEDAL_COL = ['#666', '#cd7f32', '#d8d8e0', '#ffd21f'];
   const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
-  const scoreText = (type, v) => ['skeet', 'ducks'].includes(type) ? `${v}/15` : fmt(v);
+  const scoreText = (type, v) => HIT_GAMES.includes(type) ? `${v}/15` : fmt(v);
+  // D01 one-time migration: runs once per load, before the first draw/HUD read, so a
+  // legacy duck record already displays as hits-typed (empty best/medal, archive kept).
+  let migratedHit = false;
+  for (const t of HIT_GAMES) if (migrateHitScore(t, Q().mg[t])) migratedHit = true;
+  if (migratedHit) A.save();   // persist the migration so a later run cannot re-apply it
 
   /* ------------------------------------------------------------------ geometry helpers */
   const trackPt = th => [TR.cx + Math.cos(th) * TR.rx, TR.cy + Math.sin(th) * TR.ry];
@@ -93,7 +111,10 @@ window.addEventListener('ark-ready', () => {
 
   /* ------------------------------------------------------------------ lifecycle */
   function startMG(type) {
-    const q = Q(); q.mg[type] = q.mg[type] || { tries: 0, best: 0, won: false, medal: 0 }; q.mg[type].tries++; A.save();
+    const q = Q();
+    q.mg[type] = q.mg[type] || { tries: 0, best: 0, won: false, medal: 0, ...(HIT_GAMES.includes(type) ? { unit: 'hits' } : {}) };
+    if (HIT_GAMES.includes(type)) migrateHitScore(type, q.mg[type]);
+    q.mg[type].tries++; A.save();
     MG = { type, phase: 'count', t: 0, run: 0 };
     if (type === 'race') {
       A.teleport(TR.cx + 20, TR.cy + TR.ry); P.dir = 'left';
@@ -121,11 +142,11 @@ window.addEventListener('ark-ready', () => {
     }
   }
   function endMG(win, msg) {
-    const rec = Q().mg[MG.type], score = MG.type === 'skeet' ? MG.hits : MG.run;
+    const rec = Q().mg[MG.type], score = HIT_GAMES.includes(MG.type) ? MG.hits : MG.run;
     MG.phase = win ? 'win' : 'lose'; MG.msg = msg; MG.t = 0; MG.score = score;
     MG.medal = win ? medalFor(MG.type, score) : 0;
     if (win) {
-      const better = MG.type === 'skeet' ? score > (rec.best || 0) : (!rec.best || score < rec.best);
+      const better = HIT_GAMES.includes(MG.type) ? score > (rec.best || 0) : (!rec.best || score < rec.best);
       rec.won = true; rec.medal = Math.max(rec.medal || 0, MG.medal);
       if (better) { rec.best = score; MG.record = true; if (MG.type === 'race') rec.ghost = MG.path; }
       A.celebrate();
