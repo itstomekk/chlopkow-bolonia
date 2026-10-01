@@ -13,16 +13,19 @@ trunk-collision diagnosis "only if proven". Its guard list:
                                                venues and the whole forest are reachable
   G4 roads/water/buildings/venues retain collision - road px walkable 0, river px low-solid
                                               128, venue buildings tall-solid 255
-  G5 water-bounded-closure measurement (the player-relevant RED of this card): the
-     riverbank lane at the Bialka bend - the "forest/water transition" corridor that
-     blocks Arek. The ford band is dry free land (0 trunk px, 0 water px inside) yet only
-     76 px walkable because the 128 river bands sit 1 px outside it; every corridor row is
-     >= 14 px wide except one, which contains water (128) and no trunk (255).
+  G5 ford OPEN (P10, user decision 2026-09-29 "rozsuń brzegi wody"): the two
+     128-water banks at the Bialka ford are spread by the renderer (osm/render_map.py,
+     water stage, P10 ford-spread block) so the dry strip between them is >= 28 px
+     (Arek's 14 px hitbox + 7 px margins per side; was 18 px). Every ford row's dry gap
+     must be >= 28 px, the ford band must be walkable from spawn (flood-fill reaches
+     it), and the shore-walk corridor guards (rows >= 14 px wide, water-bounded narrow
+     rows) still hold.
 
-Verdict: G1-G4 pass and G5 proves the closure is water-bounded with zero trunk pixels, so
-per the plan "mark collision change not needed and leave generator/collision unchanged".
-The empty-edit byte-equality gate (6 outputs, zero warnings) is owned by
-test/edits_pipeline_test.py and must stay green for this card.
+Verdict: after P10, G1-G4 stay green and G5 asserts the ford is OPEN (>= 28 px dry,
+walkable, reachable) with the trees guards unchanged (17/17). The empty-edit
+byte-equality gate (6 outputs, zero warnings) is owned by test/edits_pipeline_test.py;
+P10 changes map_collide.png + map_ground.png only, so its EXPECTED_BASELINE hashes for
+those two are refreshed while map.json / items.json stay byte-identical.
 """
 import argparse, json, os, sys
 import numpy as np
@@ -175,14 +178,40 @@ def main():
         tall = int((s[max(0, py - 6):py + 7, max(0, px - 6):px + 7] == 2).sum())
         check(tall >= 50, f'G4 venue {key} keeps tall-solid 255 at its anchor ({tall} px)')
 
-    # ---- G5: documented RED - the riverbank "forest/water transition" lane
+    # ---- G5: P10 - the ford is now OPEN: both 128-banks spread so every ford row's
+    # dry gap between the two water banks is >= 28 px (Arek hitbox 14 + 7 margins),
+    # the ford band is walkable, and the shore-walk corridor guards still hold.
     F = (2257, 5026, 2274, 5044)          # the ford band (dry strip between two 128 banks)
     fb = wk[F[1]:F[3], F[0]:F[2]]
     fb128 = int((c[F[1]:F[3], F[0]:F[2]] == 128).sum())
     fb255 = int((c[F[1]:F[3], F[0]:F[2]] == 255).sum())
-    check(int(fb.sum()) < 200 and fb255 == 0,
-          f'G5 ford band {F} closed for Arek: {int(fb.sum())} walkable px, 0 trunk px '
-          f'(128 water px inside: {fb128} - margins carry the 128 bands)')
+    # dry gap per ford row: distance between the right edge of the WEST 128-bank and
+    # the left edge of the EAST 128-bank, over the rows where both banks exist
+    gaps = []
+    for y in range(5026, 5040):
+        row = c[y, 2240:2300]
+        w = np.where(row == 128)[0]
+        if not len(w):
+            continue
+        # water runs
+        runs = []
+        st = pr = w[0]
+        for i in w[1:]:
+            if i > pr + 1:
+                runs.append((st, pr)); st = i
+            pr = i
+        runs.append((st, pr))
+        if len(runs) >= 2:
+            gaps.append(runs[1][0] - runs[0][1] - 1)   # px between the two banks
+    min_gap = min(gaps) if gaps else 0
+    check(min_gap >= 28 and int(fb.sum()) >= 200,
+          f'G5 ford OPEN for Arek: every ford row dry gap >= 28 px (min {min_gap} px, '
+          f'{len(gaps)} rows), ford band {int(fb.sum())} walkable px, 0 trunk px, '
+          f'{fb128} water px inside the band')
+    check(fb255 == 0, f'G5 ford band has 0 trunk px (no tree in the strip, {fb255})')
+    check(int(reach_px[F[1]:F[3], F[0]:F[2]].sum()) >= 100,
+          f'G5 ford band reachable from spawn flood-fill '
+          f'({int(reach_px[F[1]:F[3], F[0]:F[2]].sum())} reachable-walkable px)')
     edt = ndimage.distance_transform_edt(wk[5018:5064, 2290:2700])
     rows = list(range(8, 41))             # y 5026..5058
     wide = sum(1 for r in rows if edt[r].max() >= 7)

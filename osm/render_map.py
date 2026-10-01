@@ -139,15 +139,31 @@ for e in ways:
 pond_m = mask_of(ponds)
 edits.apply('water', EDITS, dict(pond_m=pond_m, collide=collide))
 wm = pond_m | mask_of([], river_lines)
-bank = mask_of(ponds, [(l, w + 6) for l, w in river_lines]) & ~wm
+# ---- P10: ford bank spread (2026-09-29, user decision "rozsuń brzegi wody") ----
+# The Białka ford (road x~2256..2275, y~5026..5038) is an 18 px dry strip between
+# two 128-water banks - too narrow for Arek's 14x6 hitbox (needs 28 px: 14 wide +
+# 7 px margins each side). Signed-distance correction: inside a small rect around
+# the ford, remove water within FORD_HALF px of the dry-strip centreline
+# (x = FORD_CX, midpoint of the two banks), so each bank recedes >= 4 px and the
+# dry band grows to ~30 px (>= 28). Applied to wm_art - a COPY used for water art,
+# bank ring and low/collision only - so the original wm keeps driving occupied /
+# road_block / water points and OSM data stays untouched: docs/map.json and
+# docs/items.json remain byte-identical (no entity or tree drift).
+FORD_X0, FORD_X1, FORD_Y0, FORD_Y1 = 2240, 2300, 5020, 5050   # bounding corridor
+FORD_CX = 2265.5          # dry-strip centreline between the two banks (measured C05/P10)
+FORD_HALF = 15            # cleared half-width -> ~30 px dry strip (14 px hitbox + margins)
+wm_art = wm.copy()
+ford_cols = np.abs(np.arange(FORD_X0, FORD_X1) - FORD_CX) < FORD_HALF
+wm_art[FORD_Y0:FORD_Y1, FORD_X0:FORD_X1][:, ford_cols] = False
+bank = mask_of(ponds, [(l, w + 6) for l, w in river_lines]) & ~wm_art
 wn = noise2(W, H, 6, 51)[..., None]
 wcol = np.array(hexc('#3f86c9')) * (1 - wn) + np.array(hexc('#2f6fb0')) * wn
 g[bank] = np.array(hexc('#4a7a34'))
-g[wm] = wcol[wm]
-sp = (np.random.rand(H, W) > .985) & wm
+g[wm_art] = wcol[wm_art]
+sp = (np.random.rand(H, W) > .985) & wm_art
 g[sp] = hexc('#9fd0f0')
 collide |= pond_m
-low |= wm & ~pond_m
+low |= wm_art & ~pond_m
 
 # ---------------------------------------------------------------- roads
 RW = {'tertiary': 11, 'unclassified': 9, 'residential': 9, 'service': 5, 'track': 5, 'footway': 2.5, 'path': 2.5}

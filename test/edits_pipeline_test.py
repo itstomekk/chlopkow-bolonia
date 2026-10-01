@@ -68,11 +68,14 @@ TIMEOUT = 1800  # seconds per generator step (map is 5143x7091 px)
 
 # Reproducible empty-edits output of the CURRENT generator code in THIS env
 # (PIL 12.3.0, numpy 2.4.4, scipy 1.18.1). Verify determinism with a rerun.
+# P10 (2026-09-29 "rozsuń brzegi wody"): map_collide.png + map_ground.png refreshed
+# by the ford bank spread (forked wm_art in the water stage); map.json, items.json,
+# map_objects.png, map_terrain.png proven byte-identical to the pre-P10 baseline.
 EXPECTED_BASELINE = {
     'docs/map.json':               'bab80dcb282f957c5accb25cb7f0963c18090136019e5ac7fd0ecb0c2d9614a7',
     'docs/items.json':             'e6d79b49a2c3e74474896f78b682b583b46c6446fe24245eb85efe00a5dae6f6',
-    'docs/img/map_collide.png':    '8a99214d494880fc0dac2b5849509cf05aa1558c9a481a6f7cd21b1eae31c516',
-    'docs/img/map_ground.png':     'c0f510008652ba20ab324b331028b208b9551d0a794e5224d17c0a07772d73a8',
+    'docs/img/map_collide.png':    '5cda8db1398d0920532a8adca4dff0ae3e9b1ab60a24bf264a54b8d3c6ab02e6',
+    'docs/img/map_ground.png':     '075af85f1741c313b1042dcebe13c06f91e92f24dddfd89bbbff4c54141e2f34',
     'docs/img/map_objects.png':    '3213eda3854b00c50eff69d2a603d1e164edd166305975a92b186cc979b2e084',
     'docs/img/map_terrain.png':    'aabc7d6f7da8152eae36accedc76f8f0627cccd93bbd7a646955316758d38efe',
 }
