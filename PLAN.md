@@ -38,12 +38,10 @@ The old coordinates refer to the 3897×2698 map before northern expansion; use
       GPT Luna's first asset-style task is A0 (safe inventory + review sheet); wait for
       Tomek's labels before a style guide, generation or implementation. Ordered
       gates A0–A4: [`plans/2026-09-28-asset-style-roadmap.md`](plans/2026-09-28-asset-style-roadmap.md).
-- [ ] **Canonical Luna execution queue, plan only:** all 15 gameplay/visual/audio
-      quality requests plus expandable outdoor house missions, legacy-save safety,
-      editor E2, and later local competitive minigames. Narrow cards A00–Z00, one
-      writer/test/review gate each: [`plans/2026-09-28-unified-luna-execution-plan.md`](plans/2026-09-28-unified-luna-execution-plan.md).
-      The previous G0–G9 plan is historical context, not a second queue. Nostr
-      scores and mass-populating houses are deferred; no implementation started.
+- [x] Canonical Luna queue implementation: P10 and D01–D05 are verified and fast-forwarded into local `main` at `e93ed11` (not pushed or deployed). D05 is one `home-example` outdoor pilot; do not scale it without Tomek's acceptance.
+- [x] E01 session-only participant/input model is implemented on `luna/2026-09-30-phase-de` (`771aced`); E02 has a playable two-key race prototype and focused tests, with the full integrated suite currently running. Await Tomek's playability review before any additional competition modes.
+- [ ] Z00: after E02 review, finish local test integration/quality audit, update verified handoff, and do not push/deploy without explicit permission.
+- The unified queue remains [`plans/2026-09-28-unified-luna-execution-plan.md`](plans/2026-09-28-unified-luna-execution-plan.md); previous G0–G9 is historical context. Nostr scores and mass-populating houses remain deferred.
 - [x] Publish the current playable batch and verify the Pages build at `ba64220` plus 11/11 tests against the public site. Future batches need their own release gates and fresh remote fetch.
 - [x] Character selector and sprite batch for Arek, Marcin, Damian, Edytka and Renik are live at `d34ff94`. Local follow-up: rebuilt Patryk's NPC sprite from four private reference photos; not deployed.
 
