@@ -94,6 +94,9 @@ def main():
     kinds=["boar","mouse","hare","pig","butterfly"]
     drawers={"boar":draw_boar,"mouse":draw_mouse,"hare":draw_hare,"pig":draw_pig}
     for row,kind in enumerate(kinds,5):
+        approved=ROOT/f"gen/critters_src/{kind}_row.png"   # approved GPT-art row (style guide v0.1) replaces the procedural drawer
+        if approved.exists():
+            out.alpha_composite(Image.open(approved).convert("RGBA").crop((0,0,CELL*4,CELL)),(0,row*CELL)); continue
         for phase in range(4):
             im=Image.new("RGBA",(CELL,CELL),(0,0,0,0)); d=ImageDraw.Draw(im)
             draw_butterfly(d,phase) if kind=="butterfly" else drawers[kind](d,phase,phase>=2)
