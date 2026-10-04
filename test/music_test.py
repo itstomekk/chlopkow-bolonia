@@ -1,16 +1,16 @@
 """Music: the engine starts on the first key press, picks the track by scene, K mutes/unmutes, and every
 song arranges and plays without errors.
 
-A05 routing matrix: title/village/field/Jazz barn -> the main Ogg
+Routing matrix: title/village/field -> the main Ogg
 (`audio/Polka_Dziadek_true_chiptune_NES.ogg`); forest -> pastoralka; shop -> mazurka;
-church -> choral; cemetery/end -> nokturn; minigame -> oberek.
+church -> choral; cemetery/end -> nokturn; minigame -> oberek; Jazz barn -> jazz.
 Exactly one audible source at a time (Ogg XOR synth bus)."""
 import os, time
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get("ARK_URL", "http://127.0.0.1:8790/index.html")
 MAIN_OGG = 'audio/Polka_Dziadek_true_chiptune_NES.ogg'
-MAIN_RATE_MIN = .4   # matches music.js MAIN_RATE_MIN (recorded Ogg floors at 0.4 speed)
+MAIN_RATE_MIN = .5   # matches music.js MAIN_RATE_MIN (recorded Ogg floors at 0.5 speed)
 
 errors = []
 with sync_playwright() as p:
@@ -53,7 +53,7 @@ with sync_playwright() as p:
     assert st[0] == 'running' and st[1] in allowed_start and not st[2], (st, start_zone)
 
     # Village and field are one "default" zone: the recorded playlist, chosen at random, never the title track.
-    assert pg.evaluate("MUSIC.MAIN_RATE_MIN") == .4, pg.evaluate("MUSIC.MAIN_RATE_MIN")
+    assert pg.evaluate("MUSIC.MAIN_RATE_MIN") == MAIN_RATE_MIN, pg.evaluate("MUSIC.MAIN_RATE_MIN")
     defaults = pg.evaluate("MUSIC.DEFAULT_TRACKS")
     assert isinstance(defaults, list) and len(defaults) == 6, defaults
     assert all(t.startswith('audio/') and t.endswith('.ogg') for t in defaults), defaults
@@ -83,21 +83,21 @@ with sync_playwright() as p:
     assert after != before and after in names, (before, after)
     print("playlist", before, "->", after)
 
-    # outdoor tempo contract: slower acceleration, a 0.2x floor, and no fast asymmetric catch-up
+    # outdoor tempo contract: slower acceleration, a 0.5x floor, and no fast asymmetric catch-up
     tempo = pg.evaluate("({ ...MUSIC.TEMPO })")
     print("tempo settings", tempo)
-    assert tempo['idle'] == .2, tempo
+    assert tempo['idle'] == .5, tempo
     assert tempo['rampUp'] > 20 and tempo['rampRun'] > 10, tempo
     assert tempo['rampDown'] >= tempo['rampRun'], tempo
     assert tempo.get('glideUp', 1) == tempo.get('glideDown', 1), tempo
 
-    time.sleep(2.5); idle = pg.evaluate("MUSIC.tempo"); print("idle tempo", round(idle, 2)); assert idle < .5, idle
+    time.sleep(2.5); idle = pg.evaluate("MUSIC.tempo"); print("idle tempo", round(idle, 2)); assert idle < .55, idle
     rate_idle = pg.evaluate("MUSIC.mainTrackRate"); print("main rate idle", round(rate_idle, 2))
-    assert abs(rate_idle - .4) < .06, rate_idle
+    assert abs(rate_idle - .5) < .06, rate_idle
     pg.keyboard.down("ShiftLeft")
     for k in ["ArrowLeft", "ArrowRight"] * 3: pg.keyboard.down(k); time.sleep(.8); pg.keyboard.up(k)
     pg.keyboard.up("ShiftLeft")
-    fast = pg.evaluate("MUSIC.tempo"); print("after running", round(fast, 2)); assert fast > idle + .25, fast
+    fast = pg.evaluate("MUSIC.tempo"); print("after running", round(fast, 2)); assert fast > idle + .12, fast
     assert fast <= 1.31, fast
     rate_fast = pg.evaluate("MUSIC.mainTrackRate"); print("main rate after running", round(rate_fast, 2))
     assert rate_fast > rate_idle + .1 and rate_fast <= 1.31, (rate_idle, rate_fast)
@@ -164,7 +164,7 @@ with sync_playwright() as p:
     b.close()
 
 # ---------------------------------------------------------------------------
-# A05 routing matrix: title/village/field/Jazz barn -> the main Ogg;
+# Routing matrix: title/village/field -> the main Ogg; Jazz barn -> jazz;
 # forest -> pastoralka; shop -> mazurka; church -> choral;
 # cemetery/end -> nokturn; minigame -> oberek. Exactly one audible source.
 # ---------------------------------------------------------------------------
@@ -214,15 +214,18 @@ with sync_playwright() as p:
     assert fx, "no field pixel found"
     route(pg, fx[0], fx[1], True, label=f"yellow field {fx}")
     j = pg.evaluate("__game.MAP.jazz")
-    route(pg, j['x'], j['y'], True, label="jazz barn center")
-    # jazz edge on grass: sample repeatedly, no flapping back to a synth.
-    # Some barn sides touch the forest, where pastoralka wins by exception
-    # precedence, so ask the game for a grass point just outside the circle.
+    route(pg, j['x'], j['y'], False, synth='jazz', label="jazz barn center")
+    # jazz edge on grass, inside the 40 px exit hysteresis: sample repeatedly, the
+    # swing must not flap back to the Ogg. Ask the game for a grass point just outside the circle.
     JE = "(j) => { for (const rr of [j.r + 18, j.r + 30]) { for (let a = 0; a < 6.3; a += .4) { const x = Math.round(j.x + rr * Math.cos(a)), y = Math.round(j.y + rr * Math.sin(a)); if (__game.terrainAt(x, y) === 'grass') return [x, y]; } } return null; }"
     je = pg.evaluate(JE, j)
     assert je, "no grass edge near jazz"
     for k in range(4):
-        route(pg, je[0], je[1], True, label=f"jazz edge {k} {je}")
+        route(pg, je[0], je[1], False, synth='jazz', label=f"jazz edge {k} {je}")
+    JO = "(j) => { for (const rr of [j.r + 70, j.r + 110, j.r + 160]) { for (let a = 0; a < 6.3; a += .3) { const x = Math.round(j.x + rr * Math.cos(a)), y = Math.round(j.y + rr * Math.sin(a)); if (__game.terrainAt(x, y) === 'grass') return [x, y]; } } return null; }"
+    jo = pg.evaluate(JO, j)
+    assert jo, "no grass point outside jazz"
+    route(pg, jo[0], jo[1], True, label=f"jazz left {jo}")
 
     fxp = pg.evaluate("(() => { const g=__game; for(let y=100;y<g.MAP.h;y+=50)for(let x=200;x<g.MAP.w;x+=50) if(g.terrainAt(x,y)==='forest') return [x,y]; return null; })()")
     assert fxp, "no forest pixel found"

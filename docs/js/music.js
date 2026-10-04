@@ -278,7 +278,7 @@
   };
 
   /* ------------------------------------------------------------------ scheduler
-     Tempo follows the player: standing still -> 0.2x the written BPM, moving -> the "energy" builds up and the band
+     Tempo follows the player: standing still -> 0.5x the written BPM, moving -> the "energy" builds up and the band
      slowly speeds up to 1.3x (slower build-up while walking or running), stopping -> it relaxes linearly.
      Because the tempo changes while playing, the scheduler keeps a frontier (audio time fT <-> song step fS) and
      advances it at the current tempo, so a tempo change never makes the music jump. */
@@ -299,7 +299,7 @@
   let mainTrack = null, mainTrackSrc = null, mainTrackZone = null, mainTrackOn = false;
   const MAIN_ELS = [];   // every <audio> created for the recorded playlists (debug: lets tests see ghost elements)
   const LOOKAHEAD = .25;
-  const TEMPO = { idle: .2, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
+  const TEMPO = { idle: .5, max: 1.3, still: .8,   // x written BPM; `still` is used on the title screen
     rampUp: 30, rampRun: 20, rampDown: 20 };        // linear energy seconds to max (walking / running / stopping)
   // quiet pieces (church hymn, nocturne, lullaby) set song.range, e.g. [.8, 1], so they stay slow and dignified
   let energy = 0, tempo = TEMPO.still, lastTick = performance.now();
@@ -386,9 +386,9 @@
     } else P.pass++;
     P.idx = 0; P.arr = arrange(P.song, P.pass);
   }
-  // The recorded tracks follow the player's activity. The village/field playlist runs linearly from 0.4x
+  // The recorded tracks follow the player's activity. The village/field playlist runs linearly from 0.5x
   // (standing still) to 1.3x (full energy); the entrance screen keeps its own gentle 0.8x.
-  const MAIN_RATE_MIN = .4;
+  const MAIN_RATE_MIN = .5;
   function mainTrackRate() {
     if (mainTrackZone === 'title') return TEMPO.still;
     return MAIN_RATE_MIN + energy * (TEMPO.max - MAIN_RATE_MIN);
@@ -534,11 +534,12 @@ window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_T
       if (A.room && A.room.kind === 'shop') return 'mazurka';
       if (sc === 'end' || nearCemetery()) return 'nokturn';
       if (A.minigame && A.minigame()) return 'oberek';
-      // Fields and the JAZZ W STODOLE yard play the recorded main track too:
-      // village, fields and the barn share the default Ogg playlist (no krakowiak/jazz switch).
+      // JAZZ W STODOLE: the barn yard plays the swing piece. Checked before terrain so a barn
+      // next to a field or the forest still swings inside its circle.
+      if (sc === 'play' && nearJazz()) return 'jazz';
+      // Fields play the recorded main track, like the village.
       if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'field') return 'main';
       if (sc === 'play' && A.terrainAt && A.terrainAt(A.P.x, A.P.y) === 'forest') return 'pastoralka';
-      if (sc === 'play' && nearJazz()) return 'main';
       if (sc === 'play') return 'main';
       return VILLAGE;
     };
