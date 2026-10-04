@@ -60,7 +60,7 @@
       ],
       church: ['Kościół pw. Narodzenia NMP. Dzwony biją w południe. Arek, jak zwykle, spóźniony.'],
       rectory: ['Plebania. Ksiądz macha z okna. Arek udaje, że poprawia okulary.'],
-      cemetery: ['Cmentarz parafialny. Arek zdejmuje okulary. Na chwilę.'],
+      cemetery: ['Cmentarz parafialny. Arek zwalnia i idzie ciszej.'],
       windmill: ['Wiatrak „Koźlak”. Stoi tu dłużej niż ktokolwiek pamięta. Skrzypi, jakby coś mówił.'],
       shop: ['Sklep spożywczo-przemysłowy. Półki są ciasne, ale pełne: oranżada, chleb, konserwy, nabiał i słodycze.', 'Pani sklepowa zna ceny na pamięć. I wie, kto kupił ostatniego pączka.'],
       shopBuy: ['Pani ze sklepu: „Oranżada? Ostatnia butelka, dla Marcina.”', 'Arek dostaje oranżadę!'],
@@ -126,7 +126,7 @@
       ],
       church: ['Church of the Nativity of the Virgin Mary. Bells at noon. Arek is late, as usual.'],
       rectory: ['The rectory. The priest waves from a window. Arek pretends to fix his sunglasses.'],
-      cemetery: ['The parish cemetery. Arek takes his sunglasses off. For a moment.'],
+      cemetery: ['The parish cemetery. Arek slows down and walks quietly.'],
       windmill: ['The "Koźlak" windmill. Older than anyone remembers. It creaks like it wants to talk.'],
       shop: ['The village shop. Tight aisles, full shelves: orangeade, bread, tins, dairy and sweets.', 'The shopkeeper knows every price by heart. And who bought the last doughnut.'],
       shopBuy: ['Shop lady: "Orangeade? Last bottle. For Marcin."', 'Arek got an ORANGEADE!'],
@@ -1201,16 +1201,6 @@
   addEventListener('resize', resize);
 
   function shadow(sx, sy, s, w = 8.5) { ctx.fillStyle = 'rgba(20,34,12,0.38)'; ctx.beginPath(); ctx.ellipse(sx, sy, w * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill(); }
-  // Cemetery zone: the OSM landuse rectangle around the cemetery POI (same as music.js), with hysteresis at the edge.
-  // Inside it Arek takes his sunglasses off (img/arek_sheet_noglasses.png, same layout as arek_sheet.png).
-  const CEM_HALF = [112, 97];
-  let inCemetery = false;
-  function cemeteryZone() {
-    const c = !ROOM && MAP && MAP.pois.find(p => p.key === 'cemetery');
-    if (!c) return (inCemetery = false);
-    const m = inCemetery ? 70 : 25;
-    return (inCemetery = Math.abs(P.x - c.x) < CEM_HALF[0] + m && Math.abs(P.y - c.y) < CEM_HALF[1] + m);
-  }
   function spriteAnim(meta, prefix, dir) {
     return meta.anims[prefix + dir] || meta.anims[prefix + cardinalDir(dir)] || meta.anims[prefix + 'down'];
   }
@@ -1218,7 +1208,7 @@
     const h = CHAR_H * s, zk = 1 - P.z / JUMP_H * .45;
     ctx.globalAlpha = zk; shadow(sx, sy, s * zk); ctx.globalAlpha = 1;
     sy -= P.z * s;
-    const { meta } = SPR, sheet = (inCemetery && selectedCharacter === 'arek' && SPR.bare) || SPR.sheet;   // no-glasses sheet exists only for Arek
+    const { meta, sheet } = SPR;
     const anim = spriteAnim(meta, P.moving || P.air ? 'walk_' : 'idle_', P.dir) || spriteAnim(meta, 'walk_', P.dir);
     const f = anim.frames[P.air ? 2 % anim.frames.length : P.moving ? Math.floor(P.step) % anim.frames.length : 0];
     const scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
@@ -1666,7 +1656,6 @@ function drawFrodo(sx, sy, s) {
     if (!ROOM) HOOKS.world.forEach(f => f((base, fn) => draw.push({ base, fn }), S, inView));
     draw.sort((a, b) => a.base - b.base).forEach(d => d.fn());
     const cemetery = !ROOM && MAP.pois.find(p => p.key === 'cemetery');
-    cemeteryZone();   // decides the sunglasses for the next frame too
     if (scene === 'play' && !showMap && cemetery && Math.hypot(P.x - cemetery.x, P.y - cemetery.y) < (SPOT_R.cemetery + 35)) {
       ctx.save(); ctx.globalCompositeOperation = 'saturation'; ctx.globalAlpha = .16; ctx.fillStyle = '#777'; ctx.fillRect(0, 0, W, H); ctx.restore();
     }
@@ -1830,7 +1819,7 @@ function drawFrodo(sx, sy, s) {
       x: b.x, y: b.y, hx: b.x, hy: b.y, vx: 0, vy: 0, angle: 0, roll: 0,
     })));
     PLAYER_SHEETS = Object.fromEntries(await Promise.all(PLAYABLE_CHARACTERS.map(async character => {
-      const sheetName = `${character}_sheet`;
+      const sheetName = character === 'arek' ? 'arek_sheet_8dir' : `${character}_sheet`;   // Arek: only the 8-direction sheet
       const [sheet, meta] = await Promise.all([load(`img/${sheetName}.png`), fetch(`img/${sheetName}.json`).then(r => r.json())]);
       return [character, { sheet, meta, sheetName }];
     })));
@@ -1846,15 +1835,9 @@ function drawFrodo(sx, sy, s) {
     ]);
     const [g, o, c, terrainImg, npcs, dog, _font, _churchArt, memories] = loaded;
     MEMORY_ART = memories;
-    const [arek8, arek8meta] = await Promise.all([load('img/arek_sheet_8dir.png'), fetch('img/arek_sheet_8dir.json').then(r => r.json())]);
-    PLAYER_SHEETS.arek = { sheet: arek8, meta: arek8meta, sheetName: 'arek_sheet_8dir' };
     GROUND = g; OBJ = o; SPR = PLAYER_SHEETS[selectedCharacter] || PLAYER_SHEETS.arek; NPCIMG = npcs; DOGIMG = dog;
     load('img/frodo_idle.png').then(img => { FRODO_IDLE = img; }, () => { });   // optional idle poses (sit, lick...)
     load('img/trash.png').then(img => { TRASH_IMG = img; }, () => { });   // trash bag pickup art (pixel fallback until loaded)
-    load('img/arek_sheet_8dir_noglasses.png').then(img => {
-      PLAYER_SHEETS.arek.bare = img;
-      if (selectedCharacter === 'arek') SPR = PLAYER_SHEETS.arek;
-    }, () => { });   // optional no-glasses variant with the same 8-direction layout
     {   // walking speed and mushroom placement use the same terrain classification
       const t = document.createElement('canvas'); t.width = terrainImg.width; t.height = terrainImg.height;
       const tx2 = t.getContext('2d', { willReadFrequently: true }); tx2.drawImage(terrainImg, 0, 0);
@@ -1972,7 +1955,7 @@ function drawFrodo(sx, sy, s) {
     window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
-    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, get sunglasses() { return !(inCemetery && selectedCharacter === 'arek' && SPR.bare); }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, sectorAt, clockGeometry: () => {
+    }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, sectorAt, clockGeometry: () => {
       const u = Math.min(cvs.width, cvs.height * 1.6) / 100;
       ctx.font = `${u * 2}px Silkscreen`; ctx.textAlign = 'left';
       const text = fmtTime(Q.playTime);

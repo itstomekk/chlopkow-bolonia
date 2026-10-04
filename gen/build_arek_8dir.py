@@ -57,4 +57,4 @@ def build(source, output):
 
 
 build('docs/img/arek_sheet.png', 'docs/img/arek_sheet_8dir.png')
-build('docs/img/arek_sheet_noglasses.png', 'docs/img/arek_sheet_8dir_noglasses.png')
+
