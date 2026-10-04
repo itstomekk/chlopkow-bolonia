@@ -272,9 +272,11 @@
         Q = Object.assign(Q, s.Q);
         Q.missions = normalizeMissions(s.Q.missions);   // D04: only the new mission fields are normalized
         Q.playerName = sanitizePlayerName(Q.playerName);
-        if (Q.playerName.toUpperCase() === 'AREK') Q.playerName = '';
-        if (!Q.playerName) return false;
-        P.x = s.x; P.y = s.y;
+        // Legacy v1 saves defaulted the name to AREK: blank it so the player is asked once.
+        // A blank name must not hide the save (that let a new game overwrite real progress);
+        // startGame(false) asks for a name and keeps the loaded progress.
+        if (ver < 2 && Q.playerName.toUpperCase() === 'AREK') Q.playerName = '';
+        if (Number.isFinite(s.x) && Number.isFinite(s.y)) { P.x = s.x; P.y = s.y; }
         if (s.dog && Number.isFinite(s.dog.x) && Number.isFinite(s.dog.y)) savedDog = { x: s.dog.x, y: s.dog.y };
         if (Array.isArray(s.npcs) && ITEMS && ITEMS.npcs) for (const saved of s.npcs) {
           const n = ITEMS.npcs.find(v => v.id === saved.id && !v.secret && !NPC_FIXED.has(v.id));
@@ -1643,7 +1645,7 @@ function drawFrodo(sx, sy, s) {
     ctx.drawImage(GROUND, sx0, sy0, sw, sh, ox + sx0 * zoom, oy + sy0 * zoom, sw * zoom, sh * zoom);
     const S = (x, y) => [ox + x * zoom, oy + y * zoom];
     lastCam = { ox, oy, zoom, S, toWorld: (px, py) => [(px - ox) / zoom, (py - oy) / zoom] };
-    drawClouds(ox, oy, zoom, sx0, sy0, sw, sh);
+    if (!ROOM) drawClouds(ox, oy, zoom, sx0, sy0, sw, sh);   // outdoor weather only, never over interiors
     for (const d of dust) { const k = d.t / .5; ctx.fillStyle = `rgba(235,220,180,${.55 * (1 - k)})`; const s = (2 + k * 3) * zoom; ctx.fillRect(ox + (d.x - 2 - k * 4) * zoom, oy + (d.y - 2 - k * 3) * zoom, s, s); }
 
     // everything that stands on the ground, sorted by baseline

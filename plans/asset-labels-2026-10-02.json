@@ -1,0 +1,111 @@
+{
+ "date": "2026-10-02",
+ "source": "Tomek via asset-review/2026-10-02/review.html",
+ "labels": {
+  "char.player.arek_8dir.sheet": {
+   "note": "why there is transparency?",
+   "label": "adjust"
+  },
+  "char.player.arek": {
+   "label": "keep"
+  },
+  "char.player.arek_8dir": {
+   "label": "anchor"
+  },
+  "char.player.arek.sheet": {
+   "label": "adjust",
+   "note": "looks like we dont have all figures?"
+  },
+  "char.player.damian.sheet": {
+   "label": "keep"
+  },
+  "char.player.renik": {
+   "label": "anchor"
+  },
+  "char.player.edytka": {
+   "label": "keep"
+  },
+  "char.npc.damian": {
+   "label": "keep"
+  },
+  "char.npc.grandpa": {
+   "label": "adjust",
+   "note": "too high resolution"
+  },
+  "char.npc.mateusz": {
+   "label": "adjust",
+   "note": "too high resolution"
+  },
+  "char.npc.zbyszek": {
+   "label": "keep",
+   "note": "to jest wesolcyh swiat"
+  },
+  "char.npc.soltys": {
+   "label": "keep"
+  },
+  "animal.critter.pig": {
+   "label": "regen",
+   "note": "too low quality"
+  },
+  "animal.critter.hare": {
+   "label": "regen",
+   "note": "too low quality"
+  },
+  "animal.critter.mouse": {
+   "label": "regen",
+   "note": "too low quality"
+  },
+  "animal.critter.bird": {
+   "label": "anchor"
+  },
+  "animal.critter.stork": {
+   "label": "adjust",
+   "note": "too high res"
+  },
+  "animal.critter.boar": {
+   "label": "regen",
+   "note": "too low quality"
+  },
+  "animal.minigame_sheet": {
+   "label": "adjust",
+   "note": "too high res"
+  },
+  "vehicle.tractor_side": {
+   "label": "regen"
+  },
+  "vehicle.tractor_front": {
+   "label": "regen"
+  },
+  "vehicle.tractor_back": {
+   "label": "regen"
+  },
+  "vehicle.car": {
+   "label": "adjust",
+   "note": "looks good, but directions do not work"
+  },
+  "item.trash": {
+   "label": "keep"
+  },
+  "landmark.shrine_stone": {
+   "label": "anchor"
+  },
+  "landmark.cross_iron": {
+   "label": "anchor"
+  },
+  "landmark.village_sign": {
+   "label": "adjust",
+   "note": "this is too big"
+  },
+  "tree.tree.oak": {
+   "label": "adjust",
+   "note": "make according to style"
+  },
+  "tree.tree.deciduous": {
+   "label": "adjust",
+   "note": "make according to style"
+  },
+  "ui.splash": {
+   "label": "keep"
+  }
+ }
+}

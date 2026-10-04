@@ -33,6 +33,11 @@ The old coordinates refer to the 3897×2698 map before northern expansion; use
 - [ ] Map editor (local tool in `editor/`, edits in `osm/edits.json` applied by the
       generator, satellite basemap, extensible tool registry). Design and ordered worker
       tasks E1–E7: [`plans/2026-09-28-map-editor.md`](plans/2026-09-28-map-editor.md).
+- [x] A0 audit (2026-10-02): architecture + asset audit in
+      [`plans/2026-10-02-architecture-asset-audit.md`](plans/2026-10-02-architecture-asset-audit.md);
+      review sheet builder `gen/build_asset_review.py` (output gitignored `asset-review/`).
+      Three safe fixes applied locally (save loss for "Arek" name, clouds in interiors,
+      duplicate collide decode). Waiting for Tomek's asset labels before A1.
 - [ ] Asset consistency, **planning stage**: refine the existing pixel-art look, with
       Tomek choosing which existing assets are style anchors and which need changes.
       GPT Luna's first asset-style task is A0 (safe inventory + review sheet); wait for

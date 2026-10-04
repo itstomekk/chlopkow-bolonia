@@ -21,3 +21,8 @@ docs/superpowers/
 
 # map editor: local save history (imagery tiles in editor/basemap/ may be committed)
 editor/history/
+# downloaded imagery / canopy rasters used by osm/fetch_trees.py (large, re-downloadable)
+editor/cache/
+
+# local asset review sheets (gen/build_asset_review.py)
+asset-review/

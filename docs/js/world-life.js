@@ -60,8 +60,9 @@
     A.load('img/car_red.png').then(image => { state.carImage = image; }, () => {});
     A.load('img/vehicles.png').then(image => { state.vehicleImage = image; }, () => {});
     A.load('img/critters.png').then(image => { state.critters = image; }, () => {});
-    A.load('img/map_collide.png').then(image => {
-      if (Array.isArray(MAP.water) && MAP.water.length) state.waterPoints = MAP.water;
+    // map.json normally carries water points; decode the full-size collision map only as a fallback.
+    (Array.isArray(MAP.water) && MAP.water.length ? Promise.resolve(null) : A.load('img/map_collide.png')).then(image => {
+      if (!image) state.waterPoints = MAP.water;
       else {
         const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
         const cx = canvas.getContext('2d', { willReadFrequently: true }); cx.drawImage(image, 0, 0);
