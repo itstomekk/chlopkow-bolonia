@@ -11,7 +11,7 @@ Geometry (bbox, scale, legacy-coordinate conversion) lives in osm/geo.py.
 1 m = A art pixels. Buildings are exaggerated around their centroid (RPG convention).
 Map data © OpenStreetMap contributors (ODbL).
 """
-import json, math, random, sys
+import json, math, os, random, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, 'osm'); sys.path.insert(0, 'gen')
@@ -26,6 +26,11 @@ np.random.seed(7)
 
 
 data = json.load(open(OSM, encoding='utf-8'))
+# Real features missing from OSM (e.g. a garden pond, an unmapped orchard), same Overpass
+# format with negative ids. Kept separate so an OSM re-fetch never overwrites them.
+LOCAL = 'osm/local_features.json'
+if os.path.exists(LOCAL):
+    data['elements'] += json.load(open(LOCAL, encoding='utf-8'))['elements']
 ways = [e for e in data['elements'] if e['type'] == 'way' and 'geometry' in e]
 nodes = [e for e in data['elements'] if e['type'] == 'node']
 pts = lambda e: [P(g['lat'], g['lon']) for g in e['geometry']]
@@ -116,12 +121,17 @@ for i, p in enumerate(classes.get('farmland', [])):
     ey_, ex_ = np.nonzero(edge); g[ey_ + oy_, ex_ + ox_] *= .8
 
 # orchard / cemetery / pitch
+# Graves go only where the satellite image shows them (local_features.json grave_area
+# polygons); without such polygons the whole cemetery is filled.
+_grave_areas = [pts(e) for e in ways if e['tags'].get('cemetery') == 'grave_area']
+_grave_m = mask_of(_grave_areas) if _grave_areas else None
 for p in classes.get('cemetery', []):
     m = mask_of([p]); fill(m, '#5f9a4a', '#548c42', seed=31)
+    gm_ = m & _grave_m if _grave_m is not None else m
     arr = np.array(p); x0, y0 = arr.min(0); x1, y1 = arr.max(0)
     for yy in np.arange(y0 + 6, y1 - 6, 9):
         for xx in np.arange(x0 + 6, x1 - 6, 7):
-            if m[int(yy), int(xx)] and rnd.random() < .8:
+            if gm_[int(yy), int(xx)] and rnd.random() < .8:
                 g[int(yy) - 3:int(yy) + 1, int(xx):int(xx) + 3] = hexc('#bdbdb8'); g[int(yy) - 3, int(xx):int(xx) + 3] = hexc('#dcdcd6')
                 g[int(yy) + 1, int(xx):int(xx) + 3] = hexc('#3c5a32')
 for p in classes.get('pitch', []):
@@ -265,10 +275,21 @@ buildings.sort(key=lambda b: max(v[1] for v in b['poly']))
 # This way remains deterministic and keeps every other real building on its mapped footprint.
 CUSTOM_HOUSE_WAY_ID = 1095382322
 CUSTOM_HOUSE = None
+# Real yards (houses + outbuildings) drawn from Street View / satellite, placed by gen/streetview/yard_strip.py
+# (asset-style-guide rule 25). These ways skip the procedural drawing; the RNG draws are still consumed so the
+# colours of every other procedural building stay the same.
+YARD_SPRITES = {q['id']: q for q in json.load(open('gen/yards/final/placements.json', encoding='utf-8'))} \
+    if os.path.exists('gen/yards/final/placements.json') else {}
 
 for b in buildings:
     if b['id'] in LANDMARK_IDS: continue
     poly = b['poly']; kind = b['kind']
+    if b['id'] in YARD_SPRITES:
+        house = kind in ('house', 'detached', 'bungalow', 'yes', 'residential')
+        rnd.choice(WALLS) if house else rnd.choice(['#b8a488', '#a89478', '#c4c0b6', '#9c8a70'])
+        rnd.choice(ROOFS_HOUSE if house else ROOFS_FARM)
+        if house: rnd.random()
+        continue
     if b['id'] == CUSTOM_HOUSE_WAY_ID:
         CUSTOM_HOUSE = b
         fm = Image.new('L', (W, H), 0); ImageDraw.Draw(fm).polygon(poly, fill=255)
@@ -327,6 +348,21 @@ for b in buildings:
     fmask = np.array(fm) > 0
     collide |= fmask; occupied |= fmask
 
+# yard sprites: ground shadow (lower half of the silhouette, +5/+3 like the procedural one), sprite, and a
+# collision footprint = silhouette pushed down by the wall band (gen/pilot_2026-10-03-houses/process3.collision)
+YARD_WALL_FRAC = 0.38
+for q in YARD_SPRITES.values():
+    s = Image.open(q['png']).convert('RGBA'); sx, sy = q['x'], q['y']
+    a = np.array(s.getchannel('A')) > 0
+    sh = Image.fromarray(((a & (np.arange(a.shape[0])[:, None] >= s.height // 2)) * 255).astype(np.uint8))
+    ground.paste((58, 84, 40), (sx + 5, sy + 3), sh)
+    objects_img.alpha_composite(s, (sx, sy))
+    objects.append(dict(x=sx, y=sy, w=s.width, h=s.height, base=float(sy + s.height), kind='yard_building', way=q['id']))
+    wall = round(s.height * YARD_WALL_FRAC)
+    foot = np.zeros_like(a); foot[wall:] = a[:-wall]
+    ys_, xs_ = np.nonzero(foot)
+    collide[ys_ + sy, xs_ + sx] = True; occupied[ys_ + sy, xs_ + sx] = True
+
 # ---------------------------------------------------------------- minigame venues
 # Sept 28 moves/additions, given as CURRENT map art pixels (the in-game coordinate readout), meaning "near here".
 CUR_SITES = dict(pig=(3487, 3308), dogs=(1321, 888), jazz=tuple(int(round(v)) for v in P(52.27757, 22.87983)), gravel=(873, 2322))
@@ -368,10 +404,19 @@ MEADOW = dict(x0=_mx0, y0=_my0, x1=_mx0 + 840, y1=_my0 + 540)
 _jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 160, 190, _venue_block | pm, dm)
 BARN = dict(cx=_jx0 + 80, foot=_jy0 + 112, w=120)
 JAZZ = dict(x=BARN['cx'], y=BARN['foot'] + 38, r=140)
-# Wapnica: gravel pit / village dump
-_gx0, _gy0 = clear_rect(*CUR_SITES['gravel'], 300, 220, _venue_block, _venue_soft)
-PIT = dict(cx=_gx0 + 150, cy=_gy0 + 110, rx=140, ry=100)
-GRAVEL = dict(x=PIT['cx'] + 40, y=PIT['cy'] + 42, r=60)
+# Wapnica: gravel pit / village dump, on the real dump outline traced from satellite imagery
+# (local_features.json, landuse=landfill name=Wapnica); falls back to a cleared oval site.
+_wap = [pts(e) for e in ways if e['tags'].get('landuse') == 'landfill' and e['tags'].get('name') == 'Wapnica']
+if _wap:
+    PIT_MASK = mask_of(_wap)
+    _py, _px = np.nonzero(PIT_MASK)
+    PIT = dict(cx=int(_px.mean()), cy=int(_py.mean()), rx=int((_px.max() - _px.min()) / 2), ry=int((_py.max() - _py.min()) / 2))
+else:
+    _gx0, _gy0 = clear_rect(*CUR_SITES['gravel'], 300, 220, _venue_block, _venue_soft)
+    PIT = dict(cx=_gx0 + 150, cy=_gy0 + 110, rx=140, ry=100)
+    _em = Image.new('L', (W, H), 0); ImageDraw.Draw(_em).ellipse([PIT['cx'] - PIT['rx'], PIT['cy'] - PIT['ry'], PIT['cx'] + PIT['rx'], PIT['cy'] + PIT['ry']], fill=255)
+    PIT_MASK = np.array(_em) > 0; del _em
+GRAVEL = dict(x=PIT['cx'], y=PIT['cy'] + 15, r=60)
 print('venues', dict(corral=CORRAL, meadow=MEADOW, barn=BARN, jazz=JAZZ, pit=PIT, gravel=GRAVEL))
 _rc = tuple(int(round(v)) for v in P(52.2736642, 22.867767)); RANGE = dict(x=_rc[0], y=_rc[1])   # PPM Strzelectwo
 _pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0] + 200, cy=_pc[1] + 100, w=110, h=190)
@@ -450,23 +495,26 @@ ground = Image.fromarray(g6.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(
 # Wapnica (gravel pit + village dump): pale excavated floor, walkable; heaps, spoil and the skip are solid.
 x0_, y0_, yy, xx = window(PIT['cx'], PIT['cy'], PIT['rx'] + 20, PIT['ry'] + 20)
 g4 = np.array(ground).astype(np.float32); sub = g4[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
-pr = np.hypot((xx - PIT['cx']) / PIT['rx'], (yy - PIT['cy']) / PIT['ry'])
-pit_rim, pit_floor = (pr <= 1.08) & (pr > .96), pr <= .96
+pm_ = PIT_MASK[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
+_pmi = Image.fromarray((pm_ * 255).astype(np.uint8))
+pit_floor = np.array(_pmi.filter(ImageFilter.MinFilter(7))) > 0
+pit_rim = (np.array(_pmi.filter(ImageFilter.MaxFilter(7))) > 0) & ~pit_floor
 gn = noise2(xx.shape[1], xx.shape[0], 5, 97)[..., None]
 sub[pit_rim] = np.array(hexc('#9a8a66'))
 sub[pit_floor] = (np.array(hexc('#d9cfb4')) * (1 - gn) + np.array(hexc('#bfb398')) * gn)[pit_floor]
-pebble = (np.random.RandomState(98).rand(*pr.shape) > .93) & pit_floor
+pebble = (np.random.RandomState(98).rand(*pm_.shape) > .93) & pit_floor
 sub[pebble] = np.array(hexc('#8e8a82'))
 # excavated look: the north wall of the pit is in shadow, the south edge catches the light
-wall_n = (pr <= 1.0) & (pr > .78) & (yy < PIT['cy'] - PIT['ry'] * .35)
+wall_n = pit_floor & ~np.roll(pm_, 16, 0)      # within 16 px of the northern edge
 sub[wall_n] = sub[wall_n] * .72 + np.array(hexc('#6e6048')) * .28
-lip_s = (pr <= 1.0) & (pr > .9) & (yy > PIT['cy'] + PIT['ry'] * .4)
+lip_s = pit_floor & ~np.roll(pm_, -6, 0)       # within 6 px of the southern edge
 sub[lip_s] = sub[lip_s] * .7 + np.array(hexc('#efe6cc')) * .3
 ground = Image.fromarray(g4.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g4, sub
-for i_ in range(2):       # two tyre ruts across the floor
-    ry_ = PIT['cy'] + 40 + i_ * 9
-    gd.line([(PIT['cx'] - PIT['rx'] + 10, ry_), (PIT['cx'] + PIT['rx'] - 10, ry_ - 20)], fill=hexc('#a89c80'), width=3)
-occupied[PIT['cy'] - PIT['ry'] - 30:PIT['cy'] + PIT['ry'] + 25, PIT['cx'] - PIT['rx'] - 25:PIT['cx'] + PIT['rx'] + 25] = True
+for i_ in range(2):       # two tyre ruts along the dump, roughly parallel to the access road
+    gd.line([(PIT['cx'] - PIT['rx'] * .75, PIT['cy'] - 38 + i_ * 9), (PIT['cx'] + PIT['rx'] * .6, PIT['cy'] + 22 + i_ * 9)],
+            fill=hexc('#a89c80'), width=3)
+_pw = (slice(PIT['cy'] - PIT['ry'] - 40, PIT['cy'] + PIT['ry'] + 40), slice(PIT['cx'] - PIT['rx'] - 40, PIT['cx'] + PIT['rx'] + 40))
+occupied[_pw] |= np.array(Image.fromarray((PIT_MASK[_pw] * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(51))) > 0   # no trees/props on or right around the dump
 
 
 def gravel_heap(cx, cy, r, col='#a9a296'):
@@ -488,9 +536,10 @@ def gravel_heap(cx, cy, r, col='#a9a296'):
     collide[int(cy - r * .45):int(cy + 2), int(cx - r * .8):int(cx + r * .8)] = True
 
 
-gravel_heap(PIT['cx'] - 78, PIT['cy'] - 30, 30)
-gravel_heap(PIT['cx'] - 22, PIT['cy'] - 56, 24, '#c2b58f')
-gravel_heap(PIT['cx'] + 70, PIT['cy'] - 48, 20, '#9d9486')
+# heap / sign offsets fit the real Wapnica outline (a wedge along the road, wide at the east end)
+gravel_heap(PIT['cx'] - 75, PIT['cy'] - 30, 22)
+gravel_heap(PIT['cx'] - 25, PIT['cy'] - 8, 20, '#c2b58f')
+gravel_heap(PIT['cx'] + 75, PIT['cy'] + 28, 18, '#9d9486')
 # rusty skip container with rubbish next to the drop-off point
 kx_, ky_ = GRAVEL['x'] + 34, GRAVEL['y'] - 6
 gd.rectangle([kx_ - 22, ky_ - 1, kx_ + 26, ky_ + 5], fill=hexc('#7d735c'))
@@ -503,7 +552,7 @@ od.rectangle([kx_ - 20, ky_ - 12, kx_ - 10, ky_ - 8], fill=hexc('#8a4a2a'))   # 
 objects.append(dict(x=kx_ - 26, y=ky_ - 30, w=54, h=36, base=float(ky_)))
 collide[ky_ - 8:ky_ + 1, kx_ - 22:kx_ + 22] = True
 # wooden sign post "WAPNICA" (the game draws the readable label; the board is pixel art)
-sx_, sy_ = PIT['cx'] - PIT['rx'] + 18, PIT['cy'] + 20
+sx_, sy_ = PIT['cx'] - 118, PIT['cy'] - 42
 od.rectangle([sx_ - 1, sy_ - 22, sx_ + 1, sy_], fill=hexc('#6a4a2a'))
 od.rectangle([sx_ - 16, sy_ - 30, sx_ + 16, sy_ - 18], fill=hexc('#c9a46a'), outline=hexc('#5a3a1a'))
 for lx_ in range(sx_ - 12, sx_ + 12, 4): od.rectangle([lx_, sy_ - 26, lx_ + 2, sy_ - 22], fill=hexc('#5a3a1a'))
@@ -577,6 +626,7 @@ for p_ in classes.get('farmland', []):
     for _ in range(3):
         i_ = rnd.randrange(len(xs_)); x, y = int(xs_[i_]), int(ys_[i_])
         if not (20 < x < W - 20 and 60 < y < H - 20): continue
+        if (collide | low)[max(0, y - 8):y + 8, max(0, x - 12):x + 13].any(): continue   # not on a ditch, fence or wall
         bales.append(dict(x=x, y=y))
         occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # reserve the dynamic bale footprint
 print('hay bales', len(bales))
@@ -673,10 +723,33 @@ occ_d = np.array(occ_img.filter(ImageFilter.MaxFilter(15))) > 0
 
 tree_stats = {'conifer': 0, 'oak': 0, 'deciduous': 0}
 
+# Approved pixel-art oak (style guide v0.1, gen/trees_src/oak.png, 1 art px = 1 map px).
+# Placed with its trunk foot on the procedural foot point, so collision and y-sort stay the same.
+OAK_SPRITE = Image.open('gen/trees_src/oak.png').convert('RGBA') if os.path.exists('gen/trees_src/oak.png') else None
+if OAK_SPRITE is not None:
+    _oa = np.array(OAK_SPRITE)[..., 3] > 0
+    _oy = int(np.nonzero(_oa.any(1))[0].max())
+    OAK_FOOT = (int(round(np.nonzero(_oa[_oy])[0].mean())), _oy)
+
+
+def oak_sprite(x, y, r):
+    """Paste the approved oak sprite; consumes the same renderer RNG draws as the procedural tree."""
+    sw, sh = OAK_SPRITE.size
+    fx, fy = OAK_FOOT
+    gd.ellipse([x - sw * .42, y - 3, x + sw * .42, y + 4], fill=(52, 80, 36))
+    objects_img.alpha_composite(OAK_SPRITE, (x - fx, y - fy))
+    cy = y - r * 1.25
+    [(x + rnd.uniform(-r * .6, r * .5), cy + rnd.uniform(-r * .7, r * .5)) for _ in range(4)]
+    tree_stats['oak'] += 1
+    objects.append(dict(x=int(x - fx - 2), y=int(y - fy - 2), w=sw + 4, h=fy + 8, base=float(y), kind='tree', species='oak'))
+    collide[max(0, y - 3):y + 1, max(0, x - 3):x + 4] = True
+
 
 def tree(x, y, r, kind='deciduous'):
     """Draw one y-sorted village tree; its trunk collision footprint stays unchanged."""
     x, y, r = int(x), int(y), int(r)
+    if kind == 'oak' and OAK_SPRITE is not None:
+        return oak_sprite(x, y, r)
     if kind == 'oak':
         # Oaks are broad-canopied hardwoods; scale the crown and trunk, not the foot.
         r = int(r * 1.25)
@@ -771,7 +844,7 @@ def tree(x, y, r, kind='deciduous'):
 
 def village_tree_type(x, y):
     """Stable spatial variation without consuming the renderer's layout RNG stream."""
-    return 'oak' if ((int(x) * 73856093) ^ (int(y) * 19349663)) % 100 < 24 else 'deciduous'
+    return 'oak' if ((int(x) * 73856093) ^ (int(y) * 19349663)) % 100 < 12 else 'deciduous'   # oaks kept rare (Tomek, 2026-10-02)
 
 
 res_mask = mask_of(classes.get('residential', []) + classes.get('religious', []) + classes.get('cemetery', []))
@@ -782,15 +855,24 @@ forest_mask = mask_of(classes.get('forest', []) + classes.get('wood', []))
 # forest.remove restores the underlying ground and terrain class. Forest stays
 # walkable here - trunk collision policy is owned by C05.
 edits.apply('forest', EDITS, dict(forest_mask=forest_mask))
+forest_mask &= ~wm   # ponds/streams inside a wood stay water: no forest floor or forest trees painted over them
 orch = classes.get('orchard', [])
 tree_pts = []
-# residential gardens
-for _ in range(9000):
+# Real trees outside forests (osm/fetch_trees.py: canopy-height model checked against
+# satellite imagery). When present they replace the random garden and riverbank trees.
+REAL_TREES = 'osm/real_trees.json'
+real_trees = json.load(open(REAL_TREES, encoding='utf-8'))['trees'] if os.path.exists(REAL_TREES) else None
+for t_ in real_trees or []:
+    x, y = P(t_['lat'], t_['lon']); xi, yi = int(x), int(y)
+    if not (8 < xi < W - 8 and 20 < yi < H - 4) or occ_d[yi, xi] or wm[yi, xi] or forest_mask[yi, xi]: continue
+    tree_pts.append((x, y, min(14, max(8, 6 + t_['h'] * .4)), village_tree_type(x, y)))
+# residential gardens (random fallback without real tree data)
+for _ in range(0 if real_trees else 9000):
     x, y = rnd.uniform(8, W - 8), rnd.uniform(20, H - 4)
     xi, yi = int(x), int(y)
     if res_mask[yi, xi] and not occ_d[yi, xi] and rnd.random() < .35: tree_pts.append((x, y, rnd.uniform(8, 13), village_tree_type(x, y)))
-# river banks
-for l, w in river_lines:
+# river banks (random fallback without real tree data)
+for l, w in ([] if real_trees else river_lines):
     for a_, b_ in zip(l, l[1:]):
         L = math.hypot(b_[0] - a_[0], b_[1] - a_[1])
         for k in range(int(L // 26)):

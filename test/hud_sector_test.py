@@ -112,13 +112,14 @@ def run_p04(page, out):
     coord_line = [e["t"] for e in all_t if e["t"].startswith(str(hn) + " ")]
     assert coord_line, f"P04: no coordinate readout line painted: {[e['t'] for e in all_t][:20]}"
     line = coord_line[-1]
-    assert line == f"{hn} {exp}", f"P04: readout {line!r} != '{hn} {exp}'"
-    assert SECTOR_RE.match(line.split()[-1]), f"P04: no sector label in {line!r}"
-    assert not PIXEL_RE.search(line), f"P04: raw pixels still displayed: {line!r}"
-    assert "52." not in line, f"P04: lat/lon still displayed: {line!r}"
+    # 2026-10-04 (Tomek): sector stays, map x,y + lat/lon are back next to it
+    m = re.match(rf"^{re.escape(str(hn))} ([A-K]\d{{1,2}})  (\d+),(\d+)  (52\.\d{{5}}), (22\.\d{{5}})$", line)
+    assert m, f"P04: readout {line!r} is not 'NAME SECTOR  x,y  lat, lon'"
+    assert m.group(1) == exp, f"P04: sector {m.group(1)} != {exp}"
+    assert abs(int(m.group(2)) - px) <= 1 and abs(int(m.group(3)) - py) <= 1, f"P04: x,y {line!r} != {px},{py}"
     page.screenshot(path=str(out / "p04_hud_sector.png"))
 
-    # --- full M-map: cursor line shows "KURSOR SECTOR" (no pixels) ---
+    # --- full M-map: cursor line shows "KURSOR SECTOR  x,y  lat, lon" ---
     page.keyboard.press("KeyM")
     page.wait_for_timeout(250)
     clear_trace(page)
@@ -129,8 +130,7 @@ def run_p04(page, out):
     cursor_lines = [t for t in texts if t.startswith("KURSOR")]
     assert cursor_lines, f"P04: no KURSOR line on the big map: {texts[:30]}"
     cline = cursor_lines[-1]
-    assert cline == f"KURSOR {sector(mx, my)}", f"P04: cursor line {cline!r} != KURSOR {sector(mx, my)}"
-    assert not PIXEL_RE.search(cline), f"P04: cursor raw pixels still displayed: {cline!r}"
+    assert re.match(rf"^KURSOR {sector(mx, my)}  {mx},{my}  52\.\d{{5}}, 22\.\d{{5}}$", cline), f"P04: cursor line {cline!r}"
     page.screenshot(path=str(out / "p04_map_sector.png"))
     page.keyboard.press("KeyM")
     print("  P04 PASS")

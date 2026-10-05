@@ -1,0 +1,29 @@
+{
+  "character": "BERCIK",
+  "date": "2026-10-04",
+  "provider": "openai-codex",
+  "model": "gpt-image-2-medium",
+  "reported_quality": "medium",
+  "request_id": "63eab5a7-3d26-4a29-89d9-daa288086b50",
+  "raw_image": "gen/bercik/bercik_walkcycle_raw.png",
+  "actual_size": [1774, 887],
+  "requested_size": [1536, 1024],
+  "cost": "ChatGPT image quota; no separate per-image cash charge",
+  "style_references": ["docs/img/renik_sheet.png", "docs/img/arek_sheet_8dir.png"],
+  "private_references": {
+    "location": "references/bercik/",
+    "files": ["image_fbca7d.png", "image_5d7a87.png", "image_59aebb.png"],
+    "uploaded": false,
+    "usage": "Locally observed appearance only. No private photographs were sent to the image generator."
+  },
+  "design": "Short side-swept dark hair, short beard/stubble, black rectangular sunglasses, navy short-sleeved T-shirt, navy knee-length shorts, dark walking shoes, black crossbody bag, silver watch. Summer outfit from first reference; winter and red hiking outfits not generated.",
+  "layout": {
+    "grid": [4, 2],
+    "row_0": ["down_A", "down_B", "right_A", "right_B"],
+    "row_1": ["up_A", "up_B", "left_A", "left_B"],
+    "background": "magenta; actual corner RGB [242,11,240]"
+  },
+  "generation_constraints": "Chunky low-resolution pixel art around 75px content height, 1px outline, compact adult proportions, 2-3 shading steps, 24-32 colors, upper-left light. Exactly eight isolated complete equal-scale walking figures in equal cells with clear alternating steps. Front/back/true profiles in the recorded order. Pure magenta background, no text, ground, shadows, checkerboard or overlapping cells.",
+  "raw_visual_review": "Eight separate complete figures, correct four directions and alternating steps. Output is a stylized interpretation, not an exact photographic likeness.",
+  "publication": "Local only. No commit, push or deployment authorized."
+}

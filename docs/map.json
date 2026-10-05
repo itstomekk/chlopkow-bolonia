@@ -444,13 +444,6 @@
 "base": 3858.2219547658265
 },
 {
-"x": 350,
-"y": 3828,
-"w": 64,
-"h": 50,
-"base": 3875.4635133359616
-},
-{
 "x": 5118,
 "y": 3829,
 "w": 20,
@@ -479,20 +472,6 @@
 "base": 3926.2194839969334
 },
 {
-"x": 557,
-"y": 3918,
-"w": 75,
-"h": 52,
-"base": 3967.175793608974
-},
-{
-"x": 342,
-"y": 3907,
-"w": 65,
-"h": 70,
-"base": 3974.523614839917
-},
-{
 "x": 1266,
 "y": 3893,
 "w": 34,
@@ -500,123 +479,11 @@
 "base": 3974.672076346524
 },
 {
-"x": 683,
-"y": 3929,
-"w": 67,
-"h": 57,
-"base": 3983.7425635694485
-},
-{
-"x": 555,
-"y": 3935,
-"w": 31,
-"h": 61,
-"base": 3993.1701612841543
-},
-{
-"x": 619,
-"y": 3944,
-"w": 42,
-"h": 67,
-"base": 4007.80207248915
-},
-{
-"x": 720,
-"y": 3965,
-"w": 23,
-"h": 50,
-"base": 4012.326661144727
-},
-{
-"x": 733,
-"y": 3979,
-"w": 23,
-"h": 39,
-"base": 4015.738804318188
-},
-{
-"x": 844,
-"y": 3981,
-"w": 45,
-"h": 46,
-"base": 4023.9907595805807
-},
-{
-"x": 600,
-"y": 3995,
-"w": 29,
-"h": 45,
-"base": 4036.740973862177
-},
-{
-"x": 663,
-"y": 3963,
-"w": 41,
-"h": 77,
-"base": 4037.199192329257
-},
-{
-"x": 872,
-"y": 3999,
-"w": 76,
-"h": 57,
-"base": 4052.738322792077
-},
-{
-"x": 742,
-"y": 3981,
-"w": 52,
-"h": 78,
-"base": 4055.5464917785766
-},
-{
-"x": 729,
-"y": 4013,
-"w": 25,
-"h": 54,
-"base": 4063.780807755732
-},
-{
-"x": 553,
-"y": 4004,
-"w": 62,
-"h": 66,
-"base": 4067.9521235541843
-},
-{
-"x": 824,
-"y": 4002,
-"w": 43,
-"h": 78,
-"base": 4076.3810984423226
-},
-{
-"x": 866,
-"y": 4013,
-"w": 32,
-"h": 70,
-"base": 4079.3613930474185
-},
-{
 "x": 1020,
 "y": 4045,
 "w": 50,
 "h": 46,
 "base": 4088.6007702947445
-},
-{
-"x": 824,
-"y": 4050,
-"w": 19,
-"h": 46,
-"base": 4092.255046938996
-},
-{
-"x": 426,
-"y": 4036,
-"w": 63,
-"h": 68,
-"base": 4101.033383719029
 },
 {
 "x": 1050,
@@ -640,39 +507,11 @@
 "base": 4126.732726209075
 },
 {
-"x": 688,
-"y": 4076,
-"w": 47,
-"h": 59,
-"base": 4132.1725660559305
-},
-{
-"x": 745,
-"y": 4076,
-"w": 66,
-"h": 67,
-"base": 4140.879865114789
-},
-{
-"x": 427,
-"y": 4091,
-"w": 26,
-"h": 56,
-"base": 4143.343059414053
-},
-{
 "x": 1004,
 "y": 4074,
 "w": 49,
 "h": 79,
 "base": 4150.242700836106
-},
-{
-"x": 833,
-"y": 4089,
-"w": 57,
-"h": 77,
-"base": 4162.331131203779
 },
 {
 "x": 1284,
@@ -687,13 +526,6 @@
 "w": 41,
 "h": 78,
 "base": 4170.105414641679
-},
-{
-"x": 430,
-"y": 4082,
-"w": 76,
-"h": 91,
-"base": 4170.652539614546
 },
 {
 "x": 1347,
@@ -808,11 +640,11 @@
 "base": 4266.846183593957
 },
 {
-"x": 4432,
-"y": 4207,
-"w": 70,
-"h": 68,
-"base": 4272.820973675082
+"x": 4439,
+"y": 4214,
+"w": 56,
+"h": 57,
+"base": 4267.725426030061
 },
 {
 "x": 1554,
@@ -1599,39 +1431,11 @@
 "base": 5658.359674036753
 },
 {
-"x": 4872,
-"y": 5622,
-"w": 41,
-"h": 44,
-"base": 5663.371973211718
-},
-{
-"x": 4801,
-"y": 5606,
-"w": 49,
-"h": 68,
-"base": 5670.927493943054
-},
-{
-"x": 4829,
-"y": 5640,
-"w": 32,
-"h": 37,
-"base": 5674.354221771169
-},
-{
 "x": 4147,
 "y": 5630,
 "w": 49,
 "h": 48,
 "base": 5675.2099711873825
-},
-{
-"x": 4840,
-"y": 5629,
-"w": 47,
-"h": 58,
-"base": 5684.071627001361
 },
 {
 "x": 4175,
@@ -1648,25 +1452,11 @@
 "base": 5718.011986257899
 },
 {
-"x": 4896,
-"y": 5648,
-"w": 74,
-"h": 86,
-"base": 5730.385188791774
-},
-{
 "x": 4202,
 "y": 5673,
 "w": 63,
 "h": 62,
 "base": 5732.1517265921975
-},
-{
-"x": 4817,
-"y": 5647,
-"w": 51,
-"h": 94,
-"base": 5737.948246183735
 },
 {
 "x": 4152,
@@ -1681,13 +1471,6 @@
 "w": 64,
 "h": 64,
 "base": 5772.384262124307
-},
-{
-"x": 4864,
-"y": 5713,
-"w": 86,
-"h": 76,
-"base": 5786.793146724354
 },
 {
 "x": 2714,
@@ -1760,39 +1543,11 @@
 "base": 5979.739311059239
 },
 {
-"x": 4965,
-"y": 5990,
-"w": 41,
-"h": 44,
-"base": 6031.334817184512
-},
-{
-"x": 5002,
-"y": 5982,
-"w": 51,
-"h": 65,
-"base": 6043.233031427733
-},
-{
 "x": 2809,
 "y": 6021,
 "w": 45,
 "h": 43,
 "base": 6061.118775902194
-},
-{
-"x": 4975,
-"y": 6027,
-"w": 38,
-"h": 44,
-"base": 6068.090391992801
-},
-{
-"x": 4930,
-"y": 6019,
-"w": 36,
-"h": 56,
-"base": 6072.78032997258
 },
 {
 "x": 4488,
@@ -1809,13 +1564,6 @@
 "base": 6079.099215635008
 },
 {
-"x": 5003,
-"y": 6014,
-"w": 77,
-"h": 90,
-"base": 6100.623452969399
-},
-{
 "x": 2838,
 "y": 6023,
 "w": 60,
@@ -1828,20 +1576,6 @@
 "w": 65,
 "h": 84,
 "base": 6115.520707520166
-},
-{
-"x": 4924,
-"y": 6051,
-"w": 82,
-"h": 85,
-"base": 6133.437590925432
-},
-{
-"x": 4913,
-"y": 6041,
-"w": 104,
-"h": 105,
-"base": 6142.891405954727
 },
 {
 "x": 4525,
@@ -2306,39 +2040,372 @@
 "base": 7011.885235490841
 },
 {
-"x": 762,
-"y": 2250,
-"w": 68,
-"h": 49,
-"base": 2294.0
+"x": 682,
+"y": 4076,
+"w": 56,
+"h": 50,
+"base": 4126.0,
+"kind": "yard_building",
+"way": 909988213
+},
+{
+"x": 555,
+"y": 4015,
+"w": 57,
+"h": 41,
+"base": 4056.0,
+"kind": "yard_building",
+"way": 909988189
+},
+{
+"x": 342,
+"y": 3911,
+"w": 62,
+"h": 54,
+"base": 3965.0,
+"kind": "yard_building",
+"way": 909988193
+},
+{
+"x": 742,
+"y": 4078,
+"w": 71,
+"h": 54,
+"base": 4132.0,
+"kind": "yard_building",
+"way": 909989532
+},
+{
+"x": 426,
+"y": 4039,
+"w": 62,
+"h": 52,
+"base": 4091.0,
+"kind": "yard_building",
+"way": 909988191
+},
+{
+"x": 828,
+"y": 4093,
+"w": 63,
+"h": 57,
+"base": 4150.0,
+"kind": "yard_building",
+"way": 909989531
+},
+{
+"x": 597,
+"y": 4000,
+"w": 28,
+"h": 36,
+"base": 4036.0,
+"kind": "yard_building",
+"way": 909988057
+},
+{
+"x": 437,
+"y": 4101,
+"w": 42,
+"h": 42,
+"base": 4143.0,
+"kind": "yard_building",
+"way": 909988358
 },
 {
 "x": 824,
-"y": 2231,
-"w": 56,
-"h": 41,
-"base": 2268.0
+"y": 4055,
+"w": 13,
+"h": 37,
+"base": 4092.0,
+"kind": "yard_building",
+"way": 1095382358
 },
 {
-"x": 920,
-"y": 2245,
-"w": 48,
-"h": 36,
-"base": 2276.0
+"x": 430,
+"y": 4107,
+"w": 14,
+"h": 29,
+"base": 4136.0,
+"kind": "yard_building",
+"way": 909988763
 },
 {
-"x": 921,
-"y": 2328,
-"w": 54,
-"h": 36,
-"base": 2358.0
+"x": 729,
+"y": 4016,
+"w": 22,
+"h": 46,
+"base": 4062.0,
+"kind": "yard_building",
+"way": 909988509
+},
+{
+"x": 553,
+"y": 3932,
+"w": 35,
+"h": 57,
+"base": 3989.0,
+"kind": "yard_building",
+"way": 909988457
+},
+{
+"x": 662,
+"y": 3969,
+"w": 33,
+"h": 49,
+"base": 4018.0,
+"kind": "yard_building",
+"way": 909989369
+},
+{
+"x": 613,
+"y": 3951,
+"w": 34,
+"h": 45,
+"base": 3996.0,
+"kind": "yard_building",
+"way": 909988055
+},
+{
+"x": 751,
+"y": 4004,
+"w": 26,
+"h": 35,
+"base": 4039.0,
+"kind": "yard_building",
+"way": 909989470
+},
+{
+"x": 360,
+"y": 3851,
+"w": 37,
+"h": 17,
+"base": 3868.0,
+"kind": "yard_building",
+"way": 909989345
+},
+{
+"x": 568,
+"y": 3939,
+"w": 49,
+"h": 20,
+"base": 3959.0,
+"kind": "yard_building",
+"way": 909988456
+},
+{
+"x": 824,
+"y": 4011,
+"w": 35,
+"h": 54,
+"base": 4065.0,
+"kind": "yard_building",
+"way": 909989454
+},
+{
+"x": 865,
+"y": 4014,
+"w": 29,
+"h": 65,
+"base": 4079.0,
+"kind": "yard_building",
+"way": 909989452
+},
+{
+"x": 732,
+"y": 3987,
+"w": 18,
+"h": 28,
+"base": 4015.0,
+"kind": "yard_building",
+"way": 1095382359
+},
+{
+"x": 723,
+"y": 3981,
+"w": 12,
+"h": 25,
+"base": 4006.0,
+"kind": "yard_building",
+"way": 909989419
+},
+{
+"x": 886,
+"y": 4022,
+"w": 50,
+"h": 23,
+"base": 4045.0,
+"kind": "yard_building",
+"way": 909988884
+},
+{
+"x": 685,
+"y": 3940,
+"w": 58,
+"h": 34,
+"base": 3974.0,
+"kind": "yard_building",
+"way": 909989420
+},
+{
+"x": 835,
+"y": 3986,
+"w": 60,
+"h": 37,
+"base": 4023.0,
+"kind": "yard_building",
+"way": 909989453
+},
+{
+"x": 5003,
+"y": 6019,
+"w": 72,
+"h": 66,
+"base": 6085.0,
+"kind": "yard_building",
+"way": 993157801
+},
+{
+"x": 4889,
+"y": 5645,
+"w": 82,
+"h": 73,
+"base": 5718.0,
+"kind": "yard_building",
+"way": 993157803
+},
+{
+"x": 5011,
+"y": 6000,
+"w": 27,
+"h": 30,
+"base": 6030.0,
+"kind": "yard_building",
+"way": 993157862
+},
+{
+"x": 4876,
+"y": 5642,
+"w": 22,
+"h": 16,
+"base": 5658.0,
+"kind": "yard_building",
+"way": 993157869
+},
+{
+"x": 4955,
+"y": 5996,
+"w": 50,
+"h": 34,
+"base": 6030.0,
+"kind": "yard_building",
+"way": 993157864
+},
+{
+"x": 4857,
+"y": 5720,
+"w": 90,
+"h": 56,
+"base": 5776.0,
+"kind": "yard_building",
+"way": 993157830
+},
+{
+"x": 4966,
+"y": 6044,
+"w": 35,
+"h": 27,
+"base": 6071.0,
+"kind": "yard_building",
+"way": 993157863
+},
+{
+"x": 4839,
+"y": 5639,
+"w": 40,
+"h": 37,
+"base": 5676.0,
+"kind": "yard_building",
+"way": 993157836
+},
+{
+"x": 4831,
+"y": 5656,
+"w": 20,
+"h": 15,
+"base": 5671.0,
+"kind": "yard_building",
+"way": 993157839
+},
+{
+"x": 4921,
+"y": 6056,
+"w": 93,
+"h": 64,
+"base": 6120.0,
+"kind": "yard_building",
+"way": 993157866
+},
+{
+"x": 4930,
+"y": 6028,
+"w": 34,
+"h": 40,
+"base": 6068.0,
+"kind": "yard_building",
+"way": 993157867
+},
+{
+"x": 4815,
+"y": 5636,
+"w": 22,
+"h": 26,
+"base": 5662.0,
+"kind": "yard_building",
+"way": 993157841
+},
+{
+"x": 4821,
+"y": 5659,
+"w": 35,
+"h": 54,
+"base": 5713.0,
+"kind": "yard_building",
+"way": 993157840
+},
+{
+"x": 681,
+"y": 2352,
+"w": 52,
+"h": 38,
+"base": 2386.0
 },
 {
 "x": 733,
-"y": 2310,
+"y": 2377,
+"w": 48,
+"h": 36,
+"base": 2408.0
+},
+{
+"x": 835,
+"y": 2415,
+"w": 44,
+"h": 33,
+"base": 2444.0
+},
+{
+"x": 789,
+"y": 2393,
+"w": 54,
+"h": 36,
+"base": 2423.0
+},
+{
+"x": 645,
+"y": 2340,
 "w": 36,
 "h": 34,
-"base": 2342.0
+"base": 2372.0
 },
 {
 "x": 2832,
@@ -2481,1054 +2548,3781 @@
 "base": 5722.0
 },
 {
-"x": 1848,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
+"x": 4173,
+"y": -34,
+"w": 60,
+"h": 62,
+"base": 22.0,
 "kind": "tree",
-"species": "deciduous"
+"species": "oak"
 },
 {
-"x": 1870,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 832,
-"w": 20,
-"h": 26,
-"base": 852.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 854,
-"w": 20,
-"h": 26,
-"base": 874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 876,
-"w": 20,
-"h": 26,
-"base": 896.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 898,
-"w": 20,
-"h": 26,
-"base": 918.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 920,
-"w": 20,
-"h": 26,
-"base": 940.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 942,
-"w": 20,
-"h": 26,
-"base": 962.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 964,
-"w": 20,
-"h": 26,
-"base": 984.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2002,
-"y": 986,
-"w": 20,
-"h": 26,
-"base": 1006.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 1008,
-"w": 20,
-"h": 26,
-"base": 1028.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1804,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 1030,
-"w": 20,
-"h": 26,
-"base": 1050.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1804,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 1052,
-"w": 20,
-"h": 26,
-"base": 1072.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1804,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 1074,
-"w": 20,
-"h": 26,
-"base": 1094.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1804,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1826,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1848,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1870,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1892,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1914,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1936,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1958,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1980,
-"y": 1096,
-"w": 20,
-"h": 26,
-"base": 1116.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 5072,
-"y": 1088,
+"x": 4278,
+"y": -5,
 "w": 28,
 "h": 35,
-"base": 1117.0,
+"base": 24.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 5116,
-"y": 1095,
+"x": 4144,
+"y": -5,
+"w": 28,
+"h": 35,
+"base": 24.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4233,
+"y": -3,
+"w": 28,
+"h": 35,
+"base": 26.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4120,
+"y": -1,
+"w": 26,
+"h": 32,
+"base": 26.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4041,
+"y": -2,
+"w": 28,
+"h": 35,
+"base": 27.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4508,
+"y": 0,
+"w": 26,
+"h": 32,
+"base": 27.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4477,
+"y": 1,
+"w": 26,
+"h": 32,
+"base": 28.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3981,
+"y": -1,
+"w": 30,
+"h": 37,
+"base": 31.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4308,
+"y": 3,
+"w": 28,
+"h": 35,
+"base": 32.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3815,
+"y": 3,
+"w": 30,
+"h": 37,
+"base": 35.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4379,
+"y": 12,
+"w": 28,
+"h": 35,
+"base": 41.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 724,
+"y": 17,
+"w": 28,
+"h": 35,
+"base": 46.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3825,
+"y": -9,
+"w": 60,
+"h": 62,
+"base": 47.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3949,
+"y": 17,
+"w": 30,
+"h": 37,
+"base": 49.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4145,
+"y": 23,
+"w": 26,
+"h": 32,
+"base": 50.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4100,
+"y": 27,
+"w": 26,
+"h": 32,
+"base": 54.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4255,
+"y": 31,
+"w": 28,
+"h": 35,
+"base": 60.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4419,
+"y": 35,
+"w": 28,
+"h": 35,
+"base": 64.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4496,
+"y": 37,
+"w": 26,
+"h": 32,
+"base": 64.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4447,
+"y": 38,
+"w": 26,
+"h": 32,
+"base": 65.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3964,
+"y": 41,
+"w": 26,
+"h": 32,
+"base": 68.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4148,
+"y": 12,
+"w": 60,
+"h": 62,
+"base": 68.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 662,
+"y": 52,
+"w": 20,
+"h": 26,
+"base": 72.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4308,
+"y": 44,
+"w": 28,
+"h": 35,
+"base": 73.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4279,
+"y": 49,
+"w": 26,
+"h": 32,
+"base": 76.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3900,
+"y": 43,
 "w": 32,
 "h": 39,
+"base": 77.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4105,
+"y": 21,
+"w": 60,
+"h": 62,
+"base": 77.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 694,
+"y": 53,
+"w": 28,
+"h": 35,
+"base": 82.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3855,
+"y": 49,
+"w": 32,
+"h": 39,
+"base": 83.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4330,
+"y": 59,
+"w": 28,
+"h": 35,
+"base": 88.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4094,
+"y": 65,
+"w": 26,
+"h": 32,
+"base": 92.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 724,
+"y": 67,
+"w": 24,
+"h": 30,
+"base": 92.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4253,
+"y": 69,
+"w": 26,
+"h": 32,
+"base": 96.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4296,
+"y": 73,
+"w": 26,
+"h": 32,
+"base": 100.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4371,
+"y": 74,
+"w": 28,
+"h": 35,
+"base": 103.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4488,
+"y": 76,
+"w": 26,
+"h": 32,
+"base": 103.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4427,
+"y": 76,
+"w": 28,
+"h": 35,
+"base": 105.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 669,
+"y": 83,
+"w": 22,
+"h": 28,
+"base": 106.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4058,
+"y": 89,
+"w": 24,
+"h": 30,
+"base": 114.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4328,
+"y": 89,
+"w": 28,
+"h": 35,
+"base": 118.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4263,
+"y": 92,
+"w": 26,
+"h": 32,
+"base": 119.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3883,
+"y": 91,
+"w": 30,
+"h": 37,
+"base": 123.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 662,
+"y": 103,
+"w": 22,
+"h": 28,
+"base": 126.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4016,
+"y": 99,
+"w": 28,
+"h": 35,
+"base": 128.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4460,
+"y": 101,
+"w": 26,
+"h": 32,
+"base": 128.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 416,
+"y": 109,
+"w": 20,
+"h": 26,
+"base": 129.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4404,
+"y": 105,
+"w": 26,
+"h": 32,
+"base": 132.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4104,
+"y": 105,
+"w": 26,
+"h": 32,
+"base": 132.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 724,
+"y": 112,
+"w": 22,
+"h": 28,
+"base": 135.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4336,
+"y": 109,
+"w": 28,
+"h": 35,
+"base": 138.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4298,
+"y": 111,
+"w": 28,
+"h": 35,
+"base": 140.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4055,
+"y": 117,
+"w": 24,
+"h": 30,
+"base": 142.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3780,
+"y": 121,
+"w": 24,
+"h": 30,
+"base": 146.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 542,
+"y": 90,
+"w": 60,
+"h": 62,
+"base": 146.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 677,
+"y": 90,
+"w": 60,
+"h": 62,
+"base": 146.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 633,
+"y": 91,
+"w": 60,
+"h": 62,
+"base": 147.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3977,
+"y": 122,
+"w": 28,
+"h": 35,
+"base": 151.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4448,
+"y": 125,
+"w": 26,
+"h": 32,
+"base": 152.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4092,
+"y": 125,
+"w": 26,
+"h": 32,
+"base": 152.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4353,
+"y": 126,
+"w": 28,
+"h": 35,
+"base": 155.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3803,
+"y": 134,
+"w": 24,
+"h": 30,
+"base": 159.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4326,
+"y": 134,
+"w": 28,
+"h": 35,
+"base": 163.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4466,
+"y": 107,
+"w": 60,
+"h": 62,
+"base": 163.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3748,
+"y": 138,
+"w": 24,
+"h": 30,
+"base": 163.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 433,
+"y": 143,
+"w": 20,
+"h": 26,
+"base": 163.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4011,
+"y": 136,
+"w": 28,
+"h": 35,
+"base": 165.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4143,
+"y": 140,
+"w": 26,
+"h": 32,
+"base": 167.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4119,
+"y": 141,
+"w": 28,
+"h": 35,
+"base": 170.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4212,
+"y": 152,
+"w": 24,
+"h": 30,
+"base": 177.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 545,
+"y": 154,
+"w": 22,
+"h": 28,
+"base": 177.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4510,
+"y": 152,
+"w": 26,
+"h": 32,
+"base": 179.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4256,
+"y": 155,
+"w": 26,
+"h": 32,
+"base": 182.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3867,
+"y": 158,
+"w": 24,
+"h": 30,
+"base": 183.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4298,
+"y": 161,
+"w": 28,
+"h": 35,
+"base": 190.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3734,
+"y": 168,
+"w": 22,
+"h": 28,
+"base": 191.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4371,
+"y": 163,
+"w": 28,
+"h": 35,
+"base": 192.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3985,
+"y": 163,
+"w": 28,
+"h": 35,
+"base": 192.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4478,
+"y": 168,
+"w": 26,
+"h": 32,
+"base": 195.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3821,
+"y": 140,
+"w": 60,
+"h": 62,
+"base": 196.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3889,
+"y": 172,
+"w": 24,
+"h": 30,
+"base": 197.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4108,
+"y": 169,
+"w": 28,
+"h": 35,
+"base": 198.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 803,
+"y": 173,
+"w": 26,
+"h": 32,
+"base": 200.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 687,
+"y": 173,
+"w": 26,
+"h": 32,
+"base": 200.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 748,
+"y": 175,
+"w": 24,
+"h": 30,
+"base": 200.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1237,
+"y": 144,
+"w": 60,
+"h": 62,
+"base": 200.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 862,
+"y": 145,
+"w": 60,
+"h": 62,
+"base": 201.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1020,
+"y": 145,
+"w": 60,
+"h": 62,
+"base": 201.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 838,
+"y": 172,
+"w": 28,
+"h": 35,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 985,
+"y": 174,
+"w": 26,
+"h": 32,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1115,
+"y": 174,
+"w": 26,
+"h": 32,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1205,
+"y": 145,
+"w": 60,
+"h": 62,
+"base": 201.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1435,
+"y": 167,
+"w": 32,
+"h": 39,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1400,
+"y": 167,
+"w": 32,
+"h": 39,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1160,
+"y": 167,
+"w": 32,
+"h": 39,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1369,
+"y": 172,
+"w": 28,
+"h": 35,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1344,
+"y": 172,
+"w": 28,
+"h": 35,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1299,
+"y": 172,
+"w": 28,
+"h": 35,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 939,
+"y": 174,
+"w": 26,
+"h": 32,
+"base": 201.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1553,
+"y": 146,
+"w": 60,
+"h": 62,
+"base": 202.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1510,
+"y": 170,
+"w": 30,
+"h": 37,
+"base": 202.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1883,
+"y": 173,
+"w": 28,
+"h": 35,
+"base": 202.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1674,
+"y": 173,
+"w": 28,
+"h": 35,
+"base": 202.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3675,
+"y": 177,
+"w": 24,
+"h": 30,
+"base": 202.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1829,
+"y": 177,
+"w": 26,
+"h": 32,
+"base": 204.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1728,
+"y": 177,
+"w": 26,
+"h": 32,
+"base": 204.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1809,
+"y": 177,
+"w": 26,
+"h": 32,
+"base": 204.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3929,
+"y": 179,
+"w": 24,
+"h": 30,
+"base": 204.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4508,
+"y": 178,
+"w": 26,
+"h": 32,
+"base": 205.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2008,
+"y": 173,
+"w": 30,
+"h": 37,
+"base": 205.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1938,
+"y": 149,
+"w": 60,
+"h": 62,
+"base": 205.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4280,
+"y": 176,
+"w": 28,
+"h": 35,
+"base": 205.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3770,
+"y": 150,
+"w": 60,
+"h": 62,
+"base": 206.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4341,
+"y": 180,
+"w": 28,
+"h": 35,
+"base": 209.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3700,
+"y": 190,
+"w": 24,
+"h": 30,
+"base": 215.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3839,
+"y": 193,
+"w": 22,
+"h": 28,
+"base": 216.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 577,
+"y": 199,
+"w": 20,
+"h": 26,
+"base": 219.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4176,
+"y": 164,
+"w": 60,
+"h": 62,
+"base": 220.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3643,
+"y": 197,
+"w": 22,
+"h": 28,
+"base": 220.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4463,
+"y": 195,
+"w": 26,
+"h": 32,
+"base": 222.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3881,
+"y": 200,
+"w": 24,
+"h": 30,
+"base": 225.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4395,
+"y": 202,
+"w": 26,
+"h": 32,
+"base": 229.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4328,
+"y": 203,
+"w": 28,
+"h": 35,
+"base": 232.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4040,
+"y": 207,
+"w": 24,
+"h": 30,
+"base": 232.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 636,
+"y": 204,
+"w": 28,
+"h": 35,
+"base": 233.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3924,
+"y": 177,
+"w": 60,
+"h": 62,
+"base": 233.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3622,
+"y": 213,
+"w": 20,
+"h": 26,
+"base": 233.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4123,
+"y": 209,
+"w": 24,
+"h": 30,
+"base": 234.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3850,
+"y": 211,
+"w": 22,
+"h": 28,
+"base": 234.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3790,
+"y": 214,
+"w": 20,
+"h": 26,
+"base": 234.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4201,
+"y": 212,
+"w": 24,
+"h": 30,
+"base": 237.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4070,
+"y": 214,
+"w": 24,
+"h": 30,
+"base": 239.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3998,
+"y": 217,
+"w": 24,
+"h": 30,
+"base": 242.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4510,
+"y": 216,
+"w": 26,
+"h": 32,
+"base": 243.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4278,
+"y": 218,
+"w": 28,
+"h": 35,
+"base": 247.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4452,
+"y": 218,
+"w": 28,
+"h": 35,
+"base": 247.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4161,
+"y": 226,
+"w": 24,
+"h": 30,
+"base": 251.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4390,
+"y": 225,
+"w": 26,
+"h": 32,
+"base": 252.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4417,
+"y": 228,
+"w": 26,
+"h": 32,
+"base": 255.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4161,
+"y": 201,
+"w": 60,
+"h": 62,
+"base": 257.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4242,
+"y": 231,
+"w": 28,
+"h": 35,
+"base": 260.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 674,
+"y": 233,
+"w": 28,
+"h": 35,
+"base": 262.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 989,
+"y": 235,
+"w": 28,
+"h": 35,
+"base": 264.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 637,
+"y": 233,
+"w": 30,
+"h": 37,
+"base": 265.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 753,
+"y": 209,
+"w": 60,
+"h": 62,
+"base": 265.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1228,
+"y": 236,
+"w": 28,
+"h": 35,
+"base": 265.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1275,
+"y": 238,
+"w": 26,
+"h": 32,
+"base": 265.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1336,
+"y": 240,
+"w": 24,
+"h": 30,
+"base": 265.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1514,
+"y": 236,
+"w": 30,
+"h": 37,
+"base": 268.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1425,
+"y": 239,
+"w": 28,
+"h": 35,
+"base": 268.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1174,
+"y": 241,
+"w": 26,
+"h": 32,
+"base": 268.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 867,
+"y": 240,
+"w": 28,
+"h": 35,
+"base": 269.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1107,
+"y": 235,
+"w": 32,
+"h": 39,
+"base": 269.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1908,
+"y": 237,
+"w": 30,
+"h": 37,
+"base": 269.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 796,
+"y": 213,
+"w": 60,
+"h": 62,
+"base": 269.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1853,
+"y": 240,
+"w": 28,
+"h": 35,
+"base": 269.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 951,
+"y": 240,
+"w": 28,
+"h": 35,
+"base": 269.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1527,
+"y": 214,
+"w": 60,
+"h": 62,
+"base": 270.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1948,
+"y": 214,
+"w": 60,
+"h": 62,
+"base": 270.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1488,
+"y": 241,
+"w": 28,
+"h": 35,
+"base": 270.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1572,
+"y": 239,
+"w": 30,
+"h": 37,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1598,
+"y": 239,
+"w": 30,
+"h": 37,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1702,
+"y": 242,
+"w": 28,
+"h": 35,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1672,
+"y": 242,
+"w": 28,
+"h": 35,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1044,
+"y": 242,
+"w": 28,
+"h": 35,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1725,
+"y": 242,
+"w": 28,
+"h": 35,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 922,
+"y": 244,
+"w": 26,
+"h": 32,
+"base": 271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1781,
+"y": 246,
+"w": 26,
+"h": 32,
+"base": 273.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2016,
+"y": 242,
+"w": 30,
+"h": 37,
+"base": 274.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 528,
+"y": 240,
+"w": 32,
+"h": 39,
+"base": 274.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 557,
+"y": 246,
+"w": 30,
+"h": 37,
+"base": 278.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 569,
+"y": 223,
+"w": 60,
+"h": 62,
+"base": 279.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 632,
+"y": 260,
+"w": 30,
+"h": 37,
+"base": 292.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 530,
+"y": 267,
+"w": 32,
+"h": 39,
+"base": 301.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 561,
+"y": 277,
+"w": 32,
+"h": 39,
+"base": 311.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 595,
+"y": 283,
+"w": 30,
+"h": 37,
+"base": 315.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 607,
+"y": 309,
+"w": 30,
+"h": 37,
+"base": 341.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 561,
+"y": 353,
+"w": 26,
+"h": 32,
+"base": 380.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 630,
+"y": 353,
+"w": 28,
+"h": 35,
+"base": 382.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 503,
+"y": 378,
+"w": 22,
+"h": 28,
+"base": 401.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 596,
+"y": 378,
+"w": 26,
+"h": 32,
+"base": 405.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 669,
+"y": 401,
+"w": 28,
+"h": 35,
+"base": 430.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 698,
+"y": 401,
+"w": 28,
+"h": 35,
+"base": 430.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 758,
+"y": 404,
+"w": 26,
+"h": 32,
+"base": 431.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 780,
+"y": 404,
+"w": 26,
+"h": 32,
+"base": 431.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 824,
+"y": 404,
+"w": 26,
+"h": 32,
+"base": 431.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 972,
+"y": 399,
+"w": 32,
+"h": 39,
+"base": 433.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1010,
+"y": 399,
+"w": 32,
+"h": 39,
+"base": 433.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1045,
+"y": 377,
+"w": 60,
+"h": 62,
+"base": 433.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 921,
+"y": 404,
+"w": 28,
+"h": 35,
+"base": 433.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 881,
+"y": 406,
+"w": 26,
+"h": 32,
+"base": 433.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 846,
+"y": 406,
+"w": 26,
+"h": 32,
+"base": 433.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1113,
+"y": 378,
+"w": 60,
+"h": 62,
+"base": 434.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1230,
+"y": 402,
+"w": 30,
+"h": 37,
+"base": 434.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1420,
+"y": 405,
+"w": 28,
+"h": 35,
+"base": 434.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1529,
+"y": 407,
+"w": 26,
+"h": 32,
+"base": 434.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1280,
+"y": 409,
+"w": 24,
+"h": 30,
+"base": 434.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1554,
+"y": 401,
+"w": 32,
+"h": 39,
+"base": 435.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1390,
+"y": 406,
+"w": 28,
+"h": 35,
+"base": 435.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1472,
+"y": 379,
+"w": 60,
+"h": 62,
+"base": 435.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1672,
+"y": 408,
+"w": 28,
+"h": 35,
+"base": 437.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1626,
+"y": 408,
+"w": 28,
+"h": 35,
+"base": 437.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1323,
+"y": 412,
+"w": 24,
+"h": 30,
+"base": 437.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2029,
+"y": 406,
+"w": 30,
+"h": 37,
+"base": 438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1863,
+"y": 409,
+"w": 28,
+"h": 35,
+"base": 438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1898,
+"y": 409,
+"w": 28,
+"h": 35,
+"base": 438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1823,
+"y": 409,
+"w": 28,
+"h": 35,
+"base": 438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1769,
+"y": 411,
+"w": 26,
+"h": 32,
+"base": 438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1945,
+"y": 411,
+"w": 26,
+"h": 32,
+"base": 438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2000,
+"y": 412,
+"w": 26,
+"h": 32,
+"base": 439.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 499,
+"y": 414,
+"w": 24,
+"h": 30,
+"base": 439.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 528,
+"y": 453,
+"w": 22,
+"h": 28,
+"base": 476.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 619,
+"y": 443,
+"w": 60,
+"h": 62,
+"base": 499.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 519,
+"y": 483,
+"w": 20,
+"h": 26,
+"base": 503.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2301,
+"y": 483,
+"w": 28,
+"h": 35,
+"base": 512.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 544,
+"y": 460,
+"w": 60,
+"h": 62,
+"base": 516.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2190,
+"y": 461,
+"w": 60,
+"h": 62,
+"base": 517.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1985,
+"y": 490,
+"w": 26,
+"h": 32,
+"base": 517.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 604,
+"y": 501,
+"w": 20,
+"h": 26,
+"base": 521.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2350,
+"y": 497,
+"w": 28,
+"h": 35,
+"base": 526.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2158,
+"y": 500,
+"w": 28,
+"h": 35,
+"base": 529.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 639,
+"y": 511,
+"w": 20,
+"h": 26,
+"base": 531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2112,
+"y": 507,
+"w": 28,
+"h": 35,
+"base": 536.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2019,
+"y": 515,
+"w": 28,
+"h": 35,
+"base": 544.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 566,
+"y": 524,
+"w": 20,
+"h": 26,
+"base": 544.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2072,
+"y": 516,
+"w": 28,
+"h": 35,
+"base": 545.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 604,
+"y": 538,
+"w": 20,
+"h": 26,
+"base": 558.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 619,
+"y": 505,
+"w": 60,
+"h": 62,
+"base": 561.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 619,
+"y": 541,
+"w": 20,
+"h": 26,
+"base": 561.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 503,
+"y": 549,
+"w": 22,
+"h": 28,
+"base": 572.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2163,
+"y": 557,
+"w": 22,
+"h": 28,
+"base": 580.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 483,
+"y": 562,
+"w": 20,
+"h": 26,
+"base": 582.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 546,
+"y": 565,
+"w": 22,
+"h": 28,
+"base": 588.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 638,
+"y": 575,
+"w": 22,
+"h": 28,
+"base": 598.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2129,
+"y": 583,
+"w": 20,
+"h": 26,
+"base": 603.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2109,
+"y": 585,
+"w": 20,
+"h": 26,
+"base": 605.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 488,
+"y": 589,
+"w": 20,
+"h": 26,
+"base": 609.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2157,
+"y": 593,
+"w": 20,
+"h": 26,
+"base": 613.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 568,
+"y": 599,
+"w": 22,
+"h": 28,
+"base": 622.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2355,
+"y": 601,
+"w": 28,
+"h": 35,
+"base": 630.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 593,
+"y": 609,
+"w": 22,
+"h": 28,
+"base": 632.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 637,
+"y": 610,
+"w": 24,
+"h": 30,
+"base": 635.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2197,
+"y": 619,
+"w": 20,
+"h": 26,
+"base": 639.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2218,
+"y": 619,
+"w": 20,
+"h": 26,
+"base": 639.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 550,
+"y": 618,
+"w": 22,
+"h": 28,
+"base": 641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2252,
+"y": 622,
+"w": 22,
+"h": 28,
+"base": 645.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 623,
+"y": 624,
+"w": 24,
+"h": 30,
+"base": 649.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 500,
+"y": 629,
+"w": 22,
+"h": 28,
+"base": 652.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2225,
+"y": 644,
+"w": 20,
+"h": 26,
+"base": 664.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1791,
+"y": 644,
+"w": 26,
+"h": 32,
+"base": 671.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1764,
+"y": 647,
+"w": 24,
+"h": 30,
+"base": 672.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 596,
+"y": 649,
+"w": 22,
+"h": 28,
+"base": 672.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1702,
+"y": 647,
+"w": 28,
+"h": 35,
+"base": 676.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1957,
+"y": 649,
+"w": 26,
+"h": 32,
+"base": 676.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1931,
+"y": 651,
+"w": 24,
+"h": 30,
+"base": 676.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 616,
+"y": 662,
+"w": 22,
+"h": 28,
+"base": 685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1365,
+"y": 663,
+"w": 26,
+"h": 32,
+"base": 690.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2361,
+"y": 665,
+"w": 24,
+"h": 30,
+"base": 690.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1442,
+"y": 666,
+"w": 24,
+"h": 30,
+"base": 691.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1772,
+"y": 639,
+"w": 60,
+"h": 62,
+"base": 695.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 544,
+"y": 639,
+"w": 60,
+"h": 62,
+"base": 695.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 617,
+"y": 640,
+"w": 60,
+"h": 62,
+"base": 696.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 520,
+"y": 673,
+"w": 24,
+"h": 30,
+"base": 698.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 674,
+"y": 686,
+"w": 22,
+"h": 28,
+"base": 709.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 713,
+"y": 687,
+"w": 24,
+"h": 30,
+"base": 712.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 873,
+"y": 686,
+"w": 26,
+"h": 32,
+"base": 713.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 906,
+"y": 686,
+"w": 26,
+"h": 32,
+"base": 713.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 993,
+"y": 689,
+"w": 24,
+"h": 30,
+"base": 714.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 953,
+"y": 689,
+"w": 24,
+"h": 30,
+"base": 714.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 731,
+"y": 689,
+"w": 24,
+"h": 30,
+"base": 714.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1030,
+"y": 689,
+"w": 26,
+"h": 32,
+"base": 716.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1337,
+"y": 689,
+"w": 26,
+"h": 32,
+"base": 716.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 802,
+"y": 691,
+"w": 24,
+"h": 30,
+"base": 716.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2343,
+"y": 696,
+"w": 20,
+"h": 26,
+"base": 716.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1068,
+"y": 661,
+"w": 60,
+"h": 62,
+"base": 717.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1197,
+"y": 691,
+"w": 26,
+"h": 32,
+"base": 718.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1133,
+"y": 691,
+"w": 26,
+"h": 32,
+"base": 718.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 769,
+"y": 693,
+"w": 24,
+"h": 30,
+"base": 718.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1146,
+"y": 662,
+"w": 60,
+"h": 62,
+"base": 718.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1304,
+"y": 694,
+"w": 26,
+"h": 32,
+"base": 721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1251,
+"y": 695,
+"w": 26,
+"h": 32,
+"base": 722.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1274,
+"y": 695,
+"w": 26,
+"h": 32,
+"base": 722.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1852,
+"y": 666,
+"w": 60,
+"h": 62,
+"base": 722.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1842,
+"y": 698,
+"w": 24,
+"h": 30,
+"base": 723.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1543,
+"y": 699,
+"w": 24,
+"h": 30,
+"base": 724.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1477,
+"y": 668,
+"w": 60,
+"h": 62,
+"base": 724.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1615,
+"y": 700,
+"w": 26,
+"h": 32,
+"base": 727.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1355,
+"y": 714,
+"w": 22,
+"h": 28,
+"base": 737.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1378,
+"y": 716,
+"w": 24,
+"h": 30,
+"base": 741.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2346,
+"y": 721,
+"w": 24,
+"h": 30,
+"base": 746.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2362,
+"y": 731,
+"w": 24,
+"h": 30,
+"base": 756.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1460,
+"y": 735,
+"w": 22,
+"h": 28,
+"base": 758.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1756,
+"y": 744,
+"w": 20,
+"h": 26,
+"base": 764.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1416,
+"y": 747,
+"w": 24,
+"h": 30,
+"base": 772.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1791,
+"y": 758,
+"w": 20,
+"h": 26,
+"base": 778.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1721,
+"y": 771,
+"w": 20,
+"h": 26,
+"base": 791.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2367,
+"y": 803,
+"w": 22,
+"h": 28,
+"base": 826.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1774,
+"y": 785,
+"w": 60,
+"h": 62,
+"base": 841.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1848,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 832,
+"w": 20,
+"h": 26,
+"base": 852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2371,
+"y": 834,
+"w": 20,
+"h": 26,
+"base": 854.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 854,
+"w": 20,
+"h": 26,
+"base": 874.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 876,
+"w": 20,
+"h": 26,
+"base": 896.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 898,
+"w": 20,
+"h": 26,
+"base": 918.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2363,
+"y": 912,
+"w": 20,
+"h": 26,
+"base": 932.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 920,
+"w": 20,
+"h": 26,
+"base": 940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2385,
+"y": 923,
+"w": 22,
+"h": 28,
+"base": 946.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 942,
+"w": 20,
+"h": 26,
+"base": 962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2388,
+"y": 942,
+"w": 22,
+"h": 28,
+"base": 965.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 964,
+"w": 20,
+"h": 26,
+"base": 984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2002,
+"y": 986,
+"w": 20,
+"h": 26,
+"base": 1006.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 1008,
+"w": 20,
+"h": 26,
+"base": 1028.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2473,
+"y": 1014,
+"w": 28,
+"h": 35,
+"base": 1043.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2498,
+"y": 1015,
+"w": 28,
+"h": 35,
+"base": 1044.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1804,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 1030,
+"w": 20,
+"h": 26,
+"base": 1050.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1804,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 1052,
+"w": 20,
+"h": 26,
+"base": 1072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1804,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 1074,
+"w": 20,
+"h": 26,
+"base": 1094.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1804,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1826,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1848,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1870,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1892,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1914,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1936,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1958,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1980,
+"y": 1096,
+"w": 20,
+"h": 26,
+"base": 1116.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2504,
+"y": 1102,
+"w": 26,
+"h": 32,
 "base": 1129.0,
 "kind": "tree",
 "species": "deciduous"
@@ -3975,13 +6769,13 @@
 "species": "deciduous"
 },
 {
-"x": 4855,
-"y": 1191,
-"w": 65,
-"h": 49,
-"base": 1235.0,
+"x": 2515,
+"y": 1214,
+"w": 20,
+"h": 26,
+"base": 1234.0,
 "kind": "tree",
-"species": "oak"
+"species": "deciduous"
 },
 {
 "x": 2080,
@@ -3993,11 +6787,11 @@
 "species": "deciduous"
 },
 {
-"x": 4946,
-"y": 1219,
-"w": 24,
-"h": 30,
-"base": 1244.0,
+"x": 2337,
+"y": 1222,
+"w": 22,
+"h": 28,
+"base": 1245.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -4079,15 +6873,6 @@
 "w": 20,
 "h": 26,
 "base": 1248.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4434,
-"y": 1221,
-"w": 32,
-"h": 39,
-"base": 1255.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -4182,51 +6967,6 @@
 "species": "deciduous"
 },
 {
-"x": 4772,
-"y": 1232,
-"w": 58,
-"h": 44,
-"base": 1271.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4742,
-"y": 1247,
-"w": 47,
-"h": 37,
-"base": 1279.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4365,
-"y": 1253,
-"w": 26,
-"h": 32,
-"base": 1280.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4724,
-"y": 1256,
-"w": 26,
-"h": 32,
-"base": 1283.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4679,
-"y": 1245,
-"w": 58,
-"h": 44,
-"base": 1284.0,
-"kind": "tree",
-"species": "oak"
-},
-{
 "x": 2080,
 "y": 1266,
 "w": 20,
@@ -4234,15 +6974,6 @@
 "base": 1286.0,
 "kind": "tree",
 "species": "deciduous"
-},
-{
-"x": 4469,
-"y": 1258,
-"w": 51,
-"h": 39,
-"base": 1292.0,
-"kind": "tree",
-"species": "oak"
 },
 {
 "x": 1804,
@@ -4322,33 +7053,6 @@
 "w": 20,
 "h": 26,
 "base": 1292.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4509,
-"y": 1255,
-"w": 62,
-"h": 47,
-"base": 1297.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4558,
-"y": 1272,
-"w": 28,
-"h": 35,
-"base": 1301.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4602,
-"y": 1272,
-"w": 32,
-"h": 39,
-"base": 1306.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -5685,6 +8389,15 @@
 "species": "deciduous"
 },
 {
+"x": 1622,
+"y": 1579,
+"w": 22,
+"h": 28,
+"base": 1602.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
 "x": 2058,
 "y": 1596,
 "w": 20,
@@ -6990,6 +9703,51 @@
 "species": "deciduous"
 },
 {
+"x": 2996,
+"y": 1889,
+"w": 22,
+"h": 28,
+"base": 1912.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3053,
+"y": 1893,
+"w": 22,
+"h": 28,
+"base": 1916.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3072,
+"y": 1861,
+"w": 60,
+"h": 62,
+"base": 1917.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3132,
+"y": 1900,
+"w": 20,
+"h": 26,
+"base": 1920.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3173,
+"y": 1897,
+"w": 24,
+"h": 30,
+"base": 1922.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
 "x": 2058,
 "y": 1904,
 "w": 20,
@@ -7013,6 +9771,132 @@
 "w": 20,
 "h": 26,
 "base": 1924.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3224,
+"y": 1900,
+"w": 24,
+"h": 30,
+"base": 1925.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3265,
+"y": 1900,
+"w": 26,
+"h": 32,
+"base": 1927.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3290,
+"y": 1902,
+"w": 26,
+"h": 32,
+"base": 1929.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3360,
+"y": 1904,
+"w": 24,
+"h": 30,
+"base": 1929.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3427,
+"y": 1906,
+"w": 24,
+"h": 30,
+"base": 1931.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3461,
+"y": 1908,
+"w": 22,
+"h": 28,
+"base": 1931.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3508,
+"y": 1910,
+"w": 24,
+"h": 30,
+"base": 1935.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3539,
+"y": 1910,
+"w": 24,
+"h": 30,
+"base": 1935.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3576,
+"y": 1911,
+"w": 24,
+"h": 30,
+"base": 1936.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3653,
+"y": 1913,
+"w": 22,
+"h": 28,
+"base": 1936.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3697,
+"y": 1914,
+"w": 24,
+"h": 30,
+"base": 1939.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3759,
+"y": 1917,
+"w": 22,
+"h": 28,
+"base": 1940.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3772,
+"y": 1888,
+"w": 60,
+"h": 62,
+"base": 1944.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3832,
+"y": 1922,
+"w": 22,
+"h": 28,
+"base": 1945.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -7044,6 +9928,24 @@
 "species": "deciduous"
 },
 {
+"x": 3882,
+"y": 1924,
+"w": 22,
+"h": 28,
+"base": 1947.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3985,
+"y": 1923,
+"w": 28,
+"h": 35,
+"base": 1952.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
 "x": 2058,
 "y": 1948,
 "w": 20,
@@ -7071,6 +9973,24 @@
 "species": "deciduous"
 },
 {
+"x": 3248,
+"y": 1914,
+"w": 60,
+"h": 62,
+"base": 1970.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3968,
+"y": 1950,
+"w": 28,
+"h": 35,
+"base": 1979.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
 "x": 2058,
 "y": 1970,
 "w": 20,
@@ -7094,6 +10014,33 @@
 "w": 20,
 "h": 26,
 "base": 1990.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3270,
+"y": 1974,
+"w": 22,
+"h": 28,
+"base": 1997.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3253,
+"y": 1984,
+"w": 22,
+"h": 28,
+"base": 2007.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3305,
+"y": 1986,
+"w": 22,
+"h": 28,
+"base": 2009.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -7107,1460 +10054,3476 @@
 "species": "deciduous"
 },
 {
-"x": 5096,
-"y": 2725,
-"w": 58,
-"h": 44,
-"base": 2764.0,
+"x": 3973,
+"y": 1987,
+"w": 28,
+"h": 35,
+"base": 2016.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3271,
+"y": 2010,
+"w": 24,
+"h": 30,
+"base": 2035.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3963,
+"y": 2035,
+"w": 28,
+"h": 35,
+"base": 2064.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3266,
+"y": 2057,
+"w": 24,
+"h": 30,
+"base": 2082.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3975,
+"y": 2061,
+"w": 28,
+"h": 35,
+"base": 2090.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3961,
+"y": 2082,
+"w": 26,
+"h": 32,
+"base": 2109.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3268,
+"y": 2082,
+"w": 26,
+"h": 32,
+"base": 2109.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3980,
+"y": 2103,
+"w": 28,
+"h": 35,
+"base": 2132.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3249,
+"y": 2097,
+"w": 60,
+"h": 62,
+"base": 2153.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 5099,
-"y": 2906,
+"x": 3956,
+"y": 2116,
+"w": 60,
+"h": 62,
+"base": 2172.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3267,
+"y": 2153,
+"w": 24,
+"h": 30,
+"base": 2178.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3966,
+"y": 2222,
 "w": 30,
 "h": 37,
-"base": 2938.0,
+"base": 2254.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4027,
+"y": 2273,
+"w": 30,
+"h": 37,
+"base": 2305.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3942,
+"y": 2250,
+"w": 60,
+"h": 62,
+"base": 2306.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3993,
+"y": 2286,
+"w": 28,
+"h": 35,
+"base": 2315.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 856,
+"y": 2277,
+"w": 60,
+"h": 62,
+"base": 2333.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3963,
+"y": 2304,
+"w": 28,
+"h": 35,
+"base": 2333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4261,
+"y": 2313,
+"w": 20,
+"h": 26,
+"base": 2333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4032,
+"y": 2302,
+"w": 30,
+"h": 37,
+"base": 2334.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4277,
+"y": 2317,
+"w": 20,
+"h": 26,
+"base": 2337.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4308,
+"y": 2323,
+"w": 22,
+"h": 28,
+"base": 2346.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4358,
+"y": 2334,
+"w": 24,
+"h": 30,
+"base": 2359.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4032,
+"y": 2328,
+"w": 30,
+"h": 37,
+"base": 2360.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3947,
+"y": 2331,
+"w": 28,
+"h": 35,
+"base": 2360.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4077,
+"y": 2327,
+"w": 32,
+"h": 39,
+"base": 2361.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4405,
+"y": 2342,
+"w": 26,
+"h": 32,
+"base": 2369.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 866,
+"y": 2318,
+"w": 60,
+"h": 62,
+"base": 2374.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3956,
+"y": 2322,
+"w": 60,
+"h": 62,
+"base": 2378.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4479,
+"y": 2359,
+"w": 28,
+"h": 35,
+"base": 2388.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4042,
+"y": 2357,
+"w": 30,
+"h": 37,
+"base": 2389.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4513,
+"y": 2369,
+"w": 26,
+"h": 32,
+"base": 2396.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4544,
+"y": 2376,
+"w": 26,
+"h": 32,
+"base": 2403.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4012,
+"y": 2359,
+"w": 60,
+"h": 62,
+"base": 2415.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4077,
+"y": 2395,
+"w": 30,
+"h": 37,
+"base": 2427.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4657,
+"y": 2410,
+"w": 20,
+"h": 26,
+"base": 2430.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4677,
+"y": 2417,
+"w": 20,
+"h": 26,
+"base": 2437.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4108,
+"y": 2406,
+"w": 30,
+"h": 37,
+"base": 2438.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3973,
+"y": 2425,
+"w": 32,
+"h": 39,
+"base": 2459.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4016,
+"y": 2427,
+"w": 32,
+"h": 39,
+"base": 2461.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4709,
+"y": 2438,
+"w": 22,
+"h": 28,
+"base": 2461.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3928,
+"y": 2439,
+"w": 32,
+"h": 39,
+"base": 2473.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4068,
+"y": 2468,
+"w": 28,
+"h": 35,
+"base": 2497.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4751,
+"y": 2472,
+"w": 24,
+"h": 30,
+"base": 2497.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4774,
+"y": 2464,
+"w": 60,
+"h": 62,
+"base": 2520.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4084,
+"y": 2497,
+"w": 28,
+"h": 35,
+"base": 2526.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4817,
+"y": 2509,
+"w": 24,
+"h": 30,
+"base": 2534.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4852,
+"y": 2528,
+"w": 28,
+"h": 35,
+"base": 2557.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4877,
+"y": 2551,
+"w": 28,
+"h": 35,
+"base": 2580.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 5113,
-"y": 2966,
-"w": 30,
-"h": 37,
-"base": 2998.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 5069,
-"y": 3361,
-"w": 47,
-"h": 37,
-"base": 3393.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 5107,
-"y": 3365,
-"w": 51,
-"h": 39,
-"base": 3399.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 5033,
-"y": 3457,
-"w": 26,
-"h": 32,
-"base": 3484.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 5052,
-"y": 3473,
-"w": 51,
-"h": 39,
-"base": 3507.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 2606,
-"y": 3531,
-"w": 22,
-"h": 28,
-"base": 3554.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 5006,
-"y": 3553,
-"w": 65,
-"h": 49,
-"base": 3597.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 2553,
-"y": 3571,
-"w": 44,
-"h": 35,
-"base": 3601.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 2655,
-"y": 3600,
+"y": 2633,
 "w": 20,
 "h": 26,
-"base": 3620.0,
+"base": 2653.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4907,
-"y": 3658,
-"w": 51,
-"h": 39,
-"base": 3692.0,
+"x": 4959,
+"y": 2620,
+"w": 60,
+"h": 62,
+"base": 2676.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 4900,
-"y": 3676,
-"w": 26,
-"h": 32,
-"base": 3703.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2568,
-"y": 3687,
+"x": 5003,
+"y": 2671,
 "w": 20,
 "h": 26,
-"base": 3707.0,
+"base": 2691.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4808,
-"y": 3674,
-"w": 51,
-"h": 39,
-"base": 3708.0,
+"x": 1535,
+"y": 2643,
+"w": 60,
+"h": 62,
+"base": 2699.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 4790,
-"y": 3699,
+"x": 4875,
+"y": 2802,
 "w": 28,
 "h": 35,
-"base": 3728.0,
+"base": 2831.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4791,
-"y": 3746,
-"w": 26,
-"h": 32,
-"base": 3773.0,
+"x": 4740,
+"y": 2819,
+"w": 20,
+"h": 26,
+"base": 2839.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4678,
-"y": 3772,
-"w": 26,
-"h": 32,
-"base": 3799.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4665,
-"y": 3813,
-"w": 51,
-"h": 39,
-"base": 3847.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4624,
-"y": 3840,
-"w": 58,
-"h": 44,
-"base": 3879.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4548,
-"y": 3852,
-"w": 32,
-"h": 39,
-"base": 3886.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4419,
-"y": 3887,
-"w": 30,
-"h": 37,
-"base": 3919.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 297,
-"y": 3897,
+"x": 127,
+"y": 2831,
 "w": 28,
 "h": 35,
-"base": 3926.0,
+"base": 2860.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4548,
-"y": 3898,
-"w": 28,
-"h": 35,
-"base": 3927.0,
+"x": 4738,
+"y": 2894,
+"w": 20,
+"h": 26,
+"base": 2914.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 759,
-"y": 3915,
-"w": 58,
-"h": 44,
-"base": 3954.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4274,
-"y": 3941,
-"w": 24,
-"h": 30,
-"base": 3966.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4469,
-"y": 3946,
-"w": 26,
-"h": 32,
-"base": 3973.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4476,
-"y": 3943,
-"w": 58,
-"h": 44,
-"base": 3982.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4608,
-"y": 4008,
-"w": 32,
-"h": 39,
-"base": 4042.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4561,
-"y": 4019,
-"w": 26,
-"h": 32,
-"base": 4046.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 627,
-"y": 4027,
-"w": 28,
-"h": 35,
-"base": 4056.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4141,
-"y": 4030,
-"w": 47,
-"h": 37,
-"base": 4062.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 893,
-"y": 4046,
-"w": 28,
-"h": 35,
-"base": 4075.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 766,
-"y": 4053,
-"w": 28,
-"h": 35,
-"base": 4082.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4158,
-"y": 4053,
-"w": 58,
-"h": 44,
-"base": 4092.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4095,
-"y": 4090,
-"w": 24,
-"h": 30,
-"base": 4115.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4073,
-"y": 4106,
-"w": 28,
-"h": 35,
-"base": 4135.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4642,
-"y": 4115,
-"w": 62,
-"h": 47,
-"base": 4157.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1001,
-"y": 4131,
-"w": 26,
-"h": 32,
-"base": 4158.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4686,
-"y": 4173,
-"w": 47,
-"h": 37,
-"base": 4205.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4026,
-"y": 4183,
-"w": 58,
-"h": 44,
-"base": 4222.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4786,
-"y": 4207,
-"w": 26,
-"h": 32,
-"base": 4234.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1692,
-"y": 4210,
-"w": 47,
-"h": 37,
-"base": 4242.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4019,
-"y": 4212,
-"w": 30,
-"h": 37,
-"base": 4244.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1653,
-"y": 4212,
-"w": 58,
-"h": 44,
-"base": 4251.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1202,
-"y": 4232,
+"x": 3071,
+"y": 3162,
 "w": 22,
 "h": 28,
-"base": 4255.0,
+"base": 3185.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3939,
-"y": 4227,
-"w": 51,
-"h": 39,
-"base": 4261.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4742,
-"y": 4222,
-"w": 58,
-"h": 44,
-"base": 4261.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 3995,
-"y": 4247,
-"w": 24,
-"h": 30,
-"base": 4272.0,
+"x": 3109,
+"y": 3203,
+"w": 22,
+"h": 28,
+"base": 3226.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1672,
-"y": 4252,
-"w": 28,
-"h": 35,
-"base": 4281.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4776,
-"y": 4251,
-"w": 51,
-"h": 39,
-"base": 4285.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1293,
-"y": 4270,
-"w": 28,
-"h": 35,
-"base": 4299.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 5127,
-"y": 4281,
-"w": 28,
-"h": 35,
-"base": 4310.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3894,
-"y": 4296,
-"w": 24,
-"h": 30,
-"base": 4321.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1370,
-"y": 4289,
-"w": 51,
-"h": 39,
-"base": 4323.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 5004,
-"y": 4283,
-"w": 62,
-"h": 47,
-"base": 4325.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4910,
-"y": 4283,
-"w": 65,
-"h": 49,
-"base": 4327.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1032,
-"y": 4307,
-"w": 28,
-"h": 35,
-"base": 4336.0,
+"x": 3904,
+"y": 3224,
+"w": 20,
+"h": 26,
+"base": 3244.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 3877,
-"y": 4314,
-"w": 24,
-"h": 30,
-"base": 4339.0,
+"y": 3242,
+"w": 22,
+"h": 28,
+"base": 3265.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4899,
-"y": 4326,
-"w": 28,
-"h": 35,
-"base": 4355.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 51,
-"y": 4331,
-"w": 28,
-"h": 35,
-"base": 4360.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1987,
-"y": 4337,
-"w": 24,
-"h": 30,
-"base": 4362.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4982,
-"y": 4324,
-"w": 62,
-"h": 47,
-"base": 4366.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 4963,
-"y": 4343,
+"x": 3104,
+"y": 3274,
 "w": 26,
 "h": 32,
-"base": 4370.0,
+"base": 3301.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 975,
-"y": 4351,
+"x": 4819,
+"y": 3301,
 "w": 20,
 "h": 26,
-"base": 4371.0,
+"base": 3321.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 186,
-"y": 4364,
-"w": 30,
-"h": 37,
-"base": 4396.0,
+"x": 131,
+"y": 3278,
+"w": 60,
+"h": 62,
+"base": 3334.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4772,
+"y": 3325,
+"w": 22,
+"h": 28,
+"base": 3348.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 215,
-"y": 4377,
-"w": 26,
-"h": 32,
-"base": 4404.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 111,
-"y": 4371,
-"w": 32,
-"h": 39,
-"base": 4405.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 287,
-"y": 4400,
-"w": 26,
-"h": 32,
-"base": 4427.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3777,
-"y": 4415,
-"w": 24,
-"h": 30,
-"base": 4440.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2147,
-"y": 4415,
-"w": 28,
-"h": 35,
-"base": 4444.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 233,
-"y": 4419,
-"w": 30,
-"h": 37,
-"base": 4451.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2216,
-"y": 4434,
+"x": 4725,
+"y": 3346,
 "w": 20,
 "h": 26,
-"base": 4454.0,
+"base": 3366.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 375,
-"y": 4429,
-"w": 26,
-"h": 32,
-"base": 4456.0,
+"x": 4768,
+"y": 3325,
+"w": 60,
+"h": 62,
+"base": 3381.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4741,
+"y": 3365,
+"w": 20,
+"h": 26,
+"base": 3385.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3746,
-"y": 4437,
-"w": 30,
-"h": 37,
-"base": 4469.0,
+"x": 4773,
+"y": 3384,
+"w": 20,
+"h": 26,
+"base": 3404.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 302,
-"y": 4447,
+"x": 4159,
+"y": 3385,
+"w": 22,
+"h": 28,
+"base": 3408.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4768,
+"y": 3405,
+"w": 20,
+"h": 26,
+"base": 3425.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4862,
+"y": 3424,
 "w": 24,
 "h": 30,
-"base": 4472.0,
+"base": 3449.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1941,
-"y": 4451,
-"w": 51,
-"h": 39,
-"base": 4485.0,
+"x": 4266,
+"y": 3403,
+"w": 60,
+"h": 62,
+"base": 3459.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 326,
-"y": 4446,
-"w": 58,
-"h": 44,
-"base": 4485.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 366,
-"y": 4464,
-"w": 28,
-"h": 35,
-"base": 4493.0,
+"x": 4840,
+"y": 3450,
+"w": 22,
+"h": 28,
+"base": 3473.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 529,
-"y": 4478,
+"x": 3095,
+"y": 3463,
+"w": 30,
+"h": 37,
+"base": 3495.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2512,
+"y": 3517,
+"w": 20,
+"h": 26,
+"base": 3537.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2585,
+"y": 3516,
+"w": 22,
+"h": 28,
+"base": 3539.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2455,
+"y": 3520,
+"w": 20,
+"h": 26,
+"base": 3540.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2660,
+"y": 3518,
+"w": 22,
+"h": 28,
+"base": 3541.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4620,
+"y": 3523,
+"w": 24,
+"h": 30,
+"base": 3548.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3041,
+"y": 3566,
+"w": 20,
+"h": 26,
+"base": 3586.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3079,
+"y": 3577,
+"w": 20,
+"h": 26,
+"base": 3597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3377,
+"y": 3594,
+"w": 20,
+"h": 26,
+"base": 3614.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1200,
+"y": 3643,
+"w": 20,
+"h": 26,
+"base": 3663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 383,
+"y": 3643,
+"w": 24,
+"h": 30,
+"base": 3668.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1224,
+"y": 3650,
+"w": 20,
+"h": 26,
+"base": 3670.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1245,
+"y": 3658,
+"w": 20,
+"h": 26,
+"base": 3678.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5061,
+"y": 3627,
+"w": 60,
+"h": 62,
+"base": 3683.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3377,
+"y": 3671,
+"w": 20,
+"h": 26,
+"base": 3691.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 365,
+"y": 3639,
+"w": 60,
+"h": 62,
+"base": 3695.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2439,
+"y": 3683,
 "w": 26,
 "h": 32,
-"base": 4505.0,
+"base": 3710.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 383,
+"y": 3693,
+"w": 20,
+"h": 26,
+"base": 3713.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4965,
+"y": 3689,
+"w": 24,
+"h": 30,
+"base": 3714.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4872,
+"y": 3690,
+"w": 28,
+"h": 35,
+"base": 3719.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4919,
+"y": 3692,
+"w": 26,
+"h": 32,
+"base": 3719.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2504,
+"y": 3697,
+"w": 22,
+"h": 28,
+"base": 3720.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3701,
+"w": 20,
+"h": 26,
+"base": 3721.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 118,
+"y": 3712,
+"w": 24,
+"h": 30,
+"base": 3737.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3723,
+"w": 20,
+"h": 26,
+"base": 3743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 232,
+"y": 3689,
+"w": 60,
+"h": 62,
+"base": 3745.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1206,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3745,
+"w": 20,
+"h": 26,
+"base": 3765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3767,
+"w": 20,
+"h": 26,
+"base": 3787.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4783,
+"y": 3767,
+"w": 24,
+"h": 30,
+"base": 3792.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4854,
+"y": 3785,
+"w": 20,
+"h": 26,
+"base": 3805.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3789,
+"w": 20,
+"h": 26,
+"base": 3809.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5078,
+"y": 3804,
+"w": 20,
+"h": 26,
+"base": 3824.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3811,
+"w": 20,
+"h": 26,
+"base": 3831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4314,
+"y": 3811,
+"w": 26,
+"h": 32,
+"base": 3838.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4856,
+"y": 3832,
+"w": 20,
+"h": 26,
+"base": 3852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5088,
+"y": 3832,
+"w": 20,
+"h": 26,
+"base": 3852.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3833,
+"w": 20,
+"h": 26,
+"base": 3853.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5054,
+"y": 3850,
+"w": 22,
+"h": 28,
+"base": 3873.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1206,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1250,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3855,
+"w": 20,
+"h": 26,
+"base": 3875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5080,
+"y": 3859,
+"w": 22,
+"h": 28,
+"base": 3882.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4211,
+"y": 3868,
+"w": 24,
+"h": 30,
+"base": 3893.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1272,
+"y": 3877,
+"w": 20,
+"h": 26,
+"base": 3897.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3877,
+"w": 20,
+"h": 26,
+"base": 3897.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3877,
+"w": 20,
+"h": 26,
+"base": 3897.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3877,
+"w": 20,
+"h": 26,
+"base": 3897.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3877,
+"w": 20,
+"h": 26,
+"base": 3897.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 922,
+"y": 3882,
+"w": 20,
+"h": 26,
+"base": 3902.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 924,
+"y": 3859,
+"w": 60,
+"h": 62,
+"base": 3915.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1294,
+"y": 3899,
+"w": 20,
+"h": 26,
+"base": 3919.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3899,
+"w": 20,
+"h": 26,
+"base": 3919.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3899,
+"w": 20,
+"h": 26,
+"base": 3919.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3899,
+"w": 20,
+"h": 26,
+"base": 3919.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4002,
+"y": 3913,
+"w": 20,
+"h": 26,
+"base": 3933.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3910,
+"w": 28,
+"h": 35,
+"base": 3939.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3921,
+"w": 20,
+"h": 26,
+"base": 3941.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3921,
+"w": 20,
+"h": 26,
+"base": 3941.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4282,
+"y": 3942,
+"w": 20,
+"h": 26,
+"base": 3962.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1294,
+"y": 3943,
+"w": 20,
+"h": 26,
+"base": 3963.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1316,
+"y": 3943,
+"w": 20,
+"h": 26,
+"base": 3963.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 3943,
+"w": 20,
+"h": 26,
+"base": 3963.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1360,
+"y": 3943,
+"w": 20,
+"h": 26,
+"base": 3963.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4054,
+"y": 3943,
+"w": 22,
+"h": 28,
+"base": 3966.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 913,
+"y": 3960,
+"w": 22,
+"h": 28,
+"base": 3983.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 803,
+"y": 3973,
+"w": 20,
+"h": 26,
+"base": 3993.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4054,
+"y": 3990,
+"w": 22,
+"h": 28,
+"base": 4013.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4295,
+"y": 4023,
+"w": 28,
+"h": 35,
+"base": 4052.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4262,
+"y": 4029,
+"w": 28,
+"h": 35,
+"base": 4058.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4471,
+"y": 4062,
+"w": 20,
+"h": 26,
+"base": 4082.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4300,
+"y": 4056,
+"w": 28,
+"h": 35,
+"base": 4085.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1113,
+"y": 4066,
+"w": 22,
+"h": 28,
+"base": 4089.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4257,
+"y": 4061,
+"w": 28,
+"h": 35,
+"base": 4090.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4199,
+"y": 4064,
+"w": 28,
+"h": 35,
+"base": 4093.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1135,
+"y": 4072,
+"w": 22,
+"h": 28,
+"base": 4095.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4478,
+"y": 4078,
+"w": 20,
+"h": 26,
+"base": 4098.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4372,
+"y": 4072,
+"w": 26,
+"h": 32,
+"base": 4099.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4424,
+"y": 4084,
+"w": 24,
+"h": 30,
+"base": 4109.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 876,
+"y": 4098,
+"w": 22,
+"h": 28,
+"base": 4121.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1119,
+"y": 4106,
+"w": 20,
+"h": 26,
+"base": 4126.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4385,
+"y": 4101,
+"w": 24,
+"h": 30,
+"base": 4126.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 903,
+"y": 4109,
+"w": 22,
+"h": 28,
+"base": 4132.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 784,
+"y": 4121,
+"w": 20,
+"h": 26,
+"base": 4141.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1130,
+"y": 4126,
+"w": 22,
+"h": 28,
+"base": 4149.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4586,
+"y": 4130,
+"w": 22,
+"h": 28,
+"base": 4153.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 653,
+"y": 4119,
+"w": 60,
+"h": 62,
+"base": 4175.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1125,
+"y": 4153,
+"w": 22,
+"h": 28,
+"base": 4176.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1463,
+"y": 4170,
+"w": 28,
+"h": 35,
+"base": 4199.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1130,
+"y": 4176,
+"w": 22,
+"h": 28,
+"base": 4199.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1464,
+"y": 4205,
+"w": 24,
+"h": 30,
+"base": 4230.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4636,
+"y": 4208,
+"w": 22,
+"h": 28,
+"base": 4231.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4331,
+"y": 4218,
+"w": 22,
+"h": 28,
+"base": 4241.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 121,
+"y": 4234,
+"w": 20,
+"h": 26,
+"base": 4254.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4294,
+"y": 4248,
+"w": 20,
+"h": 26,
+"base": 4268.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4665,
+"y": 4246,
+"w": 24,
+"h": 30,
+"base": 4271.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1298,
+"y": 4251,
+"w": 24,
+"h": 30,
+"base": 4276.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3551,
+"y": 4256,
+"w": 20,
+"h": 26,
+"base": 4276.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2306,
+"y": 4257,
+"w": 24,
+"h": 30,
+"base": 4282.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1074,
+"y": 4231,
+"w": 60,
+"h": 62,
+"base": 4287.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4872,
+"y": 4266,
+"w": 28,
+"h": 35,
+"base": 4295.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4624,
+"y": 4273,
+"w": 22,
+"h": 28,
+"base": 4296.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4385,
+"y": 4277,
+"w": 20,
+"h": 26,
+"base": 4297.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 283,
+"y": 4282,
+"w": 22,
+"h": 28,
+"base": 4305.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3031,
+"y": 4250,
+"w": 60,
+"h": 62,
+"base": 4306.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 79,
+"y": 4285,
+"w": 28,
+"h": 35,
+"base": 4314.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2422,
+"y": 4289,
+"w": 24,
+"h": 30,
+"base": 4314.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2394,
+"y": 4295,
+"w": 26,
+"h": 32,
+"base": 4322.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 157,
+"y": 4300,
+"w": 22,
+"h": 28,
+"base": 4323.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1454,
+"y": 4302,
+"w": 24,
+"h": 30,
+"base": 4327.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 280,
+"y": 4309,
+"w": 20,
+"h": 26,
+"base": 4329.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2418,
+"y": 4312,
+"w": 22,
+"h": 28,
+"base": 4335.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3488,
+"y": 4321,
+"w": 24,
+"h": 30,
+"base": 4346.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4669,
+"y": 4323,
+"w": 22,
+"h": 28,
+"base": 4346.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 3732,
-"y": 4496,
-"w": 47,
-"h": 37,
-"base": 4528.0,
+"y": 4331,
+"w": 20,
+"h": 26,
+"base": 4351.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3490,
+"y": 4299,
+"w": 60,
+"h": 62,
+"base": 4355.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 583,
-"y": 4487,
-"w": 62,
-"h": 47,
+"x": 153,
+"y": 4336,
+"w": 20,
+"h": 26,
+"base": 4356.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2373,
+"y": 4343,
+"w": 20,
+"h": 26,
+"base": 4363.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 61,
+"y": 4336,
+"w": 28,
+"h": 35,
+"base": 4365.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3717,
+"y": 4309,
+"w": 60,
+"h": 62,
+"base": 4365.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 36,
+"y": 4339,
+"w": 28,
+"h": 35,
+"base": 4368.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2417,
+"y": 4352,
+"w": 20,
+"h": 26,
+"base": 4372.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2310,
+"y": 4358,
+"w": 20,
+"h": 26,
+"base": 4378.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3979,
+"y": 4362,
+"w": 20,
+"h": 26,
+"base": 4382.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2283,
+"y": 4362,
+"w": 20,
+"h": 26,
+"base": 4382.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 94,
+"y": 4367,
+"w": 28,
+"h": 35,
+"base": 4396.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4639,
+"y": 4376,
+"w": 20,
+"h": 26,
+"base": 4396.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3725,
+"y": 4377,
+"w": 20,
+"h": 26,
+"base": 4397.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3888,
+"y": 4381,
+"w": 20,
+"h": 26,
+"base": 4401.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4297,
+"y": 4381,
+"w": 20,
+"h": 26,
+"base": 4401.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2901,
+"y": 4382,
+"w": 20,
+"h": 26,
+"base": 4402.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2333,
+"y": 4385,
+"w": 20,
+"h": 26,
+"base": 4405.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2225,
+"y": 4390,
+"w": 20,
+"h": 26,
+"base": 4410.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 64,
+"y": 4381,
+"w": 28,
+"h": 35,
+"base": 4410.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3978,
+"y": 4391,
+"w": 22,
+"h": 28,
+"base": 4414.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4379,
+"y": 4397,
+"w": 22,
+"h": 28,
+"base": 4420.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 86,
+"y": 4394,
+"w": 28,
+"h": 35,
+"base": 4423.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4887,
+"y": 4403,
+"w": 24,
+"h": 30,
+"base": 4428.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3432,
+"y": 4408,
+"w": 20,
+"h": 26,
+"base": 4428.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2432,
+"y": 4409,
+"w": 20,
+"h": 26,
+"base": 4429.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4310,
+"y": 4409,
+"w": 20,
+"h": 26,
+"base": 4429.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4395,
+"y": 4425,
+"w": 20,
+"h": 26,
+"base": 4445.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4035,
+"y": 4431,
+"w": 20,
+"h": 26,
+"base": 4451.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4887,
+"y": 4432,
+"w": 24,
+"h": 30,
+"base": 4457.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3833,
+"y": 4440,
+"w": 20,
+"h": 26,
+"base": 4460.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4324,
+"y": 4440,
+"w": 20,
+"h": 26,
+"base": 4460.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2416,
+"y": 4446,
+"w": 20,
+"h": 26,
+"base": 4466.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4897,
+"y": 4455,
+"w": 24,
+"h": 30,
+"base": 4480.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3841,
+"y": 4468,
+"w": 20,
+"h": 26,
+"base": 4488.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4905,
+"y": 4479,
+"w": 24,
+"h": 30,
+"base": 4504.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2424,
+"y": 4489,
+"w": 20,
+"h": 26,
+"base": 4509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4982,
+"y": 4492,
+"w": 20,
+"h": 26,
+"base": 4512.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2386,
+"y": 4496,
+"w": 20,
+"h": 26,
+"base": 4516.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4946,
+"y": 4502,
+"w": 22,
+"h": 28,
+"base": 4525.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 438,
+"y": 4473,
+"w": 60,
+"h": 62,
 "base": 4529.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 608,
-"y": 4497,
-"w": 58,
-"h": 44,
+"x": 3643,
+"y": 4506,
+"w": 26,
+"h": 32,
+"base": 4533.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3448,
+"y": 4514,
+"w": 20,
+"h": 26,
+"base": 4534.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3553,
+"y": 4514,
+"w": 20,
+"h": 26,
+"base": 4534.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3574,
+"y": 4480,
+"w": 60,
+"h": 62,
 "base": 4536.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 2169,
-"y": 4533,
+"x": 3521,
+"y": 4512,
+"w": 24,
+"h": 30,
+"base": 4537.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3494,
+"y": 4515,
 "w": 22,
 "h": 28,
-"base": 4556.0,
+"base": 4538.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3705,
-"y": 4540,
-"w": 26,
-"h": 32,
-"base": 4567.0,
+"x": 4171,
+"y": 4533,
+"w": 20,
+"h": 26,
+"base": 4553.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 780,
-"y": 4560,
-"w": 24,
-"h": 30,
-"base": 4585.0,
+"x": 2428,
+"y": 4536,
+"w": 22,
+"h": 28,
+"base": 4559.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2400,
-"y": 4570,
-"w": 28,
-"h": 35,
-"base": 4599.0,
+"x": 1766,
+"y": 4548,
+"w": 20,
+"h": 26,
+"base": 4568.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 695,
-"y": 4565,
-"w": 58,
-"h": 44,
-"base": 4604.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 737,
-"y": 4579,
-"w": 32,
-"h": 39,
-"base": 4613.0,
+"x": 4196,
+"y": 4550,
+"w": 20,
+"h": 26,
+"base": 4570.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3580,
+"x": 4209,
+"y": 4559,
+"w": 20,
+"h": 26,
+"base": 4579.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2018,
+"y": 4569,
+"w": 20,
+"h": 26,
+"base": 4589.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 809,
+"y": 4571,
+"w": 20,
+"h": 26,
+"base": 4591.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1223,
+"y": 4574,
+"w": 22,
+"h": 28,
+"base": 4597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4256,
 "y": 4577,
-"w": 62,
-"h": 47,
-"base": 4619.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 3643,
-"y": 4599,
-"w": 28,
-"h": 35,
-"base": 4628.0,
+"w": 20,
+"h": 26,
+"base": 4597.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 787,
-"y": 4595,
-"w": 32,
-"h": 39,
-"base": 4629.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2327,
-"y": 4601,
-"w": 44,
-"h": 35,
-"base": 4631.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 874,
-"y": 4621,
-"w": 32,
-"h": 39,
-"base": 4655.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3526,
-"y": 4655,
+"x": 1996,
+"y": 4576,
 "w": 24,
 "h": 30,
+"base": 4601.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2001,
+"y": 4550,
+"w": 60,
+"h": 62,
+"base": 4606.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1161,
+"y": 4592,
+"w": 20,
+"h": 26,
+"base": 4612.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 248,
+"y": 4591,
+"w": 22,
+"h": 28,
+"base": 4614.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1185,
+"y": 4594,
+"w": 22,
+"h": 28,
+"base": 4617.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1194,
+"y": 4565,
+"w": 60,
+"h": 62,
+"base": 4621.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2002,
+"y": 4603,
+"w": 22,
+"h": 28,
+"base": 4626.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2019,
+"y": 4617,
+"w": 20,
+"h": 26,
+"base": 4637.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1352,
+"y": 4615,
+"w": 22,
+"h": 28,
+"base": 4638.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1048,
+"y": 4614,
+"w": 24,
+"h": 30,
+"base": 4639.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1099,
+"y": 4627,
+"w": 28,
+"h": 35,
+"base": 4656.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2001,
+"y": 4602,
+"w": 60,
+"h": 62,
+"base": 4658.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1049,
+"y": 4636,
+"w": 24,
+"h": 30,
+"base": 4661.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1242,
+"y": 4660,
+"w": 20,
+"h": 26,
 "base": 4680.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2420,
-"y": 4690,
+"x": 1343,
+"y": 4670,
 "w": 20,
 "h": 26,
-"base": 4710.0,
+"base": 4690.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1273,
-"y": 4702,
-"w": 24,
-"h": 30,
-"base": 4727.0,
+"x": 4148,
+"y": 4639,
+"w": 60,
+"h": 62,
+"base": 4695.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1989,
+"y": 4692,
+"w": 22,
+"h": 28,
+"base": 4715.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1159,
-"y": 4708,
-"w": 24,
-"h": 30,
+"x": 4138,
+"y": 4697,
+"w": 26,
+"h": 32,
+"base": 4724.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1998,
+"y": 4669,
+"w": 60,
+"h": 62,
+"base": 4725.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1327,
+"y": 4710,
+"w": 22,
+"h": 28,
 "base": 4733.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3517,
-"y": 4708,
-"w": 26,
-"h": 32,
-"base": 4735.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1208,
-"y": 4723,
+"x": 2017,
+"y": 4719,
 "w": 24,
 "h": 30,
-"base": 4748.0,
+"base": 4744.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1350,
-"y": 4718,
+"x": 1990,
+"y": 4722,
+"w": 22,
+"h": 28,
+"base": 4745.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1701,
+"y": 4740,
+"w": 24,
+"h": 30,
+"base": 4765.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4099,
+"y": 4748,
+"w": 22,
+"h": 28,
+"base": 4771.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1991,
+"y": 4751,
+"w": 24,
+"h": 30,
+"base": 4776.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2439,
+"y": 4753,
 "w": 30,
 "h": 37,
-"base": 4750.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3418,
-"y": 4725,
-"w": 32,
-"h": 39,
-"base": 4759.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1409,
-"y": 4742,
-"w": 24,
-"h": 30,
-"base": 4767.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3466,
-"y": 4746,
-"w": 26,
-"h": 32,
-"base": 4773.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1324,
-"y": 4751,
-"w": 51,
-"h": 39,
 "base": 4785.0,
 "kind": "tree",
-"species": "oak"
+"species": "deciduous"
 },
 {
-"x": 1524,
-"y": 4767,
-"w": 30,
-"h": 37,
-"base": 4799.0,
+"x": 1051,
+"y": 4783,
+"w": 20,
+"h": 26,
+"base": 4803.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3368,
-"y": 4775,
-"w": 24,
-"h": 30,
-"base": 4800.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3415,
-"y": 4781,
-"w": 28,
-"h": 35,
-"base": 4810.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3297,
-"y": 4782,
-"w": 65,
-"h": 49,
-"base": 4826.0,
+"x": 1562,
+"y": 4748,
+"w": 60,
+"h": 62,
+"base": 4804.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 3284,
-"y": 4805,
-"w": 47,
-"h": 37,
-"base": 4837.0,
+"x": 3433,
+"y": 4789,
+"w": 20,
+"h": 26,
+"base": 4809.0,
 "kind": "tree",
-"species": "oak"
+"species": "deciduous"
 },
 {
-"x": 1615,
-"y": 4822,
-"w": 30,
-"h": 37,
+"x": 3475,
+"y": 4796,
+"w": 20,
+"h": 26,
+"base": 4816.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1013,
+"y": 4798,
+"w": 60,
+"h": 62,
 "base": 4854.0,
 "kind": "tree",
-"species": "deciduous"
+"species": "oak"
 },
 {
-"x": 1672,
-"y": 4824,
-"w": 30,
-"h": 37,
-"base": 4856.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1726,
-"y": 4847,
-"w": 26,
-"h": 32,
-"base": 4874.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1822,
-"y": 4853,
-"w": 24,
-"h": 30,
-"base": 4878.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1746,
-"y": 4852,
-"w": 32,
-"h": 39,
-"base": 4886.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1803,
-"y": 4880,
-"w": 30,
-"h": 37,
-"base": 4912.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3229,
-"y": 4886,
-"w": 26,
-"h": 32,
-"base": 4913.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 3129,
-"y": 4883,
-"w": 47,
-"h": 37,
-"base": 4915.0,
+"x": 1159,
+"y": 4811,
+"w": 60,
+"h": 62,
+"base": 4867.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 1926,
-"y": 4898,
-"w": 32,
-"h": 39,
+"x": 3036,
+"y": 4816,
+"w": 60,
+"h": 62,
+"base": 4872.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1200,
+"y": 4850,
+"w": 24,
+"h": 30,
+"base": 4875.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3430,
+"y": 4861,
+"w": 20,
+"h": 26,
+"base": 4881.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1228,
+"y": 4857,
+"w": 24,
+"h": 30,
+"base": 4882.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1035,
+"y": 4864,
+"w": 20,
+"h": 26,
+"base": 4884.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3036,
+"y": 4865,
+"w": 20,
+"h": 26,
+"base": 4885.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2898,
+"y": 4843,
+"w": 60,
+"h": 62,
+"base": 4899.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3047,
+"y": 4887,
+"w": 20,
+"h": 26,
+"base": 4907.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1338,
+"y": 4894,
+"w": 20,
+"h": 26,
+"base": 4914.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3457,
+"y": 4897,
+"w": 20,
+"h": 26,
+"base": 4917.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1361,
+"y": 4901,
+"w": 20,
+"h": 26,
+"base": 4921.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3062,
+"y": 4912,
+"w": 20,
+"h": 26,
 "base": 4932.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 3073,
-"y": 4922,
-"w": 26,
-"h": 32,
-"base": 4949.0,
+"x": 3393,
+"y": 4927,
+"w": 22,
+"h": 28,
+"base": 4950.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1882,
-"y": 4924,
-"w": 26,
-"h": 32,
-"base": 4951.0,
+"x": 2838,
+"y": 4942,
+"w": 20,
+"h": 26,
+"base": 4962.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1941,
-"y": 4954,
-"w": 51,
-"h": 39,
-"base": 4988.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1984,
-"y": 4972,
-"w": 30,
-"h": 37,
-"base": 5004.0,
+"x": 857,
+"y": 4960,
+"w": 20,
+"h": 26,
+"base": 4980.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2164,
-"y": 4967,
-"w": 65,
-"h": 49,
-"base": 5011.0,
+"x": 839,
+"y": 4980,
+"w": 20,
+"h": 26,
+"base": 5000.0,
 "kind": "tree",
-"species": "oak"
+"species": "deciduous"
 },
 {
-"x": 2333,
-"y": 4992,
+"x": 838,
+"y": 5004,
+"w": 22,
+"h": 28,
+"base": 5027.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 827,
+"y": 5033,
+"w": 20,
+"h": 26,
+"base": 5053.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3786,
+"y": 5029,
 "w": 24,
 "h": 30,
-"base": 5017.0,
+"base": 5054.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2460,
-"y": 4996,
-"w": 28,
-"h": 35,
-"base": 5025.0,
+"x": 3460,
+"y": 5047,
+"w": 20,
+"h": 26,
+"base": 5067.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2872,
-"y": 4996,
-"w": 30,
-"h": 37,
-"base": 5028.0,
+"x": 3483,
+"y": 5052,
+"w": 20,
+"h": 26,
+"base": 5072.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2996,
-"y": 4998,
-"w": 30,
-"h": 37,
-"base": 5030.0,
+"x": 3415,
+"y": 5062,
+"w": 20,
+"h": 26,
+"base": 5082.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2820,
-"y": 5000,
-"w": 32,
-"h": 39,
-"base": 5034.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2067,
-"y": 5020,
-"w": 26,
-"h": 32,
-"base": 5047.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2131,
-"y": 5016,
-"w": 47,
-"h": 37,
-"base": 5048.0,
+"x": 817,
+"y": 5041,
+"w": 60,
+"h": 62,
+"base": 5097.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 2347,
-"y": 5024,
-"w": 30,
-"h": 37,
-"base": 5056.0,
+"x": 2430,
+"y": 5094,
+"w": 24,
+"h": 30,
+"base": 5119.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2375,
-"y": 5031,
+"x": 2391,
+"y": 5105,
+"w": 20,
+"h": 26,
+"base": 5125.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1021,
+"y": 5131,
+"w": 20,
+"h": 26,
+"base": 5151.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4305,
+"y": 5139,
+"w": 20,
+"h": 26,
+"base": 5159.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1051,
+"y": 5148,
+"w": 20,
+"h": 26,
+"base": 5168.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3226,
+"y": 5155,
+"w": 20,
+"h": 26,
+"base": 5175.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4320,
+"y": 5157,
+"w": 20,
+"h": 26,
+"base": 5177.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3262,
+"y": 5157,
+"w": 22,
+"h": 28,
+"base": 5180.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2570,
+"y": 5210,
 "w": 26,
 "h": 32,
-"base": 5058.0,
+"base": 5237.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2419,
-"y": 5034,
-"w": 26,
-"h": 32,
-"base": 5061.0,
+"x": 1889,
+"y": 5247,
+"w": 20,
+"h": 26,
+"base": 5267.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2467,
-"y": 5021,
-"w": 65,
-"h": 49,
-"base": 5065.0,
+"x": 1911,
+"y": 5247,
+"w": 20,
+"h": 26,
+"base": 5267.0,
 "kind": "tree",
-"species": "oak"
+"species": "deciduous"
 },
 {
-"x": 2552,
-"y": 5035,
-"w": 32,
-"h": 39,
-"base": 5069.0,
+"x": 1933,
+"y": 5247,
+"w": 20,
+"h": 26,
+"base": 5267.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5269,
+"w": 20,
+"h": 26,
+"base": 5289.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5269,
+"w": 20,
+"h": 26,
+"base": 5289.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5269,
+"w": 20,
+"h": 26,
+"base": 5289.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5269,
+"w": 20,
+"h": 26,
+"base": 5289.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1977,
+"y": 5269,
+"w": 20,
+"h": 26,
+"base": 5289.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1999,
+"y": 5269,
+"w": 20,
+"h": 26,
+"base": 5289.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5291,
+"w": 20,
+"h": 26,
+"base": 5311.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5291,
+"w": 20,
+"h": 26,
+"base": 5311.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5291,
+"w": 20,
+"h": 26,
+"base": 5311.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5291,
+"w": 20,
+"h": 26,
+"base": 5311.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1977,
+"y": 5291,
+"w": 20,
+"h": 26,
+"base": 5311.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1999,
+"y": 5291,
+"w": 20,
+"h": 26,
+"base": 5311.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 2810,
-"y": 5041,
-"w": 47,
-"h": 37,
-"base": 5073.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 2614,
-"y": 5043,
-"w": 51,
-"h": 39,
-"base": 5077.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 2773,
-"y": 5152,
-"w": 28,
-"h": 35,
-"base": 5181.0,
+"y": 5296,
+"w": 20,
+"h": 26,
+"base": 5316.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2706,
-"y": 5174,
+"x": 1889,
+"y": 5313,
+"w": 20,
+"h": 26,
+"base": 5333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5313,
+"w": 20,
+"h": 26,
+"base": 5333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5313,
+"w": 20,
+"h": 26,
+"base": 5333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5313,
+"w": 20,
+"h": 26,
+"base": 5333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1977,
+"y": 5313,
+"w": 20,
+"h": 26,
+"base": 5333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1999,
+"y": 5313,
+"w": 20,
+"h": 26,
+"base": 5333.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1474,
+"y": 5313,
 "w": 26,
 "h": 32,
-"base": 5201.0,
+"base": 5340.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1889,
-"y": 5247,
+"x": 4244,
+"y": 5331,
 "w": 20,
 "h": 26,
-"base": 5267.0,
+"base": 5351.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1911,
-"y": 5247,
-"w": 20,
-"h": 26,
-"base": 5267.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5247,
-"w": 20,
-"h": 26,
-"base": 5267.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2642,
-"y": 5252,
+"x": 2686,
+"y": 5329,
 "w": 22,
 "h": 28,
-"base": 5275.0,
+"base": 5352.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1889,
-"y": 5269,
-"w": 20,
-"h": 26,
-"base": 5289.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5269,
-"w": 20,
-"h": 26,
-"base": 5289.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5269,
-"w": 20,
-"h": 26,
-"base": 5289.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5269,
-"w": 20,
-"h": 26,
-"base": 5289.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5269,
-"w": 20,
-"h": 26,
-"base": 5289.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1999,
-"y": 5269,
-"w": 20,
-"h": 26,
-"base": 5289.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5291,
-"w": 20,
-"h": 26,
-"base": 5311.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5291,
-"w": 20,
-"h": 26,
-"base": 5311.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5291,
-"w": 20,
-"h": 26,
-"base": 5311.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5291,
-"w": 20,
-"h": 26,
-"base": 5311.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5291,
-"w": 20,
-"h": 26,
-"base": 5311.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1999,
-"y": 5291,
-"w": 20,
-"h": 26,
-"base": 5311.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5313,
-"w": 20,
-"h": 26,
-"base": 5333.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5313,
-"w": 20,
-"h": 26,
-"base": 5333.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5313,
-"w": 20,
-"h": 26,
-"base": 5333.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5313,
-"w": 20,
-"h": 26,
-"base": 5333.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5313,
-"w": 20,
-"h": 26,
-"base": 5333.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1999,
-"y": 5313,
-"w": 20,
-"h": 26,
-"base": 5333.0,
+"x": 2383,
+"y": 5330,
+"w": 22,
+"h": 28,
+"base": 5353.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -8619,6 +13582,24 @@
 "species": "deciduous"
 },
 {
+"x": 4173,
+"y": 5334,
+"w": 22,
+"h": 28,
+"base": 5357.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2396,
+"y": 5349,
+"w": 20,
+"h": 26,
+"base": 5369.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
 "x": 1867,
 "y": 5357,
 "w": 20,
@@ -8673,11 +13654,20 @@
 "species": "deciduous"
 },
 {
-"x": 1999,
-"y": 5357,
+"x": 4148,
+"y": 5323,
+"w": 60,
+"h": 62,
+"base": 5379.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 4206,
+"y": 5378,
 "w": 20,
 "h": 26,
-"base": 5377.0,
+"base": 5398.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -8736,785 +13726,1028 @@
 "species": "deciduous"
 },
 {
-"x": 1999,
-"y": 5379,
+"x": 2397,
+"y": 5382,
 "w": 20,
 "h": 26,
-"base": 5399.0,
+"base": 5402.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1867,
-"y": 5401,
+"x": 4170,
+"y": 5391,
 "w": 20,
 "h": 26,
-"base": 5421.0,
+"base": 5411.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1889,
-"y": 5401,
-"w": 20,
-"h": 26,
-"base": 5421.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5401,
-"w": 20,
-"h": 26,
-"base": 5421.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5401,
-"w": 20,
-"h": 26,
-"base": 5421.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5401,
-"w": 20,
-"h": 26,
-"base": 5421.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5401,
-"w": 20,
-"h": 26,
-"base": 5421.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5423,
-"w": 20,
-"h": 26,
-"base": 5443.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5423,
-"w": 20,
-"h": 26,
-"base": 5443.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5423,
-"w": 20,
-"h": 26,
-"base": 5443.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5423,
-"w": 20,
-"h": 26,
-"base": 5443.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5423,
-"w": 20,
-"h": 26,
-"base": 5443.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5423,
-"w": 20,
-"h": 26,
-"base": 5443.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5445,
-"w": 20,
-"h": 26,
-"base": 5465.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5445,
-"w": 20,
-"h": 26,
-"base": 5465.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5445,
-"w": 20,
-"h": 26,
-"base": 5465.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5445,
-"w": 20,
-"h": 26,
-"base": 5465.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5445,
-"w": 20,
-"h": 26,
-"base": 5465.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5445,
-"w": 20,
-"h": 26,
-"base": 5465.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5467,
-"w": 20,
-"h": 26,
-"base": 5487.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1977,
-"y": 5489,
-"w": 20,
-"h": 26,
-"base": 5509.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5511,
-"w": 20,
-"h": 26,
-"base": 5531.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5511,
-"w": 20,
-"h": 26,
-"base": 5531.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5511,
-"w": 20,
-"h": 26,
-"base": 5531.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5511,
-"w": 20,
-"h": 26,
-"base": 5531.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5511,
-"w": 20,
-"h": 26,
-"base": 5531.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5511,
-"w": 20,
-"h": 26,
-"base": 5531.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5533,
-"w": 20,
-"h": 26,
-"base": 5553.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5533,
-"w": 20,
-"h": 26,
-"base": 5553.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5533,
-"w": 20,
-"h": 26,
-"base": 5553.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5533,
-"w": 20,
-"h": 26,
-"base": 5553.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5533,
-"w": 20,
-"h": 26,
-"base": 5553.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4845,
-"y": 5539,
-"w": 28,
-"h": 35,
-"base": 5568.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5555,
-"w": 20,
-"h": 26,
-"base": 5575.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5555,
-"w": 20,
-"h": 26,
-"base": 5575.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5555,
-"w": 20,
-"h": 26,
-"base": 5575.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5555,
-"w": 20,
-"h": 26,
-"base": 5575.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1955,
-"y": 5555,
-"w": 20,
-"h": 26,
-"base": 5575.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 4142,
-"y": 5554,
-"w": 40,
+"x": 1456,
+"y": 5388,
+"w": 26,
 "h": 32,
-"base": 5581.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1823,
-"y": 5577,
-"w": 20,
-"h": 26,
-"base": 5597.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5577,
-"w": 20,
-"h": 26,
-"base": 5597.0,
+"base": 5415.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1867,
-"y": 5577,
+"y": 5401,
 "w": 20,
 "h": 26,
-"base": 5597.0,
+"base": 5421.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1889,
-"y": 5577,
+"y": 5401,
 "w": 20,
 "h": 26,
-"base": 5597.0,
+"base": 5421.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1911,
-"y": 5577,
+"y": 5401,
 "w": 20,
 "h": 26,
-"base": 5597.0,
+"base": 5421.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1933,
-"y": 5577,
+"y": 5401,
 "w": 20,
 "h": 26,
-"base": 5597.0,
+"base": 5421.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1955,
-"y": 5577,
+"y": 5401,
 "w": 20,
 "h": 26,
-"base": 5597.0,
+"base": 5421.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2808,
-"y": 5586,
-"w": 28,
-"h": 35,
-"base": 5615.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1823,
-"y": 5599,
+"x": 1977,
+"y": 5401,
 "w": 20,
 "h": 26,
-"base": 5619.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5599,
-"w": 20,
-"h": 26,
-"base": 5619.0,
+"base": 5421.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1867,
-"y": 5599,
+"y": 5423,
 "w": 20,
 "h": 26,
-"base": 5619.0,
+"base": 5443.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1889,
-"y": 5599,
+"y": 5423,
 "w": 20,
 "h": 26,
-"base": 5619.0,
+"base": 5443.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1911,
-"y": 5599,
+"y": 5423,
 "w": 20,
 "h": 26,
-"base": 5619.0,
+"base": 5443.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1933,
-"y": 5599,
+"y": 5423,
 "w": 20,
 "h": 26,
-"base": 5619.0,
+"base": 5443.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
 "x": 1955,
-"y": 5599,
+"y": 5423,
 "w": 20,
 "h": 26,
-"base": 5619.0,
+"base": 5443.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 4753,
-"y": 5596,
-"w": 58,
-"h": 44,
-"base": 5635.0,
-"kind": "tree",
-"species": "oak"
-},
-{
-"x": 1823,
-"y": 5621,
+"x": 1977,
+"y": 5423,
 "w": 20,
 "h": 26,
-"base": 5641.0,
+"base": 5443.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 1845,
-"y": 5621,
-"w": 20,
-"h": 26,
-"base": 5641.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5621,
-"w": 20,
-"h": 26,
-"base": 5641.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5621,
-"w": 20,
-"h": 26,
-"base": 5641.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5621,
-"w": 20,
-"h": 26,
-"base": 5641.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5621,
-"w": 20,
-"h": 26,
-"base": 5641.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1823,
-"y": 5643,
-"w": 20,
-"h": 26,
-"base": 5663.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5643,
-"w": 20,
-"h": 26,
-"base": 5663.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5643,
-"w": 20,
-"h": 26,
-"base": 5663.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5643,
-"w": 20,
-"h": 26,
-"base": 5663.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5643,
-"w": 20,
-"h": 26,
-"base": 5663.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5643,
-"w": 20,
-"h": 26,
-"base": 5663.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1801,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1823,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1845,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1867,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1889,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1911,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 1933,
-"y": 5665,
-"w": 20,
-"h": 26,
-"base": 5685.0,
-"kind": "tree",
-"species": "deciduous"
-},
-{
-"x": 2112,
-"y": 5669,
+"x": 1449,
+"y": 5424,
 "w": 24,
 "h": 30,
-"base": 5694.0,
+"base": 5449.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4337,
+"y": 5432,
+"w": 24,
+"h": 30,
+"base": 5457.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4292,
+"y": 5432,
+"w": 24,
+"h": 30,
+"base": 5457.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5445,
+"w": 20,
+"h": 26,
+"base": 5465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5445,
+"w": 20,
+"h": 26,
+"base": 5465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5445,
+"w": 20,
+"h": 26,
+"base": 5465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5445,
+"w": 20,
+"h": 26,
+"base": 5465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5445,
+"w": 20,
+"h": 26,
+"base": 5465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1977,
+"y": 5445,
+"w": 20,
+"h": 26,
+"base": 5465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5023,
+"y": 5448,
+"w": 30,
+"h": 37,
+"base": 5480.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1450,
+"y": 5460,
+"w": 24,
+"h": 30,
+"base": 5485.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1977,
+"y": 5467,
+"w": 20,
+"h": 26,
+"base": 5487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4192,
+"y": 5477,
+"w": 22,
+"h": 28,
+"base": 5500.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1443,
+"y": 5481,
+"w": 26,
+"h": 32,
+"base": 5508.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1977,
+"y": 5489,
+"w": 20,
+"h": 26,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5034,
+"y": 5480,
+"w": 28,
+"h": 35,
+"base": 5509.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3408,
+"y": 5494,
+"w": 28,
+"h": 35,
+"base": 5523.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3609,
+"y": 5501,
+"w": 24,
+"h": 30,
+"base": 5526.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5511,
+"w": 20,
+"h": 26,
+"base": 5531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5511,
+"w": 20,
+"h": 26,
+"base": 5531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5511,
+"w": 20,
+"h": 26,
+"base": 5531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5511,
+"w": 20,
+"h": 26,
+"base": 5531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5511,
+"w": 20,
+"h": 26,
+"base": 5531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5511,
+"w": 20,
+"h": 26,
+"base": 5531.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 5022,
+"y": 5500,
+"w": 30,
+"h": 37,
+"base": 5532.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3564,
+"y": 5480,
+"w": 60,
+"h": 62,
+"base": 5536.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2832,
+"y": 5517,
+"w": 22,
+"h": 28,
+"base": 5540.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3508,
+"y": 5488,
+"w": 60,
+"h": 62,
+"base": 5544.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3352,
+"y": 5524,
+"w": 20,
+"h": 26,
+"base": 5544.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3502,
+"y": 5517,
+"w": 26,
+"h": 32,
+"base": 5544.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3862,
+"y": 5522,
+"w": 24,
+"h": 30,
+"base": 5547.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5533,
+"w": 20,
+"h": 26,
+"base": 5553.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5533,
+"w": 20,
+"h": 26,
+"base": 5553.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5533,
+"w": 20,
+"h": 26,
+"base": 5553.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5533,
+"w": 20,
+"h": 26,
+"base": 5553.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5533,
+"w": 20,
+"h": 26,
+"base": 5553.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5533,
+"w": 20,
+"h": 26,
+"base": 5553.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2502,
+"y": 5546,
+"w": 20,
+"h": 26,
+"base": 5566.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3378,
+"y": 5552,
+"w": 22,
+"h": 28,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5555,
+"w": 20,
+"h": 26,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5555,
+"w": 20,
+"h": 26,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5555,
+"w": 20,
+"h": 26,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5555,
+"w": 20,
+"h": 26,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5555,
+"w": 20,
+"h": 26,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5555,
+"w": 20,
+"h": 26,
+"base": 5575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3350,
+"y": 5563,
+"w": 22,
+"h": 28,
+"base": 5586.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1823,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5577,
+"w": 20,
+"h": 26,
+"base": 5597.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3619,
+"y": 5579,
+"w": 20,
+"h": 26,
+"base": 5599.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2823,
+"y": 5579,
+"w": 20,
+"h": 26,
+"base": 5599.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1823,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1955,
+"y": 5599,
+"w": 20,
+"h": 26,
+"base": 5619.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2336,
+"y": 5597,
+"w": 24,
+"h": 30,
+"base": 5622.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4229,
+"y": 5602,
+"w": 20,
+"h": 26,
+"base": 5622.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4139,
+"y": 5603,
+"w": 22,
+"h": 28,
+"base": 5626.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1823,
+"y": 5621,
+"w": 20,
+"h": 26,
+"base": 5641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5621,
+"w": 20,
+"h": 26,
+"base": 5641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5621,
+"w": 20,
+"h": 26,
+"base": 5641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5621,
+"w": 20,
+"h": 26,
+"base": 5641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5621,
+"w": 20,
+"h": 26,
+"base": 5641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5621,
+"w": 20,
+"h": 26,
+"base": 5641.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4198,
+"y": 5642,
+"w": 20,
+"h": 26,
+"base": 5662.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1823,
+"y": 5643,
+"w": 20,
+"h": 26,
+"base": 5663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5643,
+"w": 20,
+"h": 26,
+"base": 5663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5643,
+"w": 20,
+"h": 26,
+"base": 5663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5643,
+"w": 20,
+"h": 26,
+"base": 5663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5643,
+"w": 20,
+"h": 26,
+"base": 5663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5643,
+"w": 20,
+"h": 26,
+"base": 5663.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1801,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1823,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1845,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1867,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1889,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1911,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1933,
+"y": 5665,
+"w": 20,
+"h": 26,
+"base": 5685.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4151,
+"y": 5669,
+"w": 20,
+"h": 26,
+"base": 5689.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3263,
+"y": 5680,
+"w": 20,
+"h": 26,
+"base": 5700.0,
 "kind": "tree",
 "species": "deciduous"
 },
@@ -9553,6 +14786,15 @@
 "base": 5707.0,
 "kind": "tree",
 "species": "deciduous"
+},
+{
+"x": 1434,
+"y": 5668,
+"w": 60,
+"h": 62,
+"base": 5724.0,
+"kind": "tree",
+"species": "oak"
 },
 {
 "x": 1801,
@@ -9564,404 +14806,1589 @@
 "species": "deciduous"
 },
 {
-"x": 4803,
-"y": 5707,
-"w": 26,
-"h": 32,
-"base": 5734.0,
+"x": 3674,
+"y": 5712,
+"w": 20,
+"h": 26,
+"base": 5732.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2762,
-"y": 5766,
+"x": 3654,
+"y": 5716,
+"w": 20,
+"h": 26,
+"base": 5736.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1464,
+"y": 5724,
+"w": 20,
+"h": 26,
+"base": 5744.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3639,
+"y": 5725,
+"w": 20,
+"h": 26,
+"base": 5745.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3898,
+"y": 5729,
 "w": 26,
 "h": 32,
+"base": 5756.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1439,
+"y": 5738,
+"w": 20,
+"h": 26,
+"base": 5758.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3496,
+"y": 5768,
+"w": 24,
+"h": 30,
 "base": 5793.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 2852,
-"y": 5888,
-"w": 51,
-"h": 39,
-"base": 5922.0,
+"x": 3558,
+"y": 5744,
+"w": 60,
+"h": 62,
+"base": 5800.0,
 "kind": "tree",
 "species": "oak"
 },
 {
-"x": 2707,
-"y": 5977,
-"w": 20,
-"h": 26,
-"base": 5997.0,
+"x": 3621,
+"y": 5781,
+"w": 22,
+"h": 28,
+"base": 5804.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 5026,
-"y": 6094,
+"x": 3654,
+"y": 5848,
 "w": 20,
 "h": 26,
-"base": 6114.0,
+"base": 5868.0,
 "kind": "tree",
 "species": "deciduous"
 },
 {
-"x": 5114,
-"y": 6149,
+"x": 3513,
+"y": 5849,
 "w": 20,
 "h": 26,
-"base": 6169.0,
+"base": 5869.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3979,
+"y": 5852,
+"w": 20,
+"h": 26,
+"base": 5872.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3883,
+"y": 5879,
+"w": 26,
+"h": 32,
+"base": 5906.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1358,
+"y": 5906,
+"w": 60,
+"h": 62,
+"base": 5962.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3748,
+"y": 5940,
+"w": 24,
+"h": 30,
+"base": 5965.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1397,
+"y": 5965,
+"w": 22,
+"h": 28,
+"base": 5988.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3764,
+"y": 5968,
+"w": 22,
+"h": 28,
+"base": 5991.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3741,
+"y": 5973,
+"w": 22,
+"h": 28,
+"base": 5996.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4479,
+"y": 5995,
+"w": 24,
+"h": 30,
+"base": 6020.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 931,
+"y": 6019,
+"w": 28,
+"h": 35,
+"base": 6048.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4448,
+"y": 6059,
+"w": 20,
+"h": 26,
+"base": 6079.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2679,
+"y": 6064,
+"w": 20,
+"h": 26,
+"base": 6084.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2634,
+"y": 6081,
+"w": 20,
+"h": 26,
+"base": 6101.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4567,
+"y": 6091,
+"w": 20,
+"h": 26,
+"base": 6111.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1954,
+"y": 6083,
+"w": 28,
+"h": 35,
+"base": 6112.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2431,
+"y": 6151,
+"w": 20,
+"h": 26,
+"base": 6171.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3133,
+"y": 6150,
+"w": 24,
+"h": 30,
+"base": 6175.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4976,
+"y": 6180,
+"w": 22,
+"h": 28,
+"base": 6203.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2818,
+"y": 6201,
+"w": 28,
+"h": 35,
+"base": 6230.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2291,
+"y": 6229,
+"w": 20,
+"h": 26,
+"base": 6249.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 214,
+"y": 6232,
+"w": 20,
+"h": 26,
+"base": 6252.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 144,
+"y": 6248,
+"w": 24,
+"h": 30,
+"base": 6273.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1901,
+"y": 6343,
+"w": 22,
+"h": 28,
+"base": 6366.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1962,
+"y": 6359,
+"w": 26,
+"h": 32,
+"base": 6386.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1991,
+"y": 6375,
+"w": 28,
+"h": 35,
+"base": 6404.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2286,
+"y": 6404,
+"w": 20,
+"h": 26,
+"base": 6424.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2279,
+"y": 6432,
+"w": 22,
+"h": 28,
+"base": 6455.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1993,
+"y": 6437,
+"w": 26,
+"h": 32,
+"base": 6464.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1965,
+"y": 6438,
+"w": 26,
+"h": 32,
+"base": 6465.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4151,
+"y": 6417,
+"w": 60,
+"h": 62,
+"base": 6473.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2285,
+"y": 6467,
+"w": 20,
+"h": 26,
+"base": 6487.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 436,
+"y": 6481,
+"w": 20,
+"h": 26,
+"base": 6501.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2283,
+"y": 6488,
+"w": 20,
+"h": 26,
+"base": 6508.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3500,
+"y": 6488,
+"w": 20,
+"h": 26,
+"base": 6508.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 556,
+"y": 6491,
+"w": 20,
+"h": 26,
+"base": 6511.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 536,
+"y": 6491,
+"w": 20,
+"h": 26,
+"base": 6511.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3522,
+"y": 6496,
+"w": 22,
+"h": 28,
+"base": 6519.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 516,
+"y": 6499,
+"w": 20,
+"h": 26,
+"base": 6519.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 539,
+"y": 6514,
+"w": 20,
+"h": 26,
+"base": 6534.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 566,
+"y": 6514,
+"w": 20,
+"h": 26,
+"base": 6534.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 521,
+"y": 6516,
+"w": 20,
+"h": 26,
+"base": 6536.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 557,
+"y": 6486,
+"w": 60,
+"h": 62,
+"base": 6542.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2282,
+"y": 6524,
+"w": 22,
+"h": 28,
+"base": 6547.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 556,
+"y": 6527,
+"w": 20,
+"h": 26,
+"base": 6547.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 582,
+"y": 6540,
+"w": 20,
+"h": 26,
+"base": 6560.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 542,
+"y": 6548,
+"w": 20,
+"h": 26,
+"base": 6568.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 567,
+"y": 6548,
+"w": 20,
+"h": 26,
+"base": 6568.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 453,
+"y": 6513,
+"w": 60,
+"h": 62,
+"base": 6569.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 516,
+"y": 6550,
+"w": 20,
+"h": 26,
+"base": 6570.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 554,
+"y": 6555,
+"w": 20,
+"h": 26,
+"base": 6575.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 400,
+"y": 6521,
+"w": 60,
+"h": 62,
+"base": 6577.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 522,
+"y": 6527,
+"w": 60,
+"h": 62,
+"base": 6583.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1930,
+"y": 6569,
+"w": 20,
+"h": 26,
+"base": 6589.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1852,
+"y": 6576,
+"w": 20,
+"h": 26,
+"base": 6596.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 564,
+"y": 6581,
+"w": 20,
+"h": 26,
+"base": 6601.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 388,
+"y": 6551,
+"w": 60,
+"h": 62,
+"base": 6607.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 552,
+"y": 6590,
+"w": 20,
+"h": 26,
+"base": 6610.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1820,
+"y": 6593,
+"w": 20,
+"h": 26,
+"base": 6613.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 546,
+"y": 6604,
+"w": 20,
+"h": 26,
+"base": 6624.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 561,
+"y": 6609,
+"w": 20,
+"h": 26,
+"base": 6629.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 521,
+"y": 6613,
+"w": 20,
+"h": 26,
+"base": 6633.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1809,
+"y": 6614,
+"w": 20,
+"h": 26,
+"base": 6634.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 401,
+"y": 6613,
+"w": 24,
+"h": 30,
+"base": 6638.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 536,
+"y": 6628,
+"w": 20,
+"h": 26,
+"base": 6648.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1866,
+"y": 6628,
+"w": 22,
+"h": 28,
+"base": 6651.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1812,
+"y": 6636,
+"w": 20,
+"h": 26,
+"base": 6656.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 529,
+"y": 6600,
+"w": 60,
+"h": 62,
+"base": 6656.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 517,
+"y": 6640,
+"w": 20,
+"h": 26,
+"base": 6660.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1764,
+"y": 6642,
+"w": 20,
+"h": 26,
+"base": 6662.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1751,
+"y": 6650,
+"w": 20,
+"h": 26,
+"base": 6670.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 544,
+"y": 6650,
+"w": 20,
+"h": 26,
+"base": 6670.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 426,
+"y": 6652,
+"w": 24,
+"h": 30,
+"base": 6677.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 529,
+"y": 6657,
+"w": 20,
+"h": 26,
+"base": 6677.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 398,
+"y": 6658,
+"w": 24,
+"h": 30,
+"base": 6683.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2297,
+"y": 6660,
+"w": 22,
+"h": 28,
+"base": 6683.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1691,
+"y": 6633,
+"w": 60,
+"h": 62,
+"base": 6689.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1867,
+"y": 6641,
+"w": 60,
+"h": 62,
+"base": 6697.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 536,
+"y": 6677,
+"w": 20,
+"h": 26,
+"base": 6697.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 499,
+"y": 6651,
+"w": 60,
+"h": 62,
+"base": 6707.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1797,
+"y": 6691,
+"w": 20,
+"h": 26,
+"base": 6711.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 387,
+"y": 6691,
+"w": 22,
+"h": 28,
+"base": 6714.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 479,
+"y": 6699,
+"w": 20,
+"h": 26,
+"base": 6719.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2305,
+"y": 6697,
+"w": 22,
+"h": 28,
+"base": 6720.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1796,
+"y": 6709,
+"w": 20,
+"h": 26,
+"base": 6729.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 386,
+"y": 6709,
+"w": 22,
+"h": 28,
+"base": 6732.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 435,
+"y": 6714,
+"w": 20,
+"h": 26,
+"base": 6734.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 476,
+"y": 6719,
+"w": 20,
+"h": 26,
+"base": 6739.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 371,
+"y": 6717,
+"w": 22,
+"h": 28,
+"base": 6740.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 496,
+"y": 6723,
+"w": 20,
+"h": 26,
+"base": 6743.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3749,
+"y": 6724,
+"w": 22,
+"h": 28,
+"base": 6747.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 440,
+"y": 6736,
+"w": 20,
+"h": 26,
+"base": 6756.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 423,
+"y": 6738,
+"w": 20,
+"h": 26,
+"base": 6758.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 366,
+"y": 6738,
+"w": 22,
+"h": 28,
+"base": 6761.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 456,
+"y": 6705,
+"w": 60,
+"h": 62,
+"base": 6761.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 1789,
+"y": 6746,
+"w": 20,
+"h": 26,
+"base": 6766.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1764,
+"y": 6724,
+"w": 60,
+"h": 62,
+"base": 6780.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 473,
+"y": 6727,
+"w": 60,
+"h": 62,
+"base": 6783.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3767,
+"y": 6765,
+"w": 20,
+"h": 26,
+"base": 6785.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 479,
+"y": 6773,
+"w": 20,
+"h": 26,
+"base": 6793.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1786,
+"y": 6786,
+"w": 20,
+"h": 26,
+"base": 6806.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3805,
+"y": 6792,
+"w": 20,
+"h": 26,
+"base": 6812.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1781,
+"y": 6800,
+"w": 20,
+"h": 26,
+"base": 6820.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1767,
+"y": 6808,
+"w": 20,
+"h": 26,
+"base": 6828.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 4702,
+"y": 6810,
+"w": 20,
+"h": 26,
+"base": 6830.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3838,
+"y": 6811,
+"w": 20,
+"h": 26,
+"base": 6831.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1769,
+"y": 6823,
+"w": 20,
+"h": 26,
+"base": 6843.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 3874,
+"y": 6841,
+"w": 20,
+"h": 26,
+"base": 6861.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2322,
+"y": 6839,
+"w": 22,
+"h": 28,
+"base": 6862.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2298,
+"y": 6829,
+"w": 60,
+"h": 62,
+"base": 6885.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 3907,
+"y": 6859,
+"w": 28,
+"h": 35,
+"base": 6888.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1736,
+"y": 6833,
+"w": 60,
+"h": 62,
+"base": 6889.0,
+"kind": "tree",
+"species": "oak"
+},
+{
+"x": 2311,
+"y": 6900,
+"w": 20,
+"h": 26,
+"base": 6920.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1749,
+"y": 6907,
+"w": 20,
+"h": 26,
+"base": 6927.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2308,
+"y": 6918,
+"w": 20,
+"h": 26,
+"base": 6938.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1738,
+"y": 6932,
+"w": 20,
+"h": 26,
+"base": 6952.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2301,
+"y": 6946,
+"w": 20,
+"h": 26,
+"base": 6966.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1738,
+"y": 6950,
+"w": 20,
+"h": 26,
+"base": 6970.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1734,
+"y": 6964,
+"w": 20,
+"h": 26,
+"base": 6984.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1724,
+"y": 6975,
+"w": 20,
+"h": 26,
+"base": 6995.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1754,
+"y": 6984,
+"w": 20,
+"h": 26,
+"base": 7004.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1673,
+"y": 6985,
+"w": 20,
+"h": 26,
+"base": 7005.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2291,
+"y": 6988,
+"w": 20,
+"h": 26,
+"base": 7008.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1723,
+"y": 6991,
+"w": 20,
+"h": 26,
+"base": 7011.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1744,
+"y": 6996,
+"w": 20,
+"h": 26,
+"base": 7016.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1880,
+"y": 6997,
+"w": 20,
+"h": 26,
+"base": 7017.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1734,
+"y": 7020,
+"w": 20,
+"h": 26,
+"base": 7040.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1738,
+"y": 7043,
+"w": 20,
+"h": 26,
+"base": 7063.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 2274,
+"y": 7049,
+"w": 22,
+"h": 28,
+"base": 7072.0,
+"kind": "tree",
+"species": "deciduous"
+},
+{
+"x": 1731,
+"y": 7057,
+"w": 20,
+"h": 26,
+"base": 7077.0,
 "kind": "tree",
 "species": "deciduous"
 }
 ],
 "bales": [
 {
-"x": 167,
-"y": 2216
+"x": 141,
+"y": 2028
 },
 {
-"x": 1377,
-"y": 1906
+"x": 1752,
+"y": 1667
 },
 {
-"x": 246,
-"y": 2725
+"x": 1312,
+"y": 2214
+},
+{
+"x": 50,
+"y": 3598
+},
+{
+"x": 38,
+"y": 3411
 },
 {
 "x": 53,
-"y": 3543
+"y": 3477
 },
 {
-"x": 57,
-"y": 3330
+"x": 378,
+"y": 3484
 },
 {
-"x": 33,
-"y": 3309
+"x": 678,
+"y": 3667
 },
 {
-"x": 696,
-"y": 3669
+"x": 547,
+"y": 3590
 },
 {
-"x": 436,
-"y": 3701
+"x": 1147,
+"y": 3789
 },
 {
-"x": 445,
-"y": 3575
+"x": 871,
+"y": 3917
 },
 {
-"x": 1086,
-"y": 3904
+"x": 2060,
+"y": 3997
 },
 {
-"x": 1089,
-"y": 3992
+"x": 1812,
+"y": 3905
 },
 {
-"x": 873,
-"y": 3812
+"x": 1358,
+"y": 5511
 },
 {
-"x": 2117,
-"y": 4144
+"x": 2014,
+"y": 5397
 },
 {
-"x": 1647,
-"y": 3809
+"x": 1399,
+"y": 5095
 },
 {
-"x": 1722,
-"y": 3939
+"x": 2853,
+"y": 3888
 },
 {
-"x": 2345,
-"y": 5268
+"x": 3689,
+"y": 3735
 },
 {
-"x": 1651,
-"y": 5481
+"x": 3343,
+"y": 4173
 },
 {
-"x": 1832,
-"y": 5563
+"x": 4928,
+"y": 3520
 },
 {
-"x": 3799,
-"y": 4124
+"x": 4876,
+"y": 2938
 },
 {
-"x": 3724,
-"y": 3739
+"x": 4870,
+"y": 3103
 },
 {
-"x": 3381,
-"y": 4476
+"x": 4803,
+"y": 3632
 },
 {
-"x": 4792,
-"y": 2947
+"x": 4741,
+"y": 3573
 },
 {
-"x": 4885,
-"y": 3089
+"x": 4748,
+"y": 3618
 },
 {
-"x": 4920,
-"y": 3295
-},
-{
-"x": 4785,
-"y": 3680
-},
-{
-"x": 4792,
-"y": 3685
-},
-{
-"x": 4823,
-"y": 3641
-},
-{
-"x": 4569,
+"x": 4640,
 "y": 3621
 },
 {
-"x": 4633,
-"y": 3686
+"x": 4597,
+"y": 3604
 },
 {
-"x": 4659,
-"y": 3694
+"x": 4634,
+"y": 3593
 },
 {
-"x": 4809,
-"y": 3975
+"x": 4789,
+"y": 3948
 },
 {
-"x": 4948,
-"y": 3942
+"x": 4855,
+"y": 3951
 },
 {
-"x": 5034,
-"y": 3902
+"x": 4971,
+"y": 3846
 },
 {
-"x": 3139,
-"y": 5256
+"x": 2998,
+"y": 5236
 },
 {
-"x": 2994,
-"y": 5251
+"x": 3363,
+"y": 5270
 },
 {
-"x": 3064,
-"y": 5221
+"x": 3068,
+"y": 5357
 },
 {
-"x": 3531,
-"y": 4875
+"x": 3646,
+"y": 4839
 },
 {
-"x": 3600,
-"y": 5046
+"x": 3533,
+"y": 4965
 },
 {
-"x": 3572,
-"y": 4805
+"x": 3559,
+"y": 5035
 },
 {
-"x": 3973,
-"y": 4728
+"x": 3867,
+"y": 4635
 },
 {
-"x": 4111,
-"y": 4624
+"x": 3941,
+"y": 4414
 },
 {
-"x": 4048,
-"y": 4716
+"x": 4073,
+"y": 4537
 },
 {
-"x": 4652,
-"y": 4775
+"x": 4638,
+"y": 5047
 },
 {
-"x": 4564,
-"y": 4911
+"x": 4533,
+"y": 4865
 },
 {
-"x": 4740,
-"y": 5143
-},
-{
-"x": 4934,
-"y": 5098
-},
-{
-"x": 4548,
-"y": 4457
-},
-{
-"x": 5118,
-"y": 4619
-},
-{
-"x": 5108,
-"y": 4659
-},
-{
-"x": 5096,
+"x": 4615,
 "y": 4593
 },
 {
-"x": 3885,
-"y": 5272
+"x": 5102,
+"y": 4968
 },
 {
-"x": 3605,
-"y": 5343
+"x": 5098,
+"y": 4928
 },
 {
-"x": 3800,
-"y": 5149
+"x": 4785,
+"y": 4664
 },
 {
-"x": 4417,
-"y": 5505
+"x": 5113,
+"y": 4561
 },
 {
-"x": 4494,
-"y": 5524
+"x": 5112,
+"y": 4570
 },
 {
-"x": 4661,
-"y": 5460
+"x": 3805,
+"y": 5182
 },
 {
-"x": 4725,
-"y": 5648
+"x": 4107,
+"y": 5282
 },
 {
-"x": 4343,
-"y": 5734
+"x": 3842,
+"y": 5150
 },
 {
-"x": 4358,
-"y": 5809
+"x": 4761,
+"y": 5494
 },
 {
-"x": 2783,
-"y": 5733
+"x": 4627,
+"y": 5508
 },
 {
-"x": 3249,
-"y": 5688
+"x": 4383,
+"y": 5585
 },
 {
-"x": 3043,
-"y": 5718
+"x": 4378,
+"y": 5765
 },
 {
-"x": 2621,
-"y": 6000
+"x": 4489,
+"y": 5714
 },
 {
-"x": 2618,
-"y": 5838
+"x": 4504,
+"y": 5831
 },
 {
-"x": 2457,
-"y": 5659
+"x": 3994,
+"y": 5824
 },
 {
-"x": 2497,
-"y": 6094
+"x": 2847,
+"y": 5721
 },
 {
-"x": 2407,
-"y": 6186
+"x": 2430,
+"y": 5608
 },
 {
-"x": 2417,
-"y": 5870
+"x": 2574,
+"y": 5974
 },
 {
-"x": 4369,
-"y": 5382
+"x": 2608,
+"y": 6032
 },
 {
-"x": 4267,
-"y": 5387
+"x": 2365,
+"y": 6118
 },
 {
-"x": 4322,
-"y": 5315
+"x": 2504,
+"y": 6051
 },
 {
-"x": 4372,
+"x": 4342,
+"y": 5329
+},
+{
+"x": 4501,
+"y": 5371
+},
+{
+"x": 4394,
+"y": 5405
+},
+{
+"x": 4143,
+"y": 6089
+},
+{
+"x": 4029,
+"y": 5945
+},
+{
+"x": 4351,
 "y": 6127
 },
 {
-"x": 4082,
-"y": 6203
+"x": 5106,
+"y": 5867
 },
 {
-"x": 3998,
-"y": 6227
+"x": 5036,
+"y": 5643
 },
 {
-"x": 5060,
-"y": 5775
+"x": 5069,
+"y": 5953
 },
 {
-"x": 4315,
-"y": 6883
+"x": 4027,
+"y": 6505
 },
 {
-"x": 3238,
-"y": 6967
+"x": 3690,
+"y": 6861
 },
 {
-"x": 3658,
-"y": 6587
+"x": 3441,
+"y": 6667
 },
 {
-"x": 210,
-"y": 141
+"x": 296,
+"y": 317
 },
 {
-"x": 104,
-"y": 304
+"x": 313,
+"y": 218
 },
 {
-"x": 167,
-"y": 406
+"x": 298,
+"y": 237
 },
 {
-"x": 2284,
-"y": 904
+"x": 2472,
+"y": 1193
 },
 {
-"x": 2292,
-"y": 1404
+"x": 2200,
+"y": 823
 },
 {
-"x": 2142,
-"y": 1154
+"x": 2252,
+"y": 1125
 },
 {
-"x": 5099,
-"y": 7063
-},
-{
-"x": 5045,
-"y": 7070
+"x": 5040,
+"y": 7069
 }
 ],
 "water": [
@@ -9982,8 +16409,8 @@
 "y": 4356
 },
 {
-"x": 5035,
-"y": 4314
+"x": 5036,
+"y": 4324
 },
 {
 "x": 5000,
@@ -10510,8 +16937,8 @@
 "y": 4282
 },
 {
-"x": 3957,
-"y": 4253
+"x": 3964,
+"y": 4260
 },
 {
 "x": 3959,
@@ -10782,8 +17209,8 @@
 "y": 5058
 },
 {
-"x": 2886,
-"y": 5017
+"x": 2887,
+"y": 5027
 },
 {
 "x": 2851,
@@ -11086,10 +17513,6 @@
 "y": 4398
 },
 {
-"x": 161,
-"y": 4356
-},
-{
 "x": 98,
 "y": 4375
 },
@@ -11190,8 +17613,8 @@
 "y": 3494
 },
 {
-"x": 5037,
-"y": 3477
+"x": 5046,
+"y": 3481
 },
 {
 "x": 5059,
@@ -11250,16 +17673,16 @@
 "y": 3733
 },
 {
-"x": 4829,
-"y": 3698
+"x": 4835,
+"y": 3706
 },
 {
 "x": 4818,
 "y": 3755
 },
 {
-"x": 4796,
-"y": 3720
+"x": 4801,
+"y": 3728
 },
 {
 "x": 4816,
@@ -11564,6 +17987,10 @@
 {
 "x": 4382,
 "y": 3954
+},
+{
+"x": 4466,
+"y": 3973
 }
 ],
 "pois": [
@@ -11717,10 +18144,10 @@
 "key": "wapnica",
 "name": "Wapnica",
 "kind": "gravel",
-"lat": 52.27399379600991,
-"lon": 22.865007538338165,
-"x": 873,
-"y": 2434
+"lat": 52.2736998751967,
+"lon": 22.86433228802074,
+"x": 781,
+"y": 2499
 }
 ],
 "track": {
@@ -11757,8 +18184,8 @@
 "r": 140
 },
 "gravel": {
-"x": 913,
-"y": 2364,
+"x": 781,
+"y": 2429,
 "r": 60
 },
 "shrines": [
@@ -11798,14 +18225,14 @@
 "y": 4050
 },
 "tree_stats": {
-"conifer": 1586,
-"oak": 696,
-"deciduous": 1111
+"conifer": 1543,
+"oak": 745,
+"deciduous": 1813
 },
 "forest_tree_stats": {
-"conifer": 1586,
-"oak": 643,
-"deciduous": 371
+"conifer": 1543,
+"oak": 647,
+"deciduous": 410
 },
 "attribution": "Map data \u00a9 OpenStreetMap contributors (ODbL)"
 }

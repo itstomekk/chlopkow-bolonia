@@ -441,6 +441,7 @@
     else if (from === 'choral' || from === 'nokturn') ['G4', 'D5', 'G5'].forEach((n, i) => tone(master, 'p25', midi(n), t + i * .08, .08, .1, { r: .02 }));   // back outside
   }
   let SCENE_START = true;
+  let ICON = null;   // bottom-right note icon rect, set by the HUD hook
   function bark() {   // "hau!": a falling nasal square yelp through a mouth-like band-pass, plus breath noise
     if (!ac || muted || rendering) return; const t = ac.currentTime + .01;
     const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
@@ -508,7 +509,7 @@
     return new Blob([out], { type: 'audio/wav' });
   }
 
-window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, get mainSrc() { return mainTrack ? mainTrack.src : null; }, get mainPlaying() { return mainTrack ? !mainTrack.paused && !mainTrack.ended : false; }, get mainMuted() { return mainTrack ? mainTrack.muted : null; }, get busGain() { return bus ? bus.gain.value : null; }, get allMainEls() { return MAIN_ELS.map(t => ({ src: t.src, paused: t.paused, ended: t.ended })); }, MAIN_RATE_MIN, TEMPO };
+window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_TRACKS], DEFAULT_TRACKS: [...DEFAULT_TRACKS], play(n) { unlock(); P.want = n; }, get current() { return P.name; }, get muted() { return muted; }, setMuted, jingle, ding, bark, hop, get state() { return ac ? ac.state : 'none'; }, get tempo() { return tempo; }, get mainTrackRate() { return mainTrack ? mainTrack.playbackRate : null; }, get mainTrackSource() { return mainTrack ? mainTrack.src : null; }, get mainTrackEl() { return mainTrack; }, get mainTrackZone() { return mainTrackZone; }, get mainSrc() { return mainTrack ? mainTrack.src : null; }, get mainPlaying() { return mainTrack ? !mainTrack.paused && !mainTrack.ended : false; }, get mainMuted() { return mainTrack ? mainTrack.muted : null; }, get busGain() { return bus ? bus.gain.value : null; }, get allMainEls() { return MAIN_ELS.map(t => ({ src: t.src, paused: t.paused, ended: t.ended })); }, MAIN_RATE_MIN, TEMPO, get iconRect() { return ICON ? { ...ICON } : null; } };
 
   /* ------------------------------------------------------------------ game glue */
   window.addEventListener('ark-ready', () => {
@@ -568,12 +569,11 @@ window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_T
     addEventListener('keydown', e => {   // a plain listener, so K also works on the title and during dialogue
       if (e.code === 'KeyK' && !e.repeat) { setMuted(!muted); pt(muted ? A.T.musicOff : A.T.musicOn); }
     });
-    // tap the note icon (bottom-left) on touch screens
-    let ICON = null;
-    const icon = (U, H) => (ICON = { x: U * 1.5, y: H - U * 7.2, s: U * 4 });
-    HOOKS.pointer.push((px, py) => { const b = ICON; if (b && px < b.x + b.s + b.s / 2 && py > b.y - b.s / 2 && py < b.y + b.s * 1.2) { setMuted(!muted); pt(muted ? A.T.musicOff : A.T.musicOn); return true; } return false; });
+    // tap the note icon (bottom-right, above the sector readout) on touch screens
+    const icon = (U, W, H) => (ICON = { x: W - U * 1.5 - U * 4, y: H - U * 7.2, s: U * 4 });
+    HOOKS.pointer.push((px, py) => { const b = ICON; if (b && px > b.x - b.s / 2 && py > b.y - b.s / 2 && py < b.y + b.s * 1.2) { setMuted(!muted); pt(muted ? A.T.musicOff : A.T.musicOn); return true; } return false; });
     HOOKS.hud.push((U, W, H) => {
-      const c = A.ctx, b = icon(U, H), u = b.s / 10, x = b.x, y = b.y;
+      const c = A.ctx, b = icon(U, W, H), u = b.s / 10, x = b.x, y = b.y;
       c.globalAlpha = .75; c.fillStyle = 'rgba(8,12,40,.78)'; c.fillRect(x, y, b.s, b.s);
       c.fillStyle = muted ? '#9aa0c0' : '#ffd21f';
       c.fillRect(x + u * 3, y + u * 6, u * 2.2, u * 2); c.fillRect(x + u * 4.4, y + u * 2, u * .8, u * 5);   // eighth note

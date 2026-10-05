@@ -1,7 +1,7 @@
 """Browser regression for the A02 normal-world hover picker.
 
 Covers world-space and screen-space hit tests for the small world hover label
-(rendered by A03 next to the bottom-left coordinates): selected hero, a named
+(rendered by A03 next to the bottom-right coordinates): selected hero, a named
 NPC, Frodo, building, tree, apple, mushroom, trash, bale, car, tractor, mouse,
 bird and empty ground.
 

@@ -31,16 +31,16 @@
   const SAVE_VERSION = 2;   // D04: explicit payload version; a missing `v` means a legacy v1 save
   let saveFrozen = false;   // D04: a newer-version save must never be overwritten this session
   const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 5;
-  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik'];
+  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik'];
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
   if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) selectedCharacter = 'arek';
 
   /* ---------- text ---------- */
   const T = {
     pl: {
-      title: 'CHŁOPKÓW BOLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
+      title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
+      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -104,9 +104,9 @@
       ],
     },
     en: {
-      title: 'CHŁOPKÓW BOLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
+      title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK' },
+      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -192,9 +192,10 @@
      questLog(lines)                          push [text, done] rows into the quest log
      minimap(dot)                             draw markers: dot(x, y, colour)
      blocksPlayer() -> true to freeze normal movement (e.g. countdowns)
+     solidAt(x, y, air) -> true for extra outdoor obstacle pixels
      speed(x, y) -> multiplier for Arek's walking speed at (x, y) (e.g. off-track slowdown in the race)
      busy() -> true while a quiz/minigame runs (the church door stays shut) */
-  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [], busy: [], speed: [] };
+  const HOOKS = { near: [], npcTalk: [], update: [], world: [], hud: [], key: [], pointer: [], questLog: [], minimap: [], blocksPlayer: [], busy: [], speed: [], solidAt: [] };
 
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
@@ -432,7 +433,7 @@
     return { x: npc.x, y: npc.y };
   }
   // These roles live at a fixed spot of the level (items.json) and are never shuffled; old saves are pulled back to it.
-  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys']);
+  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik']);
   function randomizeNpcPositions() {
     if (!MAP || !ITEMS || !SOLID) return;
     buildReachableMask();
@@ -477,18 +478,47 @@
   /* ---------- input ---------- */
   function cancelClickMove() { clickTarget.active = false; }
   let namePrompt = null;
-  function requestPlayerName(fresh = true) {
-    if (namePrompt || scene !== 'title') return;
+  /* Opening sequence: pixel reveal of the village -> character picker + name field -> the village dims and
+     the CHŁOPKÓW POLONIA sign takes over. Only visuals: nothing here starts the game or steals focus. */
+  const REDUCED_MOTION = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const OPENING = { reveal: 1.7, emblem: 5.2, fade: 1.3 };
+  let openingT = 0, CREST = null, pixCvs = null;
+  const openingStage = () => REDUCED_MOTION || openingT >= OPENING.emblem ? 'emblem' : openingT >= OPENING.reveal ? 'selector' : 'reveal';
+  const skipOpeningReveal = () => { openingT = Math.max(openingT, OPENING.reveal); };
+  const nameInput = () => namePrompt && namePrompt.querySelector('input');
+  function placeNameForm() {   // docks the form next to the character grid (beside it when there is room, else below it)
+    if (!namePrompt || !cvs.width) return;
+    const bs = characterButtonBounds(), k = innerWidth / cvs.width;
+    const gx = Math.min(...bs.map(b => b.x)) * k, gy = Math.min(...bs.map(b => b.y)) * k, gb = Math.max(...bs.map(b => b.y + b.h)) * k;
+    const side = gx - 16 >= 210, w = side ? Math.min(290, gx - 16) : Math.min(330, innerWidth - 24);
+    const U = Math.min(cvs.width, cvs.height * 1.6) / 100, stripTop = innerHeight - U * 9.5 * k;
+    namePrompt.style.width = w + 'px';
+    const h = namePrompt.getBoundingClientRect().height;
+    let top = side ? gy : gb + 10;
+    top = Math.max(8, Math.min(top, stripTop - h - 8));
+    namePrompt.style.left = (side ? gx - 12 - w : (innerWidth - w) / 2) + 'px';
+    namePrompt.style.top = top + 'px';
+  }
+  function requestPlayerName(fresh = true, auto = false) {
+    if (scene !== 'title') return;
+    if (namePrompt) { if (!auto && nameInput()) nameInput().focus(); return; }
+    skipOpeningReveal();
     const overlay = document.createElement('div'); overlay.id = 'player-name-overlay';
-    Object.assign(overlay.style, { position: 'fixed', inset: '0', zIndex: '20', display: 'grid', placeItems: 'center', padding: '20px', boxSizing: 'border-box', background: 'rgba(5,8,25,.78)', fontFamily: 'sans-serif', touchAction: 'auto' });
+    Object.assign(overlay.style, { position: 'fixed', zIndex: '20', boxSizing: 'border-box', fontFamily: 'sans-serif', touchAction: 'auto', animation: REDUCED_MOTION ? 'none' : 'ark-name-in .5s ease-out both' });
+    if (!document.getElementById('ark-name-style')) {
+      const st = document.createElement('style'); st.id = 'ark-name-style';
+      st.textContent = '@keyframes ark-name-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}';
+      document.head.appendChild(st);
+    }
     const form = document.createElement('form');
-    Object.assign(form.style, { width: 'min(420px, 100%)', boxSizing: 'border-box', padding: '24px', border: '3px solid #ffd21f', background: '#10163a', color: '#f5f0e0', textAlign: 'center', display: 'grid', gap: '16px' });
+    Object.assign(form.style, { boxSizing: 'border-box', padding: '12px', border: '3px solid #ffd21f', background: 'rgba(16,22,58,.93)', color: '#f5f0e0', textAlign: 'center', display: 'grid', gap: '8px' });
     const label = document.createElement('label'); label.htmlFor = 'player-name-input'; label.textContent = LANG === 'pl' ? 'JAK MASZ NA IMIĘ?' : 'WHAT IS YOUR NAME?';
+    Object.assign(label.style, { fontWeight: 'bold', fontSize: '13px', letterSpacing: '.04em' });
     const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'nickname'; input.placeholder = LANG === 'pl' ? 'Wpisz imię' : 'Enter a name'; input.value = fresh ? '' : heroName(); input.required = true;
-    Object.assign(input.style, { width: '100%', boxSizing: 'border-box', padding: '14px', fontSize: '18px', border: '2px solid #c8cee0', borderRadius: '4px' });
+    Object.assign(input.style, { width: '100%', boxSizing: 'border-box', padding: '10px', fontSize: '16px', border: '2px solid #c8cee0', borderRadius: '4px' });
     const submit = document.createElement('button'); submit.id = 'player-name-submit'; submit.type = 'submit'; submit.textContent = LANG === 'pl' ? 'ZACZNIJ GRĘ' : 'START GAME';
-    Object.assign(submit.style, { padding: '14px', border: '0', borderRadius: '4px', background: '#ffd21f', color: '#10163a', fontWeight: 'bold', fontSize: '16px', touchAction: 'manipulation' });
-    const error = document.createElement('div'); error.setAttribute('aria-live', 'polite'); error.style.color = '#ff9b8f';
+    Object.assign(submit.style, { padding: '11px', border: '0', borderRadius: '4px', background: '#ffd21f', color: '#10163a', fontWeight: 'bold', fontSize: '15px', touchAction: 'manipulation' });
+    const error = document.createElement('div'); error.setAttribute('aria-live', 'polite'); error.style.cssText = 'color:#ff9b8f;font-size:12px;min-height:0';
     form.append(label, input, submit, error); overlay.appendChild(form);
     overlay.addEventListener('pointerdown', e => e.stopPropagation());
     form.addEventListener('submit', e => {
@@ -499,7 +529,9 @@
       if (fresh) startGame(true, playerName);
       else { Q.playerName = playerName; save(); }
     });
-    document.body.appendChild(overlay); namePrompt = overlay; input.focus();
+    document.body.appendChild(overlay); namePrompt = overlay; placeNameForm();
+    // Desktop: typing can begin at once. Touch: no autofocus, so the soft keyboard never hides the opening.
+    if (!auto || (window.matchMedia && matchMedia('(pointer: fine)').matches)) input.focus();
   }
   function characterButtonBounds() {
     const W = cvs.width, H = cvs.height, U = Math.min(W, H * 1.6) / 100;
@@ -528,10 +560,14 @@
       P.x = spawn.x; P.y = spawn.y; randomizeNpcPositions(); ensureMushrooms(); ensureTrash(); unstick(); placeFrodoNearArek(); camX = P.x; camY = P.y; hasSave = true; save();
     }
     if (!fresh && !Q.playerName) { requestPlayerName(false); return; }
+    if (namePrompt) { namePrompt.remove(); namePrompt = null; }
     scene = 'play';
   }
   addEventListener('keydown', e => {
-    if (namePrompt) return;
+    if (namePrompt) {
+      if (e.code === 'Enter' && nameInput() && document.activeElement !== nameInput()) { e.preventDefault(); nameInput().focus(); }
+      return;
+    }
     keys.add(e.code);
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) cancelClickMove();
@@ -663,6 +699,8 @@
             // dims (broad oak crowns w >= 40/h >= 30 used to read as BUILDING and the
             // remaining trees fell through to the anonymous ground label).
             if (o.kind === 'tree') { if (hit(box)) take({ label: WORLD_HOVER.tree, kind: 'tree', x: o.x, y: o.y, base: o.base }); continue; }
+            // real-yard sprites (osm/render_map.py YARD_SPRITES): always buildings, even narrow sheds
+            if (o.kind === 'yard_building') { if (hit(box)) take({ label: WORLD_HOVER.building, kind: 'building', x: o.x, y: o.y, base: o.base }); continue; }
             if (o.w >= 40 && o.h >= 30 && o.w <= 200) { if (hit(box)) take({ label: WORLD_HOVER.building, kind: 'building', x: o.x, y: o.y, base: o.base }); }
             else if (o.w < 40 && o.h >= 40) { if (hit(box)) take({ label: WORLD_HOVER.tree, kind: 'tree', x: o.x, y: o.y, base: o.base }); }
     }
@@ -725,7 +763,12 @@
       // Check for character button click
       const [px, py] = toCanvas(e);
       const button = characterButtonBounds().find(b => px >= b.x && px < b.x + b.w && py >= b.y && py < b.y + b.h);
-      if (button) { selectCharacter(button.id); return; }
+      if (button) {
+        selectCharacter(button.id); skipOpeningReveal();
+        if (nameInput() && window.matchMedia && matchMedia('(pointer: fine)').matches) nameInput().focus();
+        return;
+      }
+      skipOpeningReveal();
       startGame(!hasSave);
       return;
     }
@@ -974,6 +1017,7 @@
   function solidAt(x, y, air) {
     x |= 0; y |= 0;
     if (x < 4 || y < (MAP.top ?? 40) || x >= MAP.w - 4 || y >= MAP.h - 2) return true;
+    if (HOOKS.solidAt.some(f => f(x, y, air))) return true;
     const v = SOLID[y * MAP.w + x];
     return air ? v === 2 : v !== 0;   // 2 = tall (walls, trees, ponds), 1 = low (fences, streams, hay) — clearable mid-air
   }
@@ -1116,6 +1160,10 @@
   }
   function update(dt) {
     time += dt;
+    if (scene === 'title') {
+      openingT += dt;
+      if (!hasSave && !namePrompt && openingStage() !== 'reveal') requestPlayerName(true, true);
+    }
     dust = dust.filter(d => (d.t += dt) < .5);
     fx = fx.filter(f => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 320 * dt; return f.t < 1.2; });
     if (toast && (toast.t += dt) > 1.6) toast = null;
@@ -1204,7 +1252,30 @@
   function spriteAnim(meta, prefix, dir) {
     return meta.anims[prefix + dir] || meta.anims[prefix + cardinalDir(dir)] || meta.anims[prefix + 'down'];
   }
+  // Forest shade: the hero gets less light under the canopy. Eased in/out so crossing the
+  // forest edge is a soft fade, not a flicker; tinted on a small art-size canvas (no ctx.filter,
+  // which older Safari lacks).
+  const FOREST_SHADE = { max: .34, color: '14,30,20', rate: 2.5 };
+  let heroShade = 0, heroShadeT = 0, shadeCvs = null;
+  function updateHeroShade() {
+    const target = !ROOM && terrainAt(P.x, P.y) === 'forest' ? 1 : 0;
+    const dt = Math.min(.1, Math.max(0, time - heroShadeT)); heroShadeT = time;
+    heroShade += (target - heroShade) * Math.min(1, dt * FOREST_SHADE.rate);
+    if (Math.abs(target - heroShade) < .002) heroShade = target;
+    return heroShade;
+  }
+  function shadedFrame(sheet, f, k) {   // the frame, darkened by k (0..1) where it has pixels
+    if (!shadeCvs) shadeCvs = document.createElement('canvas');
+    if (shadeCvs.width !== f.w || shadeCvs.height !== f.h) { shadeCvs.width = f.w; shadeCvs.height = f.h; }
+    const g = shadeCvs.getContext('2d');
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, f.w, f.h);
+    g.drawImage(sheet, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+    g.globalCompositeOperation = 'source-atop'; g.fillStyle = `rgba(${FOREST_SHADE.color},${(FOREST_SHADE.max * k).toFixed(3)})`;
+    g.fillRect(0, 0, f.w, f.h);
+    return shadeCvs;
+  }
   function drawArek(sx, sy, s) {
+    const shade = updateHeroShade();
     const h = CHAR_H * s, zk = 1 - P.z / JUMP_H * .45;
     ctx.globalAlpha = zk; shadow(sx, sy, s * zk); ctx.globalAlpha = 1;
     sy -= P.z * s;
@@ -1216,19 +1287,20 @@
     if (anim.flip) ctx.scale(-1, 1);
     const sq = P.land < 1 ? 1 - Math.sin(P.land * Math.PI) * .14 : 1;   // landing squash
     ctx.scale(2 - sq, sq);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh);
+    ctx.imageSmoothingEnabled = selectedCharacter !== 'bercik'; ctx.imageSmoothingQuality = 'high';
+    if (shade > .01) ctx.drawImage(shadedFrame(sheet, f, shade), 0, 0, f.w, f.h, -w / 2, -hh, w, hh);
+    else ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh);
     ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
   function drawArekPose(sx, sy, s, dir, step, alpha = 1) {   // used for the race ghost
     const { meta, sheet } = SPR, anim = spriteAnim(meta, 'walk_', dir), f = anim.frames[Math.floor(step) % anim.frames.length];
     const h = CHAR_H * s, scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
     ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
-    ctx.imageSmoothingEnabled = true; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = selectedCharacter !== 'bercik'; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
   // Round straw bale lying on its side (24x16 art px), end face with rings on the right. Mirrored every few px of
   // rolling so it visibly tumbles when pushed.
-  const BALE_PX = [[9, 0, 5, "q"], [7, 1, 2, "q"], [9, 1, 3, "y"], [12, 1, 2, "n"], [14, 1, 2, "q"], [5, 2, 2, "q"], [7, 2, 5, "y"], [12, 2, 2, "n"], [14, 2, 4, "q"], [3, 3, 2, "q"], [5, 3, 4, "Y"], [9, 3, 2, "y"], [11, 3, 1, "Y"], [12, 3, 2, "n"], [14, 3, 6, "q"], [2, 4, 1, "q"], [3, 4, 4, "Y"], [7, 4, 1, "n"], [8, 4, 1, "Y"], [9, 4, 1, "y"], [10, 4, 2, "Y"], [12, 4, 2, "n"], [14, 4, 1, "q"], [15, 4, 2, "x"], [17, 4, 3, "y"], [20, 4, 1, "x"], [1, 5, 1, "q"], [2, 5, 1, "y"], [3, 5, 4, "Y"], [7, 5, 1, "n"], [8, 5, 1, "Y"], [9, 5, 1, "y"], [10, 5, 2, "Y"], [12, 5, 2, "n"], [14, 5, 1, "x"], [15, 5, 1, "y"], [16, 5, 5, "N"], [21, 5, 1, "y"], [0, 6, 1, "q"], [1, 6, 1, "Y"], [2, 6, 1, "y"], [3, 6, 4, "Y"], [7, 6, 1, "n"], [8, 6, 1, "Y"], [9, 6, 1, "y"], [10, 6, 2, "Y"], [12, 6, 1, "n"], [13, 6, 1, "x"], [14, 6, 1, "n"], [15, 6, 1, "N"], [16, 6, 1, "y"], [17, 6, 2, "N"], [19, 6, 2, "y"], [21, 6, 1, "N"], [22, 6, 1, "x"], [0, 7, 1, "q"], [1, 7, 1, "Y"], [2, 7, 1, "y"], [3, 7, 4, "Y"], [7, 7, 1, "n"], [8, 7, 1, "Y"], [9, 7, 1, "y"], [10, 7, 2, "Y"], [12, 7, 1, "n"], [13, 7, 1, "x"], [14, 7, 1, "N"], [15, 7, 1, "y"], [16, 7, 1, "N"], [17, 7, 2, "Y"], [19, 7, 1, "N"], [20, 7, 1, "y"], [21, 7, 1, "N"], [22, 7, 1, "y"], [23, 7, 1, "q"], [0, 8, 1, "q"], [1, 8, 2, "Y"], [3, 8, 1, "y"], [4, 8, 1, "Y"], [5, 8, 1, "y"], [6, 8, 2, "n"], [8, 8, 1, "y"], [9, 8, 2, "Y"], [11, 8, 1, "y"], [12, 8, 1, "n"], [13, 8, 1, "x"], [14, 8, 3, "N"], [17, 8, 2, "Y"], [19, 8, 1, "N"], [20, 8, 1, "y"], [21, 8, 1, "N"], [22, 8, 1, "y"], [23, 8, 1, "q"], [0, 9, 1, "q"], [1, 9, 2, "Y"], [3, 9, 1, "y"], [4, 9, 1, "Y"], [5, 9, 1, "y"], [6, 9, 2, "n"], [8, 9, 1, "y"], [9, 9, 2, "Y"], [11, 9, 1, "y"], [12, 9, 1, "n"], [13, 9, 1, "x"], [14, 9, 1, "n"], [15, 9, 1, "N"], [16, 9, 4, "y"], [20, 9, 2, "N"], [22, 9, 1, "x"], [1, 10, 1, "q"], [2, 10, 1, "Y"], [3, 10, 1, "y"], [4, 10, 1, "Y"], [5, 10, 1, "y"], [6, 10, 2, "n"], [8, 10, 1, "y"], [9, 10, 2, "Y"], [11, 10, 1, "y"], [12, 10, 2, "n"], [14, 10, 1, "x"], [15, 10, 1, "y"], [16, 10, 5, "N"], [21, 10, 1, "x"], [2, 11, 1, "q"], [3, 11, 3, "Y"], [6, 11, 2, "n"], [8, 11, 4, "Y"], [12, 11, 2, "n"], [14, 11, 2, "q"], [16, 11, 2, "x"], [18, 11, 1, "y"], [19, 11, 2, "x"], [3, 12, 2, "q"], [5, 12, 1, "Y"], [6, 12, 1, "n"], [7, 12, 5, "Y"], [12, 12, 2, "n"], [14, 12, 6, "q"], [5, 13, 2, "q"], [7, 13, 7, "n"], [14, 13, 4, "q"], [7, 14, 2, "q"], [9, 14, 5, "n"], [14, 14, 2, "q"], [9, 15, 5, "q"]];
+  const BALE_PX = [[5,0,13,"N"],[18,0,1,"q"],[3,1,1,"N"],[4,1,1,"n"],[5,1,1,"Y"],[6,1,2,"y"],[8,1,1,"Y"],[9,1,8,"y"],[17,1,1,"n"],[18,1,2,"N"],[20,1,1,"q"],[2,2,1,"N"],[3,2,1,"Y"],[4,2,3,"y"],[7,2,1,"Y"],[8,2,5,"y"],[13,2,1,"Y"],[14,2,2,"y"],[16,2,1,"n"],[17,2,1,"N"],[18,2,1,"Y"],[19,2,1,"y"],[20,2,1,"Y"],[21,2,1,"q"],[2,3,1,"n"],[3,3,2,"y"],[5,3,2,"Y"],[7,3,1,"x"],[8,3,6,"Y"],[14,3,1,"y"],[15,3,1,"x"],[16,3,1,"N"],[17,3,2,"Y"],[19,3,1,"n"],[20,3,2,"Y"],[1,4,1,"N"],[2,4,1,"Y"],[3,4,1,"y"],[4,4,2,"Y"],[6,4,1,"x"],[7,4,5,"Y"],[12,4,1,"x"],[13,4,1,"y"],[14,4,1,"Y"],[15,4,1,"n"],[16,4,1,"x"],[17,4,1,"y"],[18,4,1,"N"],[19,4,2,"n"],[21,4,1,"x"],[22,4,1,"n"],[1,5,1,"n"],[2,5,1,"y"],[3,5,3,"Y"],[6,5,1,"x"],[7,5,5,"Y"],[12,5,1,"n"],[13,5,1,"y"],[14,5,1,"Y"],[15,5,1,"n"],[16,5,1,"x"],[17,5,1,"n"],[18,5,1,"x"],[19,5,1,"Y"],[20,5,1,"y"],[21,5,2,"n"],[0,6,1,"q"],[1,6,1,"Y"],[2,6,1,"y"],[3,6,2,"Y"],[5,6,1,"y"],[6,6,1,"x"],[7,6,2,"Y"],[9,6,1,"y"],[10,6,2,"Y"],[12,6,1,"n"],[13,6,2,"Y"],[15,6,1,"n"],[16,6,1,"x"],[17,6,1,"n"],[18,6,1,"y"],[19,6,1,"N"],[20,6,1,"x"],[21,6,1,"Y"],[22,6,1,"n"],[23,6,1,"N"],[0,7,1,"q"],[1,7,1,"x"],[2,7,3,"Y"],[5,7,1,"y"],[6,7,1,"x"],[7,7,2,"Y"],[9,7,1,"y"],[10,7,2,"Y"],[12,7,1,"n"],[13,7,1,"Y"],[14,7,1,"x"],[15,7,1,"N"],[16,7,1,"x"],[17,7,1,"n"],[18,7,1,"x"],[19,7,2,"n"],[21,7,1,"Y"],[22,7,1,"x"],[23,7,1,"N"],[0,8,1,"q"],[1,8,1,"x"],[2,8,3,"Y"],[5,8,1,"y"],[6,8,1,"x"],[7,8,1,"n"],[8,8,1,"Y"],[9,8,1,"y"],[10,8,1,"Y"],[11,8,1,"x"],[12,8,1,"n"],[13,8,1,"Y"],[14,8,1,"x"],[15,8,1,"N"],[16,8,1,"x"],[17,8,1,"N"],[18,8,1,"n"],[19,8,2,"x"],[21,8,1,"Y"],[22,8,1,"x"],[23,8,1,"N"],[0,9,1,"q"],[1,9,1,"n"],[2,9,1,"Y"],[3,9,2,"x"],[5,9,1,"y"],[6,9,1,"x"],[7,9,1,"n"],[8,9,1,"Y"],[9,9,1,"y"],[10,9,1,"Y"],[11,9,2,"n"],[13,9,2,"x"],[15,9,1,"N"],[16,9,1,"x"],[17,9,1,"n"],[18,9,1,"x"],[19,9,2,"Y"],[21,9,2,"n"],[23,9,1,"N"],[1,10,1,"N"],[2,10,1,"Y"],[3,10,2,"x"],[5,10,1,"Y"],[6,10,1,"x"],[7,10,1,"n"],[8,10,3,"Y"],[11,10,2,"n"],[13,10,2,"x"],[15,10,1,"N"],[16,10,1,"x"],[17,10,1,"Y"],[18,10,1,"x"],[19,10,1,"y"],[20,10,1,"x"],[21,10,2,"n"],[1,11,1,"N"],[2,11,3,"x"],[5,11,1,"Y"],[6,11,1,"x"],[7,11,1,"n"],[8,11,1,"x"],[9,11,2,"Y"],[11,11,2,"n"],[13,11,2,"x"],[15,11,1,"n"],[16,11,1,"N"],[17,11,1,"y"],[18,11,1,"x"],[19,11,2,"N"],[21,11,1,"Y"],[22,11,1,"n"],[2,12,1,"N"],[3,12,2,"n"],[5,12,2,"x"],[7,12,2,"n"],[9,12,2,"x"],[11,12,3,"n"],[14,12,1,"x"],[15,12,1,"n"],[16,12,1,"N"],[17,12,1,"n"],[18,12,1,"Y"],[19,12,1,"x"],[20,12,1,"Y"],[21,12,1,"x"],[2,13,1,"q"],[3,13,1,"N"],[4,13,12,"n"],[16,13,1,"N"],[17,13,1,"q"],[18,13,1,"n"],[19,13,1,"Y"],[20,13,1,"x"],[21,13,1,"q"],[3,14,1,"q"],[4,14,1,"N"],[5,14,3,"n"],[8,14,1,"N"],[9,14,8,"n"],[17,14,1,"N"],[18,14,1,"q"],[19,14,1,"N"],[20,14,1,"q"],[5,15,1,"q"],[6,15,2,"N"],[8,15,1,"q"],[9,15,5,"N"],[14,15,1,"q"],[15,15,2,"N"],[17,15,2,"q"]];
   // Art-space bounds of BALE_PX, shared by drawBale (offsets), the hover extent and the test hook.
   const BALE_DRAW = (() => {
   let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
@@ -1414,6 +1486,14 @@ function drawFrodo(sx, sy, s) {
       ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(player.sheet, f.x, f.y, f.w, f.h, sx - w / 2, sy + meta.foot * scale - hh, w, hh); ctx.restore();
       return;
     }
+    if (n.id === 'bercik' && PLAYER_SHEETS.bercik) {
+      const player = PLAYER_SHEETS.bercik, meta = player.meta;
+      const anim = spriteAnim(meta, 'walk_', n.face || 'down');
+      const f = anim.frames[Math.floor(time * 3) % anim.frames.length], h = CHAR_H * s;
+      const scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
+      ctx.save(); ctx.imageSmoothingEnabled = false; ctx.drawImage(player.sheet, f.x, f.y, f.w, f.h, sx - w / 2, sy + meta.foot * scale - hh, w, hh); ctx.restore();
+      return;
+    }
     const i = NPC_IDX[n.id], h = CHAR_H * s * (n.id === 'grandpa' ? 1.05 : 1);
     if (i == null || NPCIMG.width < (i + 1) * 130) return;   // atlas cell not built yet
     const scale = h / (170 - 6 - 14), w = 130 * scale, hh = 170 * scale;
@@ -1503,14 +1583,15 @@ function drawFrodo(sx, sy, s) {
     return String.fromCharCode(65 + col) + row;
   }
 
-  // Position readout: the grid sector (A5, B6 style) under the player / cursor.
+  // Position readout: grid sector (A5, B6 style) + map x,y + lat/lon under the player / cursor.
+  const posText = (x, y) => `${sectorAt(x, y)}  ${Math.round(x)},${Math.round(y)}  ${mapCoordinateText(x, y)}`;
   function drawCoords(U, H, big, mx, my, mw, mh) {
-    const player = `${heroName()} ${sectorAt(P.x, P.y)}`;
+    const player = `${heroName()} ${posText(P.x, P.y)}`;
     if (!big) {
       ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
-      const tw = ctx.measureText(player).width;
-      ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(U * 1.2, H - U * 2.4, tw + U * .8, U * 2);
-      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(player, U * 1.6, H - U * 1.35);
+      const tw = ctx.measureText(player).width, W = cvs.width;   // bottom-right corner, right-aligned
+      ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(W - U * 1.2 - tw - U * .8, H - U * 2.4, tw + U * .8, U * 2);
+      ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(player, W - U * 1.6, H - U * 1.35); ctx.textAlign = 'left';
       // A03: one small world hover label beside the coordinates (state fn above).
       const hl = worldHoverLabelState(U, cvs.width, H);
       if (hl.shown) {
@@ -1520,7 +1601,7 @@ function drawFrodo(sx, sy, s) {
       }
       return;
     }
-    const cursor = mapCursor.seen ? `KURSOR ${sectorAt(mapCursor.x, mapCursor.y)}` : 'KURSOR / TAP - kliknij mapę';
+    const cursor = mapCursor.seen ? `KURSOR ${posText(mapCursor.x, mapCursor.y)}` : 'KURSOR / TAP - kliknij mapę';
     ctx.font = `${U * 1.25}px Silkscreen`; ctx.textAlign = 'left';
     const tw = Math.max(ctx.measureText(player).width, ctx.measureText(cursor).width) + U * 2;
     const x = Math.max(U, mx), y = Math.min(H - U * 5.2, my + mh + U);
@@ -1555,7 +1636,7 @@ function drawFrodo(sx, sy, s) {
       text += '…';
     }
     const tw = ctx.measureText(text).width, h = U * 1.6, w = tw + U * .8;
-    const x = U * 1.2, y = H - U * 2.4 - h;   // sits directly above the coordinate box
+    const x = W - U * 1.2 - w, y = H - U * 2.4 - h;   // directly above the (bottom-right) coordinate box
     return { shown: true, text, x, y, w, h };
   }
 
@@ -1565,25 +1646,51 @@ function drawFrodo(sx, sy, s) {
     for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) ctx.fillText(txt, x + dx * px, y + dy * px);
     ctx.fillStyle = fill; ctx.fillText(txt, x, y);
   }
+  const clamp01 = v => Math.max(0, Math.min(1, v));
   function drawSplash(W, H, U) {
-    ctx.fillStyle = '#6fb6ea'; ctx.fillRect(0, 0, W, H);
+    const ease = v => v * v * (3 - 2 * v);
+    const reveal = REDUCED_MOTION ? 1 : clamp01(openingT / OPENING.reveal);
+    const ui = REDUCED_MOTION ? 1 : clamp01((openingT - (OPENING.reveal - .5)) / .6);
+    const dim = REDUCED_MOTION ? 1 : ease(clamp01((openingT - OPENING.emblem) / OPENING.fade));
+    ctx.fillStyle = '#10163a'; ctx.fillRect(0, 0, W, H);
     if (SPLASH) {   // cover-fit with a slow Ken-Burns drift toward the church
       const k = Math.max(W / SPLASH.width, H / SPLASH.height) * (1.04 + .02 * Math.sin(time * .15));
-      const dw = SPLASH.width * k, dh = SPLASH.height * k;
+      const dw = SPLASH.width * k, dh = SPLASH.height * k, dx = (W - dw) / 2 - Math.sin(time * .1) * U * .8, dy = (H - dh) * .55;
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(SPLASH, (W - dw) / 2 - Math.sin(time * .1) * U * .8, (H - dh) * .55, dw, dh);
+      if (reveal >= 1) ctx.drawImage(SPLASH, dx, dy, dw, dh);
+      else {   // coarse blocks resolving into the real image: the village "materialises" out of pixels
+        const steps = [60, 44, 32, 24, 17, 12, 8, 6, 4, 3, 2];
+        const b = Math.max(2, Math.round(steps[Math.min(steps.length - 1, Math.floor(reveal * steps.length))] * W / 1280));
+        pixCvs = pixCvs || document.createElement('canvas');
+        const cw = Math.ceil(W / b), ch = Math.ceil(H / b);
+        pixCvs.width = cw; pixCvs.height = ch;
+        const pc = pixCvs.getContext('2d'); pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'low';
+        pc.drawImage(SPLASH, dx / b, dy / b, dw / b, dh / b);
+        ctx.globalAlpha = clamp01(openingT / .35);
+        ctx.drawImage(pixCvs, 0, 0, cw, ch, 0, 0, cw * b, ch * b);
+        ctx.globalAlpha = 1;
+      }
     }
     // golden-hour sparkles drifting over the grass
+    ctx.globalAlpha = reveal;
     for (let i = 0; i < 18; i++) {
       const x = ((i * 137.5 + time * (8 + i % 5)) % 100) / 100 * W, y = H * (.62 + ((i * 53) % 30) / 100) - Math.sin(time * 1.3 + i) * U;
       ctx.fillStyle = `rgba(255,238,160,${.35 + .35 * Math.sin(time * 3 + i * 1.7)})`; ctx.fillRect(x, y, U * .35, U * .35);
     }
-    // title block on the calm upper-left sky
-    const tx = W * .06, ty = H * .12;
+    ctx.globalAlpha = 1;
+    // The village dims and the CHŁOPKÓW POLONIA sign (wordmark included in the art) takes the stage.
+    const bs = characterButtonBounds(), gridTop = Math.min(...bs.map(b => b.y));
+    if (dim > 0) { ctx.fillStyle = `rgba(8,12,28,${.74 * dim})`; ctx.fillRect(0, 0, W, H); }
+    if (CREST && dim > 0) {
+      const top = H * .03, bottom = hasSave ? H * .35 : gridTop - U * 1.4;
+      const sc = Math.min((W - U * 4) / CREST.width, (bottom - top) / CREST.height), cw = CREST.width * sc, ch = CREST.height * sc;
+      ctx.globalAlpha = dim; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(CREST, (W - cw) / 2, top + (bottom - top - ch) / 2 + (1 - dim) * U * 2, cw, ch);
+      ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
+    }
+    ctx.globalAlpha = ui;
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.font = `${U * 5.4}px Silkscreen`; outlined(T.title.split(' ').slice(0, -1).join(' '), tx, ty, '#ffd21f', Math.max(2, U * .35));
-    ctx.font = `${U * 7}px Silkscreen`; outlined(T.title.split(' ').slice(-1)[0], tx, ty + U * 7.2, '#ffffff', Math.max(2, U * .4));
-    ctx.font = `${U * 1.6}px Silkscreen`; outlined(LANG === 'pl' ? 'GMINA PLATERÓW · MAZOWSZE' : 'PLATERÓW COMMUNE · MASOVIA', tx, ty + U * 12.4, '#f5f0e0', Math.max(1, U * .2));
+    ctx.font = `${U * 1.5}px Silkscreen`; outlined(LANG === 'pl' ? 'GMINA PLATERÓW · MAZOWSZE' : 'PLATERÓW COMMUNE · MASOVIA', W * .04, H * .04, '#f5f0e0', Math.max(1, U * .2));
     // Character selection (same geometry is used by pointer input, including before first paint).
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const button of characterButtonBounds()) {
@@ -1619,6 +1726,8 @@ function drawFrodo(sx, sy, s) {
     ctx.textAlign = 'center';
     if (Math.floor(time * 2) % 2) { ctx.font = `${U * 2.5}px Silkscreen`; outlined(hasSave ? T.cont : T.start, W / 2, H - U * 6.2, '#ffd21f', Math.max(1, U * .25)); }
     ctx.font = `${U * 1.4}px Silkscreen`; ctx.fillStyle = '#c8cee0'; ctx.fillText(T.help, W / 2, H - U * 2.6);
+    ctx.globalAlpha = 1;
+    placeNameForm();
   }
 
   /* ---------- render ---------- */
@@ -1739,8 +1848,8 @@ function drawFrodo(sx, sy, s) {
       ctx.globalAlpha = big ? 1 : .9; ctx.fillStyle = '#10163a'; ctx.fillRect(mx - U * .5, my - U * .5, mw + U, mh + U);
       ctx.imageSmoothingEnabled = true; ctx.drawImage(MINI, mx, my, mw, mh); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
       const dot = (x, y, c, r = .5) => { ctx.fillStyle = c; ctx.fillRect(mx + x / MAP.w * mw - U * r, my + y / MAP.h * mh - U * r, U * r * 2, U * r * 2); };
-      for (const n of ITEMS.npcs) if (!n.secret) { const st = n.id === 'grandpa' ? Q.grandpa : Q[n.id]; if (st !== 2) dot(n.x, n.y, '#7cd0ff', big ? .6 : .4); }
-      HOOKS.minimap.forEach(f => f((x, y, c) => dot(x, y, c, big ? .45 : .3)));
+      // Maps mark only the player's own position (2026-10-04, Tomek). HOOKS.minimap stays
+      // available for plugins but is intentionally not drawn: no NPC, quest, race, flag or car dots.
       dot(P.x, P.y, Math.floor(time * 4) % 2 ? '#ff3b30' : '#fff', big ? .7 : .5);
       if (big) {
         if (mapCursor.seen) {
@@ -1806,6 +1915,7 @@ function drawFrodo(sx, sy, s) {
   }
 
   async function init() {
+    load('img/chlopkow-polonia-logo.png').then(i => { CREST = i; }, () => { });   // title-screen sign; optional
     load('img/splash.png').then(i => { SPLASH = i; }, () => { });   // title art; the title still works without it
     [MAP, ITEMS] = await Promise.all([fetch('map.json').then(r => r.json()), fetch('items.json').then(r => r.json())]);
     // A stale generated items file or an old save must not render the same NPC twice.
@@ -1952,7 +2062,7 @@ function drawFrodo(sx, sy, s) {
       load,
     };
     window.dispatchEvent(new Event('ark-ready'));
-    window.__game = { P, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
+    window.__game = { P, get openingStage() { return openingStage(); }, get heroShade() { return heroShade; }, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
     }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, sectorAt, clockGeometry: () => {

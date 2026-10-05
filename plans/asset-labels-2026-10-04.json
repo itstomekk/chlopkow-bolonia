@@ -1,0 +1,166 @@
+{
+ "review": "style-2026-10-04",
+ "scope": "zwierzęta, drzewa, przedmioty, teren, obiekty, rekwizyty (bez postaci i budynków)",
+ "global_note": "",
+ "labels": {
+  "animal.minigame.pig": {
+   "label": "adjust",
+   "note": "nie pasuje do reszty stylu"
+  },
+  "animal.minigame.dog": {
+   "label": "adjust"
+  },
+  "animal.critter.pig": {
+   "label": "regen",
+   "issues": [
+    "too_crude"
+   ]
+  },
+  "animal.critter.butterfly": {
+   "label": "keep"
+  },
+  "animal.critter.hare": {
+   "issues": [
+    "too_crude"
+   ],
+   "label": "regen"
+  },
+  "animal.critter.mouse": {
+   "label": "keep"
+  },
+  "animal.critter.boar": {
+   "label": "anchor"
+  },
+  "animal.critter.stork": {
+   "label": "keep"
+  },
+  "animal.critter.bird": {
+   "label": "anchor"
+  },
+  "animal.bison": {
+   "label": "keep",
+   "note": "a czy nie mamy kierunków góra dół?"
+  },
+  "animal.butterfly_fallback": {
+   "label": "adjust",
+   "issues": [
+    "too_crude"
+   ]
+  },
+  "vehicle.tractor_side": {
+   "label": "regen",
+   "issues": [
+    "too_crude"
+   ]
+  },
+  "vehicle.tractor_front": {
+   "label": "regen",
+   "issues": [
+    "too_crude",
+    "perspective",
+    "animation"
+   ]
+  },
+  "vehicle.tractor_back": {
+   "label": "regen",
+   "issues": [
+    "too_crude",
+    "perspective",
+    "animation"
+   ]
+  },
+  "vehicle.car_red": {
+   "label": "keep"
+  },
+  "vehicle.car": {
+   "label": "regen",
+   "note": "zmiazdzony jest, awaryjny wygląda lepiej",
+   "issues": [
+    "perspective"
+   ]
+  },
+  "item.apple": {
+   "label": "keep"
+  },
+  "item.mushroom": {
+   "label": "adjust",
+   "note": "więcej światłocienai i kształtu"
+  },
+  "item.bale": {
+   "label": "regen",
+   "note": "kształt jest croissanta, zamiast walca"
+  },
+  "item.trash": {
+   "label": "anchor"
+  },
+  "item.cap": {
+   "label": "keep"
+  },
+  "minigame.mower": {
+   "label": "adjust",
+   "issues": [
+    "too_crude"
+   ]
+  },
+  "minigame.flag": {
+   "label": "keep"
+  },
+  "tree.oak.source": {
+   "label": "anchor"
+  },
+  "tree.deciduous.1": {
+   "label": "regen",
+   "issues": [
+    "too_crude",
+    "outline"
+   ]
+  },
+  "terrain.grass": {
+   "label": "keep"
+  },
+  "terrain.cemetery": {
+   "label": "adjust",
+   "note": "dodaj symbole, nagrobki, wygeneruj małe ze zdjęć archwialnych"
+  },
+  "landmark.cross_iron": {
+   "label": "keep"
+  },
+  "landmark.shrine_stone": {
+   "label": "adjust",
+   "issues": [
+    "too_crude"
+   ]
+  },
+  "landmark.shrine_white": {
+   "label": "keep"
+  },
+  "landmark.shrine_fenced": {
+   "label": "keep"
+  },
+  "landmark.village_sign": {
+   "label": "adjust",
+   "issues": [
+    "size"
+   ],
+   "note": "za duże"
+  },
+  "church.altar": {
+   "label": "anchor"
+  },
+  "church.ambo": {
+   "label": "anchor"
+  },
+  "church.backwall": {
+   "label": "keep"
+  },
+  "church.mary": {
+   "label": "anchor"
+  },
+  "ui.splash": {
+   "label": "keep"
+  },
+  "ui.sokol_watermark": {
+   "label": "keep"
+  }
+ }
+}

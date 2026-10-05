@@ -49,7 +49,7 @@
     const { HOOKS, P, MAP, ITEMS, ctx } = A;
     const Q = () => A.Q;
     const PL = A.LANG === 'pl';
-    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, saveT: 0, carImage: null, vehicleImage: null, critters: null, waterPoints: [], lastRestoredIds: [] };
+    const state = { q: null, cars: [], tractors: [], animals: [], ride: 0, car: -1, sites: null, farmyards: null, saveT: 0, carImage: null, vehicleImage: null, critters: null, waterPoints: [], lastRestoredIds: [] };
     const lastInteraction = Object.create(null), interactionCooldown = Object.create(null);
     /* B02b: animal identity snapshot. Only stable ids, kind and bounded positions
        are persisted into the existing Q.worldLife (same save key, no per-frame
@@ -214,6 +214,50 @@
       }
       return best;
     }
+    /* Real yard geometry only: generated map objects tagged yard_building. Trees and
+       anonymous scenery are deliberately not promoted to farmyards. Dense clusters
+       win over a long row of scattered sheds, which keeps the J12 yards useful. */
+    function farmyardClusters() {
+      if (state.farmyards) return state.farmyards;
+      const buildings = (MAP.objects || []).filter(o => o && o.kind === 'yard_building' &&
+        finite(o.x) && finite(o.y) && finite(o.w) && finite(o.h) && finite(o.base));
+      const clusters = [];
+      for (const o of buildings) {
+        const point = { x: o.x + o.w / 2, y: o.y + o.h / 2 };
+        let cluster = clusters.find(c => c.objects.some(v => Math.hypot(v.point.x - point.x, v.point.y - point.y) <= 260));
+        if (!cluster) { cluster = { objects: [] }; clusters.push(cluster); }
+        cluster.objects.push({ o, point });
+      }
+      for (const c of clusters) {
+        c.x = c.objects.reduce((sum, v) => sum + v.point.x, 0) / c.objects.length;
+        c.y = c.objects.reduce((sum, v) => sum + v.point.y, 0) / c.objects.length;
+        const xs = c.objects.map(v => v.point.x), ys = c.objects.map(v => v.point.y);
+        c.density = c.objects.length / Math.max(1, Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)));
+      }
+      return (state.farmyards = clusters.sort((a, b) => b.density - a.density));
+    }
+    function farmyardClear(s, cluster) {
+      for (const { o } of cluster.objects) {
+        if (s.x >= o.x - 20 && s.x <= o.x + o.w + 20 && s.y >= o.y - 20 && s.y <= o.base + 20) return false;
+        if (Math.hypot(s.x - (o.x + o.w / 2), s.y - o.base) < 28) return false;
+      }
+      return true;
+    }
+    function farmyardSite(extra, allowed) {
+      const clusters = farmyardClusters().slice(0, 2);
+      const isReachable = typeof A.isSpawnReachable === 'function' ? A.isSpawnReachable :
+        (window.__game && typeof window.__game.isSpawnReachable === 'function' ? window.__game.isSpawnReachable : null);
+      if (!clusters.length || !isReachable) return null;
+      const pool = [];
+      for (const c of clusters) for (let x = c.x - 250; x <= c.x + 250; x += SITE_STEP) for (let y = c.y - 250; y <= c.y + 250; y += SITE_STEP) {
+        const s = { x, y };
+        if (!isReachable(x, y) || A.terrainAt(x, y) !== 'grass' || !clusters.every(other => farmyardClear(s, other)) ||
+            !allowed(s) || tooCloseToStatic(x, y, extra) || !standable(x, y, extra)) continue;
+        pool.push(s);
+      }
+      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+      return pool.length ? { x: pool[0].x, y: pool[0].y, farmyard: true } : null;
+    }
     const inMeadow = s => {
       const m = MAP.meadow;
       return !!m && s.x >= m.x0 && s.x <= m.x1 && s.y >= m.y0 && s.y <= m.y1;
@@ -224,8 +268,12 @@
       if (Array.isArray(h)) return h.includes(terrain) || (h.includes('meadow') && inMeadow(s));
       return terrain !== 'forest';
     };
-    function animalSite(kind, extra, preferred = () => true) {
+    function animalSite(kind, extra, preferred = () => true, favorFarmyard = false) {
       const allowed = s => wildlifeAllowed(kind, s) && preferred(s);
+      if (favorFarmyard && (kind === 'chicken' || kind === 'dog')) {
+        const farm = farmyardSite(extra, allowed);
+        if (farm) return farm;
+      }
       const found = emptySite(extra, allowed);
       if (found) return found;
       if (kind === 'stork') {
@@ -278,9 +326,15 @@
         const n = counters[kind] || 0; a.id = `${kind}:${n}`; counters[kind] = n + 1;
         animals.push(a); return a;
       };
-      // Roaming wildlife first; ANIMAL_ORDER keeps every per-kind index stable.
+      // Domestic animals use a small, per-kind quota in the densest real farmyard
+      // clusters. Once it is filled, the existing rural scatter remains unchanged.
+      const farmyardQuota = { chicken: 5, dog: 3 };
       for (const kind of ['chicken', 'dog', 'boar', 'mouse', 'hare']) {
-        for (let i = 0; i < ANIMAL_TYPES[kind].count; i++) add(kind, animalSite(kind, extra.concat(animals)));
+        for (let i = 0; i < ANIMAL_TYPES[kind].count; i++) {
+          const site = animalSite(kind, extra.concat(animals), () => true, (farmyardQuota[kind] || 0) > 0);
+          if (site && site.farmyard) farmyardQuota[kind]--;
+          add(kind, site);
+        }
       }
       // Pigs stay by a subset of accessible building fronts rather than becoming
       // generic roaming wildlife. This gives the village a few lived-in farmyards.

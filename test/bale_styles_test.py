@@ -4,7 +4,7 @@ RED/GREEN checks against docs/js/game.js drawBale:
   * art bounds grow beyond the pre-B05 baseline (23x10, aspect 2.30)
   * visible aspect ratio lands in [1.4, 1.7] (rounder, not stretched)
   * the actually rendered sprite at gameplay zoom matches the declared art
-  * bale count/coordinates stay identical to docs/map.json (86 bales)
+  * bale count/coordinates stay identical to the current docs/map.json
   * pushing still works for the hero AND Frodo; a walkable route stays nearby
 
 Run:  ARK_URL=http://127.0.0.1:8790/index.html python test/bale_styles_test.py
@@ -67,12 +67,13 @@ with sync_playwright() as p:
 
     # ---------- 1. bale count + coordinates identical to map.json (before any pushing) ----------
     facts = page.evaluate("() => ({ count: window.__game.bales.length, zoom: window.ARK.zoom })")
-    assert facts["count"] == len(map_data["bales"]) == 86, facts["count"]
+    assert len(map_data["bales"]) > 0, "Map must contain field bales"
+    assert facts["count"] == len(map_data["bales"]), facts["count"]
     got = page.evaluate("__game.bales.map(b => [b.x, b.y, b.hx, b.hy])")
     src = [[b["x"], b["y"], b["x"], b["y"]] for b in map_data["bales"]]
     for i, (g0, s0) in enumerate(zip(got, src)):
         assert all(abs(a - b) < 1e-9 for a, b in zip(g0, s0)), (i, g0, s0)
-    print(f"count/coords: 86 bales identical to map.json  (zoom={facts['zoom']:.3f})")
+    print(f"count/coords: {facts['count']} bales identical to map.json  (zoom={facts['zoom']:.3f})")
 
     # ---------- 2. visible bounds at gameplay zoom: rendered canvas pixel scan ----------
     page.evaluate("window.ARK.teleport(window.__game.bales[0].x, window.__game.bales[0].y - 60)")

@@ -114,8 +114,43 @@ Compatible keepers (follow them, do not copy them): Arek (4-dir frame), Damian, 
     used 7.5 / 5 px/m = 3.6x real size; the old procedural houses were ~2.4x and that is what the plot spacing
     fits. New rule: sprite width = OSM footprint width on the map x F, F about 2.2-2.6 for houses, x0.75 of that for
     farm buildings (`process8.py`; F chosen by Tomek from compare8.png). Rules 13/15 px/m values are superseded.
+    Tomek chose F = 2.6 for houses (iteration 8).
+25. Yards (iteration 9, `gen/streetview/yard_strip.py`): Tomek: "sensible gaps between buildings, barns like the
+    real ones on the satellite".
+    - Plot membership: outbuilding -> house nearest ALONG the road on the same side (plots are strips
+      perpendicular to the road), corrected by hand from fences/hedges/driveways on the satellite (YARD_OVERRIDE).
+    - Footprints: OSM + global satellite offset (+5, +3 game px, edge-alignment search); per building a further
+      snap of max +-6 px when roof edges clearly fit better (gain > 1.4). Larger snaps locked onto trees, rejected.
+    - Outbuildings are drawn from the satellite only (tight crop + yard crop, target outlined), straight when
+      axis-aligned on the satellite (most barns here are exactly N-S / E-W), never in the road angle; N-S barns are
+      tall narrow sprites. Scale 2.0x real (houses 2.6x).
+    - Layout (corrected after Tomek: "you changed the positions, they must be as on the map"): every new sprite's
+      ground centre (collision centroid) sits exactly on the real footprint centroid (OSM + per-building
+      satellite snap; iteration 9c - 9b used the old procedural box centre, which drifted up to 13 px south for
+      tall buildings; `pos_check9c.png`). Nothing is pushed or stretched. Conflicts are solved only by
+      shrinking that outbuilding (x0.9 ... x0.6). Outbuildings x1.6 real size (houses x2.6).
+    - Known gap: some small sheds on the satellite have no OSM outline and are not drawn yet.
+    - Whole yard in ONE image (Tomek): all outbuildings of a yard drawn together, arranged as on the satellite
+      (labelled + clean yard crop, house sprite as anchor), each separate on magenta; `cut` splits them by
+      connected components and matches pieces to footprints by relative position (Hungarian); fallback
+      `single` = one image per building. Gives one consistent palette/scale per yard.
+
+26. Yard dressing (Tomek, 2026-10-04): collect ambiguous satellite features into a local HTML decision sheet
+    with original crop + marked wider context, stable candidate id, approximate map point, confidence,
+    interpretation alternatives, add/skip/better-photo decisions and notes. Ask occasional narrow questions
+    during future sector work; prefer a batch review instead of interrupting for every blurred object.
+    No uncertain tractor, mixer, material heap or shrub identity becomes a claimed satellite reconstruction
+    before Tomek decides. Keep user-confirmed local knowledge or deliberate fictional decoration distinct
+    from features actually identifiable in the image. J12 first batch: `gen/build_yard_evidence_review.py`
+    -> `asset-review/yard-evidence-j12/review.html`; every sheet has **Copy JSON** beside download, with selected-text fallback if clipboard access is denied. Preserve supplied user strings exactly; record normalized game categories separately. Decisions are exported as JSON for implementation; never overwrite the user's input export with implementation status.
+27. Farmyard life (Tomek, 2026-10-04): domestic animals should occur more frequently around dense clusters
+    of farm buildings: favour chickens and dogs, with occasional other suitable domestic species. This is
+    gameplay dressing, not satellite evidence. Keep entrances and paths clear and use walkable ground.
+    Implemented locally in `world-life.js`: prefer real `yard_building` clusters for part of the chicken/dog population, preserve rural scatter, counts, IDs and saved positions. `test/farmyard_animals_test.py` checks the integrated placement contract.
 
 ## Decisions
+
+- Bale `regen` correction: use a horizontal cylinder with parallel barrel edges and a full round end, never a peaked crescent/croissant. Keep the original 24x16 world bounds, six straw colours and shared field/J12 bitmap. Local replacement verified by real canvas and pushing tests; generated source under `image-gen/2026-10-04-chlopkow-cylindrical-bale/`.
 
 - Characters marked `adjust` get the Sołtys/Zbyszek re-grid recipe (Tomek, 2026-10-02): grandpa, Mateusz done via `gen/sprite_cleanup.py npc`.
 - Oaks stay rare in the village (12% of village trees).

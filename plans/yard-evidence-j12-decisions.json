@@ -1,0 +1,131 @@
+{
+  "review": "yard-evidence-j12-v1",
+  "gameChangesApplied": false,
+  "policy": {
+    "denseFarmyards": "Prefer chickens and dogs around dense farmyard clusters; animals are gameplay dressing, not identified from satellite imagery."
+  },
+  "decisions": {
+    "j12-15-vegetation": {
+      "decision": "add",
+      "identification": "krzewy / małe drzewa",
+      "note": "małe krzewy"
+    },
+    "j12-15-materials": {
+      "decision": "add",
+      "identification": "ciężarówka",
+      "note": ""
+    },
+    "j12-15-object": {
+      "decision": "add",
+      "identification": "cylindryczny silos na zboże",
+      "note": ""
+    },
+    "j12-18-vegetation": {
+      "decision": "add",
+      "identification": "krzewy / żywopło",
+      "note": ""
+    },
+    "j12-18-ground": {
+      "decision": "add",
+      "identification": "belki siana jak na polu",
+      "note": ""
+    },
+    "j12-18-object": {
+      "decision": "skip",
+      "identification": "",
+      "note": ""
+    }
+  },
+  "provenance": [
+    {
+      "id": "j12-15-vegetation",
+      "yard": "15",
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "box": [
+        558,
+        337,
+        699,
+        493
+      ],
+      "mapPointApprox": [
+        4908,
+        5697
+      ]
+    },
+    {
+      "id": "j12-15-materials",
+      "yard": "15",
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "box": [
+        224,
+        548,
+        465,
+        704
+      ],
+      "mapPointApprox": [
+        4860,
+        5732
+      ]
+    },
+    {
+      "id": "j12-15-object",
+      "yard": "15",
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "box": [
+        440,
+        724,
+        521,
+        805
+      ],
+      "mapPointApprox": [
+        4883,
+        5756
+      ]
+    },
+    {
+      "id": "j12-18-vegetation",
+      "yard": "18",
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "box": [
+        758,
+        36,
+        1008,
+        324
+      ],
+      "mapPointApprox": [
+        5056,
+        6023
+      ]
+    },
+    {
+      "id": "j12-18-ground",
+      "yard": "18",
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "box": [
+        356,
+        191,
+        639,
+        344
+      ],
+      "mapPointApprox": [
+        4999,
+        6036
+      ]
+    },
+    {
+      "id": "j12-18-object",
+      "yard": "18",
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "box": [
+        598,
+        425,
+        797,
+        693
+      ],
+      "mapPointApprox": [
+        5029,
+        6079
+      ]
+    }
+  ]
+}

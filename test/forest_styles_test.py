@@ -195,7 +195,7 @@ with sync_playwright() as p:
     pick = page.evaluate("""() => {
       const g = window.__game;
       const trees = g.MAP.objects.filter(o => o.kind === 'tree');
-      const bldList = g.MAP.objects.filter(o => !o.kind && o.w >= 40 && o.h >= 30 && o.w <= 200);
+      const bldList = g.MAP.objects.filter(o => (!o.kind && o.w >= 40 && o.h >= 30 && o.w <= 200) || o.kind === 'yard_building');
       // these kinds are pushed to the draw list after MAP.objects, so they always
       // render in front of a tree and legitimately win the hover pick
       const FRONT = new Set(['apple', 'mushroom', 'trash', 'cap', 'bale', 'npc', 'hero', 'frodo',
@@ -218,11 +218,12 @@ with sync_playwright() as p:
                poorTrees: treePicks.filter(o => o.w >= 40 && o.h >= 30 && o.w <= 200).length };
     }""")
     print("tree picks:", pick)
-    check(pick["treeTotal"] == 793, f"793 generated trees present ({pick['treeTotal']})")
+    _map_trees = sum(1 for o in json.load(open("docs/map.json", encoding="utf-8"))["objects"] if o.get("kind") == "tree")
+    check(pick["treeTotal"] == _map_trees, f"{_map_trees} generated trees present ({pick['treeTotal']})")
     check(pick["treePicked"] >= 780 and not pick["mis"],
           f"every tree picks as TREE or a legit front-drawn object ({pick['treePicked']}/793; misclassified {pick['mis']})")
-    check(pick["poorTrees"] >= 50,
-          f"all broad oaks (53) engageable as trees ({pick['poorTrees']} big trees picked TREE)")
+    check(pick["poorTrees"] >= 25,
+          f"all broad oaks (27 since the 2026-10-02 sprite pilot) engageable as trees ({pick['poorTrees']} big trees picked TREE)")
     check("building" in pick["bldKinds"] and pick["bldClean"] > 30,
           f"real buildings still pick as BUILDING ({pick['bldKinds']}, {pick['bldClean']} clean)"
           if "building" in pick["bldKinds"] else f"no building picks as BUILDING ({pick['bldKinds']})")

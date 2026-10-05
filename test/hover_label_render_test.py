@@ -1,10 +1,10 @@
-"""A03 render regression: the small world hover label beside the bottom-left
+"""A03 render regression: the small world hover label beside the bottom-right
 coordinate HUD.
 
 The A02 picker answers *which* label a world point gets; this suite pins down
 *that the label is actually rendered*, and only under the right conditions:
 
-- one small strip directly above the coordinate readout (same left margin,
+- one small strip directly above the coordinate readout (same right margin,
   same translucent box colour, separate from the large M-map floating box);
 - correct text after the pointer moves between objects;
 - hidden on pointerleave (and never redrawn stale), hidden in title / during
@@ -144,11 +144,11 @@ def assert_no_label(page, why):
 
 
 def assert_near_coords(page, st):
-    """The strip sits directly above the coordinate box: same left margin, its
+    """The strip sits directly above the coordinate box: same right margin, its
     bottom touching the box top (H - 2.4*U), fully inside the viewport."""
     W, H = page.evaluate("() => [window.ARK.ctx.canvas.width, window.ARK.ctx.canvas.height]")
     U = page.evaluate(U_JS)
-    assert abs(st["x"] - U * 1.2) <= 0.01, f"label left margin {st['x']} != {U*1.2}"
+    assert abs((st["x"] + st["w"]) - (W - U * 1.2)) <= 0.01, f"label right margin {W-(st['x']+st['w'])} != {U*1.2}"
     assert abs((st["y"] + st["h"]) - (H - U * 2.4)) <= U * 0.4, \
         f"label bottom {st['y']+st['h']} not above the coordinate box (H-2.4U={H-U*2.4})"
     assert st["x"] >= 0 and st["x"] + st["w"] <= W, f"label box outside viewport: {st}"
@@ -161,18 +161,18 @@ def run_desktop(page, lang, out):
     boot(page, name=name, lang=lang)
     pick = PICK_PL if lang == "pl" else PICK_EN
 
-    # --- 1. label near the bottom-left coordinates, really painted ---
+    # --- 1. label near the bottom-right coordinates, really painted ---
     info = hover(page, pick, "building")
     st = lbl(page)
     assert_label(page, info, info["expected"], "building hover")
     assert_near_coords(page, st)
     assert painted(page, info["expected"]) > 0, f"{info['expected']} never painted on canvas"
-    # the coordinate line itself still paints (hero name + grid sector, P04)
+    # the coordinate line itself still paints (hero name + grid sector P04 + map x,y + lat/lon, 2026-10-04)
     hn = page.evaluate("() => window.__game.playerName")
-    coord_re = re.compile(rf"^{re.escape(str(hn))} [A-K]\d{{1,2}}$")
+    coord_re = re.compile(rf"^{re.escape(str(hn))} [A-K]\d{{1,2}}  \d+,\d+  \d+\.\d{{5}}, \d+\.\d{{5}}$")
     coords_painted = [e["t"] for e in page.evaluate("() => window.__a3trace") if coord_re.match(e["t"])]
     assert coords_painted, f"coordinate readout line not painted: {page.evaluate('() => window.__a3trace')[:20]}"
-    assert not re.search(r"\d+,\d+", coords_painted[-1]), f"raw pixels still in the readout: {coords_painted[-1]}"
+    assert re.search(r"\d+,\d+", coords_painted[-1]), f"map x,y missing from the readout: {coords_painted[-1]}"
     page.screenshot(path=SCRATCH / f"1280x720_{lang}_hover_building.png")
 
     # --- 2. correct text after the pointer moves ---

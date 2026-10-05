@@ -1,13 +1,12 @@
 """Check the local page identity and its browser-share metadata."""
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import unquote
 
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "docs" / "index.html"
-TITLE = "CHŁOPKÓW BOLONIA"
-DESCRIPTION = "CHŁOPKÓW BOLONIA - pikselowa opowieść o wsi, pamięci i codziennym życiu."
+TITLE = "CHŁOPKÓW POLONIA"
+DESCRIPTION = "CHŁOPKÓW POLONIA - pikselowa przygoda przez prawdziwą wieś."
 REQUIRED_SCRIPTS = {"js/chat.js", "js/world-life.js", "js/cemetery-art.js"}
 
 
@@ -51,17 +50,15 @@ assert parser.meta["description"] == DESCRIPTION
 assert parser.meta["og:title"] == TITLE
 assert parser.meta["og:description"] == DESCRIPTION
 assert parser.meta["og:type"] == "website"
-assert parser.meta["og:image"] == "img/splash.png"
+assert parser.meta["og:image"] == "img/og-polonia.png"
+assert (ROOT / "docs" / parser.meta["og:image"]).is_file()
 assert set(REQUIRED_SCRIPTS).issubset(parser.scripts)
 assert all((ROOT / "docs" / src).is_file() for src in REQUIRED_SCRIPTS)
 
 favicon = next(link for link in parser.links if link.get("rel") == "icon")
 href = favicon["href"]
-assert href.startswith("data:image/svg+xml,"), href
-svg = unquote(href.split(",", 1)[1])
-assert "<svg" in svg and "</svg>" in svg
-assert "CB" in svg or any(letter in svg for letter in ("village", "house", "home"))
-assert ">A<" not in svg
+assert href == "img/favicon-polonia.png", href
+assert (ROOT / "docs" / href).is_file()
 
 for key, value in parser.meta.items():
     if key == "og:image":

@@ -71,13 +71,18 @@ TIMEOUT = 1800  # seconds per generator step (map is 5143x7091 px)
 # P10 (2026-09-29 "rozsuń brzegi wody"): map_collide.png + map_ground.png refreshed
 # by the ford bank spread (forked wm_art in the water stage); map.json, items.json,
 # map_objects.png, map_terrain.png proven byte-identical to the pre-P10 baseline.
+# 2026-10-02 A2 oak pilot: village oaks use gen/trees_src/oak.png and are rarer (24% -> 12%);
+# map.json/items.json/map_ground/map_objects refreshed, collide + terrain unchanged.
+# 2026-10-04 yards 27A-24 (asset-style-guide rule 25): 24 real-yard sprites from gen/yards/final replace their
+# procedural buildings; all six outputs refreshed (terrain had already drifted from the old baseline before this
+# change). Re-verified 2026-10-04 after the hay-bale/J12 work: two clean generator runs with empty edits reproduced these six hashes and they equal the shipped files.
 EXPECTED_BASELINE = {
-    'docs/map.json':               'bab80dcb282f957c5accb25cb7f0963c18090136019e5ac7fd0ecb0c2d9614a7',
-    'docs/items.json':             'e6d79b49a2c3e74474896f78b682b583b46c6446fe24245eb85efe00a5dae6f6',
-    'docs/img/map_collide.png':    '5cda8db1398d0920532a8adca4dff0ae3e9b1ab60a24bf264a54b8d3c6ab02e6',
-    'docs/img/map_ground.png':     '075af85f1741c313b1042dcebe13c06f91e92f24dddfd89bbbff4c54141e2f34',
-    'docs/img/map_objects.png':    '3213eda3854b00c50eff69d2a603d1e164edd166305975a92b186cc979b2e084',
-    'docs/img/map_terrain.png':    'aabc7d6f7da8152eae36accedc76f8f0627cccd93bbd7a646955316758d38efe',
+    'docs/map.json':               '4baabbb2425a2b44640cbd9bbe5ae8e1cfdb44bd27fc50e4328eda7ae694acf6',
+    'docs/items.json':             'db36e1e9d5bffd4940eec38e11de4fec21f80dfa97cd75d804023e3c5c363118',
+    'docs/img/map_collide.png':    '50b743e11aba82078222b9459f340b2af3413b0e239dce1cf2807730d0eb10ea',
+    'docs/img/map_ground.png':     '6db1079f161a40455d3ab6c98ba4ddb10eb484843fd80ca70e5a314c73ac0e5a',
+    'docs/img/map_objects.png':    '37482e6d9cf182fddb9dabe49bd75f6680e5d5c6ca04a665958e240f89857a2b',
+    'docs/img/map_terrain.png':    '833befbfd23f0fa63daac24fb04fc12bd7fae4079861f870c7fc2bfe4f6eb6dd',
 }
 
 fails = []

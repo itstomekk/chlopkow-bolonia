@@ -90,12 +90,12 @@
   style.textContent = `
     #arek-global-chat, #arek-global-chat * { box-sizing: border-box; }
     #arek-global-chat {
-      position: fixed; z-index: 10000; right: 12px; bottom: 10px;   /* P05: bottom-docked bar (was right side) */
+      position: fixed; z-index: 10000; left: 12px; bottom: 10px;   /* bottom-left dock; music note + sector readout own the bottom-right */
       width: min(400px, calc(100vw - 24px));
       color: #fff7d6; font: 12px/1.35 "Silkscreen", monospace;
       /* Readable on any terrain without an enclosing box: layered outline + soft glow. */
       text-shadow: 1px 1px 0 #10163a, 2px 2px 0 #10163a, 0 0 7px rgba(16,22,58,.9);
-      pointer-events: none; text-align: right;
+      pointer-events: none; text-align: left;
     }
     #arek-global-chat button, #arek-global-chat input, #arek-global-chat textarea {
       color: #fff7d6; background: transparent; border: 0;
@@ -107,7 +107,7 @@
       outline: 1px dashed #ffd21f; outline-offset: 2px; color: #ffd21f;
     }
     #arek-chat-launch {
-      display: inline-block; pointer-events: auto; text-align: right;
+      display: inline-block; pointer-events: auto; text-align: left;
       background: transparent; color: #fff7d6; padding: 2px 0;
       border: 0; text-transform: uppercase;
     }
@@ -145,7 +145,7 @@
     #arek-chat-send:disabled { cursor: wait; opacity: .6; }
     #arek-global-chat.arek-chat-away { visibility: hidden; }
     @media (max-width: 480px) {
-      #arek-global-chat { right: 8px; width: min(340px, calc(100vw - 16px)); }
+      #arek-global-chat { left: 8px; width: min(340px, calc(100vw - 64px)); }   /* keeps the bottom-right music note clear */
       #arek-chat-messages { height: 206px; }
     }
   `;
@@ -448,9 +448,9 @@
       if (persist) { try { localStorage.setItem(CHAT_MINIMIZED_STORAGE, '1'); } catch (e) { /* session can still minimise */ } }
     }
 
-  // Layout: a transparent bar docked to the bottom edge of the screen (P05 - was a
-  // right-side overlay). It is right-anchored at `bottom: 10px` so it never reaches
-  // across to the bottom-left coordinate readout or up to the top-right minimap; the
+  // Layout: a transparent, left-aligned bar docked to the bottom-left corner. It is
+  // left-anchored at `bottom: 10px` so it never reaches across to the bottom-right
+  // music note + sector readout or up to the top-right minimap; the
   // message area stays pointer-transparent, so the game canvas keeps every pointer
   // event except the chat's own controls. placeChat() only manages the step-aside:
   // the bar hides (the arek-chat-away class) while a dialogue box, the big M-map,

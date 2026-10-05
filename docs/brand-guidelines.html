@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHŁOPKÓW POLONIA · Brand guide</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="img/favicon-polonia.png">
+<link rel="stylesheet" href="fonts.css">
+<style>
+  :root{
+    --navy:#10163a; --gold:#ffd21f; --cream:#f5f0e0; --mist:#c8cee0; --ink:#16130c;
+    --plank:#81502b; --oak:#6e4326; --moss:#446b2e; --meadow:#b8c24b; --church:#f5e7c3;
+    --paper:#fbf7ea; --line:#e0d8c2; --text:#26231a; --muted:#6a6452;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--text);font:16px/1.6 system-ui,"Segoe UI",Roboto,sans-serif}
+  img{max-width:100%;height:auto;display:block}
+  a{color:inherit}
+  .px{font-family:Silkscreen,monospace;letter-spacing:.04em}
+  .wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+  section{padding:72px 0;border-top:1px solid var(--line)}
+  h2{font:400 22px/1.2 Silkscreen,monospace;letter-spacing:.04em;margin:0 0 6px;color:var(--navy)}
+  .kicker{font:400 12px/1 Silkscreen,monospace;letter-spacing:.12em;color:var(--moss);text-transform:uppercase;margin-bottom:12px}
+  .lede{max-width:64ch;color:var(--muted);margin:0 0 32px}
+
+  /* hero */
+  header.hero{background:var(--navy) radial-gradient(900px 420px at 50% 0,#27306b 0,transparent 70%);color:var(--cream);padding:56px 0 64px;text-align:center}
+  .hero .tag{font:400 12px Silkscreen,monospace;letter-spacing:.14em;color:var(--gold)}
+  .hero img{width:min(560px,86vw);margin:18px auto 8px;image-rendering:auto;filter:drop-shadow(0 12px 28px #0009)}
+  .hero p{margin:0 auto;max-width:56ch;color:var(--mist)}
+  nav.jump{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+  nav.jump a{font:400 11px Silkscreen,monospace;letter-spacing:.08em;text-decoration:none;color:var(--cream);border:2px solid #ffffff44;padding:8px 12px}
+  nav.jump a:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* anatomy */
+  .anatomy{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:center}
+  .stage{position:relative;background:var(--navy);padding:22px;border:3px solid var(--ink)}
+  .pin{position:absolute;width:28px;height:28px;border:3px solid var(--ink);background:var(--gold);color:var(--ink);font:400 12px/22px Silkscreen,monospace;text-align:center;transform:translate(-50%,-50%)}
+  ol.legend{margin:0;padding:0;list-style:none;display:grid;gap:18px}
+  ol.legend li{display:grid;grid-template-columns:34px 1fr;gap:12px}
+  ol.legend b{display:block;font:400 14px Silkscreen,monospace;color:var(--navy);margin-bottom:2px}
+  ol.legend span.n{width:28px;height:28px;border:3px solid var(--ink);background:var(--gold);font:400 12px/22px Silkscreen,monospace;text-align:center}
+  ol.legend p{margin:0;color:var(--muted);font-size:15px}
+
+  /* wordmark */
+  .wm{background:var(--navy);color:var(--gold);padding:40px 24px;text-align:center;border:3px solid var(--ink)}
+  .wm .big{font:400 clamp(26px,5.4vw,64px)/1.1 Silkscreen,monospace;letter-spacing:.04em;text-shadow:3px 3px 0 var(--ink),-3px 3px 0 var(--ink),3px -3px 0 var(--ink),-3px -3px 0 var(--ink),0 6px 0 var(--ink);overflow-wrap:anywhere}
+  .wm .big b{color:#fff;font-weight:400}
+  .wm small{display:block;margin-top:18px;font:400 12px Silkscreen,monospace;color:var(--mist);letter-spacing:.1em}
+  .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+  .card{background:#fff;border:2px solid var(--ink);padding:18px}
+  .card h3{margin:0 0 6px;font:400 13px Silkscreen,monospace;color:var(--navy)}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+
+  /* colour */
+  .sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .sw button{all:unset;cursor:pointer;display:block;border:2px solid var(--ink);background:#fff}
+  .sw button:focus-visible{outline:3px solid var(--gold)}
+  .sw i{display:block;height:84px}
+  .sw span{display:block;padding:9px 10px;font-size:13px;line-height:1.35}
+  .sw b{display:block;font:400 11px Silkscreen,monospace;letter-spacing:.05em}
+  .sw em{font-style:normal;color:var(--muted)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--gold);font:400 12px Silkscreen,monospace;padding:10px 14px;opacity:0;transition:.2s;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%)}
+
+  /* placement */
+  .grounds{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .ground{display:grid;place-items:center;padding:28px;border:2px solid var(--ink);min-height:240px}
+  .ground img{width:min(210px,100%)}
+  .ground.dark{background:var(--navy)} .ground.cream{background:var(--church)} .ground.grass{background:var(--moss)}
+  .ground figcaption{margin-top:10px;font:400 10px Silkscreen,monospace;letter-spacing:.08em;color:#ffffffcc;text-align:center}
+  .ground.cream figcaption{color:var(--muted)}
+  .clear{position:relative;width:min(340px,100%);margin:0 auto;border:2px dashed var(--plank);padding:34px}
+  .clear:after{content:"";position:absolute;inset:34px;border:1px solid #81502b55;pointer-events:none}
+  .specs{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;margin-top:24px}
+  .specs ul{margin:0;padding-left:18px;color:var(--muted)}
+  .specs li{margin:6px 0}
+
+  /* opening */
+  .seq{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+  .seq figure{margin:0;background:#fff;border:2px solid var(--ink)}
+  .seq figure img{width:100%;aspect-ratio:16/9;object-fit:cover;image-rendering:pixelated;border-bottom:2px solid var(--ink)}
+  .seq figcaption{padding:12px 14px;counter-increment:s;font-size:14.5px;color:var(--muted)}
+  .seq figcaption:before{content:counter(s) " · ";font:400 12px Silkscreen,monospace;color:var(--moss)}
+  .seq figcaption b{display:block;font:400 12px Silkscreen,monospace;color:var(--navy);margin-bottom:3px;letter-spacing:.05em}
+  .timeline{display:flex;margin-top:22px;height:34px;border:2px solid var(--ink);font:400 10px/30px Silkscreen,monospace;text-align:center;color:var(--ink)}
+  .timeline div{border-right:2px solid var(--ink)} .timeline div:last-child{border:0}
+
+  /* do/dont */
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .dd ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .dd li{padding:12px 14px 12px 44px;position:relative;background:#fff;border:2px solid var(--ink);font-size:15px}
+  .dd li:before{position:absolute;left:12px;top:10px;font:400 14px Silkscreen,monospace}
+  .do li:before{content:"✓";color:var(--moss)} .dont li:before{content:"✕";color:#b3261e}
+  .dd h3{font:400 14px Silkscreen,monospace;margin:0 0 12px}
+
+  /* assets */
+  table{width:100%;border-collapse:collapse;background:#fff;border:2px solid var(--ink);font-size:14.5px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font:400 11px Silkscreen,monospace;letter-spacing:.06em;background:var(--church)}
+  code{font:13px ui-monospace,Consolas,monospace;background:#efe9d2;padding:1px 5px}
+  footer{background:var(--navy);color:var(--mist);padding:36px 0;font-size:14px}
+  footer a{color:var(--gold)}
+
+  @media (max-width:820px){
+    .anatomy,.specs,.dd{grid-template-columns:1fr}
+    .rules,.grounds,.seq{grid-template-columns:1fr}
+    section{padding:52px 0}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toast{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="tag">BRAND GUIDE · v1 · OCTOBER 2026</div>
+    <img src="img/chlopkow-polonia-logo.png" alt="CHŁOPKÓW POLONIA: a village sign with the church, the windmill and a falcon">
+    <p>How the village sign, the wordmark and the opening screen of the game fit together, and how to use them without breaking the pixel-art world they come from.</p>
+    <nav class="jump" aria-label="Sections">
+      <a href="#sign">The sign</a><a href="#wordmark">Wordmark</a><a href="#colour">Colour</a><a href="#placement">Placement</a><a href="#opening">Opening</a><a href="#rules">Rules</a><a href="#assets">Assets</a>
+    </nav>
+  </div>
+</header>
+
+<section id="sign"><div class="wrap">
+  <div class="kicker">01 · The sign</div>
+  <h2>A village sign, drawn from the village</h2>
+  <p class="lede">The mark is a signboard that could stand at the edge of Chłopków. Every part comes from the game world; nothing is borrowed from a football crest, a coat of arms or a stock icon set.</p>
+  <div class="anatomy">
+    <div class="stage">
+      <img src="img/chlopkow-polonia-logo.png" alt="Annotated logo">
+      <span class="pin" style="left:50%;top:15%">1</span>
+      <span class="pin" style="left:17%;top:36%">2</span>
+      <span class="pin" style="left:73%;top:33%">3</span>
+      <span class="pin" style="left:50%;top:84%">4</span>
+    </div>
+    <ol class="legend">
+      <li><span class="n">1</span><div><b>The falcon</b><p>Original, loosely nodding to the local Sokół idea. A calm glide, not an attack pose. It must never be swapped for an existing club or national emblem.</p></div></li>
+      <li><span class="n">2</span><div><b>The windmill</b><p>The actual windmill from the game (<code>gen/lm_windmill.png</code>), with sails clearly readable so it never turns into a barn.</p></div></li>
+      <li><span class="n">3</span><div><b>The church</b><p>The actual church (<code>gen/lm_church.png</code>): cream walls, slate roof, tower and cross. The centre of the village, so the centre of the sign.</p></div></li>
+      <li><span class="n">4</span><div><b>The plank</b><p>Weathered oak with iron brackets, the one place text lives. The wordmark is typeset, never generated.</p></div></li>
+    </ol>
+  </div>
+</div></section>
+
+<section id="wordmark"><div class="wrap">
+  <div class="kicker">02 · Wordmark</div>
+  <h2>CHŁOPKÓW POLONIA</h2>
+  <p class="lede">Set in Silkscreen, the pixel font the game already uses everywhere, in capitals, on one line. Silkscreen draws the Polish letters correctly, which is why the text is always real text.</p>
+  <div class="wm"><div class="big">CHŁOPKÓW <b>POLONIA</b></div><small>SILKSCREEN · CAPITALS · HARD 1-STEP OUTLINE</small></div>
+  <div class="rules">
+    <div class="card"><h3>Always typeset</h3><p>Generated images garble Ł, Ó and Ą. Draw the illustration without letters, then add the words with the font.</p></div>
+    <div class="card"><h3>One name</h3><p>The game is <b>CHŁOPKÓW POLONIA</b>. The older name survives only in the repository address and internal save keys.</p></div>
+    <div class="card"><h3>Hard outline</h3><p>Dark 1-step outline and drop, never a soft glow or blur. It is the same treatment as the in-game titles.</p></div>
+  </div>
+</div></section>
+
+<section id="colour"><div class="wrap">
+  <div class="kicker">03 · Colour</div>
+  <h2>Earth, slate and one gold</h2>
+  <p class="lede">The sign uses the village's own palette. Gold is the only bright accent, reserved for the active choice and the call to act. Click a swatch to copy its hex.</p>
+  <div class="sw" id="swatches">
+    <button data-hex="#16130C"><i style="background:#16130c"></i><span><b>OUTLINE</b>#16130C<br><em>every hard edge</em></span></button>
+    <button data-hex="#81502B"><i style="background:#81502b"></i><span><b>PLANK</b>#81502B<br><em>sign board</em></span></button>
+    <button data-hex="#6E4326"><i style="background:#6e4326"></i><span><b>OAK</b>#6E4326<br><em>timber, shadows</em></span></button>
+    <button data-hex="#446B2E"><i style="background:#446b2e"></i><span><b>MOSS</b>#446B2E<br><em>trees, grass</em></span></button>
+    <button data-hex="#B8C24B"><i style="background:#b8c24b"></i><span><b>MEADOW</b>#B8C24B<br><em>lit grass</em></span></button>
+    <button data-hex="#F5E7C3"><i style="background:#f5e7c3"></i><span><b>CHURCH</b>#F5E7C3<br><em>walls, paper</em></span></button>
+    <button data-hex="#10163A"><i style="background:#10163a"></i><span><b>NIGHT</b>#10163A<br><em>title screen, panels</em></span></button>
+    <button data-hex="#FFD21F"><i style="background:#ffd21f"></i><span><b>GOLD</b>#FFD21F<br><em>selection, wordmark</em></span></button>
+    <button data-hex="#F5F0E0"><i style="background:#f5f0e0"></i><span><b>CREAM</b>#F5F0E0<br><em>UI text</em></span></button>
+    <button data-hex="#C8CEE0"><i style="background:#c8cee0"></i><span><b>MIST</b>#C8CEE0<br><em>secondary text</em></span></button>
+  </div>
+</div></section>
+
+<section id="placement"><div class="wrap">
+  <div class="kicker">04 · Placement</div>
+  <h2>Where the sign goes</h2>
+  <p class="lede">Full sign on the opening screen, the README and the share card. It does not float over the playing field, where the HUD and the map already compete for space.</p>
+  <div class="grounds">
+    <figure class="ground dark" style="margin:0"><img src="img/chlopkow-polonia-logo.png" alt=""><figcaption>ON NIGHT</figcaption></figure>
+    <figure class="ground cream" style="margin:0"><img src="img/chlopkow-polonia-logo.png" alt=""><figcaption>ON CHURCH CREAM</figcaption></figure>
+    <figure class="ground grass" style="margin:0"><img src="img/chlopkow-polonia-logo.png" alt=""><figcaption>ON MOSS</figcaption></figure>
+  </div>
+  <div class="specs">
+    <div class="clear"><img src="img/chlopkow-polonia-logo.png" alt="Logo with clear-space frame"></div>
+    <ul>
+      <li><b>Clear space:</b> keep at least the height of the falcon free on every side.</li>
+      <li><b>Minimum size:</b> 160 px wide for the full sign; below that use the favicon crop (<code>favicon-polonia.png</code>, no plank).</li>
+      <li><b>Scale:</b> resize the sign proportionally. Smoothing is fine for large downscales, never stretch.</li>
+      <li><b>Never inside the game world:</b> the old roadside sign stays a prop. The brand sign is a separate object.</li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="opening"><div class="wrap">
+  <div class="kicker">05 · Opening sequence</div>
+  <h2>From pixels to a village</h2>
+  <p class="lede">The opening is three beats, all cosmetic. The picker and the name field are usable the moment they appear, nothing starts the game by itself, and reduced-motion visitors get the final state straight away.</p>
+  <div class="seq">
+    <figure><img src="img/brand/opening-1-reveal.jpg" alt="Village resolving from large pixels"><figcaption><b>THE VILLAGE MATERIALISES</b>Coarse blocks resolve into the real splash scene in 1.7 s. No title text over the sky.</figcaption></figure>
+    <figure><img src="img/brand/opening-2-picker.jpg" alt="Character picker and name field over the village"><figcaption><b>PICK A HERO, GIVE A NAME</b>Six characters and the docked name form appear together on the sharp village.</figcaption></figure>
+    <figure><img src="img/brand/opening-3-sign.jpg" alt="Dimmed village with the CHŁOPKÓW POLONIA sign"><figcaption><b>THE SIGN TAKES OVER</b>After about 5 s the village dims and the sign fades in. Controls stay live above it.</figcaption></figure>
+  </div>
+  <div class="timeline" aria-label="Timing">
+    <div style="flex:1.7;background:#f5e7c3">0 – 1.7 s · REVEAL</div>
+    <div style="flex:3.5;background:#dfe6b8">1.7 – 5.2 s · PICKER + NAME</div>
+    <div style="flex:1.3;background:#ffd21f">5.2 – 6.5 s · DIM + SIGN</div>
+  </div>
+</div></section>
+
+<section id="rules"><div class="wrap">
+  <div class="kicker">06 · Rules</div>
+  <h2>Keep it a village, not a brand</h2>
+  <p class="lede" style="margin-bottom:24px">Short list, because the art does most of the work.</p>
+  <div class="dd">
+    <div class="do"><h3>DO</h3><ul>
+      <li>Use the real church and windmill sprites as the reference for any new artwork.</li>
+      <li>Keep chunky pixel clusters, hard edges and two or three shading steps.</li>
+      <li>Typeset the wordmark in Silkscreen with its hard outline.</li>
+      <li>Check Ł, Ó, Ś, Ć and Ż render before shipping any text.</li>
+      <li>Use gold only for the active choice and the call to act.</li>
+    </ul></div>
+    <div class="dont"><h3>DON'T</h3><ul>
+      <li>Merge the brand sign into the old roadside sign or redraw that prop.</li>
+      <li>Let an image generator write the name, even for a draft.</li>
+      <li>Recolour the sign, add gradients, glows or a drop shadow bigger than one pixel step.</li>
+      <li>Replace the falcon with an existing club badge, eagle emblem or coat of arms.</li>
+      <li>Pin the sign in a corner of the playing field.</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section id="assets"><div class="wrap">
+  <div class="kicker">07 · Files</div>
+  <h2>What ships</h2>
+  <p class="lede">All files live in <code>docs/img/</code> and are rebuilt by <code>python gen/brand/build_brand_assets.py</code> from <code>gen/brand/emblem-source.png</code>.</p>
+  <table>
+    <thead><tr><th>File</th><th>What it is</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td><code>chlopkow-polonia-logo.png</code></td><td>Full sign with the typeset wordmark, transparent</td><td>Opening screen, README, this guide</td></tr>
+      <tr><td><code>chlopkow-polonia-emblem.png</code></td><td>Sign without any text, transparent</td><td>Re-lettering, other languages</td></tr>
+      <tr><td><code>favicon-polonia.png</code></td><td>128 px crop: church, windmill, falcon</td><td>Browser tab</td></tr>
+      <tr><td><code>og-polonia.png</code></td><td>1200 × 630 share card on the dimmed village</td><td>Link previews</td></tr>
+    </tbody>
+  </table>
+</div></section>
+
+<footer><div class="wrap">CHŁOPKÓW POLONIA · pixel village in Gmina Płaterów, Mazowsze · <a href="./">play the game</a> · Font: Silkscreen by Jason Kottke, SIL OFL.</div></footer>
+<div class="toast px" id="toast" role="status" aria-live="polite"></div>
+<script>
+  const toast = document.getElementById('toast'); let tm;
+  document.getElementById('swatches').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const hex = b.dataset.hex;
+    (navigator.clipboard ? navigator.clipboard.writeText(hex) : Promise.reject()).catch(() => {});
+    toast.textContent = 'COPIED ' + hex; toast.classList.add('on'); clearTimeout(tm); tm = setTimeout(() => toast.classList.remove('on'), 1400);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+{
+  "review": "yard-evidence-j12-v1",
+  "identificationSource": "user-review-not-independent-satellite-confirmation",
+  "placementPolicy": "Nearest safe ground, approximate crop centers adapted to existing game buildings; no shared map rewrite.",
+  "assets": {
+    "truck": {
+      "src": "img/j12_prop_truck.png",
+      "size": [
+        24,
+        22
+      ],
+      "origin": "openai-codex-gpt-image-2-medium"
+    },
+    "silo": {
+      "src": "img/j12_prop_silo.png",
+      "size": [
+        12,
+        24
+      ],
+      "origin": "openai-codex-gpt-image-2-medium"
+    },
+    "shrub": {
+      "src": "img/j12_prop_shrub.png",
+      "size": [
+        12,
+        10
+      ],
+      "origin": "openai-codex-gpt-image-2-medium"
+    },
+    "hedge": {
+      "src": "img/j12_prop_hedge.png",
+      "size": [
+        24,
+        16
+      ],
+      "origin": "openai-codex-gpt-image-2-medium"
+    },
+    "bale": {
+      "src": "img/j12_prop_bale.png",
+      "size": [
+        24,
+        16
+      ],
+      "origin": "existing-field-bale-art"
+    }
+  },
+  "props": [
+    {
+      "id": "j12-15-materials:0",
+      "candidate": "j12-15-materials",
+      "kind": "truck",
+      "x": 4872,
+      "y": 5726,
+      "sourcePoint": [
+        4860,
+        5732
+      ],
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "sourceBox": [
+        224,
+        548,
+        465,
+        704
+      ],
+      "identification": "ciężarówka",
+      "note": "",
+      "footprint": {
+        "rx": 8.399999999999999,
+        "ry": 4.4,
+        "cy": -2,
+        "tall": true
+      }
+    },
+    {
+      "id": "j12-15-object:0",
+      "candidate": "j12-15-object",
+      "kind": "silo",
+      "x": 4845,
+      "y": 5756,
+      "sourcePoint": [
+        4883,
+        5756
+      ],
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "sourceBox": [
+        440,
+        724,
+        521,
+        805
+      ],
+      "identification": "cylindryczny silos na zboże",
+      "note": "",
+      "footprint": {
+        "rx": 4.199999999999999,
+        "ry": 4.800000000000001,
+        "cy": -2,
+        "tall": true
+      }
+    },
+    {
+      "id": "j12-15-vegetation:0",
+      "candidate": "j12-15-vegetation",
+      "kind": "shrub",
+      "x": 4880,
+      "y": 5691,
+      "sourcePoint": [
+        4908,
+        5697
+      ],
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "sourceBox": [
+        558,
+        337,
+        699,
+        493
+      ],
+      "identification": "krzewy / małe drzewa",
+      "note": "małe krzewy",
+      "footprint": {
+        "rx": 4.199999999999999,
+        "ry": 2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-15-vegetation:1",
+      "candidate": "j12-15-vegetation",
+      "kind": "shrub",
+      "x": 4956,
+      "y": 5733,
+      "sourcePoint": [
+        4908,
+        5697
+      ],
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "sourceBox": [
+        558,
+        337,
+        699,
+        493
+      ],
+      "identification": "krzewy / małe drzewa",
+      "note": "małe krzewy",
+      "footprint": {
+        "rx": 4.199999999999999,
+        "ry": 2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-15-vegetation:2",
+      "candidate": "j12-15-vegetation",
+      "kind": "shrub",
+      "x": 4958,
+      "y": 5751,
+      "sourcePoint": [
+        4908,
+        5697
+      ],
+      "source": "gen/yards/j12/yard_15/sat_clean.png",
+      "sourceBox": [
+        558,
+        337,
+        699,
+        493
+      ],
+      "identification": "krzewy / małe drzewa",
+      "note": "małe krzewy",
+      "footprint": {
+        "rx": 4.199999999999999,
+        "ry": 2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-18-vegetation:0",
+      "candidate": "j12-18-vegetation",
+      "kind": "hedge",
+      "x": 5094,
+      "y": 5991,
+      "sourcePoint": [
+        5056,
+        6023
+      ],
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "sourceBox": [
+        758,
+        36,
+        1008,
+        324
+      ],
+      "identification": "krzewy / żywopło",
+      "note": "",
+      "footprint": {
+        "rx": 8.399999999999999,
+        "ry": 3.2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-18-vegetation:1",
+      "candidate": "j12-18-vegetation",
+      "kind": "hedge",
+      "x": 5092,
+      "y": 5967,
+      "sourcePoint": [
+        5056,
+        6023
+      ],
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "sourceBox": [
+        758,
+        36,
+        1008,
+        324
+      ],
+      "identification": "krzewy / żywopło",
+      "note": "",
+      "footprint": {
+        "rx": 8.399999999999999,
+        "ry": 3.2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-18-ground:0",
+      "candidate": "j12-18-ground",
+      "kind": "bale",
+      "x": 4979,
+      "y": 5992,
+      "sourcePoint": [
+        4999,
+        6036
+      ],
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "sourceBox": [
+        356,
+        191,
+        639,
+        344
+      ],
+      "identification": "belki siana jak na polu",
+      "note": "",
+      "footprint": {
+        "rx": 8.399999999999999,
+        "ry": 3.2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-18-ground:1",
+      "candidate": "j12-18-ground",
+      "kind": "bale",
+      "x": 5011,
+      "y": 5984,
+      "sourcePoint": [
+        4999,
+        6036
+      ],
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "sourceBox": [
+        356,
+        191,
+        639,
+        344
+      ],
+      "identification": "belki siana jak na polu",
+      "note": "",
+      "footprint": {
+        "rx": 8.399999999999999,
+        "ry": 3.2,
+        "cy": -2,
+        "tall": false
+      }
+    },
+    {
+      "id": "j12-18-ground:2",
+      "candidate": "j12-18-ground",
+      "kind": "bale",
+      "x": 5031,
+      "y": 6106,
+      "sourcePoint": [
+        4999,
+        6036
+      ],
+      "source": "gen/yards/j12/yard_18/sat_clean.png",
+      "sourceBox": [
+        356,
+        191,
+        639,
+        344
+      ],
+      "identification": "belki siana jak na polu",
+      "note": "",
+      "footprint": {
+        "rx": 8.399999999999999,
+        "ry": 3.2,
+        "cy": -2,
+        "tall": false
+      }
+    }
+  ],
+  "skipped": [
+    "j12-18-object"
+  ],
+  "artCost": {
+    "provider": "openai-codex",
+    "calls": 1,
+    "usdIncremental": 0,
+    "billing": "ChatGPT subscription quota"
+  }
+}
