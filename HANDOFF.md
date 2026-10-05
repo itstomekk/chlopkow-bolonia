@@ -140,6 +140,7 @@ Last updated: 2026-09-28 (music added; before that: audit + bigger map + minigam
 - Reference photos live in the gitignored `references/`. Never commit them.
 
 ## Next ideas
+- **Windmill with sails that turn (Tomek, 2026-10-05):** the in-game windmill should get four sails that rotate (slow turn, stops if wind/idle is ever modelled). The logo windmill stays sail-less on purpose (the real koźlak in Chłopków has lost its sails, so the sign shows the bare box). Reference photos are on Tomek's machine only (`gen/refs/windmill/`, not committed); ask him to re-send them. Do this as a separate card after the branding release.
 - Regenerate landmarks from photos as they arrive (`PHOTOS-WANTED.md`). The windmill photos so far came only as chat attachments; save the files for an exact re-render.
 - The west and east map extensions have no quest content yet. Candidates: a Kolonia NPC, a second orchard, the świetlica as an interior.
 - NPC walk cycles; a tractor-driving minigame after the keys; more sound effects (steps, jump, dog bark); see also `AUDIO.md` in the Grand Theft Tractor video project.

@@ -57,7 +57,7 @@ gen/
   build_npcs.py          ← NPC atlas
   build_frodo.py         ← key and pack Frodo's 8-frame atlas into docs/img/frodo.png
   codex_gen.py / ppq_gen.py ← image-generation helpers (local tooling, need the author's accounts)
-  brand/build_brand_assets.py ← brand sign: cuts gen/brand/emblem-source.png, typesets the Silkscreen wordmark, writes docs/img/chlopkow-polonia-*.png, the favicon and the share card
+  brand/build_brand_assets.py ← brand sign: cuts gen/brand/emblem-source.png (GPT Image art with the pixel wordmark baked in), writes docs/img/chlopkow-polonia-*.png, the favicon and the share card
 ```
 
 ### Rebuilding assets

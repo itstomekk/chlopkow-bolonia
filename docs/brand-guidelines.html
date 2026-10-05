@@ -132,16 +132,16 @@
   <div class="anatomy">
     <div class="stage">
       <img src="img/chlopkow-polonia-logo.png" alt="Annotated logo">
-      <span class="pin" style="left:50%;top:15%">1</span>
-      <span class="pin" style="left:17%;top:36%">2</span>
-      <span class="pin" style="left:73%;top:33%">3</span>
-      <span class="pin" style="left:50%;top:84%">4</span>
+      <span class="pin" style="left:8%;top:15%">1</span>
+      <span class="pin" style="left:23%;top:47%">2</span>
+      <span class="pin" style="left:59%;top:46%">3</span>
+      <span class="pin" style="left:50%;top:81%">4</span>
     </div>
     <ol class="legend">
-      <li><span class="n">1</span><div><b>The falcon</b><p>Original, loosely nodding to the local Sokół idea. A calm glide, not an attack pose. It must never be swapped for an existing club or national emblem.</p></div></li>
-      <li><span class="n">2</span><div><b>The windmill</b><p>The actual windmill from the game (<code>gen/lm_windmill.png</code>), with sails clearly readable so it never turns into a barn.</p></div></li>
+      <li><span class="n">1</span><div><b>The falcon</b><p>Blue, with a navy wing tip and a stern look: hooked beak, narrowed eyes, wings swept back. It sits in the top-left corner at about 80% of its first size. Original art, it must never be swapped for an existing club or national emblem.</p></div></li>
+      <li><span class="n">2</span><div><b>The windmill</b><p>The real wooden koźlak of Chłopków, drawn from Tomek's photos: a short, stocky box on four stout posts with a plank ladder and a clean axle stub. <b>No sails</b>, because the real mill has lost them. The sails come back (and turn) only in the game itself.</p></div></li>
       <li><span class="n">3</span><div><b>The church</b><p>The actual church (<code>gen/lm_church.png</code>): cream walls, slate roof, tower and cross. The centre of the village, so the centre of the sign.</p></div></li>
-      <li><span class="n">4</span><div><b>The plank</b><p>Weathered oak with iron brackets, the one place text lives. The wordmark is typeset, never generated.</p></div></li>
+      <li><span class="n">4</span><div><b>The plank</b><p>Weathered oak with iron brackets, the one place text lives. The wordmark is drawn as chunky pixel letters, never as a smooth font.</p></div></li>
     </ol>
   </div>
 </div></section>
@@ -149,10 +149,10 @@
 <section id="wordmark"><div class="wrap">
   <div class="kicker">02 · Wordmark</div>
   <h2>CHŁOPKÓW POLONIA</h2>
-  <p class="lede">Set in Silkscreen, the pixel font the game already uses everywhere, in capitals, on one line. Silkscreen draws the Polish letters correctly, which is why the text is always real text.</p>
-  <div class="wm"><div class="big">CHŁOPKÓW <b>POLONIA</b></div><small>SILKSCREEN · CAPITALS · HARD 1-STEP OUTLINE</small></div>
+  <p class="lede">Blocky pixel capitals on one line, cream letters with a thick dark outline. In the logo the letters are drawn into the artwork; everywhere else (UI, captions) the name is set in Silkscreen, the pixel font the game already uses.</p>
+  <div class="wm"><div class="big">CHŁOPKÓW <b>POLONIA</b></div><small>CAPITALS · HARD EDGES · NO SMOOTHING</small></div>
   <div class="rules">
-    <div class="card"><h3>Always typeset</h3><p>Generated images garble Ł, Ó and Ą. Draw the illustration without letters, then add the words with the font.</p></div>
+    <div class="card"><h3>Check the diacritics</h3><p>After every regeneration, zoom into the plank and check the stroke on Ł and the accent on Ó. A typeset font looked too smooth next to the pixel art, so the letters stay in the artwork.</p></div>
     <div class="card"><h3>One name</h3><p>The game is <b>CHŁOPKÓW POLONIA</b>. The older name survives only in the repository address and internal save keys.</p></div>
     <div class="card"><h3>Hard outline</h3><p>Dark 1-step outline and drop, never a soft glow or blur. It is the same treatment as the in-game titles.</p></div>
   </div>
@@ -241,15 +241,15 @@
   <table>
     <thead><tr><th>File</th><th>What it is</th><th>Used for</th></tr></thead>
     <tbody>
-      <tr><td><code>chlopkow-polonia-logo.png</code></td><td>Full sign with the typeset wordmark, transparent</td><td>Opening screen, README, this guide</td></tr>
-      <tr><td><code>chlopkow-polonia-emblem.png</code></td><td>Sign without any text, transparent</td><td>Re-lettering, other languages</td></tr>
-      <tr><td><code>favicon-polonia.png</code></td><td>128 px crop: church, windmill, falcon</td><td>Browser tab</td></tr>
+      <tr><td><code>chlopkow-polonia-logo.png</code></td><td>Full sign with the pixel wordmark, transparent</td><td>Opening screen, README, this guide</td></tr>
+      <tr><td><code>chlopkow-polonia-emblem.png</code></td><td>Same file as the logo (kept for older links)</td><td>Re-lettering, other languages</td></tr>
+      <tr><td><code>favicon-polonia.png</code></td><td>128 px crop of the scene above the plank: falcon, church, windmill</td><td>Browser tab</td></tr>
       <tr><td><code>og-polonia.png</code></td><td>1200 × 630 share card on the dimmed village</td><td>Link previews</td></tr>
     </tbody>
   </table>
 </div></section>
 
-<footer><div class="wrap">CHŁOPKÓW POLONIA · pixel village in Gmina Płaterów, Mazowsze · <a href="./">play the game</a> · Font: Silkscreen by Jason Kottke, SIL OFL.</div></footer>
+<footer><div class="wrap">CHŁOPKÓW POLONIA · pixel village in Gmina Platerów, Mazowsze · <a href="./">play the game</a> · Font: Silkscreen by Jason Kottke, SIL OFL.</div></footer>
 <div class="toast px" id="toast" role="status" aria-live="polite"></div>
 <script>
   const toast = document.getElementById('toast'); let tm;
