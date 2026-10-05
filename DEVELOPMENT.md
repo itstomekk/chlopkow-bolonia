@@ -1,6 +1,6 @@
 # Development
 
-This document keeps the technical notes for CHŁOPKÓW POLONIA (the repository and its GitHub Pages address keep the older `chlopkow-bolonia` name on purpose). The game runs in a modern browser on desktop or phone. Its game logic is plain JavaScript without a build step; the optional chat loads nostr-tools from a CDN after opt-in.
+This document keeps the technical notes for CHŁOPKÓW POLONIA (the repository and its GitHub Pages address keep the older `chlopkow-bolonia` name on purpose). The game runs in a modern browser on desktop or phone. Its game logic is plain JavaScript without a build step. Entering play starts the Nostr arrival log and loads pinned nostr-tools from a CDN, even if the chat panel is minimized. The name form explains that the name and arrival become public.
 
 ## Controls
 
@@ -86,6 +86,12 @@ python test/run_all.py https://itstomekk.github.io/chlopkow-bolonia/   # against
 
 `quest_test` (main quest), `jump_test` (river jump), `features_test` (quiz), `minigames_test` (all four games, medals, retry, ghost),
 `church_test`, `frodo_test`, `soltys_surprise_test`, `cemetery_memories_test`, `village_sign_test`, `play_test`, `branding_flow_test` (title sequence: pixel reveal, name + character picker, sign phase, reduced motion), `site_metadata_test`.
+
+The full runner isolates public Nostr sockets and disables the CDN module for every browser, so test names never enter the public arrival history. For individual regressions use `python test/isolated_browser_runner.py test/branding_flow_test.py`; `arrival_log_test.py` overrides the disabled module with a controlled transport and tests submission, history, deduplication, retries and mobile disclosure. A successful controlled transport is not proof of persistence on public relays.
+
+### Public village arrival log
+
+`game.js` dispatches `ark-player-arrived` after a named player enters play. `chat.js` queues one notice per loaded document, signs a NIP-28 kind-42 event in the existing chat channel with `arrival=v1` and a random `session` tag, and renders it as a turquoise timestamped line alongside normal messages. Returning from a dialogue or reopening the panel does not create another visit; reloading and entering again does. The arrival log is history, not an online-player count. Publication never blocks play. A failed write reuses its event on online/reconnection/manual reopen, with at most three attempts; no local success row is inserted before relay acceptance. Public relays control retention, and guest names are self-reported, not authenticated real-world identities.
 
 ### Design notes
 

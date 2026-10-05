@@ -36,7 +36,7 @@ jx, jy = river_column()
 TESTS = [['music_test.py'], ['quest_test.py'], ['jump_test.py', str(jx), str(jy)], ['features_test.py'], ['quiz_expansion_test.py'], ['minigames_test.py'],
          ['church_test.py'], ['frodo_test.py'], ['soltys_surprise_test.py'], ['cemetery_memories_test.py'],
          ['village_sign_test.py'], ['edytka_test.py'], ['mushroom_test.py'], ['play_test.py'],
-         ['character_selection_test.py'], ['bercik_test.py'], ['eight_direction_test.py'], ['latest_world_requests_test.py'], ['sprite_background_test.py'],
+         ['character_selection_test.py'], ['arrival_log_test.py'], ['bercik_test.py'], ['eight_direction_test.py'], ['latest_world_requests_test.py'], ['sprite_background_test.py'],
          ['map_venues_test.py'], ['sept28_batch_test.py'], ['soltys_chat_test.py'], ['animals_test.py'], ['trees_test.py'], ['bukala_test.py'],
          ['forest_path_test.py'], ['duck_score_test.py'], ['mission_data_test.py'], ['mission_runtime_test.py'],
          ['mission_pilot_test.py'], ['save_migration_test.py'], ['local_competition_test.py'], ['local_competition_race_test.py'],
@@ -45,7 +45,8 @@ TESTS = [['music_test.py'], ['quest_test.py'], ['jump_test.py', str(jx), str(jy)
 results = []
 for t in TESTS:
     t0 = time.time()
-    p = subprocess.run([sys.executable, os.path.join('test', t[0]), *t[1:]], env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
+    # Game entry now publishes an arrival: isolate all regression browsers from public relays.
+    p = subprocess.run([sys.executable, os.path.join('test', 'isolated_browser_runner.py'), os.path.join('test', t[0]), *t[1:]], env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
     out = (p.stdout + p.stderr).strip().splitlines()
     bad = p.returncode != 0 or any('errors [' in l and 'errors []' not in l for l in out) or any(l.startswith('FAIL ') for l in out)
     results.append((t[0], not bad, time.time() - t0, out[-1] if out else ''))

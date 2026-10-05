@@ -514,12 +514,17 @@
     Object.assign(form.style, { boxSizing: 'border-box', padding: '12px', border: '3px solid #ffd21f', background: 'rgba(16,22,58,.93)', color: '#f5f0e0', textAlign: 'center', display: 'grid', gap: '8px' });
     const label = document.createElement('label'); label.htmlFor = 'player-name-input'; label.textContent = LANG === 'pl' ? 'JAK MASZ NA IMIĘ?' : 'WHAT IS YOUR NAME?';
     Object.assign(label.style, { fontWeight: 'bold', fontSize: '13px', letterSpacing: '.04em' });
-    const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'nickname'; input.placeholder = LANG === 'pl' ? 'Wpisz imię' : 'Enter a name'; input.value = fresh ? '' : heroName(); input.required = true;
+    const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'nickname'; input.placeholder = LANG === 'pl' ? 'Wpisz imię' : 'Enter a name'; input.value = fresh ? '' : sanitizePlayerName(Q.playerName); input.required = true;
     Object.assign(input.style, { width: '100%', boxSizing: 'border-box', padding: '10px', fontSize: '16px', border: '2px solid #c8cee0', borderRadius: '4px' });
+    const disclosure = document.createElement('p'); disclosure.id = 'player-name-disclosure';
+    disclosure.textContent = LANG === 'pl'
+      ? 'Imię i informacja o wejściu pojawią się publicznie w Nostr (globalny czat).'
+      : 'Your name and arrival will be public on Nostr (global chat).';
+    Object.assign(disclosure.style, { margin: '0', padding: '5px 6px', background: 'rgba(8,12,40,.92)', borderRadius: '3px', fontSize: '13px', fontWeight: '600', lineHeight: '1.4', color: '#d8ffee' });
     const submit = document.createElement('button'); submit.id = 'player-name-submit'; submit.type = 'submit'; submit.textContent = LANG === 'pl' ? 'ZACZNIJ GRĘ' : 'START GAME';
     Object.assign(submit.style, { padding: '11px', border: '0', borderRadius: '4px', background: '#ffd21f', color: '#10163a', fontWeight: 'bold', fontSize: '15px', touchAction: 'manipulation' });
     const error = document.createElement('div'); error.setAttribute('aria-live', 'polite'); error.style.cssText = 'color:#ff9b8f;font-size:12px;min-height:0';
-    form.append(label, input, submit, error); overlay.appendChild(form);
+    form.append(label, input, disclosure, submit, error); overlay.appendChild(form);
     overlay.addEventListener('pointerdown', e => e.stopPropagation());
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -527,7 +532,7 @@
       if (!playerName) { error.textContent = LANG === 'pl' ? 'Wpisz niepuste imię.' : 'Please enter a non-blank name.'; input.focus(); return; }
       overlay.remove(); namePrompt = null;
       if (fresh) startGame(true, playerName);
-      else { Q.playerName = playerName; save(); }
+      else { Q.playerName = playerName; save(); startGame(false); }
     });
     document.body.appendChild(overlay); namePrompt = overlay; placeNameForm();
     // Desktop: typing can begin at once. Touch: no autofocus, so the soft keyboard never hides the opening.
@@ -561,7 +566,9 @@
     }
     if (!fresh && !Q.playerName) { requestPlayerName(false); return; }
     if (namePrompt) { namePrompt.remove(); namePrompt = null; }
+    const enteringPlay = scene !== 'play';
     scene = 'play';
+    if (enteringPlay) window.dispatchEvent(new CustomEvent('ark-player-arrived', { detail: { name: heroName() } }));
   }
   addEventListener('keydown', e => {
     if (namePrompt) {

@@ -10,6 +10,8 @@ The previous phase's plan (village assets + cemetery archive) is in `_archive/20
 
 ## Active phase: Chłopków Bolonia, staged local integration
 
+- [x] Add a public arrival log alongside Nostr chat (2026-10-05): five varied Polish greetings, turquoise timestamped single-line notices, one event per document visit, minimized-panel publication, bounded stable-event retries, and public-name disclosure. Focused arrival/chat/branding/selector/Sołtys/save-migration tests passed; real pinned nostr-tools signing and delivery between two isolated browsers verified with zero public test writes. `run_all.py` now isolates public Nostr for all regression browsers. `save_name_test.py` still reproduces its pre-existing save/load race, observed before feature changes; no full-suite green claimed. Tomek authorized narrow commit/push. Design: `plans/2026-10-05-arrival-log.md`.
+
 The complete requested roadmap, coordinates, prerequisites and release gates are in
 [`plans/2026-09-27-chlopkow-bolonia-roadmap.md`](plans/2026-09-27-chlopkow-bolonia-roadmap.md).
 The old coordinates refer to the 3897×2698 map before northern expansion; use

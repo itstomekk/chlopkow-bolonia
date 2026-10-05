@@ -74,6 +74,8 @@
     eoseTimer: null,
     renderQueued: false,
     lastByAuthor: new Map(),   // pubkey -> [{ text, at }] for duplicate collapsing
+    arrival: null,
+    arrivalSession: '',
   };
 
   const unicodeLength = value => Array.from(String(value)).length;
@@ -134,6 +136,8 @@
     .arek-chat-meta { color: #fff7d6; font-size: 10px; }
     .arek-chat-name { color: #fff7d6; }
     .arek-chat-message[data-own="true"] .arek-chat-name { color: #b8ff9c; }
+    .arek-chat-arrival { color: #8fffe0; }
+    .arek-chat-arrival .arek-chat-meta, .arek-chat-arrival .arek-chat-name { color: #8fffe0; }
     .arek-chat-day { display: none; }
     .arek-chat-empty { color: #fff7d6; opacity: .7; }
     #arek-chat-form { padding: 2px 0 0; }
@@ -260,11 +264,16 @@
       const day = dayKey(event.created_at);
       if (day !== lastDay) { el('div', `— ${dayLabel(event.created_at)} —`, messages).className = 'arek-chat-day'; lastDay = day; prev = null; }
       const row = el('div', undefined, messages);
-      row.className = 'arek-chat-message';
+      row.className = `arek-chat-message ${event.arrival ? 'arek-chat-arrival' : 'arek-chat-regular'}`;
       row.style.setProperty('--chat-opacity', String(Math.max(.35, Math.min(1, .35 + (index + 1) / visible.length * .65))));
       row.dataset.own = event.pubkey === state.pubkey ? 'true' : 'false';
+      if (event.arrival) {
+        el('span', `${timeLabel(event.created_at)} · ${event.content}`, row);
+        prev = event;
+        continue;
+      }
       // consecutive messages from the same person within 5 minutes share one name/time line
-      const grouped = prev && prev.pubkey === event.pubkey && prev.nickname === event.nickname && event.created_at - prev.created_at < 300;
+      const grouped = !event.arrival && prev && !prev.arrival && prev.pubkey === event.pubkey && prev.nickname === event.nickname && event.created_at - prev.created_at < 300;
       if (grouped) row.style.marginTop = '-5px';
       else {
         const meta = el('div', undefined, row);
@@ -313,11 +322,14 @@
     const content = cleanText(event.content);
     if (!content || unicodeLength(content) > MAX_SHOWN_CHARS) return;
     const pubkey = typeof event.pubkey === 'string' ? event.pubkey : '';
-    if (isDuplicate(pubkey, content, createdAt)) return;
+    const arrivalTag = tags.find(tag => Array.isArray(tag) && tag[0] === 'arrival' && tag[1] === 'v1');
+    const sessionTag = tags.find(tag => Array.isArray(tag) && tag[0] === 'session' && typeof tag[1] === 'string' && /^[a-zA-Z0-9_-]{8,80}$/.test(tag[1]));
     const nameTag = tags.find(tag => Array.isArray(tag) && tag[0] === 'name' && typeof tag[1] === 'string');
+    const name = trimUnicode(cleanText(nameTag ? nameTag[1] : ''), MAX_NICKNAME_CHARS);
+    if (arrivalTag && (!sessionTag || !name)) return;
+    if (!arrivalTag && isDuplicate(pubkey, content, createdAt)) return;
     const fallback = pubkey ? `guest-${pubkey.slice(0, 6)}` : 'guest';
-    const name = trimUnicode(cleanText(nameTag ? nameTag[1] : ''), MAX_NICKNAME_CHARS) || fallback;
-    state.events.set(event.id, { id: event.id, created_at: createdAt, content, nickname: name, pubkey });
+    state.events.set(event.id, { id: event.id, created_at: createdAt, content, nickname: name || fallback, pubkey, arrival: !!arrivalTag, session: sessionTag ? sessionTag[1] : '' });
     if (state.events.size > MAX_EVENTS) {
       const oldest = Array.from(state.events.values()).sort((a, b) => a.created_at - b.created_at)[0];
       state.events.delete(oldest.id);
@@ -363,6 +375,7 @@
             const n = relayCount(), total = state.events.size;
             setStatus(`${total ? `${total} message${total === 1 ? '' : 's'} since 26 Sep` : 'Nobody wrote yet'} · live`);
             status.title = n ? `Connected to ${n} of ${RELAYS.length} Nostr relays` : '';
+            publishArrival();
           },
           onclose: reasons => {
             state.connected = false;
@@ -386,6 +399,56 @@
       state.pool = null;
       setStatus(`Chat unavailable: ${error.message || 'relay or library error'}`, true);
     }
+  }
+
+  const GREETINGS = Object.freeze([
+    name => `Chłopków wita: ${name}!`,
+    name => `${name} na mapie! Siema!`,
+    name => `Do Chłopkowa zagląda ${name}.`,
+    name => `We wsi melduje się ${name}.`,
+    name => `Hej, ${name} już z nami!`,
+  ]);
+  function queueArrival(name) {
+    const cleanName = trimUnicode(cleanText(name || ''), MAX_NICKNAME_CHARS);
+    if (!cleanName || state.arrival) return;
+    const bytes = new Uint8Array(12);
+    crypto.getRandomValues(bytes);
+    state.arrivalSession = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    state.arrival = { name: cleanName, session: state.arrivalSession, event: null, attempts: 0, publishing: false, accepted: false };
+    start();
+  }
+
+  async function publishArrival() {
+    const arrival = state.arrival;
+    if (!arrival || arrival.accepted || arrival.publishing || !state.connected || !state.pool || !state.tools || !state.secretKey || arrival.attempts >= 3) return;
+    if (!arrival.event) {
+      const greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+      arrival.event = state.tools.finalizeEvent({
+        kind: 42,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [['e', CHANNEL_ID, RELAYS[0], 'root'], ['name', arrival.name], ['arrival', 'v1'], ['session', arrival.session], ['client', 'arek-w-chlopkowie']],
+        content: greeting(arrival.name),
+      }, state.secretKey);
+    }
+    arrival.attempts++;
+    arrival.publishing = true;
+    try {
+      const results = await Promise.allSettled(state.pool.publish(RELAYS, arrival.event));
+      if (!results.some(result => result.status === 'fulfilled')) throw new Error('no relay accepted the arrival');
+      arrival.accepted = true;
+      addEvent(arrival.event);
+    } catch (error) {
+      setStatus(`Wejście nie zapisane · ponowimy przy połączeniu (${arrival.attempts}/3).`, true);
+    } finally {
+      arrival.publishing = false;
+    }
+  }
+
+  function retryArrival() {
+    if (!state.arrival || state.arrival.accepted || state.arrival.publishing || state.arrival.attempts >= 3) return;
+    // Reuse an active connection; replacing its pool would race old subscription callbacks.
+    if (state.connected) publishArrival();
+    else start();
   }
 
   async function sendMessage() {
@@ -438,6 +501,8 @@
       if (focusInput) text.focus();
       if (persist) { try { localStorage.removeItem(CHAT_MINIMIZED_STORAGE); } catch (e) { /* keep chat usable when storage is disabled */ } }
       start();
+      // Only explicit reopen retries; default-open must not consume an attempt on entry.
+      if (persist) retryArrival();
     }
 
     function closeChat(persist = true) {
@@ -463,6 +528,11 @@
     root.classList.toggle('arek-chat-away', busy && !typing);
   }
   addEventListener('resize', placeChat);
+  addEventListener('ark-player-arrived', event => {
+    queueArrival(event.detail && event.detail.name);
+    publishArrival();
+  });
+  addEventListener('online', retryArrival);
   setInterval(placeChat, 200);
   placeChat();
   launch.addEventListener('click', () => openChat(true));
