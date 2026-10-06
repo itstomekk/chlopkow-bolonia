@@ -148,6 +148,7 @@
     #arek-chat-send { color: #fff7d6; background: transparent; padding: 0; text-shadow: inherit; }
     #arek-chat-send:disabled { cursor: wait; opacity: .6; }
     #arek-global-chat.arek-chat-away { visibility: hidden; }
+    #arek-global-chat.arek-chat-loading { visibility: hidden; }
     @media (max-width: 480px) {
       #arek-global-chat { left: 8px; width: min(340px, calc(100vw - 64px)); }   /* keeps the bottom-right music note clear */
       #arek-chat-messages { height: 206px; }
@@ -196,6 +197,17 @@
   send.id = 'arek-chat-send';
   send.type = 'submit';
   document.body.appendChild(root);
+  const bootSplash = document.getElementById('boot-splash');
+  if (bootSplash && bootSplash.dataset.state !== 'hidden') {
+    root.classList.add('arek-chat-loading');
+    const observer = new MutationObserver(() => {
+      if (bootSplash.dataset.state === 'hidden') {
+        root.classList.remove('arek-chat-loading');
+        observer.disconnect();
+      }
+    });
+    observer.observe(bootSplash, { attributes: true, attributeFilter: ['data-state'] });
+  }
   // Chat typing must never trigger the game's WASD, jump or map shortcuts.
   root.addEventListener('keydown', event => event.stopPropagation());
 
