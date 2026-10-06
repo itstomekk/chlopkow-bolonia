@@ -41,7 +41,7 @@ TESTS = [['music_test.py'], ['quest_test.py'], ['jump_test.py', str(jx), str(jy)
          ['forest_path_test.py'], ['duck_score_test.py'], ['mission_data_test.py'], ['mission_runtime_test.py'],
          ['mission_pilot_test.py'], ['save_migration_test.py'], ['local_competition_test.py'], ['local_competition_race_test.py'],
          ['save_name_test.py'], ['bison_test.py'], ['forest_styles_test.py'], ['forest_shade_test.py'], ['hud_corners_test.py'],
-         ['branding_flow_test.py'], ['site_metadata_test.py']]
+         ['branding_flow_test.py'], ['site_metadata_test.py'], ['splash_loading_test.py'], ['splash_timing_test.py']]
 results = []
 for t in TESTS:
     t0 = time.time()

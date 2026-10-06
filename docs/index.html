@@ -10,29 +10,101 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="img/og-polonia.png">
 <link rel="icon" type="image/png" href="img/favicon-polonia.png">
+<link rel="preload" as="image" href="img/boot-logo.png" fetchpriority="high">
 <link rel="stylesheet" href="fonts.css">
 <style>
   html, body { margin: 0; height: 100%; background: #0c0f1c; overflow: hidden; touch-action: none; }
   canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
+  #boot-splash {
+    position: fixed; z-index: 100; inset: 0; display: grid; place-items: center;
+    background: #050609; opacity: 1; visibility: visible;
+    transition: opacity .95s ease, visibility 0s linear .95s;
+  }
+  #boot-splash[data-state="fading"], #boot-splash[data-state="hidden"] {
+    opacity: 0; visibility: hidden; pointer-events: none;
+  }
+  #boot-splash[data-state="hidden"] { display: none; }
+  #boot-splash img {
+    display: block; width: min(82vw, 540px); max-height: 78vh; object-fit: contain;
+    image-rendering: pixelated; opacity: 0;
+  }
+  #boot-splash img.loaded { animation: boot-logo-in 1.2s ease-out both; }
+  @keyframes boot-logo-in { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    #boot-splash { transition: none; }
+    #boot-splash img, #boot-splash img.loaded { opacity: 1; animation: none; }
+  }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-<script src="js/quiz.js"></script>
-<script src="js/features.js"></script>
-<script src="js/minigames.js"></script>
-<script src="js/church.js"></script>
-<script src="js/shop.js"></script>
-<script src="js/music.js"></script>
-<script src="js/world-life.js"></script>
-<script src="js/cemetery-art.js"></script>
-<script src="js/sokol-watermark.js"></script>
-<script src="js/bison.js"></script>
-<script src="js/local-competition.js"></script>
-<script src="js/bercik.js"></script>
-<script src="js/yard-props.js"></script>
-<script src="js/game.js"></script>
-<script src="js/chat.js"></script>
-<script src="js/missions.js"></script>
+<div id="boot-splash" role="status" aria-label="Ładowanie gry">
+  <img src="img/boot-logo.png" alt="CHŁOPKÓW POLONIA" width="768" height="544">
+</div>
+<script>
+(() => {
+  const boot = document.getElementById('boot-splash');
+  const logo = boot.querySelector('img');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.__bootRevealStarted = false;
+  window.__bootSplashDone = false;
+  let resolveLogoIn, resolveGameReady;
+  const logoIn = new Promise(resolve => { resolveLogoIn = resolve; });
+  const gameReady = new Promise(resolve => { resolveGameReady = resolve; });
+  const finishLogoIn = () => resolveLogoIn();
+  if (reducedMotion) finishLogoIn();
+  else logo.addEventListener('animationend', event => {
+    if (event.animationName === 'boot-logo-in') finishLogoIn();
+  }, { once: true });
+  const showLogo = () => {
+    logo.classList.add('loaded');
+    if (reducedMotion || !logo.naturalWidth) finishLogoIn();
+  };
+  if (logo.complete) showLogo();
+  else {
+    logo.addEventListener('load', showLogo, { once: true });
+    logo.addEventListener('error', finishLogoIn, { once: true });
+  }
+  const startHandoff = () => {
+    window.__bootRevealStarted = true;
+    let finished = false, fallback;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(fallback);
+      boot.removeEventListener('transitionend', onFadeEnd);
+      boot.dataset.state = 'hidden';
+      boot.setAttribute('aria-hidden', 'true');
+      window.__bootSplashDone = true;
+      window.dispatchEvent(new Event('ark-boot-faded'));
+    };
+    const onFadeEnd = event => {
+      if (event.target === boot && event.propertyName === 'opacity') finish();
+    };
+    boot.dataset.state = 'fading';
+    if (reducedMotion) { finish(); return; }
+    boot.addEventListener('transitionend', onFadeEnd);
+    fallback = setTimeout(finish, 3000);
+  };
+  window.addEventListener('ark-ready', resolveGameReady, { once: true });
+  Promise.all([logoIn, gameReady]).then(startHandoff);
+})();
+</script>
+<script defer src="js/quiz.js"></script>
+<script defer src="js/features.js"></script>
+<script defer src="js/minigames.js"></script>
+<script defer src="js/church.js"></script>
+<script defer src="js/shop.js"></script>
+<script defer src="js/music.js"></script>
+<script defer src="js/world-life.js"></script>
+<script defer src="js/cemetery-art.js"></script>
+<script defer src="js/sokol-watermark.js"></script>
+<script defer src="js/bison.js"></script>
+<script defer src="js/local-competition.js"></script>
+<script defer src="js/bercik.js"></script>
+<script defer src="js/yard-props.js"></script>
+<script defer src="js/game.js"></script>
+<script defer src="js/chat.js"></script>
+<script defer src="js/missions.js"></script>
 </body>
 </html>

@@ -482,7 +482,7 @@
      the CHŁOPKÓW POLONIA sign takes over. Only visuals: nothing here starts the game or steals focus. */
   const REDUCED_MOTION = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const OPENING = { reveal: 1.7, emblem: 5.2, fade: 1.3 };
-  let openingT = 0, CREST = null, pixCvs = null;
+  let openingT = 0, openingUiStart = null, openingUiAlpha = 0, CREST = null, pixCvs = null;
   const openingStage = () => REDUCED_MOTION || openingT >= OPENING.emblem ? 'emblem' : openingT >= OPENING.reveal ? 'selector' : 'reveal';
   const skipOpeningReveal = () => { openingT = Math.max(openingT, OPENING.reveal); };
   const nameInput = () => namePrompt && namePrompt.querySelector('input');
@@ -1161,8 +1161,8 @@
   function update(dt) {
     time += dt;
     if (scene === 'title') {
-      openingT += dt;
-      if (!hasSave && !namePrompt && openingStage() !== 'reveal') requestPlayerName(true, true);
+      if (window.__bootRevealStarted !== false) openingT += dt;
+      if (!hasSave && !namePrompt && openingStage() !== 'reveal' && window.__bootSplashDone !== false) requestPlayerName(true, true);
     }
     dust = dust.filter(d => (d.t += dt) < .5);
     fx = fx.filter(f => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 320 * dt; return f.t < 1.2; });
@@ -1650,7 +1650,14 @@ function drawFrodo(sx, sy, s) {
   function drawSplash(W, H, U) {
     const ease = v => v * v * (3 - 2 * v);
     const reveal = REDUCED_MOTION ? 1 : clamp01(openingT / OPENING.reveal);
-    const ui = REDUCED_MOTION ? 1 : clamp01((openingT - (OPENING.reveal - .5)) / .6);
+    if (REDUCED_MOTION) openingUiAlpha = 1;
+    else if (window.__bootSplashDone === false) openingUiAlpha = 0;
+    else {
+      if (openingUiStart === null) openingUiStart = Math.max(OPENING.reveal - .5, openingT);
+      openingUiAlpha = clamp01((openingT - openingUiStart) / .6);
+    }
+    window.__openingUiAlpha = openingUiAlpha;
+    const ui = openingUiAlpha;
     const dim = REDUCED_MOTION ? 1 : ease(clamp01((openingT - OPENING.emblem) / OPENING.fade));
     ctx.fillStyle = '#10163a'; ctx.fillRect(0, 0, W, H);
     if (SPLASH) {   // cover-fit with a slow Ken-Burns drift toward the church
