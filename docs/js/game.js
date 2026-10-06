@@ -200,7 +200,7 @@
   /* ---------- assets ---------- */
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
-  let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, SPLASH = null, MEMORY_ART = [], FOREST_STATS = null;
+  let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, MEMORY_ART = [], FOREST_STATS = null;
   let ROOM = null, OUT = null, trans = null, shopGame = null;   // OUT: the village to return to
 
   /* ---------- state ---------- */
@@ -478,12 +478,12 @@
   /* ---------- input ---------- */
   function cancelClickMove() { clickTarget.active = false; }
   let namePrompt = null;
-  /* Opening sequence: pixel reveal of the village -> character picker + name field -> the village dims and
-     the CHŁOPKÓW POLONIA sign takes over. Only visuals: nothing here starts the game or steals focus. */
+  /* Opening sequence: reveal the live village board -> selector and name prompt. */
   const REDUCED_MOTION = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const OPENING = { reveal: 1.7, emblem: 5.2, fade: 1.3 };
-  let openingT = 0, openingUiStart = null, openingUiAlpha = 0, CREST = null, pixCvs = null;
-  const openingStage = () => REDUCED_MOTION || openingT >= OPENING.emblem ? 'emblem' : openingT >= OPENING.reveal ? 'selector' : 'reveal';
+  const OPENING = { reveal: REDUCED_MOTION ? .8 : 1.7 };
+  const OPENING_UI_FADE = REDUCED_MOTION ? .3 : .6;
+  let openingT = 0, openingUiStart = null, openingUiAlpha = 0, pixCvs = null;
+  const openingStage = () => openingT >= OPENING.reveal ? 'selector' : 'reveal';
   const skipOpeningReveal = () => { openingT = Math.max(openingT, OPENING.reveal); };
   const nameInput = () => namePrompt && namePrompt.querySelector('input');
   function placeNameForm() {   // docks the form next to the character grid (beside it when there is room, else below it)
@@ -1647,7 +1647,7 @@ function drawFrodo(sx, sy, s) {
     return { shown: true, text, x, y, w, h };
   }
 
-  /* ---------- title / splash screen: pixel-art remake of the "Chłopków" sign + church photo ---------- */
+  /* ---------- title: pixelate the rendered village board, then show its HUD/selector ---------- */
   function outlined(txt, x, y, fill, px) {   // pixel-font text with a hard 8-way dark outline
     ctx.fillStyle = '#10163a';
     for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) ctx.fillText(txt, x + dx * px, y + dy * px);
@@ -1655,52 +1655,29 @@ function drawFrodo(sx, sy, s) {
   }
   const clamp01 = v => Math.max(0, Math.min(1, v));
   function drawSplash(W, H, U) {
-    const ease = v => v * v * (3 - 2 * v);
-    const reveal = REDUCED_MOTION ? 1 : clamp01(openingT / OPENING.reveal);
-    if (REDUCED_MOTION) openingUiAlpha = 1;
-    else if (window.__bootSplashDone === false) openingUiAlpha = 0;
+    const reveal = clamp01(openingT / OPENING.reveal);
+    if (window.__bootSplashDone === false) openingUiAlpha = 0;
     else {
-      if (openingUiStart === null) openingUiStart = Math.max(OPENING.reveal - .5, openingT);
-      openingUiAlpha = clamp01((openingT - openingUiStart) / .6);
+      if (openingUiStart === null) openingUiStart = Math.max(OPENING.reveal - (REDUCED_MOTION ? .25 : .5), openingT);
+      openingUiAlpha = clamp01((openingT - openingUiStart) / OPENING_UI_FADE);
     }
     window.__openingUiAlpha = openingUiAlpha;
     const ui = openingUiAlpha;
-    const dim = REDUCED_MOTION ? 1 : ease(clamp01((openingT - OPENING.emblem) / OPENING.fade));
-    ctx.fillStyle = '#10163a'; ctx.fillRect(0, 0, W, H);
-    if (SPLASH) {   // cover-fit with a slow Ken-Burns drift toward the church
-      const k = Math.max(W / SPLASH.width, H / SPLASH.height) * (1.04 + .02 * Math.sin(time * .15));
-      const dw = SPLASH.width * k, dh = SPLASH.height * k, dx = (W - dw) / 2 - Math.sin(time * .1) * U * .8, dy = (H - dh) * .55;
+    if (reveal < 1) {
+      // Downsample the already-rendered live map and enlarge it with nearest-neighbour.
+      const steps = [120, 96, 72, 54, 38, 26, 18, 12, 8, 5, 3, 2];
+      const b = Math.max(2, Math.round(steps[Math.min(steps.length - 1, Math.floor(reveal * steps.length))] * W / 1280));
+      window.__openingPixelBlock = b;
+      pixCvs = pixCvs || document.createElement('canvas');
+      const cw = Math.ceil(W / b), ch = Math.ceil(H / b);
+      pixCvs.width = cw; pixCvs.height = ch;
+      const pc = pixCvs.getContext('2d'); pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'low';
+      pc.drawImage(cvs, 0, 0, W, H, 0, 0, cw, ch);
       ctx.imageSmoothingEnabled = false;
-      if (reveal >= 1) ctx.drawImage(SPLASH, dx, dy, dw, dh);
-      else {   // coarse blocks resolving into the real image: the village "materialises" out of pixels
-        const steps = [60, 44, 32, 24, 17, 12, 8, 6, 4, 3, 2];
-        const b = Math.max(2, Math.round(steps[Math.min(steps.length - 1, Math.floor(reveal * steps.length))] * W / 1280));
-        pixCvs = pixCvs || document.createElement('canvas');
-        const cw = Math.ceil(W / b), ch = Math.ceil(H / b);
-        pixCvs.width = cw; pixCvs.height = ch;
-        const pc = pixCvs.getContext('2d'); pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'low';
-        pc.drawImage(SPLASH, dx / b, dy / b, dw / b, dh / b);
-        ctx.globalAlpha = clamp01(openingT / .35);
-        ctx.drawImage(pixCvs, 0, 0, cw, ch, 0, 0, cw * b, ch * b);
-        ctx.globalAlpha = 1;
-      }
-    }
-    // golden-hour sparkles drifting over the grass
-    ctx.globalAlpha = reveal;
-    for (let i = 0; i < 18; i++) {
-      const x = ((i * 137.5 + time * (8 + i % 5)) % 100) / 100 * W, y = H * (.62 + ((i * 53) % 30) / 100) - Math.sin(time * 1.3 + i) * U;
-      ctx.fillStyle = `rgba(255,238,160,${.35 + .35 * Math.sin(time * 3 + i * 1.7)})`; ctx.fillRect(x, y, U * .35, U * .35);
-    }
-    ctx.globalAlpha = 1;
-    // The village dims and the CHŁOPKÓW POLONIA sign (wordmark included in the art) takes the stage.
-    const bs = characterButtonBounds(), gridTop = Math.min(...bs.map(b => b.y));
-    if (dim > 0) { ctx.fillStyle = `rgba(8,12,28,${.74 * dim})`; ctx.fillRect(0, 0, W, H); }
-    if (CREST && dim > 0) {
-      const top = H * .03, bottom = hasSave ? H * .35 : gridTop - U * 1.4;
-      const sc = Math.min((W - U * 4) / CREST.width, (bottom - top) / CREST.height), cw = CREST.width * sc, ch = CREST.height * sc;
-      ctx.globalAlpha = dim; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(CREST, (W - cw) / 2, top + (bottom - top - ch) / 2 + (1 - dim) * U * 2, cw, ch);
-      ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1;
+      ctx.globalAlpha = 1;
+      ctx.drawImage(pixCvs, 0, 0, cw, ch, 0, 0, W, H);
+    } else {
+      window.__openingPixelBlock = 0;
     }
     ctx.globalAlpha = ui;
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
@@ -1929,8 +1906,6 @@ function drawFrodo(sx, sy, s) {
   }
 
   async function init() {
-    load('img/chlopkow-polonia-logo.png').then(i => { CREST = i; }, () => { });   // title-screen sign; optional
-    load('img/splash.png').then(i => { SPLASH = i; }, () => { });   // title art; the title still works without it
     [MAP, ITEMS] = await Promise.all([fetch('map.json').then(r => r.json()), fetch('items.json').then(r => r.json())]);
     // A stale generated items file or an old save must not render the same NPC twice.
     // Keep the first authored instance, which preserves the intended range position.
