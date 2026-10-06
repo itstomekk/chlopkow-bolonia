@@ -16,9 +16,11 @@
   html, body { margin: 0; height: 100%; background: #0c0f1c; overflow: hidden; touch-action: none; }
   canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
   #boot-splash {
+    --boot-logo-in-duration: 1.2s;
+    --boot-fade-duration: .95s;
     position: fixed; z-index: 100; inset: 0; display: grid; place-items: center;
     background: #050609; opacity: 1; visibility: visible;
-    transition: opacity .95s ease, visibility 0s linear .95s;
+    transition: opacity var(--boot-fade-duration) ease, visibility 0s linear var(--boot-fade-duration);
   }
   #boot-splash[data-state="fading"], #boot-splash[data-state="hidden"] {
     opacity: 0; visibility: hidden; pointer-events: none;
@@ -28,11 +30,10 @@
     display: block; width: min(82vw, 540px); max-height: 78vh; object-fit: contain;
     image-rendering: pixelated; opacity: 0;
   }
-  #boot-splash img.loaded { animation: boot-logo-in 1.2s ease-out both; }
+  #boot-splash img.loaded { animation: boot-logo-in var(--boot-logo-in-duration) ease-out both; }
   @keyframes boot-logo-in { from { opacity: 0; } to { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
-    #boot-splash { transition: none; }
-    #boot-splash img, #boot-splash img.loaded { opacity: 1; animation: none; }
+    #boot-splash { --boot-logo-in-duration: .35s; --boot-fade-duration: .35s; }
   }
 </style>
 </head>
@@ -45,20 +46,20 @@
 (() => {
   const boot = document.getElementById('boot-splash');
   const logo = boot.querySelector('img');
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   window.__bootRevealStarted = false;
   window.__bootSplashDone = false;
   let resolveLogoIn, resolveGameReady;
   const logoIn = new Promise(resolve => { resolveLogoIn = resolve; });
   const gameReady = new Promise(resolve => { resolveGameReady = resolve; });
-  const finishLogoIn = () => resolveLogoIn();
-  if (reducedMotion) finishLogoIn();
-  else logo.addEventListener('animationend', event => {
+  let logoInFallback;
+  const finishLogoIn = () => { clearTimeout(logoInFallback); resolveLogoIn(); };
+  logoInFallback = setTimeout(finishLogoIn, 5000);
+  logo.addEventListener('animationend', event => {
     if (event.animationName === 'boot-logo-in') finishLogoIn();
   }, { once: true });
   const showLogo = () => {
     logo.classList.add('loaded');
-    if (reducedMotion || !logo.naturalWidth) finishLogoIn();
+    if (!logo.naturalWidth) finishLogoIn();
   };
   if (logo.complete) showLogo();
   else {
@@ -81,9 +82,8 @@
     const onFadeEnd = event => {
       if (event.target === boot && event.propertyName === 'opacity') finish();
     };
-    boot.dataset.state = 'fading';
-    if (reducedMotion) { finish(); return; }
     boot.addEventListener('transitionend', onFadeEnd);
+    boot.dataset.state = 'fading';
     fallback = setTimeout(finish, 3000);
   };
   window.addEventListener('ark-ready', resolveGameReady, { once: true });
