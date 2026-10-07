@@ -716,6 +716,18 @@ objects.append(dict(x=sign_x - sign_w // 2, y=sign_y, w=sign_w, h=sign_h, base=f
 collide[sign_base - 9:sign_base, sign_x - 4:sign_x + 5] = True
 occupied[max(0, sign_y):sign_base, max(0, sign_x - sign_w // 2):sign_x + sign_w // 2] = True
 
+# Historic white Chłopków sign at the church fork (Tomek-approved 2026-10-07): one central post,
+# board angled along the church road, on the grass NW of the church driveway. Pre-gridded 1:1 pixel art.
+church_sign = Image.open('gen/lm_church_sign.png').convert('RGBA')
+_csa = np.array(church_sign)[..., 3] > 0
+_cs_foot = (int(round(np.nonzero(_csa[-4:].any(0))[0].mean())), church_sign.height - 1)
+_csx, _csy = (int(round(v)) for v in P(52.2602473, 22.8770666))
+_cs_x0, _cs_y0 = _csx - _cs_foot[0], _csy - _cs_foot[1]
+gd.ellipse([_csx - 2, _csy - 1, _csx + 8, _csy + 2], fill=(52, 80, 36))
+objects_img.alpha_composite(church_sign, (_cs_x0, _cs_y0))
+objects.append(dict(x=_cs_x0, y=_cs_y0, w=church_sign.width, h=church_sign.height, base=float(_csy)))
+collide[_csy - 3:_csy + 1, _csx - 2:_csx + 3] = True
+
 # ---------------------------------------------------------------- trees
 occ_img = Image.fromarray((occupied * 255).astype(np.uint8))
 occ_d = np.array(occ_img.filter(ImageFilter.MaxFilter(15))) > 0
