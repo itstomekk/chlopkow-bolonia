@@ -151,7 +151,7 @@ window.ShopGame = (() => {
     root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-labelledby', 'shop-title');
     const style = doc.createElement('style');
     style.textContent = `
-      .shop-game{position:fixed;z-index:10000;inset:0;background:rgba(8,12,40,.82);display:flex;align-items:center;justify-content:center;padding:10px;box-sizing:border-box;font:16px Silkscreen,monospace;color:#f5f0e0;image-rendering:pixelated}
+      .shop-game{position:fixed;z-index:10000;inset:0;background:rgba(8,12,40,.82);display:flex;align-items:center;justify-content:center;padding:10px;box-sizing:border-box;font:16px PixelifySans,monospace;color:#f5f0e0;image-rendering:pixelated}
       .shop-card{width:min(100%,500px);max-height:92dvh;overflow:auto;background:#10163a;border:4px solid #f5f0e0;box-shadow:6px 6px 0 #050819;padding:clamp(12px,4vw,22px);box-sizing:border-box}
       .shop-card h2{font-size:clamp(18px,5vw,25px);line-height:1.35;margin:0 0 10px;color:#ffd21f}.shop-copy{line-height:1.55;margin:9px 0}
       .shop-game button,.shop-game input{font:inherit;min-height:44px;border:3px solid #ffd21f;box-sizing:border-box;border-radius:0}

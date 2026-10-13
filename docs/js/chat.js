@@ -94,7 +94,7 @@
     #arek-global-chat {
       position: fixed; z-index: 10000; left: 12px; bottom: 10px;   /* bottom-left dock; music note + sector readout own the bottom-right */
       width: min(400px, calc(100vw - 24px));
-      color: #fff7d6; font: 12px/1.35 "Silkscreen", monospace;
+      color: #fff7d6; font: 12px/1.35 "PixelifySans", monospace;
       /* Readable on any terrain without an enclosing box: layered outline + soft glow. */
       text-shadow: 1px 1px 0 #10163a, 2px 2px 0 #10163a, 0 0 7px rgba(16,22,58,.9);
       pointer-events: none; text-align: left;

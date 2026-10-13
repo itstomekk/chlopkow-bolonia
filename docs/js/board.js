@@ -147,7 +147,7 @@ window.addEventListener('ark-ready', () => {
     px(-1, -30, 2, 30, '#5a3a1e');
     for (let i = 0; i < 12; i++) for (let j = 0; j < 4; j++) px(1 + i, -29 + j * 2 + i * .35 + Math.sin(A.time * 5 + i * .5) * .8, 1, 2, (Math.floor(i / 2) + j) % 2 ? def.flagColors[0] : def.flagColors[1]);
     const r = A.Q && A.Q.mg && A.Q.mg[def.id], label = def.flagLabel + (r && r.medal ? ' ★' : '');
-    c.font = `${6 * s}px Silkscreen`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = `${6 * s}px PixelifySans`; c.textAlign = 'center'; c.textBaseline = 'middle';
     const tw = c.measureText(label).width + 3 * s;
     c.fillStyle = 'rgba(8,12,40,.8)'; c.fillRect(sx - tw / 2, sy - 40 * s, tw, 8 * s);
     c.fillStyle = r && r.medal ? MEDAL_COL[r.medal] : '#fff'; c.fillText(label, sx, sy - 36 * s); c.textAlign = 'left';
@@ -414,7 +414,7 @@ window.addEventListener('ark-ready', () => {
     c.save(); c.beginPath(); c.rect(0, 0, W, H); c.clip();
     run.game.draw(c, run.phase, run.t);
     if (run.phase === 'done' && run.doneT > .6) drawResults(c);
-    else { c.font = '10px Silkscreen'; c.textAlign = 'center'; c.fillStyle = 'rgba(255,255,255,.8)'; c.fillText(T.menu, W / 2, H - 6); c.textAlign = 'left'; }
+    else { c.font = '10px PixelifySans'; c.textAlign = 'center'; c.fillStyle = 'rgba(255,255,255,.8)'; c.fillText(T.menu, W / 2, H - 6); c.textAlign = 'left'; }
     c.restore();
   }
   function drawMedal(c, x, y, r, m) {
@@ -427,29 +427,29 @@ window.addEventListener('ark-ready', () => {
     const bh = 112 + rows.length * rh + (top.length ? 26 + top.length * 16 + (useG ? 16 : 0) : 0), bx = (W - bw) / 2, by = Math.max(14, (H - bh) / 2);
     c.fillStyle = 'rgba(8,12,40,.92)'; c.fillRect(bx, by, bw, bh); c.strokeStyle = '#ffd21f'; c.lineWidth = 2; c.strokeRect(bx, by, bw, bh);
     const w = rows[0] && rows[0].score != null ? rows[0].player : null;
-    c.textAlign = 'center'; c.font = '20px Silkscreen'; c.fillStyle = w && !w.cpu ? '#7cff6b' : '#ffd21f';
+    c.textAlign = 'center'; c.font = '20px PixelifySans'; c.fillStyle = w && !w.cpu ? '#7cff6b' : '#ffd21f';
     c.fillText(w ? `${T.wins} ${w.name}${w.cpu && !w.avg ? ' (CPU)' : ''}` : T.dnf, W / 2, by + 32);
     rows.forEach((r, i) => {
       const y = by + 72 + i * rh, p = r.player;
       c.fillStyle = 'rgba(255,255,255,.05)'; if (i % 2) c.fillRect(bx + 10, y - 20, bw - 20, rh);
-      c.textAlign = 'left'; c.font = '18px Silkscreen'; c.fillStyle = '#f5f0e0'; c.fillText(r.place ? `${r.place}.` : '—', bx + 20, y);
-      c.font = '14px Silkscreen'; c.fillStyle = p.color; c.fillText(`${p.name}${p.avg ? '' : ` ${p.tag}`}`, bx + 62, y);
-      c.textAlign = 'right'; c.fillStyle = '#f5f0e0'; c.font = '16px Silkscreen';
+      c.textAlign = 'left'; c.font = '18px PixelifySans'; c.fillStyle = '#f5f0e0'; c.fillText(r.place ? `${r.place}.` : '—', bx + 20, y);
+      c.font = '14px PixelifySans'; c.fillStyle = p.color; c.fillText(`${p.name}${p.avg ? '' : ` ${p.tag}`}`, bx + 62, y);
+      c.textAlign = 'right'; c.fillStyle = '#f5f0e0'; c.font = '16px PixelifySans';
       c.fillText(r.score == null ? T.dnf : def.score.format(r.score), bx + 430, y);
-      if (r.note) { c.font = '10px Silkscreen'; c.fillStyle = '#ff9a5e'; c.fillText(r.note, bx + 430, y + 12); }
-      if (r.medal) { drawMedal(c, bx + 462, y - 6, 9, r.medal); c.textAlign = 'left'; c.font = '11px Silkscreen'; c.fillStyle = MEDAL_COL[r.medal]; c.fillText(T.medal[r.medal], bx + 476, y - 1); }
-      if (r.record) { c.textAlign = 'left'; c.font = '10px Silkscreen'; c.fillStyle = '#7cff6b'; c.fillText(`★ ${T.record}`, bx + 476, y + 12); }
-      if (Number.isInteger(r.global)) { c.textAlign = 'right'; c.font = '11px Silkscreen'; c.fillStyle = '#9fd0f0'; c.fillText(T.grank(r.global), bx + bw - 16, y); }
+      if (r.note) { c.font = '10px PixelifySans'; c.fillStyle = '#ff9a5e'; c.fillText(r.note, bx + 430, y + 12); }
+      if (r.medal) { drawMedal(c, bx + 462, y - 6, 9, r.medal); c.textAlign = 'left'; c.font = '11px PixelifySans'; c.fillStyle = MEDAL_COL[r.medal]; c.fillText(T.medal[r.medal], bx + 476, y - 1); }
+      if (r.record) { c.textAlign = 'left'; c.font = '10px PixelifySans'; c.fillStyle = '#7cff6b'; c.fillText(`★ ${T.record}`, bx + 476, y + 12); }
+      if (Number.isInteger(r.global)) { c.textAlign = 'right'; c.font = '11px PixelifySans'; c.fillStyle = '#9fd0f0'; c.fillText(T.grank(r.global), bx + bw - 16, y); }
     });
     let y = by + 72 + rows.length * rh;
     if (top.length) {
-      c.textAlign = 'center'; c.font = '11px Silkscreen'; c.fillStyle = useG ? '#9fd0f0' : '#ffd21f'; c.fillText(useG ? T.gtop : T.top, W / 2, y + 4);
-      c.font = '11px Silkscreen'; c.fillStyle = '#c8cee0';
+      c.textAlign = 'center'; c.font = '11px PixelifySans'; c.fillStyle = useG ? '#9fd0f0' : '#ffd21f'; c.fillText(useG ? T.gtop : T.top, W / 2, y + 4);
+      c.font = '11px PixelifySans'; c.fillStyle = '#c8cee0';
       top.forEach((e, i) => c.fillText(`${i + 1}. ${e.name} — ${def.score.format(e.score)}`, W / 2, y + 22 + i * 16));
       y += 26 + top.length * 16;
       if (useG && g.average && Number.isFinite(g.average.score)) { c.fillStyle = '#9fd0f0'; c.fillText(`${T.gavg}: ${def.score.format(g.average.score)} (${T.gof(g.average.count)})`, W / 2, y + 4); }
     }
-    if (run.doneT > .8) { c.font = '12px Silkscreen'; c.fillStyle = Math.floor(run.doneT * 3) % 2 ? '#ffd21f' : '#fff3b0'; c.textAlign = 'center'; c.fillText(T.again, W / 2, by + bh - 12); }
+    if (run.doneT > .8) { c.font = '12px PixelifySans'; c.fillStyle = Math.floor(run.doneT * 3) % 2 ? '#ffd21f' : '#fff3b0'; c.textAlign = 'center'; c.fillText(T.again, W / 2, by + bh - 12); }
     c.textAlign = 'left';
   }
   function loop(ts) {

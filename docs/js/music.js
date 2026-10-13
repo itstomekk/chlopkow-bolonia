@@ -558,7 +558,7 @@ window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_T
       if (!dogLine) return; const age = (performance.now() - dogLine.t) / 1000; if (age > 1.8) return;
       const cam = A.camera, F = A.FRODO; if (!cam) return;
       const [x, y0] = cam.S(F.x, F.y), y = y0 - 18 * cam.zoom, c = A.ctx;
-      c.globalAlpha = Math.min(1, (1.8 - age) * 2); c.font = `${U * 1.65}px Silkscreen`; c.textAlign = 'center';
+      c.globalAlpha = Math.min(1, (1.8 - age) * 2); c.font = `${U * 1.65}px PixelifySans`; c.textAlign = 'center';
       const yy = y - U * 4 - age * U * 3, w = c.measureText(dogLine.text).width + U * 1.6;
       c.fillStyle = '#fff'; c.fillRect(x - w / 2, yy - U * 2.2, w, U * 3); c.fillStyle = '#10163a'; c.fillText(dogLine.text, x, yy);
       c.globalAlpha = 1;

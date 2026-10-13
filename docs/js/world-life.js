@@ -784,7 +784,7 @@
         const w = Math.max(26 * s, o.say.length * 6 * s + 8 * s), h = 13 * s, y = sy - size - z - h;
         ctx.fillStyle = '#fff4d6'; ctx.fillRect(sx - w / 2, y, w, h);
         ctx.strokeStyle = '#282433'; ctx.lineWidth = Math.max(1, s); ctx.strokeRect(sx - w / 2, y, w, h);
-        ctx.fillStyle = '#282433'; ctx.font = `bold ${Math.max(6, 7 * s)}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.say, sx, y + h / 2);
+        ctx.fillStyle = '#282433'; ctx.font = `bold ${Math.max(6, 7 * s)}px PixelifySans`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.say, sx, y + h / 2);
         ctx.textAlign = 'left';
       }
     }
@@ -951,7 +951,7 @@
       if (state.ride > 0) lines.push(`${text.riding}: ${Math.ceil(state.ride)}s`);
       const width = U * 28, x = W - width - U * 2, y = H - U * (lines.length * 2.8 + 3);
       ctx.fillStyle = 'rgba(8,12,40,.78)'; ctx.fillRect(x, y, width, U * (lines.length * 2.8 + 2));
-      ctx.font = `${U * 1.45}px Silkscreen`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.font = `${U * 1.45}px PixelifySans`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       lines.forEach((line, i) => { ctx.fillStyle = i === 1 ? '#ffd21f' : '#f5f0e0'; ctx.fillText(line, x + width - U * 1.4, y + U * (1.3 + i * 2.8)); });
       ctx.textAlign = 'left';
     });

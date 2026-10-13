@@ -304,7 +304,7 @@ window.addEventListener('ark-ready', () => {
   }
   function bubble(sx, sy, s, txt, col) {
     ctx.fillStyle = '#10163a'; ctx.fillRect(sx - 4 * s, sy - 5 * s, 8 * s, 9 * s);
-    ctx.fillStyle = col; ctx.font = `${8 * s}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, sx, sy);
+    ctx.fillStyle = col; ctx.font = `${8 * s}px PixelifySans`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, sx, sy);
   }
   function drawFlag(f, sx, sy, s) {
     const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(sx + x * s, sy + y * s, w * s, h * s); };
@@ -312,7 +312,7 @@ window.addEventListener('ark-ready', () => {
     px(-1, -30, 2, 30, '#5a3a1e');
     for (let i = 0; i < 12; i++) px(1 + i, -29 + i * .35 + Math.sin(A.time * 5 + i * .5) * .8, 1, 8 - i * .6, f.color);
     const rec = Q().mg[f.type], label = L.flag[f.type] + (rec && rec.medal ? ' ★' : '');
-    ctx.font = `${6 * s}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `${6 * s}px PixelifySans`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const tw = ctx.measureText(label).width + 3 * s;
     ctx.fillStyle = 'rgba(8,12,40,.8)'; ctx.fillRect(sx - tw / 2, sy - 40 * s, tw, 8 * s);
     ctx.fillStyle = rec && rec.medal ? MEDAL_COL[rec.medal] : '#fff'; ctx.fillText(label, sx, sy - 36 * s);
@@ -437,9 +437,9 @@ window.addEventListener('ark-ready', () => {
       : MG.type === 'dogs' ? `${L.eggs} ${MG.eggs.filter(e => e.got).length}/6` : MG.type === 'mowing' ? `${MG.cut.size}/${MG.target}` : `${L.hits} ${MG.hits}/15`;
     const bw = Math.min(W * .56, U * 64), bx = (W - bw) / 2;
     ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(bx, U * 1.5, bw, U * 6);
-    ctx.font = `${U * 2.3}px Silkscreen`; ctx.textAlign = 'left'; ctx.fillStyle = '#ffd21f'; ctx.fillText(`${L.time} ${fmt(MG.run)}`, bx + U * 2, U * 3.6);
+    ctx.font = `${U * 2.3}px PixelifySans`; ctx.textAlign = 'left'; ctx.fillStyle = '#ffd21f'; ctx.fillText(`${L.time} ${fmt(MG.run)}`, bx + U * 2, U * 3.6);
     ctx.textAlign = 'right'; ctx.fillStyle = '#f5f0e0'; ctx.fillText(info, bx + bw - U * 2, U * 3.6);
-    ctx.textAlign = 'center'; ctx.font = `${U * 1.3}px Silkscreen`; ctx.fillStyle = '#9aa0c0';
+    ctx.textAlign = 'center'; ctx.font = `${U * 1.3}px PixelifySans`; ctx.fillStyle = '#9aa0c0';
     const nextMedal = [3, 2, 1].find(m => !rec || (rec.medal || 0) < m);
     ctx.fillText([rec && rec.best ? `${L.best} ${scoreText(MG.type, rec.best)}` : '', nextMedal && rec && rec.medal < 3 && rec.medal ? L.next(L.medal[rec.medal + 1]) : '', L.esc].filter(Boolean).join(' · '), W / 2, U * 6.2);
     // status line under the bar
@@ -447,29 +447,29 @@ window.addEventListener('ark-ready', () => {
     if (MG.type === 'pig' && MG.tired) status = [L.tired, '#7cff6b'];
     if (['skeet', 'ducks'].includes(MG.type) && MG.reload > 0) status = [L.reload, '#ffd21f'];
     if (MG.type === 'mowing' && MG.phase === 'run') status = [`${MG.cut.size}/${MG.target}`, '#7cff6b'];
-    if (status) { ctx.font = `${U * 1.7}px Silkscreen`; ctx.fillStyle = status[1]; ctx.fillText(status[0], W / 2, U * 9.2); }
+    if (status) { ctx.font = `${U * 1.7}px PixelifySans`; ctx.fillStyle = status[1]; ctx.fillText(status[0], W / 2, U * 9.2); }
 
     if (['skeet', 'ducks'].includes(MG.type) && MG.phase === 'run') drawSkeetHUD(U, W, H);
     if (MG.phase === 'count') {   // three lamps: red, red, yellow... then green GO
       const n = Math.floor(MG.t), k = MG.t % 1, r = U * 3.2, cy = H * .38;
       ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(W / 2 - r * 5, cy - r * 1.6, r * 10, r * 3.2);
       for (let i = 0; i < 3; i++) { ctx.fillStyle = i <= n ? (i < 2 ? '#ff4b3e' : '#ffd21f') : '#2a2f45'; ctx.beginPath(); ctx.arc(W / 2 + (i - 1) * r * 3, cy, r, 0, 7); ctx.fill(); }
-      ctx.font = `${U * (6 - k * 2)}px Silkscreen`; ctx.fillStyle = `rgba(255,255,255,${1 - k * .5})`; ctx.fillText(String(3 - n), W / 2, cy + r * 2.8);
+      ctx.font = `${U * (6 - k * 2)}px PixelifySans`; ctx.fillStyle = `rgba(255,255,255,${1 - k * .5})`; ctx.fillText(String(3 - n), W / 2, cy + r * 2.8);
     } else if (MG.phase === 'run' && MG.run < .8) {
-      ctx.font = `${U * 9}px Silkscreen`; ctx.fillStyle = `rgba(124,255,107,${1 - MG.run / .8})`; ctx.fillText(L.go, W / 2, H * .42);
+      ctx.font = `${U * 9}px PixelifySans`; ctx.fillStyle = `rgba(124,255,107,${1 - MG.run / .8})`; ctx.fillText(L.go, W / 2, H * .42);
     } else if (MG.phase === 'win' || MG.phase === 'lose') {
       const pw = Math.min(W - U * 6, U * 64), ph = U * 25, px = (W - pw) / 2, py = H * .26;
       A.box(px, py, pw, ph, U);
-      ctx.font = `${U * 3.2}px Silkscreen`; ctx.fillStyle = MG.phase === 'win' ? '#7cff6b' : '#ff6b5e'; ctx.fillText(MG.msg, W / 2, py + U * 4.6);
-      if (MG.medal) { drawMedal(W / 2 - pw * .32, py + U * 12.5, U * 3, MG.medal); ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillStyle = MEDAL_COL[MG.medal]; ctx.fillText(L.medal[MG.medal], W / 2 - pw * .32, py + U * 17.4); }
-      ctx.font = `${U * 2.2}px Silkscreen`; ctx.fillStyle = '#f5f0e0';
+      ctx.font = `${U * 3.2}px PixelifySans`; ctx.fillStyle = MG.phase === 'win' ? '#7cff6b' : '#ff6b5e'; ctx.fillText(MG.msg, W / 2, py + U * 4.6);
+      if (MG.medal) { drawMedal(W / 2 - pw * .32, py + U * 12.5, U * 3, MG.medal); ctx.font = `${U * 1.8}px PixelifySans`; ctx.fillStyle = MEDAL_COL[MG.medal]; ctx.fillText(L.medal[MG.medal], W / 2 - pw * .32, py + U * 17.4); }
+      ctx.font = `${U * 2.2}px PixelifySans`; ctx.fillStyle = '#f5f0e0';
       const main = ['skeet', 'ducks'].includes(MG.type) ? `${L.hits} ${MG.hits}/15` : `${L.time} ${fmt(MG.run)}`;
       ctx.fillText(main, W / 2 + (MG.medal ? pw * .1 : 0), py + U * 9.5);
-      ctx.font = `${U * 1.6}px Silkscreen`; ctx.fillStyle = '#c8cee0';
+      ctx.font = `${U * 1.6}px PixelifySans`; ctx.fillStyle = '#c8cee0';
       if (rec && rec.best) ctx.fillText(`${L.best} ${scoreText(MG.type, rec.best)}${MG.record ? '  ★ ' + L.record : ''}`, W / 2 + (MG.medal ? pw * .1 : 0), py + U * 15.4);
       MG.btn = { mid: W / 2 };
       if (MG.t > .5) {
-        ctx.font = `${U * 1.7}px Silkscreen`;
+        ctx.font = `${U * 1.7}px PixelifySans`;
         ctx.fillStyle = Math.floor(A.time * 3) % 2 ? '#ffd21f' : '#fff3b0'; ctx.fillText(L.retry, W / 2 - pw * .24, py + ph - U * 3);
         ctx.fillStyle = '#c8cee0'; ctx.fillText(L.quit, W / 2 + pw * .26, py + ph - U * 3);
       }

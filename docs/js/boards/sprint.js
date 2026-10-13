@@ -159,7 +159,7 @@
         const x = sx(m); if (x < -30 || x > W + 30) continue;
         c.fillStyle = 'rgba(10,20,10,.35)'; c.fillRect(Math.round(x) - 3, t, 8, 2);
         c.fillStyle = '#f5f0e0'; c.fillRect(Math.round(x) - 2, t - 16, 5, 16); c.fillStyle = '#d8262c'; c.fillRect(Math.round(x) - 2, t - 16, 5, 3);
-        c.font = '10px Silkscreen'; c.textAlign = 'center'; c.fillStyle = '#10141f'; c.fillText(`${m}`, x + 1, t - 19); c.fillStyle = '#fff'; c.fillText(`${m}`, x, t - 20);
+        c.font = '10px PixelifySans'; c.textAlign = 'center'; c.fillStyle = '#10141f'; c.fillText(`${m}`, x + 1, t - 19); c.fillStyle = '#fff'; c.fillText(`${m}`, x, t - 20);
       }
       const s0 = sx(0);
       if (s0 > -10 && s0 < W + 10) { c.fillStyle = 'rgba(255,255,255,.85)'; c.fillRect(Math.round(s0) - 2, y0, 4, b - y0); c.fillStyle = 'rgba(255,255,255,.55)'; c.fillRect(Math.round(s0) - 2, b, 4, y1 - b); }
@@ -169,7 +169,7 @@
         // two posts with a META banner on the far one; the tape snaps when the first runner breaks it
         c.fillStyle = '#5a3a1e'; c.fillRect(Math.round(f) + 6, t - 46, 3, 46); c.fillRect(Math.round(f) + 6, y1 - 50, 3, 50);
         c.fillStyle = 'rgba(8,12,40,.85)'; c.fillRect(f - 22, t - 62, 56, 16);
-        c.font = '12px Silkscreen'; c.textAlign = 'center'; c.fillStyle = '#ffd21f'; c.fillText(TX.done, f + 6, t - 50);
+        c.font = '12px PixelifySans'; c.textAlign = 'center'; c.fillStyle = '#ffd21f'; c.fillText(TX.done, f + 6, t - 50);
         c.strokeStyle = '#e8262c'; c.lineWidth = 2; const ta = t - 20, tb = y1 - 30;
         if (!tape) { c.beginPath(); c.moveTo(f + 8, ta); c.lineTo(f + 8, tb); c.stroke(); }
         else if (tape.t < 1.2) { const a = Math.min(1, tape.t * 3); c.globalAlpha = 1 - tape.t / 1.2; c.beginPath(); c.moveTo(f + 8, ta); c.lineTo(f + 8 + 30 * a, ta + 30 + 20 * a); c.moveTo(f + 8, tb); c.lineTo(f + 8 + 30 * a, tb - 30 - 20 * a); c.stroke(); c.globalAlpha = 1; }
@@ -189,7 +189,7 @@
         const x = sx(r.d), y = footY(r.p.lane);
         if (x < -40 || x > W + 40) {   // off-screen: edge marker with the gap to the leader
           const left = x < 0, ex = left ? 6 : W - 6, lead = Math.max(...R.map(o => o.d));
-          c.font = '11px Silkscreen'; c.textAlign = left ? 'left' : 'right'; c.fillStyle = 'rgba(8,12,40,.75)';
+          c.font = '11px PixelifySans'; c.textAlign = left ? 'left' : 'right'; c.fillStyle = 'rgba(8,12,40,.75)';
           const label = `${left ? '◀ ' : ''}${r.p.cpu ? 'CPU' : 'P' + (r.p.slot + 1)} ${left ? '-' + Math.round(lead - r.d) + ' ' + TX.m : ''}${left ? '' : ' ▶'}`;
           const tw = c.measureText(label).width + 8; c.fillRect(left ? ex - 2 : ex - tw + 2, y - 40, tw, 16);
           c.fillStyle = r.p.color; c.fillText(label, ex + (left ? 2 : -2), y - 28); c.textAlign = 'left';
@@ -199,8 +199,8 @@
         const hop = r.v > 1 && r.finish === null ? -Math.abs(Math.sin(r.bob * 1.5)) * 3 : 0;
         if (!drawSprite(c, r.p.atlas, frameOf(r, phase), x, y + hop, 1, SCALE)) { c.fillStyle = r.p.color; c.fillRect(x - 10, y - 70, 20, 70); }
         const tag = r.p.tag || (r.p.cpu ? 'CPU' : `P${r.p.slot + 1}`);
-        c.font = '10px Silkscreen'; c.textAlign = 'center'; c.fillStyle = '#10141f'; c.fillText(tag, x + 1, y - 87); c.fillStyle = r.p.color; c.fillText(tag, x, y - 88);
-        if (r.msgT > 0) { c.globalAlpha = Math.min(1, r.msgT * 2); c.font = '12px Silkscreen'; c.fillStyle = '#10141f'; c.fillText(r.msg, x + 1, y - 101); c.fillStyle = '#ff9a5e'; c.fillText(r.msg, x, y - 102); c.globalAlpha = 1; }
+        c.font = '10px PixelifySans'; c.textAlign = 'center'; c.fillStyle = '#10141f'; c.fillText(tag, x + 1, y - 87); c.fillStyle = r.p.color; c.fillText(tag, x, y - 88);
+        if (r.msgT > 0) { c.globalAlpha = Math.min(1, r.msgT * 2); c.font = '12px PixelifySans'; c.fillStyle = '#10141f'; c.fillText(r.msg, x + 1, y - 101); c.fillStyle = '#ff9a5e'; c.fillText(r.msg, x, y - 102); c.globalAlpha = 1; }
         c.textAlign = 'left';
       }
     }
@@ -210,28 +210,28 @@
       R.forEach((r, i) => {
         const x = 10 + i * (pw + gap), y = 6, p = r.p;
         c.fillStyle = 'rgba(8,12,40,.82)'; c.fillRect(x, y, pw, 52); c.fillStyle = p.color; c.fillRect(x, y, pw, 2);
-        c.font = '11px Silkscreen'; c.textAlign = 'left'; c.fillStyle = '#f5f0e0'; c.fillText(p.name.slice(0, 14), x + 6, y + 15);
+        c.font = '11px PixelifySans'; c.textAlign = 'left'; c.fillStyle = '#f5f0e0'; c.fillText(p.name.slice(0, 14), x + 6, y + 15);
         c.textAlign = 'right'; c.fillStyle = p.color; c.fillText(p.tag || (p.cpu ? 'CPU' : `P${p.slot + 1}`), x + pw - 6, y + 15);
         if (!p.cpu) {   // which key comes next: the one you did not press last
           const kl = api.keyLabel(p, 'left'), kr = api.keyLabel(p, 'right'), next = r.last === 'left' ? 'right' : r.last === 'right' ? 'left' : null;
-          c.textAlign = 'left'; c.font = '12px Silkscreen';
+          c.textAlign = 'left'; c.font = '12px PixelifySans';
           c.fillStyle = next === 'right' ? 'rgba(255,255,255,.35)' : '#ffd21f'; c.fillText(kl, x + 6, y + 31);
           c.fillStyle = next === 'left' ? 'rgba(255,255,255,.35)' : '#ffd21f'; c.fillText(kr, x + 6 + c.measureText(kl + '  ').width, y + 31);
         }
-        c.textAlign = 'right'; c.font = '11px Silkscreen'; c.fillStyle = '#c8cee0';
+        c.textAlign = 'right'; c.font = '11px PixelifySans'; c.fillStyle = '#c8cee0';
         const right = r.finish !== null ? `${fmt(r.finish + r.penalty)} s` : r.dnf ? '—' : `${Math.min(DIST, Math.floor(r.d))} ${TX.m}`;
         c.fillText(right, x + pw - 6, y + 31);
         c.fillStyle = '#0a1120'; c.fillRect(x + 6, y + 38, pw - 12, 7);
         c.fillStyle = r.stumble > 0 ? '#ff6b5e' : p.color; c.fillRect(x + 6, y + 38, (pw - 12) * Math.min(1, r.v / VMAX), 7);
-        if (r.penalty || r.fs) { c.fillStyle = r.penalty ? '#ff6b5e' : '#ffd21f'; c.font = '10px Silkscreen'; c.textAlign = 'center'; c.fillText(r.penalty ? '+2 s' : '!', x + pw * .56, y + 31); }
+        if (r.penalty || r.fs) { c.fillStyle = r.penalty ? '#ff6b5e' : '#ffd21f'; c.font = '10px PixelifySans'; c.textAlign = 'center'; c.fillText(r.penalty ? '+2 s' : '!', x + pw * .56, y + 31); }
       });
       c.textAlign = 'center';
-      c.font = '26px Silkscreen'; c.fillStyle = '#10141f'; c.fillText(fmt(time), W / 2 + 2, 92); c.fillStyle = '#fff'; c.fillText(fmt(time), W / 2, 90);
+      c.font = '26px PixelifySans'; c.fillStyle = '#10141f'; c.fillText(fmt(time), W / 2 + 2, 92); c.fillStyle = '#fff'; c.fillText(fmt(time), W / 2, 90);
       if (phase === 'count') {
         const txt = t < 1 ? TX.mark : TX.set;
-        c.font = '44px Silkscreen'; c.fillStyle = '#10141f'; c.fillText(txt, W / 2 + 3, H * .38 + 3); c.fillStyle = '#ffd21f'; c.fillText(txt, W / 2, H * .38);
+        c.font = '44px PixelifySans'; c.fillStyle = '#10141f'; c.fillText(txt, W / 2 + 3, H * .38 + 3); c.fillStyle = '#ffd21f'; c.fillText(txt, W / 2, H * .38);
       } else if (phase === 'run' && t < .7) {
-        c.font = '64px Silkscreen'; c.fillStyle = `rgba(124,255,107,${1 - t / .7})`; c.fillText(TX.go, W / 2, H * .4);
+        c.font = '64px PixelifySans'; c.fillStyle = `rgba(124,255,107,${1 - t / .7})`; c.fillText(TX.go, W / 2, H * .4);
       }
       c.textAlign = 'left';
     }

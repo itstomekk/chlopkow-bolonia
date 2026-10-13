@@ -87,7 +87,7 @@ window.addEventListener('ark-ready', () => {
     const t = QZ.q[PL ? 'pl' : 'en'];
     ctx.fillStyle = 'rgba(4,6,20,0.62)'; ctx.fillRect(0, 0, W, H);
     const bw = Math.min(W - U * 4, U * 96), bx = (W - bw) / 2;
-    ctx.font = `${U * 2.1}px Silkscreen`;
+    ctx.font = `${U * 2.1}px PixelifySans`;
     const qLines = A.wrapText(t.q.toUpperCase(), bw - U * 6);
     const factLines = QZ.phase === 'done' ? A.wrapText(t.fact.toUpperCase(), bw - U * 6) : [];
     const ansH = U * 7.2, gap = U * 1.2;
@@ -98,9 +98,9 @@ window.addEventListener('ark-ready', () => {
     ctx.fillStyle = '#10163a'; ctx.fillRect(bx, by, bw, bh);
     ctx.strokeStyle = '#f5f0e0'; ctx.lineWidth = Math.max(1, U * .35); ctx.strokeRect(bx, by, bw, bh);
     ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-    ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 2.3}px Silkscreen`;
+    ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 2.3}px PixelifySans`;
     ctx.fillText(`${L.quizTitle} ${answered() + (QZ.phase === 'ask' ? 1 : 0)}/${QZ_ALL}`, bx + U * 3, by + U * 3.4);
-    ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.1}px Silkscreen`;
+    ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.1}px PixelifySans`;
     qLines.forEach((l, i) => ctx.fillText(l, bx + U * 3, by + U * (7 + i * 3)));
     const ay = by + U * 6 + qLines.length * U * 3 + gap;
     const aw = (bw - U * 6 - gap) / 2;
@@ -115,23 +115,23 @@ window.addEventListener('ark-ready', () => {
       if (picked && !isOk) { bg = '#73353b'; fg = '#ffb3ab'; }
       ctx.fillStyle = bg; ctx.fillRect(ox, oy, aw, ansH);
       ctx.strokeStyle = fg; ctx.lineWidth = Math.max(1, U * .2); ctx.strokeRect(ox, oy, aw, ansH);
-      ctx.fillStyle = fg; ctx.font = `${U * 2}px Silkscreen`;
+      ctx.fillStyle = fg; ctx.font = `${U * 2}px PixelifySans`;
       ctx.fillText('ABCD'[slot] + ')', ox + U * 1.2, oy + ansH / 2);
-      ctx.font = `${U * 1.75}px Silkscreen`;
+      ctx.font = `${U * 1.75}px PixelifySans`;
       const al = A.wrapText(t.a[orig].toUpperCase(), aw - U * 6).slice(0, 2);
       al.forEach((l, i) => ctx.fillText(l, ox + U * 4.4, oy + ansH / 2 + (i - (al.length - 1) / 2) * U * 2.3));
     }
     const fy = ay + ansH * 2 + gap * 2;
     if (QZ.phase === 'ask') {
-      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 1.4}px Silkscreen`; ctx.textAlign = 'center';
+      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 1.4}px PixelifySans`; ctx.textAlign = 'center';
       ctx.fillText(matchMedia('(pointer:coarse)').matches ? '' : L.pick, W / 2, fy + U * 1.4);
     } else {
       const ok = QZ.pick === QZ.q.ok;
-      ctx.fillStyle = ok ? '#7cff6b' : '#ff6b5e'; ctx.font = `${U * 2.4}px Silkscreen`;
+      ctx.fillStyle = ok ? '#7cff6b' : '#ff6b5e'; ctx.font = `${U * 2.4}px PixelifySans`;
       ctx.fillText(ok ? L.correct : L.wrong, bx + U * 3, fy + U * 1.8);
-      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.9}px Silkscreen`;
+      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.9}px PixelifySans`;
       factLines.forEach((l, i) => ctx.fillText(l, bx + U * 3, fy + U * (4.8 + i * 2.8)));
-      if (Math.floor(A.time * 3) % 2) { ctx.fillStyle = '#ffd21f'; ctx.textAlign = 'right'; ctx.font = `${U * 1.5}px Silkscreen`; ctx.fillText(L.cont, bx + bw - U * 3, by + bh - U * 2.2); }
+      if (Math.floor(A.time * 3) % 2) { ctx.fillStyle = '#ffd21f'; ctx.textAlign = 'right'; ctx.font = `${U * 1.5}px PixelifySans`; ctx.fillText(L.cont, bx + bw - U * 3, by + bh - U * 2.2); }
     }
     ctx.textAlign = 'left';
   }
@@ -167,7 +167,7 @@ window.addEventListener('ark-ready', () => {
     if (st !== undefined) return;
     const bob = Math.sin(A.time * 5 + b.x) * 1.5 * s, my = sy - 20 * s + bob;
     ctx.fillStyle = '#10163a'; ctx.fillRect(sx - 5 * s, my - 6 * s, 10 * s, 11 * s);
-    ctx.fillStyle = '#ffd21f'; ctx.font = `${8 * s}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffd21f'; ctx.font = `${8 * s}px PixelifySans`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('?', sx, my);
   }
   HOOKS.world.push((push, S, inView) => {

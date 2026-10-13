@@ -5,24 +5,6 @@
 (() => {
   const cvs = document.getElementById('game');
   const ctx = cvs.getContext('2d');
-  // Silkscreen has no 'Ć'. Measure it as 'C' and draw 'C' plus a tiny acute accent.
-  const _fill = ctx.fillText.bind(ctx), _measure = ctx.measureText.bind(ctx);
-  ctx.measureText = t => _measure(String(t).replace(/Ć/g, 'C'));
-  ctx.fillText = (t, x, y, mw) => {
-    t = String(t);
-    if (!t.includes('Ć')) return _fill(t, x, y, mw);
-    const plain = t.replace(/Ć/g, 'C'), w = _measure(plain).width, al = ctx.textAlign;
-    let cx = al === 'center' ? x - w / 2 : al === 'right' || al === 'end' ? x - w : x;
-    const fs = parseFloat((ctx.font.match(/([\d.]+)px/) || [0, 16])[1]);
-    ctx.textAlign = 'left';
-    for (const part of t.split(/(Ć)/)) {
-      if (!part) continue;
-      const seg = part === 'Ć' ? 'C' : part; _fill(seg, cx, y);
-      if (part === 'Ć') { const cw = _measure('C').width, u = fs / 8; ctx.fillRect(cx + cw * .45, y - fs * .78, u * 1.4, u); ctx.fillRect(cx + cw * .45 + u, y - fs * .78 - u, u * 1.4, u); }
-      cx += _measure(seg).width;
-    }
-    ctx.textAlign = al;
-  };
   const params = new URLSearchParams(location.search);
   const LANG = params.get('lang') === 'en' ? 'en' : 'pl';
   const DEBUG = params.get('debug') === '1';
@@ -31,7 +13,11 @@
   const SAVE_VERSION = 2;   // D04: explicit payload version; a missing `v` means a legacy v1 save
   let saveFrozen = false;   // D04: a newer-version save must never be overwritten this session
   const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 5;
-  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik'];
+  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat'];
+  // Hard-alpha pixel sheets: draw the player without smoothing.
+  const PIXEL_CHARACTERS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat']);
+  // NPCs drawn from their own walk sheet in the world (the older cast keeps docs/img/npcs.png and quest markers).
+  const PIXEL_NPCS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek']);
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
   if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) selectedCharacter = 'arek';
 
@@ -40,7 +26,7 @@
     pl: {
       title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK' },
+      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -106,7 +92,7 @@
     en: {
       title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK' },
+      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -433,7 +419,7 @@
     return { x: npc.x, y: npc.y };
   }
   // These roles live at a fixed spot of the level (items.json) and are never shuffled; old saves are pulled back to it.
-  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik']);
+  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek']);
   function randomizeNpcPositions() {
     if (!MAP || !ITEMS || !SOLID) return;
     buildReachableMask();
@@ -486,17 +472,16 @@
   const openingStage = () => openingT >= OPENING.reveal ? 'selector' : 'reveal';
   const skipOpeningReveal = () => { openingT = Math.max(openingT, OPENING.reveal); };
   const nameInput = () => namePrompt && namePrompt.querySelector('input');
-  function placeNameForm() {   // docks the form next to the character grid (beside it when there is room, else below it)
+  function placeNameForm() {   // docks the form into the selector's form panel (see selectorLayout)
     if (!namePrompt || !cvs.width) return;
-    const bs = characterButtonBounds(), k = innerWidth / cvs.width;
-    const gx = Math.min(...bs.map(b => b.x)) * k, gy = Math.min(...bs.map(b => b.y)) * k, gb = Math.max(...bs.map(b => b.y + b.h)) * k;
-    const side = gx - 16 >= 210, w = side ? Math.min(290, gx - 16) : Math.min(330, innerWidth - 24);
+    const { form } = selectorLayout(), k = innerWidth / cvs.width;
     const U = Math.min(cvs.width, cvs.height * 1.6) / 100, stripTop = innerHeight - U * 9.5 * k;
+    const w = form.w * k;
     namePrompt.style.width = w + 'px';
     const h = namePrompt.getBoundingClientRect().height;
-    let top = side ? gy : gb + 10;
-    top = Math.max(8, Math.min(top, stripTop - h - 8));
-    namePrompt.style.left = (side ? gx - 12 - w : (innerWidth - w) / 2) + 'px';
+    const heroLines = hasSave ? 46 : 0;   // the saved hero's name is drawn on the canvas just above the form
+    const top = Math.max(8, Math.min(form.y * k + heroLines, stripTop - h - 8));
+    namePrompt.style.left = form.x * k + 'px';
     namePrompt.style.top = top + 'px';
   }
   function requestPlayerName(fresh = true, auto = false) {
@@ -538,17 +523,43 @@
     // Desktop: typing can begin at once. Touch: no autofocus, so the soft keyboard never hides the opening.
     if (!auto || (window.matchMedia && matchMedia('(pointer: fine)').matches)) input.focus();
   }
-  function characterButtonBounds() {
+  // Character selector layout. The cards fill the whole board between the title line and the help strip;
+  // the name form gets its own panel (right side on landscape screens, below the cards on portrait ones).
+  let selectorCache = null;
+  function selectorLayout() {
     const W = cvs.width, H = cvs.height, U = Math.min(W, H * 1.6) / 100;
-    const scale = W / Math.max(1, innerWidth);
-    const size = Math.max(U * 7, 48 * scale), gap = U * 1.5;
-    const n = PLAYABLE_CHARACTERS.length, rows = Math.ceil(n / 2);
-    // keep every row above the bottom prompt strip (H - 9.5U) on short landscape screens
-    const gridW = size * 2 + gap, gridX = (W - gridW) / 2, gridY = Math.min(H * .45, H - U * 10.3 - rows * size - (rows - 1) * gap);
-    return PLAYABLE_CHARACTERS.map((id, i) => ({   // 2 columns; a lone last button is centred on its own row
-      id, x: i === n - 1 && n % 2 ? (W - size) / 2 : gridX + (i % 2) * (size + gap), y: gridY + Math.floor(i / 2) * (size + gap), w: size, h: size,
+    const k = W / Math.max(1, innerWidth);   // canvas px per CSS px
+    const key = [W, H, innerWidth, PLAYABLE_CHARACTERS.length, hasSave].join();
+    if (selectorCache && selectorCache.key === key) return selectorCache;
+    const pad = 12 * k, gap = Math.max(4 * k, U * .9);
+    const top = Math.max(H * .075, 30 * k), bottom = H - U * 9.5 - pad;
+    const side = W / k >= 720 && W / H >= 1.15;   // landscape: name form on the right
+    const formW = Math.min(300 * k, W - 2 * pad), formH = (hasSave ? 270 : 215) * k;   // measured DOM form height plus margin
+    const area = side
+      ? { x: pad, y: top, w: W - formW - 3 * pad, h: bottom - top }
+      : { x: pad, y: top, w: W - 2 * pad, h: Math.max(60 * k, bottom - top - formH - pad) };
+    const n = PLAYABLE_CHARACTERS.length;
+    let best = null;
+    for (let cols = 1; cols <= n; cols++) {
+      const rows = Math.ceil(n / cols);
+      const cw = (area.w - gap * (cols - 1)) / cols, ch = (area.h - gap * (rows - 1)) / rows;
+      // Cards are a little taller than wide (portrait figure + name); score by the usable card width.
+      const w = Math.min(cw, ch / 1.12, 240 * k);
+      if (w > 0 && (!best || w > best.w)) best = { cols, rows, w };
+    }
+    const { cols, rows } = best, w = best.w, h = Math.min(w * 1.12, (area.h - gap * (rows - 1)) / rows);
+    const gridW = cols * w + (cols - 1) * gap, gridH = rows * h + (rows - 1) * gap;
+    const x0 = area.x + (area.w - gridW) / 2, y0 = area.y + Math.max(0, (area.h - gridH) / 2);
+    const cards = PLAYABLE_CHARACTERS.map((id, i) => ({
+      id, x: x0 + (i % cols) * (w + gap), y: y0 + Math.floor(i / cols) * (h + gap), w, h,
     }));
+    const form = side
+      ? { x: W - pad - formW, y: top, w: formW }
+      : { x: (W - formW) / 2, y: Math.min(y0 + gridH + pad, bottom - formH), w: formW };
+    selectorCache = { key, cards, form, cols, rows, side };
+    return selectorCache;
   }
+  function characterButtonBounds() { return selectorLayout().cards; }
   function selectCharacter(char) {
     if (!PLAYABLE_CHARACTERS.includes(char)) return;
     selectedCharacter = char;
@@ -1294,7 +1305,7 @@
     if (anim.flip) ctx.scale(-1, 1);
     const sq = P.land < 1 ? 1 - Math.sin(P.land * Math.PI) * .14 : 1;   // landing squash
     ctx.scale(2 - sq, sq);
-    ctx.imageSmoothingEnabled = selectedCharacter !== 'bercik'; ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingEnabled = !PIXEL_CHARACTERS.has(selectedCharacter); ctx.imageSmoothingQuality = 'high';
     if (shade > .01) ctx.drawImage(shadedFrame(sheet, f, shade), 0, 0, f.w, f.h, -w / 2, -hh, w, hh);
     else ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh);
     ctx.restore(); ctx.imageSmoothingEnabled = false;
@@ -1303,7 +1314,7 @@
     const { meta, sheet } = SPR, anim = spriteAnim(meta, 'walk_', dir), f = anim.frames[Math.floor(step) % anim.frames.length];
     const h = CHAR_H * s, scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
     ctx.save(); ctx.globalAlpha = alpha; ctx.translate(sx, sy + meta.foot * scale); if (anim.flip) ctx.scale(-1, 1);
-    ctx.imageSmoothingEnabled = selectedCharacter !== 'bercik'; ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = !PIXEL_CHARACTERS.has(selectedCharacter); ctx.drawImage(sheet, f.x, f.y, f.w, f.h, -w / 2, -hh, w, hh); ctx.restore(); ctx.imageSmoothingEnabled = false;
   }
   // Round straw bale lying on its side (24x16 art px), end face with rings on the right. Mirrored every few px of
   // rolling so it visibly tumbles when pushed.
@@ -1493,8 +1504,8 @@ function drawFrodo(sx, sy, s) {
       ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(player.sheet, f.x, f.y, f.w, f.h, sx - w / 2, sy + meta.foot * scale - hh, w, hh); ctx.restore();
       return;
     }
-    if (n.id === 'bercik' && PLAYER_SHEETS.bercik) {
-      const player = PLAYER_SHEETS.bercik, meta = player.meta;
+    if (PIXEL_NPCS.has(n.id) && PLAYER_SHEETS[n.id]) {
+      const player = PLAYER_SHEETS[n.id], meta = player.meta;
       const anim = spriteAnim(meta, 'walk_', n.face || 'down');
       const f = anim.frames[Math.floor(time * 3) % anim.frames.length], h = CHAR_H * s;
       const scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
@@ -1515,7 +1526,7 @@ function drawFrodo(sx, sy, s) {
     if (mark && !n.rival) {
       const my = sy - h - 12 * s + Math.sin(time * 5 + i) * 1.5 * s;
       ctx.fillStyle = '#10163a'; ctx.fillRect(sx - 5 * s, my - 6 * s, 10 * s, 11 * s);
-      ctx.fillStyle = mark === '!' ? '#ffd21f' : '#7cff6b'; ctx.font = `${9 * s}px Silkscreen`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = mark === '!' ? '#ffd21f' : '#7cff6b'; ctx.font = `${9 * s}px PixelifySans`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(mark, sx, my);
     }
   }
@@ -1595,21 +1606,21 @@ function drawFrodo(sx, sy, s) {
   function drawCoords(U, H, big, mx, my, mw, mh) {
     const player = `${heroName()} ${posText(P.x, P.y)}`;
     if (!big) {
-      ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
+      ctx.font = `${U * 1.1}px PixelifySans`; ctx.textAlign = 'left';
       const tw = ctx.measureText(player).width, W = cvs.width;   // bottom-right corner, right-aligned
       ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(W - U * 1.2 - tw - U * .8, H - U * 2.4, tw + U * .8, U * 2);
       ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(player, W - U * 1.6, H - U * 1.35); ctx.textAlign = 'left';
       // A03: one small world hover label beside the coordinates (state fn above).
       const hl = worldHoverLabelState(U, cvs.width, H);
       if (hl.shown) {
-        ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
+        ctx.font = `${U * 1.1}px PixelifySans`; ctx.textAlign = 'left';
         ctx.fillStyle = 'rgba(8,12,40,.55)'; ctx.fillRect(hl.x, hl.y, hl.w, hl.h);
         ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(hl.text, hl.x + U * .4, hl.y + hl.h * .55);
       }
       return;
     }
     const cursor = mapCursor.seen ? `KURSOR ${posText(mapCursor.x, mapCursor.y)}` : 'KURSOR / TAP - kliknij mapę';
-    ctx.font = `${U * 1.25}px Silkscreen`; ctx.textAlign = 'left';
+    ctx.font = `${U * 1.25}px PixelifySans`; ctx.textAlign = 'left';
     const tw = Math.max(ctx.measureText(player).width, ctx.measureText(cursor).width) + U * 2;
     const x = Math.max(U, mx), y = Math.min(H - U * 5.2, my + mh + U);
     ctx.fillStyle = 'rgba(8,12,40,.84)'; ctx.fillRect(x, y, tw, U * 4.2);
@@ -1636,7 +1647,7 @@ function drawFrodo(sx, sy, s) {
     const p = worldPickAt(wx, wy);
     if (!p || !p.label || p.kind === 'ground') return none;   // terrain stays anonymous
     let text = String(p.label);
-    ctx.font = `${U * 1.1}px Silkscreen`; ctx.textAlign = 'left';
+    ctx.font = `${U * 1.1}px PixelifySans`; ctx.textAlign = 'left';
     const maxW = W - U * 2.0;   // keep the strip fully inside the viewport
     if (ctx.measureText(text).width > maxW) {
       while (text.length > 1 && ctx.measureText(text + '…').width > maxW) text = text.slice(0, -1);
@@ -1681,12 +1692,12 @@ function drawFrodo(sx, sy, s) {
     }
     ctx.globalAlpha = ui;
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.font = `${U * 1.5}px Silkscreen`; outlined(LANG === 'pl' ? 'GMINA PLATERÓW · MAZOWSZE' : 'PLATERÓW COMMUNE · MASOVIA', W * .04, H * .04, '#f5f0e0', Math.max(1, U * .2));
+    ctx.font = `${U * 1.5}px PixelifySans`; outlined(LANG === 'pl' ? 'GMINA PLATERÓW · MAZOWSZE' : 'PLATERÓW COMMUNE · MASOVIA', W * .04, H * .04, '#f5f0e0', Math.max(1, U * .2));
     // Character selection (same geometry is used by pointer input, including before first paint).
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const button of characterButtonBounds()) {
       const isSelected = button.id === selectedCharacter;
-      ctx.fillStyle = isSelected ? 'rgba(255, 210, 31, 0.3)' : 'rgba(8, 12, 40, 0.72)';
+      ctx.fillStyle = isSelected ? 'rgba(92, 76, 18, 0.92)' : 'rgba(8, 12, 40, 0.88)';
       ctx.fillRect(button.x, button.y, button.w, button.h);
       ctx.strokeStyle = isSelected ? '#ffd21f' : '#c8cee0';
       ctx.lineWidth = Math.max(2, U * .35);
@@ -1695,28 +1706,51 @@ function drawFrodo(sx, sy, s) {
       const anim = player && (player.meta.anims.walk_down || player.meta.anims.idle_down);
       const frame = anim && anim.frames[0];
       if (frame) {
-        const s = Math.min(button.w * .58 / frame.w, button.h * .64 / frame.h);
-        const w = frame.w * s, h = frame.h * s;
+        // Crop the transparent cell margin so the figure, not the cell, fills the card.
+        const cropTop = frame.h * .08, fh = frame.h - cropTop;
+        const s = Math.min(button.w * .8 / frame.w, button.h * .74 / fh);
+        const w = frame.w * s, h = fh * s;
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(player.sheet, frame.x, frame.y, frame.w, frame.h,
-          button.x + (button.w - w) / 2, button.y + U * .4, w, h);
+        ctx.drawImage(player.sheet, frame.x, frame.y + cropTop, frame.w, fh,
+          button.x + (button.w - w) / 2, button.y + button.h * .03, w, h);
       }
-      ctx.font = `${Math.max(U * 1.3, 10 * button.w / (U * 7))}px Silkscreen`;
-      ctx.fillStyle = isSelected ? '#ffd21f' : '#f5f0e0';
+      // Name: one line, or two lines for long names (DZIADEK ZDZISIEK, WESOŁYCH ŚWIĄT) instead of a tiny font.
       const label = T.names[button.id] || button.id.toUpperCase();
-      ctx.fillText(label, button.x + button.w / 2, button.y + button.h * .86);
+      const maxW = button.w * .92, stripH = button.h * .21, minPx = 9 * (cvs.width / Math.max(1, innerWidth));
+      let fontPx = Math.max(minPx, button.w * .12), lines = [label];
+      ctx.font = `${fontPx}px PixelifySans`;
+      const fit = ls => Math.min(...ls.map(l => maxW / Math.max(1, ctx.measureText(l).width)));
+      if (fit(lines) < .8 && label.includes(' ')) {
+        const words = label.split(' ');
+        let bestSplit = null;
+        for (let i = 1; i < words.length; i++) {
+          const ls = [words.slice(0, i).join(' '), words.slice(i).join(' ')];
+          if (!bestSplit || fit(ls) > fit(bestSplit)) bestSplit = ls;
+        }
+        lines = bestSplit;
+        fontPx = Math.min(fontPx, stripH / 2.25);
+        ctx.font = `${fontPx}px PixelifySans`;
+      }
+      const f = fit(lines);
+      if (f < 1) { fontPx *= f; ctx.font = `${fontPx}px PixelifySans`; }
+      ctx.fillStyle = 'rgba(8, 12, 40, 0.92)';
+      ctx.fillRect(button.x, button.y + button.h - stripH, button.w, stripH);
+      ctx.fillStyle = isSelected ? '#ffd21f' : '#f5f0e0';
+      const mid = button.y + button.h - stripH / 2, lh = fontPx * 1.05;
+      lines.forEach((l, i) => ctx.fillText(l, button.x + button.w / 2, mid + (i - (lines.length - 1) / 2) * lh));
     }
     if (hasSave) {
-      ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillStyle = '#fff7d6';
-      ctx.fillText(`${LANG === 'pl' ? 'BOHATER' : 'HERO'}: ${heroName()}`, W / 2, H * .37);
-      ctx.font = `${U * 1.15}px Silkscreen`; ctx.fillStyle = '#c8cee0';
-      ctx.fillText(LANG === 'pl' ? 'N - ZMIEŃ IMIĘ   R - NOWA GRA' : 'N - CHANGE NAME   R - NEW GAME', W / 2, H * .405);
+      const { form } = selectorLayout();
+      ctx.font = `${U * 1.8}px PixelifySans`; ctx.fillStyle = '#fff7d6';
+      ctx.fillText(`${LANG === 'pl' ? 'BOHATER' : 'HERO'}: ${heroName()}`, form.x + form.w / 2, form.y + U * 1.2);
+      ctx.font = `${U * 1.15}px PixelifySans`; ctx.fillStyle = '#c8cee0';
+      ctx.fillText(LANG === 'pl' ? 'N - ZMIEŃ IMIĘ   R - NOWA GRA' : 'N - CHANGE NAME   R - NEW GAME', form.x + form.w / 2, form.y + U * 3.2);
     }
     // prompt + help on a translucent strip at the bottom
     ctx.fillStyle = 'rgba(8,12,40,.72)'; ctx.fillRect(0, H - U * 9.5, W, U * 9.5);
     ctx.textAlign = 'center';
-    if (Math.floor(time * 2) % 2) { ctx.font = `${U * 2.5}px Silkscreen`; outlined(hasSave ? T.cont : T.start, W / 2, H - U * 6.2, '#ffd21f', Math.max(1, U * .25)); }
-    ctx.font = `${U * 1.4}px Silkscreen`; ctx.fillStyle = '#c8cee0'; ctx.fillText(T.help, W / 2, H - U * 2.6);
+    if (Math.floor(time * 2) % 2) { ctx.font = `${U * 2.5}px PixelifySans`; outlined(hasSave ? T.cont : T.start, W / 2, H - U * 6.2, '#ffd21f', Math.max(1, U * .25)); }
+    ctx.font = `${U * 1.4}px PixelifySans`; ctx.fillStyle = '#c8cee0'; ctx.fillText(T.help, W / 2, H - U * 2.6);
     ctx.globalAlpha = 1;
     placeNameForm();
   }
@@ -1776,7 +1810,7 @@ function drawFrodo(sx, sy, s) {
     if (near && !near.npc) {
       const [bx, by0] = S(P.x, P.y - CHAR_H - 8), by = by0 + Math.sin(time * 6) * U * .4;
       ctx.textAlign = 'center'; ctx.fillStyle = '#10163a'; ctx.fillRect(bx - U * 2.2, by - U * 2.2, U * 4.4, U * 4.4);
-      ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3}px Silkscreen`; ctx.fillText('…', bx, by);
+      ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3}px PixelifySans`; ctx.fillText('…', bx, by);
     }
     // HUD: apples + quest log
     if (scene === 'play' || scene === 'end') {
@@ -1793,7 +1827,7 @@ function drawFrodo(sx, sy, s) {
       // Apple and mushroom counters share one compact line.
       const ax = qx + U * 2.4, ay = qy + U * 2.8;
       drawPixels(APPLE_PX, ax - U * 1.3, ay - U * 1.95, U * .2);   // same pixel art as on the map
-      ctx.font = `${U * 2}px Silkscreen`; ctx.fillStyle = '#f5f0e0'; ctx.textAlign = 'left';
+      ctx.font = `${U * 2}px PixelifySans`; ctx.fillStyle = '#f5f0e0'; ctx.textAlign = 'left';
       ctx.fillText(`× ${appleCount()}`, ax + U * 2, ay);
       const mxh = qx + U * 12.2, myh = ay;   // P07: mushroom column nudged left so the right-aligned clock below never collides
       drawPixels(MUSH_PX, mxh - U * 1.3, myh - U * 1.95, U * .2);
@@ -1803,7 +1837,7 @@ function drawFrodo(sx, sy, s) {
       ctx.textAlign = 'right'; ctx.fillStyle = '#ffd21f';
       ctx.fillText(fmtTime(Q.playTime), qx + qw - U * 1.2, ay);
       ctx.textAlign = 'left';
-      ctx.font = `${U * 1.45}px Silkscreen`;
+      ctx.font = `${U * 1.45}px PixelifySans`;
       lines.forEach(([txt, done], i) => {
         const ly = qy + U * (6.1 + i * 2.6);
         ctx.strokeStyle = done ? '#7cff6b' : '#f5f0e0'; ctx.lineWidth = Math.max(1, U * .2); ctx.strokeRect(qx + U * 1.6, ly - U * .7, U * 1.4, U * 1.4);
@@ -1813,22 +1847,22 @@ function drawFrodo(sx, sy, s) {
     }
     if (toast) {
       const a = Math.min(1, (1.6 - toast.t) * 3), y = H * .22 - toast.t * U * 3;
-      ctx.globalAlpha = a; ctx.font = `${U * 2.6}px Silkscreen`; ctx.textAlign = 'center';
+      ctx.globalAlpha = a; ctx.font = `${U * 2.6}px PixelifySans`; ctx.textAlign = 'center';
       const tw = ctx.measureText(toast.text).width + U * 3; ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(W / 2 - tw / 2, y - U * 2.2, tw, U * 4.4);
       ctx.fillStyle = '#ffd21f'; ctx.fillText(toast.text, W / 2, y); ctx.globalAlpha = 1;
     }
     if (talk) {
       const bw = Math.min(W - U * 6, U * 92), bh = U * 17, bx = (W - bw) / 2, by = H - bh - U * 3;
       box(bx, by, bw, bh, U);
-      ctx.font = `${U * 2.4}px Silkscreen`; ctx.fillStyle = talk.who === 'arek' ? '#ffd21f' : '#7cd0ff'; ctx.textAlign = 'left';
+      ctx.font = `${U * 2.4}px PixelifySans`; ctx.fillStyle = talk.who === 'arek' ? '#ffd21f' : '#7cd0ff'; ctx.textAlign = 'left';
       ctx.fillText(talk.who === 'arek' ? heroName() : T.names[talk.who], bx + U * 3, by + U * 3.6);
-      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.25}px Silkscreen`;
+      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2.25}px PixelifySans`;
       const full = talk.lines[talk.i].toUpperCase(), shown = full.slice(0, Math.floor(talkT * 45));
       wrapText(shown, bw - U * 6).slice(0, 3).forEach((l, i) => ctx.fillText(l, bx + U * 3, by + U * (7.6 + i * 3.1)));
       if (shown.length >= full.length && Math.floor(time * 3) % 2) { ctx.fillStyle = '#ffd21f'; ctx.fillText('▼', bx + bw - U * 4, by + bh - U * 2.8); }
     }
     if (scene === 'play' && ROOM) {   // room label instead of the village minimap
-      ctx.font = `${U * 1.8}px Silkscreen`; ctx.textAlign = 'right';
+      ctx.font = `${U * 1.8}px PixelifySans`; ctx.textAlign = 'right';
       const txt = `${ROOM.kind === 'shop' ? (LANG === 'pl' ? 'SKLEP' : 'SHOP') : T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(W - tw - U * 2, U * 2, tw, U * 4); ctx.fillStyle = '#ffd21f'; ctx.fillText(txt, W - U * 3, U * 4);
     }
@@ -1848,7 +1882,7 @@ function drawFrodo(sx, sy, s) {
           ctx.strokeStyle = '#ffd21f'; ctx.lineWidth = Math.max(1, U * .18); ctx.strokeRect(mx + mapCursor.x / MAP.w * mw - U * 1.1, my + mapCursor.y / MAP.h * mh - U * 1.1, U * 2.2, U * 2.2);
           const label = mapHoverLabel(mapCursor.x, mapCursor.y, U * 2.2 / mw * MAP.w), place = label && { name: label };
           if (place) {
-            ctx.font = `${U * 1.65}px Silkscreen`; ctx.textAlign = 'left';
+            ctx.font = `${U * 1.65}px PixelifySans`; ctx.textAlign = 'left';
             const labelW = ctx.measureText(place.name).width + U * 3, sx = mx + mapCursor.x / MAP.w * mw + U * 2.5;
             const sy = my + mapCursor.y / MAP.h * mh - U * 2.5, lx = Math.min(mx + mw - labelW, Math.max(mx, sx)), ly = Math.max(my + U * 5, sy - U * 3);
             ctx.fillStyle = 'rgba(8,12,40,.92)'; ctx.fillRect(lx, ly, labelW, U * 3.8);
@@ -1864,8 +1898,8 @@ function drawFrodo(sx, sy, s) {
     if (scene === 'play' && !ROOM && !showMap && lastCam) {
       const edge = directionSignEdges(W);
       ctx.save(); ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff7d6'; ctx.shadowColor = '#10163a'; ctx.shadowBlur = U * .7;
-      if (edge.left > 0) { ctx.globalAlpha = edge.left; ctx.textAlign = 'left'; ctx.font = `${U * 1.5}px Silkscreen`; ctx.fillText(DIRECTION_SIGNS.left, edge.leftX + U * 1.5, H * .52); }
-      if (edge.right > 0) { ctx.globalAlpha = edge.right; ctx.textAlign = 'right'; ctx.font = `${U * 1.15}px Silkscreen`; ctx.fillText(DIRECTION_SIGNS.right, edge.rightX - U * 1.5, H * .52); }
+      if (edge.left > 0) { ctx.globalAlpha = edge.left; ctx.textAlign = 'left'; ctx.font = `${U * 1.5}px PixelifySans`; ctx.fillText(DIRECTION_SIGNS.left, edge.leftX + U * 1.5, H * .52); }
+      if (edge.right > 0) { ctx.globalAlpha = edge.right; ctx.textAlign = 'right'; ctx.font = `${U * 1.15}px PixelifySans`; ctx.fillText(DIRECTION_SIGNS.right, edge.rightX - U * 1.5, H * .52); }
       ctx.restore();
     }
     if (scene === 'play') HOOKS.hud.forEach(f => f(U, W, H));
@@ -1873,27 +1907,27 @@ function drawFrodo(sx, sy, s) {
       ctx.globalAlpha = .3; ctx.fillStyle = '#fff';
       if (joy.active) { ctx.beginPath(); ctx.arc(joy.cx, joy.cy, 70, 0, 7); ctx.fill(); ctx.globalAlpha = .6; ctx.beginPath(); ctx.arc(joy.cx + joy.x * 70, joy.cy + joy.y * 70, 30, 0, 7); ctx.fill(); }
       ctx.globalAlpha = .5; ctx.beginPath(); ctx.arc(W * .89, H * .8, U * 5, 0, 7); ctx.fill();
-      ctx.globalAlpha = 1; ctx.fillStyle = '#10163a'; ctx.font = `${U * 2.6}px Silkscreen`; ctx.textAlign = 'center'; ctx.fillText('A', W * .89, H * .8);
+      ctx.globalAlpha = 1; ctx.fillStyle = '#10163a'; ctx.font = `${U * 2.6}px PixelifySans`; ctx.textAlign = 'center'; ctx.fillText('A', W * .89, H * .8);
     }
     if (trans) { ctx.fillStyle = `rgba(0,0,0,${Math.max(0, 1 - Math.abs(trans.t - .25) / .25)})`; ctx.fillRect(0, 0, W, H); }
     if (scene === 'title') drawSplash(W, H, U);
     if (scene === 'end') {
       ctx.fillStyle = 'rgba(5,8,25,0.8)'; ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3.6}px Silkscreen`; ctx.fillText(T.end1, W / 2, H * .075);
-      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillText(T.end2, W / 2, H * .145);
-      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 1.45}px Silkscreen`; ctx.fillText(`${T.end3} ${fmtTime(Q.playTime)} · ${appleCount()}/${ITEMS.apples.length}`, W / 2, H * .205);
+      ctx.textAlign = 'center'; ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3.6}px PixelifySans`; ctx.fillText(T.end1, W / 2, H * .075);
+      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.8}px PixelifySans`; ctx.fillText(T.end2, W / 2, H * .145);
+      ctx.fillStyle = '#9aa0c0'; ctx.font = `${U * 1.45}px PixelifySans`; ctx.fillText(`${T.end3} ${fmtTime(Q.playTime)} · ${appleCount()}/${ITEMS.apples.length}`, W / 2, H * .205);
 
       const size = Math.min(U * 32, H * .28, W * .62), x = (W - size) / 2, y = H * .25;
       ctx.fillStyle = 'rgba(8,12,40,0.94)'; ctx.fillRect(x - U, y - U, size + U * 2, size + U * 2);
       ctx.strokeStyle = '#f5f0e0'; ctx.lineWidth = Math.max(2, U * .28); ctx.strokeRect(x - U * .7, y - U * .7, size + U * 1.4, size + U * 1.4);
       if (MEMORY_ART[memoryIndex]) { ctx.imageSmoothingEnabled = false; ctx.drawImage(MEMORY_ART[memoryIndex], x, y, size, size); }
 
-      ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillText(`${T.memoryTitle} · ${memoryIndex + 1}/${T.memoryFacts.length}`, W / 2, H * .59);
-      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.55}px Silkscreen`;
+      ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 1.8}px PixelifySans`; ctx.fillText(`${T.memoryTitle} · ${memoryIndex + 1}/${T.memoryFacts.length}`, W / 2, H * .59);
+      ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 1.55}px PixelifySans`;
       ctx.fillText(T.memoryNames[memoryIndex], W / 2, H * .645);
       const fact = wrapText(T.memoryFacts[memoryIndex], Math.min(W - U * 10, U * 86));
       fact.slice(0, 3).forEach((line, i) => ctx.fillText(line, W / 2, H * .71 + i * U * 2.15));
-      ctx.fillStyle = '#c8cee0'; ctx.font = `${U * 1.45}px Silkscreen`;
+      ctx.fillStyle = '#c8cee0'; ctx.font = `${U * 1.45}px PixelifySans`;
       ctx.fillText(memoryIndex < T.memoryFacts.length - 1 ? T.memoryNext : T.memoryReturn, W / 2, H * .92);
     }
   }
@@ -1926,7 +1960,7 @@ function drawFrodo(sx, sy, s) {
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
       load('img/map_terrain.png'),
       load('img/npcs.png'), load('img/frodo.png'),
-      document.fonts.load('20px Silkscreen', 'ŁŚĆŻ'),
+      document.fonts.load('20px PixelifySans', 'ŁŚĆŻ'),
       // optional AI art for the church; a missing file just keeps the hand-drawn piece
       fetch('img/church/manifest.json').then(r => r.json()).catch(() => [])
         .then(names => Promise.all(names.map(k => load(`img/church/${k}.png`).then(i => { window.CHURCH_ART[k] = i; }, () => { })))),
@@ -2054,9 +2088,12 @@ function drawFrodo(sx, sy, s) {
     window.__game = { P, get openingStage() { return openingStage(); }, get heroShade() { return heroShade; }, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
+    }, get playableCharacters() { return PLAYABLE_CHARACTERS.slice(); }, characterButtonRects() {   // CSS-pixel card rects (tests)
+      const k = cvs.width / Math.max(1, innerWidth);
+      return characterButtonBounds().map(b => ({ id: b.id, x: b.x / k, y: b.y / k, w: b.w / k, h: b.h / k }));
     }, get playerName() { return heroName(); }, get FRODO() { return FRODO; }, get MAP() { return MAP; }, mapPlaceName, mapHoverLabel: (x, y, r = 60) => mapHoverLabel(+x, +y, r), worldHoverLabel: (x, y) => worldHoverLabel(+x, +y), worldPickAt: (x, y) => worldPickAt(+x, +y), worldHoverLabelAtCanvas: (px, py) => worldHoverLabelAtCanvas(+px, +py), worldHoverLabelState: () => worldHoverLabelState(Math.min(cvs.width, cvs.height * 1.6) / 100, cvs.width, cvs.height), get bales() { return BALES; }, get showMap() { return showMap; }, set showMap(v) { showMap = !!v; }, terrainAt, mushroomTotal: MUSHROOMS_TOTAL, mushroomNeeded: MUSHROOMS_NEEDED, mushroomCount, mushroomPalette: { white: true }, hudCountersSingleLine: true, directionSigns: DIRECTION_SIGNS, get directionSignVisibility() { const e = directionSignEdges(cvs.width); return { left: e.left, right: e.right }; }, edytkaStay: EDYTKA_STAY, ITEMS, blocked, clickTarget, mapCursor, copyMapCoordinates, sectorAt, clockGeometry: () => {
       const u = Math.min(cvs.width, cvs.height * 1.6) / 100;
-      ctx.font = `${u * 2}px Silkscreen`; ctx.textAlign = 'left';
+      ctx.font = `${u * 2}px PixelifySans`; ctx.textAlign = 'left';
       const text = fmtTime(Q.playTime);
       const tw = ctx.measureText(text).width;
       const qx = u * 2, qy = u * 2, qw = u * 40, ay = qy + u * 2.8;

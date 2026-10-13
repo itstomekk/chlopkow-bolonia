@@ -28,6 +28,7 @@ CELL_H = 170
 SHEET_SIZE = (CELL_W * 4, CELL_H * 4)
 FOOT = 6
 CONTENT_H_SMALL = 75
+PALETTE_COLORS = 40  # build_cast_walk.py --colors lowers this for simpler cast sprites
 DIRECTIONS = ("down", "up", "left", "right")
 FRAME_NAMES = ("a", "b")
 GRID_KEYS = (
@@ -179,7 +180,7 @@ def _common_palette(frames: Iterable[Image.Image]) -> list[tuple[int, int, int]]
     # Quantize a compact image containing only sprite colours, not transparent
     # padding. The single palette is then applied to every frame by nearest RGB.
     sample = Image.fromarray(colors.reshape(1, len(colors), 3).astype(np.uint8), "RGB")
-    quantized = sample.quantize(colors=40, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    quantized = sample.quantize(colors=PALETTE_COLORS, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
     used = sorted({index for index in np.asarray(quantized).ravel()})
     palette = quantized.getpalette()
     return [tuple(int(value) for value in palette[index * 3:index * 3 + 3]) for index in used]
