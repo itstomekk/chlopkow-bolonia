@@ -51,6 +51,12 @@ def at(x, y, r=10, max_dist=197):
 landmarks = []
 for lm in m.get('landmarks', []):
     ax, ay = near_free(lm['x'], lm['y'], r=8)
+    if not free(ax, ay, 8):
+        # The found point can round into a wall (e.g. the świetlica POI now sits inside its sprite):
+        # search again testing the rounded point itself. Landmarks that already passed keep their old access.
+        ax, ay = next(((round(lm['x'] + math.cos(a) * rad), round(lm['y'] + math.sin(a) * rad))
+                       for rad in range(0, 198, 3) for a in np.linspace(0, 2 * math.pi, 16, endpoint=False)
+                       if free(round(lm['x'] + math.cos(a) * rad), round(lm['y'] + math.sin(a) * rad), 8)), (ax, ay))
     assert free(ax, ay, 8), f"{lm['key']} has no reachable access point"
     landmarks.append(dict(lm, access=dict(x=ax, y=ay)))
 

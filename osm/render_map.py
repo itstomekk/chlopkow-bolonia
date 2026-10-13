@@ -716,6 +716,21 @@ objects_img.alpha_composite(church_sign, (_cs_x0, _cs_y0))
 objects.append(dict(x=_cs_x0, y=_cs_y0, w=church_sign.width, h=church_sign.height, base=float(_csy)))
 collide[_csy - 3:_csy + 1, _csx - 2:_csx + 3] = True
 
+# Świetlica (pilot 2026-10-03, top kept; 2026-10-13 made longer with the south annex / gym) and the bus shelter north of
+# Dom Muchy (variant C, 2026-10-05, triangulated from Street View). Tomek, 2026-10-13: put both on the map.
+# Pre-gridded 1:1 pixel art; shadow and collision follow the yard sprites (silhouette pushed down by the wall band).
+for _png, _sx, _sy in (('gen/lm_swietlica.png', 2281, 4583), ('gen/lm_bus_shelter_muchy.png', 2169, 4543)):
+    _s = Image.open(_png).convert('RGBA'); _a = np.array(_s.getchannel('A')) > 0
+    _sh = Image.fromarray(((_a & (np.arange(_a.shape[0])[:, None] >= _s.height // 2)) * 255).astype(np.uint8))
+    ground.paste((58, 84, 40), (_sx + 5, _sy + 3), _sh)
+    objects_img.alpha_composite(_s, (_sx, _sy))
+    objects.append(dict(x=_sx, y=_sy, w=_s.width, h=_s.height, base=float(_sy + _s.height)))
+    _wall = round(_s.height * YARD_WALL_FRAC)
+    _foot = np.zeros_like(_a); _foot[_wall:] = _a[:-_wall]
+    _ys, _xs = np.nonzero(_foot)
+    collide[_ys + _sy, _xs + _sx] = True; occupied[_ys + _sy, _xs + _sx] = True
+
+
 # ---------------------------------------------------------------- trees
 occ_img = Image.fromarray((occupied * 255).astype(np.uint8))
 occ_d = np.array(occ_img.filter(ImageFilter.MaxFilter(15))) > 0

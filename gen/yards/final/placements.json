@@ -307,5 +307,29 @@
   "png": "gen/yards/final/993157840.png",
   "x": 4821,
   "y": 5659
+ },
+ {
+  "id": 993157691,
+  "yard": "muchy",
+  "house": true,
+  "png": "gen/yards/final/993157691.png",
+  "x": 2186,
+  "y": 4570
+ },
+ {
+  "id": 993157696,
+  "yard": "muchy",
+  "house": false,
+  "png": "gen/yards/final/993157696.png",
+  "x": 2146,
+  "y": 4565
+ },
+ {
+  "id": 993157706,
+  "yard": "muchy",
+  "house": false,
+  "png": "gen/yards/final/993157706.png",
+  "x": 2164,
+  "y": 4623
  }
 ]
