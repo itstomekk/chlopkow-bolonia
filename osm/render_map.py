@@ -716,10 +716,11 @@ objects_img.alpha_composite(church_sign, (_cs_x0, _cs_y0))
 objects.append(dict(x=_cs_x0, y=_cs_y0, w=church_sign.width, h=church_sign.height, base=float(_csy)))
 collide[_csy - 3:_csy + 1, _csx - 2:_csx + 3] = True
 
-# Świetlica (pilot 2026-10-03, top kept; 2026-10-13 made longer with the south annex / gym) and the bus shelter north of
+# Świetlica (pilot 2026-10-03; 2026-10-13 redrawn longer (round-5 f3), south annex = gym, entrance steps on its west side, sprite's
+# left edge = road's east edge) and the bus shelter north of
 # Dom Muchy (variant C, 2026-10-05, triangulated from Street View). Tomek, 2026-10-13: put both on the map.
 # Pre-gridded 1:1 pixel art; shadow and collision follow the yard sprites (silhouette pushed down by the wall band).
-for _png, _sx, _sy in (('gen/lm_swietlica.png', 2281, 4583), ('gen/lm_bus_shelter_muchy.png', 2169, 4543)):
+for _png, _sx, _sy in (('gen/lm_swietlica.png', 2284, 4561), ('gen/lm_bus_shelter_muchy.png', 2169, 4543)):
     _s = Image.open(_png).convert('RGBA'); _a = np.array(_s.getchannel('A')) > 0
     _sh = Image.fromarray(((_a & (np.arange(_a.shape[0])[:, None] >= _s.height // 2)) * 255).astype(np.uint8))
     ground.paste((58, 84, 40), (_sx + 5, _sy + 3), _sh)
