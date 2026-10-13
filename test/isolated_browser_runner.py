@@ -8,6 +8,10 @@ import sys
 from playwright.sync_api import Browser, BrowserContext
 
 
+EMPTY_BOARD = ('{"ok":true,"best":[],"recent":[],"average":{"score":null,"count":0},'
+               '"cpu":{"score":null,"count":0,"trace":null},"players":0}')
+
+
 def isolate(original):
     def new_page(self, *args, **kwargs):
         page = original(self, *args, **kwargs)
@@ -15,6 +19,10 @@ def isolate(original):
         page.route('https://esm.sh/**', lambda route: route.fulfill(
             status=200, content_type='application/javascript', body='export {};'))
         page.route_web_socket('wss://**', lambda socket: socket.close())
+        # Global scores: tests read an empty board and never write to production.
+        page.route('https://chlopkow-api.kolotom.workers.dev/**', lambda route: route.fulfill(
+            status=200, content_type='application/json',
+            body=EMPTY_BOARD if route.request.method == 'GET' else '{"ok":false,"error":"test isolation"}'))
         return page
     return new_page
 

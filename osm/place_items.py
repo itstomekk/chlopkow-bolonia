@@ -152,7 +152,7 @@ assert min(new_gaps + new_old_gaps) >= 200, 'optional building markers are too c
 
 # ---------------------------------------------------------------- NPCs
 soltys_spot = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['soltys'])
-cem = poi['cemetery']; TR = m['track']; RG = m['range']
+cem = poi['cemetery']; SP = m['sprint']; RG = m['range']
 # litter spots: fixed trash bags by the cemetery and by the southern shop; the game scatters more per new game
 # and the player collects them like apples and mushrooms (no clean-up NPC).
 south_shop = pre_expansion_i(2150, 2506)
@@ -160,7 +160,7 @@ trash = [dict(id='cemetery', **at(cem['x'] + 150, cem['y'] + 60, r=8)), dict(id=
 npcs = [
     dict(id='kasia', **at(*P(52.26261, 22.88575))),          # far east, by a Chłopków-Kolonia farmstead
     dict(id='marcin', **at(1106, 4251)),                      # hangs around the bus stop (the game lets him wander a little)
-    dict(id='damian', **at(TR['cx'] + 80, TR['cy'] + TR['ry'] + TR['w'] / 2 + 34)),   # always by the race track, outside the oval
+    dict(id='damian', **at(SP['x'] + 110, SP['y'] + 12.0)),   # hosts the sprint board, next to its flag
     dict(id='grandpa', **at(poi['windmill']['x'] + 60, poi['windmill']['y'] + 40)),
     dict(id='halina', **at(poi['church']['x'] - 120, poi['church']['y'] + 70)),   # the chronicler waits by the church
     # hidden Sołtys at the supplied preceding-map coordinate, away from every quiz board
@@ -186,9 +186,9 @@ edits.apply('entities', EDITS, dict(target=ent_target, target_list=npcs))
 anchor = {}
 for vk in ('shop', 'church', 'windmill', 'rectory', 'cemetery'):
     if vk in poi: anchor[vk] = (poi[vk]['x'], poi[vk]['y'])
-for vk in ('jazz', 'range', 'gravel'):
+for vk in ('jazz', 'range', 'gravel', 'sprint'):
     if vk in m: anchor[vk] = (m[vk]['x'], m[vk]['y'])
-for vk in ('corral', 'track', 'football_pitch'):
+for vk in ('corral', 'football_pitch'):
     if vk in m: anchor[vk] = (m[vk]['cx'], m[vk]['cy'])
 if 'meadow' in m: anchor['meadow'] = ((m['meadow']['x0'] + m['meadow']['x1']) // 2, (m['meadow']['y0'] + m['meadow']['y1']) // 2)
 edits.apply('zones', EDITS, dict(target=ent_target, target_list=npcs, venues=anchor, spot=at))

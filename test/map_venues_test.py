@@ -41,8 +41,9 @@ for i, p in enumerate(m.get('water', [])):
     elif lab[p['y'], p['x']] != home: fails.append(f'water point {i} is disconnected from spawn')
 for i, p in enumerate(m.get('bales', [])):
     if not (0 <= p['x'] < m['w'] and 0 <= p['y'] < m['h']) or solid[p['y'], p['x']]: fails.append(f'field bale {i} is not walkable')
-# Exactly six static bale objects belong to the race track; field bales are data-only.
-if sum(o['w'] == 27 and o['h'] == 26 for o in m['objects']) != 6: fails.append('expected only six baked race-track bales')
+# The race oval and its six baked bales were removed on 2026-10-12; field bales are data-only.
+if any(o['w'] == 27 and o['h'] == 26 for o in m['objects']): fails.append('baked race-track bales are still on the map')
+if 'track' in m: fails.append('map.json still exports the removed race track')
 check('gravel', m['gravel']['x'], m['gravel']['y'], (873, 2322), 250)
 check('corral', m['corral']['cx'], m['corral']['cy'], (3487, 3308), 250)
 M = m['meadow']
@@ -56,9 +57,10 @@ for i in ('michal', 'kuba', 'patryk', 'marcin', 'damian'):
 check('marcin@bus', npc['marcin']['x'], npc['marcin']['y'], (1106, 4251), 20)
 free = (~solid[4251 - 60:4251 + 61, 1106 - 60:1106 + 61]).mean()
 if free < .6: fails.append(f'only {free:.0%} walkable around Marcin')
-T = m['track']
-d = math.hypot(npc['damian']['x'] - T['cx'], npc['damian']['y'] - T['cy'])
-if d > 400: fails.append(f'damian is {d:.0f}px from the race track')
+S = m['sprint']
+d = math.hypot(npc['damian']['x'] - S['x'], npc['damian']['y'] - S['y'])
+if d > 150: fails.append(f'damian is {d:.0f}px from the sprint flag')
+if solid[S['y'], S['x']]: fails.append('sprint flag is not on walkable ground')
 R = m['range']
 for i in ('michal',):
     if math.hypot(npc[i]['x'] - R['x'], npc[i]['y'] - R['y']) > 130: fails.append(f'{i} is not by the range')

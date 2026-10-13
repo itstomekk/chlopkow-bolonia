@@ -104,7 +104,7 @@
     (it.npcs || []).forEach(n => out.push({ key: 'npc:' + n.id, label: n.id, kind: 'npc', x: n.x, y: n.y }));
     (m.landmarks || it.landmarks || []).forEach(l => out.push({ key: 'landmark:' + l.key, label: l.name || l.key, kind: 'landmark', x: l.x, y: l.y }));
     const venue = (name, o, cx = 'cx', cy = 'cy') => o && out.push({ key: 'venue:' + name, label: name, kind: 'venue', x: o[cx], y: o[cy] });
-    venue('track', m.track); venue('corral', m.corral); venue('range', m.range, 'x', 'y'); venue('football_pitch', m.football_pitch); venue('spawn', m.spawn, 'x', 'y');
+    venue('sprint', m.sprint, 'x', 'y'); venue('corral', m.corral); venue('range', m.range, 'x', 'y'); venue('football_pitch', m.football_pitch); venue('spawn', m.spawn, 'x', 'y');
     if (m.meadow) out.push({ key: 'venue:meadow', label: 'meadow', kind: 'venue', x: (m.meadow.x0 + m.meadow.x1) / 2, y: (m.meadow.y0 + m.meadow.y1) / 2 });
     E.entities = out.filter(e => Number.isFinite(e.x) && Number.isFinite(e.y));
   };

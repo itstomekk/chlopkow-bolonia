@@ -1,4 +1,5 @@
-"""Headless test of the four minigames (race, pig, dogs, skeet): win/lose paths, medals, retry, ghost, off-track slowdown.
+"""Headless test of the village minigames (pig, dogs, skeet, ducks, mowing): win/lose paths, medals, retry.
+The lap race was removed on 2026-10-12 (replaced by the sprint board, see sprint_board_test.py).
 Usage: python test/minigames_test.py [URL]"""
 import os
 import math, sys, time
@@ -25,30 +26,8 @@ with sync_playwright() as p:
     ev = pg.evaluate
     mg = lambda: ev("__features.MG && {phase: __features.MG.phase, type: __features.MG.type, medal: __features.MG.medal, msg: __features.MG.msg}")
 
-    # ---- race: win by driving through the checkpoints, ghost gets stored, then retry shows the ghost
-    ev("__features.startMG('race')"); time.sleep(3.3)
-    tr = ev("__game.MAP.track")
-    for lap in range(2):
-        for k in range(1, 17):
-            a = math.pi / 2 + k * 2 * math.pi / 16
-            ev(f"__game.P.x={tr['cx'] + math.cos(a) * tr['rx']}; __game.P.y={tr['cy'] + math.sin(a) * tr['ry']}"); time.sleep(.07)
-    time.sleep(.2); r = mg(); check(r and r['phase'] == 'win', f"race win -> {r}")
-    check(r and r['medal'] == 3, "race teleport-lap earns gold")
-    check(ev("!!(__game.Q.mg.race.ghost && __game.Q.mg.race.ghost.length)"), "race ghost saved")
-    pg.screenshot(path="test/m1_race_result.png")
-    time.sleep(.6); pg.keyboard.press("KeyR"); time.sleep(3.6)
-    check(ev("__features.MG.phase === 'run' && !!__features.MG.ghost"), "retry restarts race with ghost")
-    # off-track slowdown: walk onto the infield grass
-    ev(f"__game.P.x={tr['cx']}; __game.P.y={tr['cy'] + tr['ry'] - 60}")
-    x0 = ev("__game.P.x"); pg.keyboard.down("ArrowRight"); time.sleep(.5); pg.keyboard.up("ArrowRight"); x1 = ev("__game.P.x")
-    check(0 < x1 - x0 < 45, f"off-track speed reduced ({x1 - x0:.0f}px in .5s)")
-    pg.screenshot(path="test/m2_race_ghost.png")
-    pg.keyboard.press("Escape"); time.sleep(.2)
-    # race lose: stand still
-    # The rival completes two laps at 0.7x the legacy pace, which takes just
-    # over 26 seconds after the countdown.
-    ev("__features.startMG('race')"); time.sleep(3.2 + 27.5)
-    r = mg(); check(r and r['phase'] == 'lose', f"race idle -> lose ({r and r['msg']})"); pg.keyboard.press("Escape")
+    # ---- the old lap race is gone: no race type, flag or off-track slowdown
+    check(ev("__game.MAP.track === undefined && !!__game.MAP.sprint"), "map exports a sprint venue and no race track")
 
     # ---- pig: catch → medal by time; timeout → lose
     ev("__features.startMG('pig')"); time.sleep(3.3)
@@ -99,20 +78,23 @@ with sync_playwright() as p:
     r = mg(); check(r and r['phase'] == 'win', f"ducks win by aiming at targets ({r})"); pg.keyboard.press("Escape")
 
     # ---- mowing: holding SPACE while walking paints every pitch strip green
-    ev("__features.startMG('mowing')"); time.sleep(3.2)
+    ev("__features.startMG('mowing')")
+    pg.wait_for_function("__features.MG && __features.MG.phase === 'run'")
     fp = ev("__game.MAP.football_pitch")
     pg.keyboard.down("ArrowRight"); pg.keyboard.down("Space")
     for cy in range(10):
         for cx in range(7):
             ev(f"__game.P.x={fp['cx'] - fp['w'] / 2 + (cx + .5) * fp['w'] / 7}; __game.P.y={fp['cy'] - fp['h'] / 2 + (cy + .5) * fp['h'] / 10}")
-            time.sleep(.045)
-    pg.keyboard.up("Space"); pg.keyboard.up("ArrowRight"); time.sleep(.3)
+            # Teleports must survive until the frame-driven update actually records this tile.
+            pg.wait_for_function("key => __features.MG.cut.has(key)", arg=f'{cx},{cy}', timeout=3000)
+    pg.keyboard.up("Space"); pg.keyboard.up("ArrowRight")
+    pg.wait_for_function("__features.MG.phase === 'win'", timeout=3000)
     r = mg(); check(r and r['phase'] == 'win', f"mowing covers the pitch ({r})"); pg.keyboard.press("Escape")
 
     # ---- save + quest log
     q = ev("JSON.stringify(Object.fromEntries(Object.entries(__game.Q.mg).map(([k, v]) => [k, {won: v.won, medal: v.medal, best: v.best}])))")
     print('mg save:', q)
-    check(all(ev(f"!!(__game.Q.mg.{k} && __game.Q.mg.{k}.won)") for k in ['race', 'pig', 'dogs', 'skeet', 'ducks', 'mowing']), "all six minigames recorded as won")
+    check(all(ev(f"!!(__game.Q.mg.{k} && __game.Q.mg.{k}.won)") for k in ['pig', 'dogs', 'skeet', 'ducks', 'mowing']), "all five minigames recorded as won")
     check(not errs, f"no page errors {errs}")
     b.close()
 print('\nFAILED:', fails if fails else 'none')

@@ -614,7 +614,7 @@
   }
   const MAP_PLACE_NAMES = {
     shop: 'SKLEP', windmill: 'WIATRAK KOŹLAK', cemetery: 'CMENTARZ', rectory: 'PLEBANIA', church: 'KOŚCIÓŁ', river: 'RZEKA MELIORANKA',
-    corral: 'ŚWINKA PEPA', track: 'TOR WYŚCIGOWY', meadow: 'PASTWISKO', range: 'PPM STRZELECTWO', football_pitch: 'BOISKO', jazz: 'JAZZ W STODOLE', gravel: 'WAPNICA',
+    corral: 'ŚWINKA PEPA', sprint: 'BIEG NA 100 M', meadow: 'PASTWISKO', range: 'PPM STRZELECTWO', football_pitch: 'BOISKO', jazz: 'JAZZ W STODOLE', gravel: 'WAPNICA',
   };
   function mapPlaceCandidates() {
     if (!MAP) return [];
@@ -626,7 +626,7 @@
     }
     const named = [
       ['corral', MAP.corral && MAP.corral.cx, MAP.corral && MAP.corral.cy],
-      ['track', MAP.track && MAP.track.cx, MAP.track && MAP.track.cy],
+      ['sprint', MAP.sprint && MAP.sprint.x, MAP.sprint && MAP.sprint.y],
       ['meadow', MAP.meadow && (MAP.meadow.x0 + MAP.meadow.x1) / 2, MAP.meadow && (MAP.meadow.y0 + MAP.meadow.y1) / 2],
       ['range', MAP.range && MAP.range.x, MAP.range && MAP.range.y],
       ['football_pitch', MAP.football_pitch && MAP.football_pitch.cx, MAP.football_pitch && MAP.football_pitch.cy],

@@ -27,7 +27,10 @@ docs/                    ← the game (GitHub Pages serves this folder)
   brand-guidelines.html  ← visual brand guide (logo, wordmark, palette, opening sequence, usage rules)
   js/game.js             ← core: input, physics, NPC quests, rendering, extension HOOKS (commented)
   js/features.js         ← quiz UI + Babcia Irenka + question markers (plugs into HOOKS)
-  js/minigames.js        ← race / pig / dogs / shooting gallery: medals, records, retry, race ghost (plugs into HOOKS)
+  js/minigames.js        ← pig / dogs / shooting gallery / ducks / mowing: medals, records, retry (plugs into HOOKS)
+  js/scores.js           ← ARK.scores client for the shared Cloudflare game server (global best / recent / average, averaged CPU traces)
+  js/board.js            ← shared full-screen board framework: map flag, 4-player lobby, input, loop, results and local records
+  js/boards/sprint.js    ← BIEG NA 100 METRÓW: alternate left/right on asphalt + grass; PRZECIĘTNIAK replays last-200 global mean
   js/quiz.js             ← the 13 quiz questions (PL/EN), each bound to a map spot
   js/church.js           ← church interior room (drawn in code from reference photos, AI sprites auto-load from img/church/) + Sołtys
   map.json               ← map size, y-sortable objects, points of interest, minigame venues, spawn point

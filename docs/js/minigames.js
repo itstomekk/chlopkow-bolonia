@@ -1,13 +1,14 @@
 /* Minigames for "Arek w Chłopkowie" — each started from a coloured flag on the map.
-     race   (Damian, north track)      2 laps vs Damian; jump the bale walls; off-track = slow; ghost of your best run
      pig    (Grandpa, corral)          catch Pepa in 30 s; she is fast at first and tires over time
      dogs   (Marcin, south meadow)     collect 6 eggs; dogs growl ("!") before they lunge — jump over them
      skeet  (Michał, PPM range)         shoot a pixel-art target at the range; aim & shoot, 2 barrels
      ducks  (south-east wetland)        ducks fly across the southern-east fields; aim & shoot, 2 barrels
      mowing (football pitch)            mow every strip of the pitch before time runs out
    Shared: 3-2-1 lights, bronze/silver/gold medals, records and retry. Venues come from map.json (osm/render_map.py).
-   Save: Q.mg[type] = { tries, won, best, medal, ghost?, unit? } — best is a time (s) for
-  race/pig/dogs/mowing (lower is better) and a hit count /15 for skeet/ducks (higher is
+   The old lap race vs Damian was removed on 2026-10-12 (replaced by the sprint board in
+   boards/sprint.js); an old Q.mg.race record is left in saves untouched.
+   Save: Q.mg[type] = { tries, won, best, medal, unit? } — best is a time (s) for
+  pig/dogs/mowing (lower is better) and a hit count /15 for skeet/ducks (higher is
   better; marked unit:'hits'). A pre-fix duck record (seconds, no unit) migrates once. */
 'use strict';
 window.addEventListener('ark-ready', () => {
@@ -15,49 +16,46 @@ window.addEventListener('ark-ready', () => {
   const PL = A.LANG === 'pl';
   const Q = () => A.Q;
   if (!Q().mg) Q().mg = {};
-  const TR = MAP.track, CO = MAP.corral, ME = MAP.meadow, RG = MAP.range;
+  const CO = MAP.corral, ME = MAP.meadow, RG = MAP.range;
   const coarse = () => matchMedia('(pointer:coarse)').matches;
 
   /* ------------------------------------------------------------------ texts */
   const L = PL ? {
-    flag: { race: 'TOR', pig: 'ŚWINKA', dogs: 'PSY', skeet: 'TARCZA', ducks: 'KACZKI', mowing: 'KOSZENIE' },
+    flag: { pig: 'ŚWINKA', dogs: 'PSY', skeet: 'TARCZA', ducks: 'KACZKI', mowing: 'KOSZENIE' },
     intro: {
-      race: ['Damian: „Wyścig! Dwa okrążenia. Bele siana przeskakujesz — SPACJA albo X.”', 'Damian: „Po trawie biegnie się wolno, a skróty się nie liczą. Pobij mnie, a potem swój rekord!”'],
       pig: ['Dziadek Zdzisiek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
       dogs: ['Marcin: „Kury pana Stefana zniosły na pastwisku 6 jajek, ale pilnują ich psy.”', 'Marcin: „Kiedy pies warknie „!”, zaraz skoczy. Wtedy przeskocz go albo uciekaj w bok!”'],
       skeet: ['Bukała: „Tu jest tarcza, nie gra w kurki. Sprawdź oko na PPM Strzelectwie.”', !coarse() ? 'Bukała: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Bukała: „Dotknij tarczy, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
       ducks: ['Bukała: „Grę w kaczki przeniosłem na południowy wschód, nad mokradła.”', 'Bukała: „Kaczki lecą łukiem nad polami. Traf 10 z 15, ale nie strzelaj w nic poza tarczą.”'],
       mowing: ['Damian: „Boisko zarosło po deszczu. Pomożesz je skosić?”', 'Damian: „Przejdź po każdym pasie murawy. Spacja uruchamia kosiarkę, ale liczy się dokładność.”'],
     },
-    win: { race: 'WYGRAŁEŚ Z DAMIANEM!', pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNA TARCZA!', ducks: 'KACZKI TRAFIONE!', mowing: 'BOISKO SKOSZONE!' },
-    lose: { race: 'DAMIAN BYŁ SZYBSZY...', pig: 'PEPA UCIEKŁA...', dogs: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...', skeet: 'ZA MAŁO TRAFIEŃ...', ducks: 'KACZKI ODLECIAŁY...', mowing: 'BOISKO NADAL ZAROSŁE...' },
-    log: { race: 'Wyścig z Damianem', pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Tarcza u Michała', ducks: 'Gra w kaczki', mowing: 'Koszenie boiska' },
+    win: { pig: 'MASZ PEPĘ!', dogs: 'WSZYSTKIE JAJKA!', skeet: 'CELNA TARCZA!', ducks: 'KACZKI TRAFIONE!', mowing: 'BOISKO SKOSZONE!' },
+    lose: { pig: 'PEPA UCIEKŁA...', dogs: 'PIES CIĘ DOPADŁ!', dogsOut: 'UCIEKŁEŚ Z PASTWISKA...', skeet: 'ZA MAŁO TRAFIEŃ...', ducks: 'KACZKI ODLECIAŁY...', mowing: 'BOISKO NADAL ZAROSŁE...' },
+    log: { pig: 'Złap świnkę Pepę', dogs: 'Jajka i psy', skeet: 'Tarcza u Michała', ducks: 'Gra w kaczki', mowing: 'Koszenie boiska' },
     medal: ['', 'BRĄZ', 'SREBRO', 'ZŁOTO'], next: m => `NASTĘPNY: ${m}`,
-    go: 'START!', lap: 'OKRĄŻENIE', time: 'CZAS', best: 'REKORD', eggs: 'JAJKA', left: 'ZOSTAŁO', hits: 'TRAFIENIA', reload: 'PRZEŁADOWANIE...',
-    retry: 'SPACJA / R — JESZCZE RAZ', quit: 'ESC — WYJDŹ', esc: 'ESC — PRZERWIJ', record: 'NOWY REKORD!', ghost: 'DUCH REKORDU', offTrack: 'TRAWA — WOLNIEJ!',
+    go: 'START!', time: 'CZAS', best: 'REKORD', eggs: 'JAJKA', left: 'ZOSTAŁO', hits: 'TRAFIENIA', reload: 'PRZEŁADOWANIE...',
+    retry: 'SPACJA / R — JESZCZE RAZ', quit: 'ESC — WYJDŹ', esc: 'ESC — PRZERWIJ', record: 'NOWY REKORD!',
     tired: 'PEPA SIĘ MĘCZY!',
   } : {
-    flag: { race: 'TRACK', pig: 'PIGGY', dogs: 'DOGS', skeet: 'TARGET', ducks: 'DUCKS', mowing: 'MOWING' },
+    flag: { pig: 'PIGGY', dogs: 'DOGS', skeet: 'TARGET', ducks: 'DUCKS', mowing: 'MOWING' },
     intro: {
-      race: ['Damian: "Race! Two laps. Jump the hay bales — SPACE or X."', 'Damian: "Grass is slow and shortcuts don\'t count. Beat me, then beat your own record!"'],
       pig: ['Grandpa Zdzisiek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
       dogs: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "When a dog growls "!", it is about to lunge. Jump over it or dodge sideways!"'],
       skeet: ['Bukała: "This is a target, not a moorhen game. Test your aim at Bukała\'s PPM range."', !coarse() ? 'Bukała: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Bukała: "Tap the target to shoot. Two barrels, then reload. Hit 10 of 15!"'],
       ducks: ['Bukała: "The duck game moved south-east, out by the wetlands."', 'Bukała: "Ducks fly in arcs over the fields. Hit 10 of 15, and keep your aim on the targets."'],
       mowing: ['Damian: "The pitch has grown wild after the rain. Can you mow it?"', 'Damian: "Walk every strip of grass. SPACE starts the mower, but accuracy matters."'],
     },
-    win: { race: 'YOU BEAT DAMIAN!', pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'TARGET MASTER!', ducks: 'DUCKS HIT!', mowing: 'PITCH MOWN!' },
-    lose: { race: 'DAMIAN WAS FASTER...', pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...', ducks: 'THE DUCKS FLEW OFF...', mowing: 'THE PITCH IS STILL WILD...' },
-    log: { race: 'Race against Damian', pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: 'Target at Bukała\'s range', ducks: 'Duck game', mowing: 'Mow the football pitch' },
+    win: { pig: 'GOT PEPA!', dogs: 'ALL THE EGGS!', skeet: 'TARGET MASTER!', ducks: 'DUCKS HIT!', mowing: 'PITCH MOWN!' },
+    lose: { pig: 'PEPA GOT AWAY...', dogs: 'A DOG GOT YOU!', dogsOut: 'YOU LEFT THE MEADOW...', skeet: 'NOT ENOUGH HITS...', ducks: 'THE DUCKS FLEW OFF...', mowing: 'THE PITCH IS STILL WILD...' },
+    log: { pig: 'Catch Pepa the piglet', dogs: 'Eggs and dogs', skeet: 'Target at Bukała\'s range', ducks: 'Duck game', mowing: 'Mow the football pitch' },
     medal: ['', 'BRONZE', 'SILVER', 'GOLD'], next: m => `NEXT: ${m}`,
-    go: 'GO!', lap: 'LAP', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT', hits: 'HITS', reload: 'RELOADING...',
-    retry: 'SPACE / R — AGAIN', quit: 'ESC — LEAVE', esc: 'ESC — QUIT', record: 'NEW RECORD!', ghost: 'RECORD GHOST', offTrack: 'GRASS — SLOWER!',
+    go: 'GO!', time: 'TIME', best: 'BEST', eggs: 'EGGS', left: 'LEFT', hits: 'HITS', reload: 'RELOADING...',
+    retry: 'SPACE / R — AGAIN', quit: 'ESC — LEAVE', esc: 'ESC — QUIT', record: 'NEW RECORD!',
     tired: 'PEPA IS TIRING!',
   };
 
   /* ------------------------------------------------------------------ medals: [bronze, silver, gold] thresholds */
   const MEDAL = {   // time games: lower is better; shooting: hits, higher is better
-    race: { lower: true, t: [Infinity, 18.5, 16.5] },   // bronze = simply beating Damian (~18.4 s)
     pig: { lower: true, t: [30, 15, 8] },
     dogs: { lower: true, t: [Infinity, 28, 18] },
     skeet: { lower: false, t: [10, 12, 14] }, ducks: { lower: false, t: [10, 12, 14] }, mowing: { lower: true, t: [Infinity, 35, 22] },
@@ -83,12 +81,7 @@ window.addEventListener('ark-ready', () => {
   for (const t of HIT_GAMES) if (migrateHitScore(t, Q().mg[t])) migratedHit = true;
   if (migratedHit) A.save();   // persist the migration so a later run cannot re-apply it
 
-  /* ------------------------------------------------------------------ geometry helpers */
-  const trackPt = th => [TR.cx + Math.cos(th) * TR.rx, TR.cy + Math.sin(th) * TR.ry];
-  const onTrack = (x, y) => { const r = Math.hypot((x - TR.cx) / TR.rx, (y - TR.cy) / TR.ry); return Math.abs(r - 1) < (TR.w / 2 + 6) / ((TR.rx + TR.ry) / 2); };
-  const angOf = (x, y) => { let a = Math.atan2((y - TR.cy) / TR.ry, (x - TR.cx) / TR.rx); if (a < 0) a += Math.PI * 2; return a; };
-  const DIRS = ['down', 'up', 'left', 'right'];
-
+  /* ------------------------------------------------------------------ venues */
   function freeVenue(x, y) {
     for (let r = 0; r < 500; r += 18) for (let a = 0; a < Math.PI * 2; a += .45) {
       const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
@@ -98,7 +91,6 @@ window.addEventListener('ark-ready', () => {
   }
   const DUCKS_SITE = freeVenue(MAP.w * .78, MAP.h * .78);
   const FLAGS = [
-    { type: 'race', host: 'damian', x: TR.cx - 30, y: TR.cy + TR.ry + TR.w / 2 + 22, color: '#d8262c' },
     { type: 'pig', host: 'grandpa', x: CO.cx - CO.r - 26, y: CO.cy + 6, color: '#ff8fb8' },
     { type: 'dogs', host: 'marcin', x: ME.x0 - 18, y: (ME.y0 + ME.y1) / 2, color: '#2f6fe0' },
     { type: 'skeet', host: 'michal', x: RG.x + 40, y: RG.y + 22, color: '#d8a03a' },
@@ -116,11 +108,7 @@ window.addEventListener('ark-ready', () => {
     if (HIT_GAMES.includes(type)) migrateHitScore(type, q.mg[type]);
     q.mg[type].tries++; A.save();
     MG = { type, phase: 'count', t: 0, run: 0 };
-    if (type === 'race') {
-      A.teleport(TR.cx + 20, TR.cy + TR.ry); P.dir = 'left';
-      // checkpoints every 22.5°, clockwise on screen from the bottom (90°); a ghost replays the record run
-      Object.assign(MG, { cp: 0, lap: 1, laps: 2, cps: 16, laps_t: [], rival: { th: Math.PI / 2 + .02, z: 0 }, path: [], ghost: q.mg.race.ghost || null });
-    } else if (type === 'pig') {
+    if (type === 'pig') {
       A.teleport(CO.cx - CO.r - 10, CO.cy); P.dir = 'right';
       MG.pig = { x: CO.cx + 20, y: CO.cy, dir: 'left', step: 0, wander: 0, juke: 1.5, jx: 0, jy: 0 }; MG.limit = 30;
     } else if (type === 'dogs') {
@@ -148,7 +136,7 @@ window.addEventListener('ark-ready', () => {
     if (win) {
       const better = HIT_GAMES.includes(MG.type) ? score > (rec.best || 0) : (!rec.best || score < rec.best);
       rec.won = true; rec.medal = Math.max(rec.medal || 0, MG.medal);
-      if (better) { rec.best = score; MG.record = true; if (MG.type === 'race') rec.ghost = MG.path; }
+      if (better) { rec.best = score; MG.record = true; }
       A.celebrate();
     }
     A.save();
@@ -169,7 +157,6 @@ window.addEventListener('ark-ready', () => {
   }))));
   HOOKS.busy.push(() => !!MG);
   HOOKS.blocksPlayer.push(() => !!MG && (MG.phase !== 'run' || MG.type === 'skeet'));
-  HOOKS.speed.push((x, y) => (MG && MG.type === 'race' && MG.phase === 'run' && !onTrack(x, y) ? .55 : 1));
   HOOKS.key.push(e => {
     if (!MG) return false;
     if (e.code === 'Escape') { leave(); return true; }
@@ -247,27 +234,7 @@ window.addEventListener('ark-ready', () => {
     if (MG.phase === 'count') { if (MG.t >= 3) { MG.phase = 'run'; MG.t = 0; } return; }
     if (MG.phase !== 'run') return;
     MG.run += dt;
-    if (MG.type === 'race') {
-      // record the path (10 Hz) for the ghost
-      if (MG.path.length < MG.run * 10) MG.path.push([Math.round(P.x), Math.round(P.y), DIRS.indexOf(P.dir)]);
-      const step = Math.PI * 2 / MG.cps, next = (Math.PI / 2 + (MG.cp + 1) * step) % (Math.PI * 2);
-      const a = angOf(P.x, P.y); let diff = Math.abs(a - next); diff = Math.min(diff, Math.PI * 2 - diff);
-      if (diff < step * .5 && onTrack(P.x, P.y)) {
-        MG.cp++;
-        if (MG.cp === MG.cps) {
-          MG.cp = 0; MG.laps_t.push(MG.run);
-          if (MG.lap === MG.laps) { endMG(true, L.win.race); return; }
-          MG.lap++; A.popToast(`${L.lap} ${MG.lap}/${MG.laps} · ${fmt(MG.run)}`);
-        }
-      }
-      MG.offTrack = !onTrack(P.x, P.y);
-      // Damian: steady pace with a little wobble (0.7x of his old 9.2 s lap); hops over the bale walls at 200° and 330°
-      const R = MG.rival, lapT = 9.2 / .7;
-      R.th += (Math.PI * 2 / lapT) * (1 + Math.sin(MG.run * 1.3) * .08) * dt;
-      const deg = ((R.th * 180 / Math.PI) % 360 + 360) % 360, wall = [200, 330].find(b => Math.abs(deg - b) < 9);
-      R.z = wall ? Math.cos((deg - wall) / 9 * Math.PI / 2) * 14 : 0;
-      if (R.th - Math.PI / 2 >= Math.PI * 2 * MG.laps) endMG(false, L.lose.race);
-    } else if (MG.type === 'pig') {
+    if (MG.type === 'pig') {
       const pig = MG.pig, d = Math.hypot(P.x - pig.x, P.y - pig.y);
       if (d < 16 && !P.air) { endMG(true, L.win.pig); return; }
       const stamina = Math.max(0, 1 - MG.run / 26);                // 1 -> 0 over ~26 s
@@ -418,7 +385,7 @@ window.addEventListener('ark-ready', () => {
       else if (rec && rec.won) drawPitch('all', S, A.zoom);
     }
     for (const f of FLAGS) if (inView(f.x, f.y) && !(MG && MG.type === f.type)) push(f.y, () => drawFlag(f, ...S(f.x, f.y), A.zoom));
-    const host = FLAGS[3];
+    const host = FLAGS.find(f => f.type === 'skeet');
     if (inView(host.x + 28, host.y - 25)) push(host.y - 25, () => {
       const [sx, sy] = S(host.x + 28, host.y - 25);
       A.drawNpc({ id: host.host, x: host.x + 28, y: host.y - 25 }, sx, sy, A.zoom);
@@ -427,14 +394,7 @@ window.addEventListener('ark-ready', () => {
     if (inView(RG.x, RG.y)) push(RG.y, () => drawTarget(null, ...S(RG.x, RG.y), A.zoom));
     if (!MG) return;
     const s = A.zoom;
-    if (MG.type === 'race') {
-      const R = MG.rival, [x, y] = trackPt(R.th);
-      if (inView(x, y)) push(y, () => { const [sx, sy] = S(x, y + 6); A.drawNpc({ id: 'damian', x, y, rival: true }, sx, sy - R.z * s, s); });
-      if (MG.ghost && MG.phase !== 'count') {
-        const i = Math.min(MG.ghost.length - 1, Math.floor(MG.run * 10)), g = MG.ghost[i];
-        if (g && inView(g[0], g[1])) push(g[1] - .5, () => A.drawArekPose(...S(g[0], g[1]), s, DIRS[g[2]] || 'down', MG.run * 7, .35));
-      }
-    } else if (MG.type === 'pig') {
+    if (MG.type === 'pig') {
       const p = MG.pig; push(p.y, () => drawAnimal(0, p, ...S(p.x, p.y), s));
     } else if (MG.type === 'dogs') {
       for (const e of MG.eggs) if (!e.got) push(e.y, () => { const [sx, sy] = S(e.x, e.y); ctx.fillStyle = 'rgba(20,34,12,.3)'; ctx.fillRect(sx - 3 * s, sy, 6 * s, 1.5 * s); ctx.fillStyle = '#fbf6e8'; ctx.beginPath(); ctx.ellipse(sx, sy - 4 * s, 3 * s, 4 * s, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#fff'; ctx.fillRect(sx - 1.5 * s, sy - 7 * s, s, s * 1.5); });
@@ -473,7 +433,7 @@ window.addEventListener('ark-ready', () => {
     if (!MG) return;
     ctx.textBaseline = 'middle';
     const rec = Q().mg[MG.type];
-    const info = MG.type === 'race' ? `${L.lap} ${MG.lap}/${MG.laps}` : MG.type === 'pig' ? `${L.left} ${Math.max(0, MG.limit - MG.run).toFixed(1)}`
+    const info = MG.type === 'pig' ? `${L.left} ${Math.max(0, MG.limit - MG.run).toFixed(1)}`
       : MG.type === 'dogs' ? `${L.eggs} ${MG.eggs.filter(e => e.got).length}/6` : MG.type === 'mowing' ? `${MG.cut.size}/${MG.target}` : `${L.hits} ${MG.hits}/15`;
     const bw = Math.min(W * .56, U * 64), bx = (W - bw) / 2;
     ctx.fillStyle = 'rgba(8,12,40,.85)'; ctx.fillRect(bx, U * 1.5, bw, U * 6);
@@ -484,8 +444,6 @@ window.addEventListener('ark-ready', () => {
     ctx.fillText([rec && rec.best ? `${L.best} ${scoreText(MG.type, rec.best)}` : '', nextMedal && rec && rec.medal < 3 && rec.medal ? L.next(L.medal[rec.medal + 1]) : '', L.esc].filter(Boolean).join(' · '), W / 2, U * 6.2);
     // status line under the bar
     let status = null;
-    if (MG.type === 'race' && MG.phase === 'run' && MG.offTrack) status = [L.offTrack, '#ff6b5e'];
-    if (MG.type === 'race' && MG.ghost && MG.phase === 'run' && !status) status = [L.ghost, '#9fd0f0'];
     if (MG.type === 'pig' && MG.tired) status = [L.tired, '#7cff6b'];
     if (['skeet', 'ducks'].includes(MG.type) && MG.reload > 0) status = [L.reload, '#ffd21f'];
     if (MG.type === 'mowing' && MG.phase === 'run') status = [`${MG.cut.size}/${MG.target}`, '#7cff6b'];
@@ -508,7 +466,6 @@ window.addEventListener('ark-ready', () => {
       const main = ['skeet', 'ducks'].includes(MG.type) ? `${L.hits} ${MG.hits}/15` : `${L.time} ${fmt(MG.run)}`;
       ctx.fillText(main, W / 2 + (MG.medal ? pw * .1 : 0), py + U * 9.5);
       ctx.font = `${U * 1.6}px Silkscreen`; ctx.fillStyle = '#c8cee0';
-      if (MG.type === 'race' && MG.laps_t.length) ctx.fillText(MG.laps_t.map((t, i) => `${L.lap} ${i + 1}: ${fmt(i ? t - MG.laps_t[i - 1] : t)}`).join('  '), W / 2 + (MG.medal ? pw * .1 : 0), py + U * 12.6);
       if (rec && rec.best) ctx.fillText(`${L.best} ${scoreText(MG.type, rec.best)}${MG.record ? '  ★ ' + L.record : ''}`, W / 2 + (MG.medal ? pw * .1 : 0), py + U * 15.4);
       MG.btn = { mid: W / 2 };
       if (MG.t > .5) {

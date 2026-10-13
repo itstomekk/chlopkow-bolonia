@@ -433,23 +433,10 @@ g3 = np.array(ground).astype(np.float32)
 x0_, y0_, yy, xx = window(TRACK['cx'], TRACK['cy'], TRACK['rx'] + 80, TRACK['ry'] + 80)
 def ell(dx):  # normalised elliptic radius for an ellipse grown by dx pixels
     return ((xx - TRACK['cx']) / (TRACK['rx'] + dx)) ** 2 + ((yy - TRACK['cy']) / (TRACK['ry'] + dx)) ** 2
-outer, inner = ell(TRACK['w'] / 2) <= 1, ell(-TRACK['w'] / 2) <= 1
-ring = outer & ~inner
-tn = noise2(xx.shape[1], xx.shape[0], 4, 91)[..., None]
-tcol = np.array(hexc('#c79a62')) * (1 - tn) + np.array(hexc('#b48752')) * tn
-sub = g3[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
-sub[ring] = tcol[ring]
-ang = np.arctan2((yy - TRACK['cy']) / TRACK['ry'], (xx - TRACK['cx']) / TRACK['rx'])
-kerb_o = outer & ~(ell(TRACK['w'] / 2 - 4) <= 1); kerb_i = (ell(-TRACK['w'] / 2 + 4) <= 1) & ~inner
-stripes = (np.floor(ang / (2 * np.pi) * 90) % 2).astype(bool)
-for kb in (kerb_o, kerb_i):
-    sub[kb & stripes] = hexc('#d8262c'); sub[kb & ~stripes] = hexc('#f4f1e6')
+outer = ell(TRACK['w'] / 2) <= 1
 occupied[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]] |= outer & ~(ell(-TRACK['w'] / 2 - 25) <= 1)
-# chequered start/finish line at the bottom of the oval
-sx0 = TRACK['cx'] - 6; sy0, sy1 = TRACK['cy'] + TRACK['ry'] - TRACK['w'] / 2, TRACK['cy'] + TRACK['ry'] + TRACK['w'] / 2
-for i_ in range(int(sy0), int(sy1), 4):
-    for j_ in range(3):
-        g3[i_:i_ + 4, sx0 + j_ * 4:sx0 + j_ * 4 + 4] = (20, 20, 20) if (i_ // 4 + j_) % 2 else (245, 245, 245)
+# Sprint flag reuses the old entry area; retain its coordinates without baking in an oval track.
+SPRINT = dict(x=int(TRACK['cx'] - 30), y=int(TRACK['cy'] + TRACK['ry'] + TRACK['w'] / 2 + 22))
 TRACK_BALES = []
 for deg in (200, 330):   # two bale walls across the track: jump them!
     a_ = math.radians(deg)
@@ -617,7 +604,8 @@ def draw_bale(x, y):
     objects.append(dict(x=x - 13, y=y - 22, w=27, h=26, base=float(y + 2)))
     low[y - 6:y + 2, x - 11:x + 12] = True
     occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # keep trees and other props off static track bales
-for x_, y_ in TRACK_BALES: draw_bale(x_, y_)
+for x_, y_ in TRACK_BALES:
+    occupied[max(0, y_ - 24):y_ + 8, max(0, x_ - 16):x_ + 17] = True
 for p_ in classes.get('farmland', []):
     ox_, oy_, m_ = mask_win(p_)
     if not m_.size: continue
@@ -1094,7 +1082,7 @@ for poly in ponds:
         if len(water) >= 400: break
     if len(water) >= 400: break
 water = water[:400]
-json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, bales=bales, water=water, pois=pois, landmarks=landmarks, track=TRACK, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, jazz=JAZZ, gravel=GRAVEL, shrines=SHRINES, spawn=spawn, tree_stats=tree_stats, forest_tree_stats=forest_tree_stats,
+json.dump(dict(w=W, h=H, scale=A, bbox=BBOX, objects=objects, bales=bales, water=water, pois=pois, landmarks=landmarks, sprint=SPRINT, corral=CORRAL, meadow=MEADOW, range=RANGE, football_pitch=FOOTBALL_PITCH, jazz=JAZZ, gravel=GRAVEL, shrines=SHRINES, spawn=spawn, tree_stats=tree_stats, forest_tree_stats=forest_tree_stats,
                attribution='Map data © OpenStreetMap contributors (ODbL)'), open('docs/map.json', 'w'), indent=0)
 print('tree types', tree_stats)
 print(W, H, len(objects), 'objects', len(pois), 'pois', [p['key'] for p in pois], 'landmarks', [(p['key'], p['x'], p['y']) for p in landmarks])

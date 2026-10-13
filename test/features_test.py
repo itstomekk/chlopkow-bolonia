@@ -1,4 +1,4 @@
-"""Headless test: Halina + quiz, and the three minigames (race / pig / dogs)."""
+"""Headless test: Halina + quiz, and the pig / dogs minigames (the lap race was removed 2026-10-12)."""
 import os
 import time, sys
 from playwright.sync_api import sync_playwright
@@ -55,17 +55,5 @@ with sync_playwright() as p:
     pg.evaluate("__features.startMG('dogs')"); time.sleep(3.1)
     for e in pg.evaluate("__features.MG.eggs"): pg.evaluate(f"__game.P.x={e['x']}; __game.P.y={e['y']}"); time.sleep(.05)
     time.sleep(.2); print('dogs2:', pg.evaluate("__features.MG.phase"), pg.evaluate("__features.MG.msg")); pg.keyboard.press("Escape")
-    # --- race: Damian must win if we stand still; then we "drive" through checkpoints
-    pg.evaluate("__features.startMG('race')"); time.sleep(3.6); pg.screenshot(path="test/f6_race.png")
-    tr = pg.evaluate("__game.MAP.track")
-    import math
-    for lap in range(2):
-        for k in range(1, 17):
-            a = math.pi / 2 + k * 2 * math.pi / 16
-            pg.evaluate(f"__game.P.x={tr['cx'] + math.cos(a) * tr['rx']}; __game.P.y={tr['cy'] + math.sin(a) * tr['ry']}"); time.sleep(.06)
-    time.sleep(.2); print('race:', pg.evaluate("__features.MG && __features.MG.phase"), pg.evaluate("__features.MG && __features.MG.msg"))
-    pg.screenshot(path="test/f7_race_end.png"); pg.keyboard.press("Escape")
-    pg.evaluate("__features.startMG('race')"); time.sleep(3.2 + 27.5)
-    print('race idle:', pg.evaluate("__features.MG.phase"), pg.evaluate("__features.MG.msg"))
     print('mg', pg.evaluate("JSON.stringify(__game.Q.mg)"))
     print('errors', errs); b.close()
