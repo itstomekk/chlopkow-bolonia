@@ -13,11 +13,11 @@
   const SAVE_VERSION = 2;   // D04: explicit payload version; a missing `v` means a legacy v1 save
   let saveFrozen = false;   // D04: a newer-version save must never be overwritten this session
   const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 5;
-  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat'];
+  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat'];
   // Hard-alpha pixel sheets: draw the player without smoothing.
-  const PIXEL_CHARACTERS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat']);
+  const PIXEL_CHARACTERS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat']);
   // NPCs drawn from their own walk sheet in the world (the older cast keeps docs/img/npcs.png and quest markers).
-  const PIXEL_NPCS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek']);
+  const PIXEL_NPCS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa']);
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
   if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) selectedCharacter = 'arek';
 
@@ -26,7 +26,7 @@
     pl: {
       title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK' },
+      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -92,7 +92,7 @@
     en: {
       title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK' },
+      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -419,7 +419,7 @@
     return { x: npc.x, y: npc.y };
   }
   // These roles live at a fixed spot of the level (items.json) and are never shuffled; old saves are pulled back to it.
-  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek']);
+  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa']);
   function randomizeNpcPositions() {
     if (!MAP || !ITEMS || !SOLID) return;
     buildReachableMask();
