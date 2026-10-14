@@ -16,7 +16,7 @@ This is Tomek's active browser game project. The canonical folder is
 1. Read the hub files `C:\Users\Lenovo\.agents\WORKSPACE.md`, `PORTFOLIO.md`, and `PROJECT-ROUTING.md`.
 2. Read `PLAN.md` and `HANDOFF.md`, then the relevant roadmap under `plans/`. The HANDOFF has historical sections: use its **CURRENT STATE** section and the active roadmap, not historical notes, when facts conflict.
 3. Check `git status` before edits. This project has concurrent work; preserve unrelated dirty and untracked files. Never commit, push, or deploy unless Tomek explicitly asks.
-4. Do not publish real-person reference photos. Keep them in gitignored `references/`; do not upload private photos to image-generation services. Avoid unverified or defamatory claims about identifiable residents.
+4. Do not publish real-person reference photos. Keep them in gitignored `references/`; do not upload private photos to image-generation services. Exception (Tomek, 2026-10-12): reference photos of KOSTEK, PAWEŁ, DAREK, PIEKARZ, MAREK and WALDEK (PIEKARZ and MAREK added 2026-10-12, WALDEK 2026-10-13, same flow) may be sent to the openai-codex image generator for likeness; they still never go to git or public hosts. The loose `references/1.png`-`4.png` (copies in `references/arek/`) are photos of AREK, not PATRYK: the 2026-09-28 PATRYK rebuild was wrongly made from them (Tomek, 2026-10-13); PATRYK has no reference photos yet. Avoid unverified or defamatory claims about identifiable residents.
 5. Distinguish local changes from the live build. Verify the exact commit/build before describing anything as deployed.
 
 ## Feature ownership during local J12 follow-up
@@ -26,6 +26,13 @@ This is Tomek's active browser game project. The canonical folder is
 | `docs/data/j12-yard-props.json`, `docs/img/j12_prop_*.png` | J12 props generator / interactive J12 worker | Read accepted decisions; never rewrite shared map PNGs. |
 | `docs/js/yard-props.js`, `gen/build_j12_props.py` | interactive J12 props worker | Static objects only; keep evidence and user identification separate. |
 | `docs/js/world-life.js` | animal-placement worker during this follow-up | No concurrent parent edits; preserve animal identities and saves. |
+
+## Board minigames and the game server
+
+- Full-screen overlays: the page CSS sets explicit `display` on canvases/flex boxes, so the `hidden` attribute alone is not enough; set `style.display` too.
+- An overlay opened from an NPC dialogue receives the same Enter that closed the dialogue: focus its primary button late and ignore keyboard clicks for ~400 ms after opening.
+- Global scores live on Cloudflare (game server `cloud/api/README.md`, plan `plans/2026-10-12-game-server.md`). Browser tests must never write there: `test/isolated_browser_runner.py` routes the live URL to a fake; focused tests override it with a stateful fake. Test the server on `wrangler dev --local`; against production only reads and rejected writes.
+- Run every browser test through `python test/isolated_browser_runner.py test/<name>_test.py`, never `python test/<name>_test.py` directly: direct runs publish "Test" arrivals to public Nostr and some tests (bercik/wiesio/iwona) fail on the loading splash without the runner's wait.
 
 ## Quiz and local knowledge
 
