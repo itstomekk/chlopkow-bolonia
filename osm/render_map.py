@@ -180,8 +180,8 @@ low |= wm_art & ~pond_m
 RW = {'tertiary': 11, 'unclassified': 9, 'residential': 9, 'service': 5, 'track': 5, 'footway': 2.5, 'path': 2.5}
 paved = [(pts(e), RW[e['tags']['highway']] * A) for e in ways if e['tags'].get('highway') in ('tertiary', 'unclassified', 'residential')]
 dirt = [(pts(e), RW[e['tags']['highway']] * A) for e in ways if e['tags'].get('highway') in ('service', 'track', 'footway', 'path')]
-# The Wapnica roadside track (WAP_NEW_WAYS) was added after the layout was frozen: it is drawn and walkable, but it must
-# not steer any placement decision or random stream elsewhere, so every layout/occupancy step reads dm_old instead of dm.
+# The Wapnica roadside track (WAP_NEW_WAYS, id -9000021) was removed again once the dump was aligned to the existing road; the
+# filter is kept so that re-adding such a way never steers any placement decision or random stream: layout reads dm_old, not dm.
 WAP_NEW_WAYS = {-9000021}
 dirt_old = [(pts(e), RW[e['tags']['highway']] * A) for e in ways if e['tags'].get('highway') in ('service', 'track', 'footway', 'path') and e['id'] not in WAP_NEW_WAYS]
 dm = mask_of([], dirt); de = mask_of([], [(l, w + 3) for l, w in dirt]) & ~dm
@@ -411,12 +411,19 @@ _jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 160, 190, _venue_block | pm, dm_old)
 BARN = dict(cx=_jx0 + 80, foot=_jy0 + 112, w=120)
 JAZZ = dict(x=BARN['cx'], y=BARN['foot'] + 38, r=140)
 # Wapnica: satellite-traced roadside dump footprint, with GPT Image pixel-art ground decal.
+# The whole Wapnica group (decal, heaps, skip container, landmark access point, GRAVEL venue) is one rigid translation of the
+# traced outline's centre. The decal's former roadside track (id -9000021, now deleted) was fitted onto the existing dirt road
+# (OSM way 1102348330) by least squares: 60.2 px perpendicular to the road (vector 27,-54; rms residual 13 px, max 24 px over
+# the decal's length, because the track was ~9.5 deg flatter than the road), then slid 66 px west along the road, which does
+# not change the fit, so that the decal no longer covers the two oaks beside the old track (their removal would also reshuffle
+# the outer-apple pool in place_items.py). Total (-32, -83).
+WAP_SHIFT = (-32, -83)
 _wap = [pts(e) for e in ways if e['tags'].get('landuse') == 'landfill' and e['tags'].get('name') == 'Wapnica']
 PIT_ASSET = Image.open('gen/wapnica/ground.png').convert('RGBA') if os.path.exists('gen/wapnica/ground.png') else None
 if _wap:
     _outline = mask_of(_wap)
     _py, _px = np.nonzero(_outline)
-    PIT = dict(cx=int(_px.mean()), cy=int(_py.mean()), rx=int((_px.max() - _px.min()) / 2), ry=int((_py.max() - _py.min()) / 2))
+    PIT = dict(cx=int(_px.mean()) + WAP_SHIFT[0], cy=int(_py.mean()) + WAP_SHIFT[1], rx=int((_px.max() - _px.min()) / 2), ry=int((_py.max() - _py.min()) / 2))
     if PIT_ASSET is not None:
         _ax, _ay = int(round(PIT['cx'] - PIT_ASSET.width / 2)), int(round(PIT['cy'] - PIT_ASSET.height / 2))
         _aa = np.array(PIT_ASSET.getchannel('A')) > 0
