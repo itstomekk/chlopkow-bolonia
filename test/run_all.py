@@ -34,7 +34,7 @@ def river_column():
 
 jx, jy = river_column()
 TESTS = [['music_test.py'], ['quest_test.py'], ['jump_test.py', str(jx), str(jy)], ['features_test.py'], ['quiz_expansion_test.py'], ['minigames_test.py'],
-         ['church_test.py'], ['crypt_test.py'], ['frodo_test.py'], ['soltys_surprise_test.py'], ['cemetery_memories_test.py'],
+         ['church_test.py'], ['crypt_test.py'], ['tunnel_test.py'], ['frodo_test.py'], ['soltys_surprise_test.py'], ['cemetery_memories_test.py'],
          ['village_sign_test.py'], ['edytka_test.py'], ['mushroom_test.py'], ['play_test.py'],
          ['character_selection_test.py'], ['arrival_log_test.py'], ['bercik_test.py'], ['wiesio_test.py'], ['iwona_test.py'], ['bosiowa_test.py'], ['friends_test.py'], ['cast_selector_test.py'], ['eight_direction_test.py'], ['latest_world_requests_test.py'], ['sprite_background_test.py'],
          ['map_venues_test.py'], ['sept28_batch_test.py'], ['soltys_chat_test.py'], ['animals_test.py'], ['trees_test.py'], ['bukala_test.py'],

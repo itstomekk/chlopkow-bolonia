@@ -20,7 +20,7 @@
           "room": "village",
           "poi": "cemetery",
           "slab": { "dx": 8, "dy": -36, "w": 20, "h": 13, "r": 22 },
-          "surface": { "dx": 8, "dy": -14, "dir": "down" },
+          "surface": { "dx": -16, "dy": -30, "dir": "right" },
           "visible": { "type": "any", "of": [ { "type": "flag", "key": "tunnelOpen" }, { "type": "flag", "key": "tunnelSeen" } ] },
           "gate": { "type": "flag", "key": "tunnelOpen" }
         }

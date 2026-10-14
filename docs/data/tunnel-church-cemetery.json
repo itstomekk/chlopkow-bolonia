@@ -13,7 +13,7 @@
   "niche": { "y0": 742, "y1": 790, "depth": 30 },
   "sealed": { "y0": 1084, "y1": 1124, "depth": 30 },
   "spawns": {
-    "crypt": { "x": 128, "y": 1452, "dir": "up" },
+    "crypt": { "x": 128, "y": 1420, "dir": "up" },
     "cemetery": { "x": 128, "y": 140, "dir": "down" }
   },
   "portals": {

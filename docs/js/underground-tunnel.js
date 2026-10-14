@@ -72,12 +72,17 @@
     }
     pois.push({ key: 'tunnelStairs', x: 128, y: 86, r: 26 });
 
-    /* ---------- south end: the arch back into the crypt ---------- */
+    /* ---------- south end: a stone arch back towards the crypt (the floor falls into the dark under it) ---------- */
     {
-      const y = C.y1;
-      R(g, WL, y, 12, 40, '#1d1a17'); R(g, WR, y, 12, 40, '#1d1a17'); bricks(WL, y, 12 + (C.x1 - C.x0) + 12, 10, ['#5a544b', '#4f4a42']); R(g, WL, y, 80, 2, '#6a6359');
-      for (let i = 0; i < 4; i++) R(g, C.x0, y + 10 + i * 6, C.x1 - C.x0, 5, `rgba(5,4,3,${.35 + i * .17})`);   // the floor falls into the dark
-      lights.push({ x: 128, y: C.y1 - 30, r: 64, a: .24, c: '255,200,120' });
+      const y = C.y1, base = y + 8;
+      for (let i = 0; i < 8; i++) R(g, C.x0, y + i * 5, C.x1 - C.x0, 5, `rgba(4,3,2,${(.18 + i * .12).toFixed(2)})`);
+      R(g, WL, y, 12, 40, '#1d1a17'); R(g, WR, y, 12, 40, '#1d1a17');
+      for (const px of [WL + 1, WR + 4]) { R(o, px, base - 50, 7, 50, '#6a645a'); R(o, px, base - 50, 2, 50, '#8d867a'); R(o, px + 6, base - 50, 1, 50, '#35312c'); R(o, px - 1, base - 4, 9, 4, '#4b463f'); }
+      R(o, C.x0 - 12, base - 54, C.x1 - C.x0 + 24, 8, '#6a645a'); R(o, C.x0 - 12, base - 54, C.x1 - C.x0 + 24, 2, '#9a9284'); R(o, C.x0 - 12, base - 47, C.x1 - C.x0 + 24, 1, '#25211e');
+      for (let x = C.x0 - 10; x < C.x1 + 10; x += 9) R(o, x, base - 52, 1, 5, '#35312c');   // joints between the lintel stones
+      R(o, 123, base - 58, 10, 14, '#8d8472'); R(o, 123, base - 58, 10, 2, '#b3aa96'); R(o, 127, base - 53, 2, 2, '#2a2622');   // keystone
+      put(C.x0 - 12, base - 60, C.x1 - C.x0 + 24, 62, base + 2);
+      lights.push({ x: 128, y: C.y1 - 24, r: 60, a: .20, c: '255,200,120' });
     }
 
     /* ---------- wooden supports (posts in the wall strips, a crossbeam overhead) ---------- */

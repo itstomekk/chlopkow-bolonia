@@ -34,6 +34,9 @@ docs/                    ← the game (GitHub Pages serves this folder)
   js/quiz.js             ← the 13 quiz questions (PL/EN), each bound to a map spot
   js/church.js           ← church interior room (drawn in code from reference photos, AI sprites auto-load from img/church/) + Sołtys
   js/crypt.js            ← secret crypt under the church (room drawn in code), the confessional cipher + cryptex overlay, sign-order puzzle, hidden chamber
+  js/passages.js         ← PASSAGES engine (the only eager passage file): registry, gate evaluator, lazy loader, village-side slab, portal checks
+  js/underground-tunnel.js ← LAZY: the church-cemetery tunnel room (drawn in code); fetched on first need, never listed in index.html
+  data/passages.json     ← passage registry (ids, endpoints, gates, lazy module/data paths); data/tunnel-church-cemetery.json ← LAZY: tunnel layout + PL/EN lore
   map.json               ← map size, y-sortable objects, points of interest, minigame venues, spawn point
   items.json             ← NPC positions, apples, the cap, quiz signboards
   img/map_ground.png     ← ground layer (fields, roads, river, fences)
@@ -89,9 +92,18 @@ python test/run_all.py https://itstomekk.github.io/chlopkow-bolonia/   # against
 ```
 
 `quest_test` (main quest), `jump_test` (river jump), `features_test` (quiz), `minigames_test` (all four games, medals, retry, ghost),
-`church_test`, `crypt_test` (confessional riddle, cryptex, crypt, reload mid-crypt), `frodo_test`, `soltys_surprise_test`, `cemetery_memories_test`, `village_sign_test`, `play_test`, `branding_flow_test` (title sequence: pixel reveal, name + character picker, sign phase, reduced motion), `site_metadata_test`.
+`church_test`, `crypt_test` (confessional riddle, cryptex, crypt, reload mid-crypt), `tunnel_test` (loose brick, lazy-loaded tunnel, cemetery slab shortcut, room stack, gates, load failure), `frodo_test`, `soltys_surprise_test`, `cemetery_memories_test`, `village_sign_test`, `play_test`, `branding_flow_test` (title sequence: pixel reveal, name + character picker, sign phase, reduced motion), `site_metadata_test`.
 
 The full runner isolates public Nostr sockets and disables the CDN module for every browser, so test names never enter the public arrival history. For individual regressions use `python test/isolated_browser_runner.py test/branding_flow_test.py`; `arrival_log_test.py` overrides the disabled module with a controlled transport and tests submission, history, deduplication, retries and mobile disclosure. A successful controlled transport is not proof of persistence on public relays.
+
+### Passages engine (secret tunnels and doors)
+
+A *passage* links two places and is data, not code in `game.js`. Everything lives in `docs/data/passages.json` (registry, fetched at startup, tiny) plus two lazy files per passage.
+
+- **Add one:** (1) append an entry to `passages.json`: `id`, `kind`, `module` (lazy JS), `data` (lazy JSON), `seen` (optional Q flag set on first use), `gate`, and `ends{name:{room, mouth|poi, arrive, gate, visible, slab, surface}}`. (2) Write `js/<kind>.js` that calls `PASSAGES.defineKind('<kind>', { build(def, data, ctx) { return room; } })`; the room has the usual crypt-style shape plus `spawns{endName:{x,y,dir}}` and `portals[{rect, go}]`, and optional `interact(poi, api)`, `tick(dt)`, `labelKey`. (3) Put layout and PL/EN strings (`text:{pl:{},en:{}}`, merged into `ARK.T` on load) in the data file. (4) Hook the physical entrance: an indoor room publishes `room.openPassages[id] = true` and the registry `mouth` rect (walking into it calls `PASSAGES.enter`); an outdoor end uses `slab` + `visible` (a `HOOKS.near` + `HOOKS.world` pair, invisible until `visible` passes). (5) Add a case to `test/tunnel_test.py`.
+- **Gates** (`PASSAGES.gate(descriptor)` -> `{open, reason}`): `always`, `flag` (`Q[key]`), `all`, `any`, `not`, and two documented stubs, `quiz` and `mission`, that stay locked with a `TODO` reason until wired (`PASSAGES.defineGate('quiz', fn)`). `gate` decides whether a passage can be used; `visible` decides whether its village-side marker exists at all, so there are no spoilers.
+- **Lazy loading rules:** only `passages.js` and `passages.json` are eager. The module and data are fetched on first need (a gating event such as the loose brick or the slab calls `PASSAGES.preload(id)`, `enter` calls `load`), the promise is cached, a failure shows the `passageFail` toast, is not cached (retry works) and never throws into the game loop. `PASSAGES.state()` reports registry, load status, scripts and data for tests. Keep one canvas under about 2000 px tall and draw per segment.
+- **Room stack** (`game.js`, `ARK.rooms`): `OUT` is always the village; `STACK` holds the rooms above the current one (church -> crypt -> tunnel = `[church, crypt]`). `rooms.descend(room, at, back)` pushes, `rooms.ascend(roomId, at)` pops (and rebuilds the church/crypt chain when the player arrived from the village), `rooms.surface(x, y, dir)` clears the stack and puts Arek in the village. `leaveRoom()` pops one level, so church and crypt exits behave as before. A room with no `exit` has no plain exit; saves written at any depth hold the village door, so a reload never strands Arek.
 
 ### Public village arrival log
 
