@@ -1,9 +1,29 @@
-"""Verify the logo-to-pixel-reveal handoff and delayed title HUD."""
+"""Reveal order: logo fades out only after init -> full black frame -> map + selector fade in -> ready (overlay gone)."""
 import asyncio
 import os
 from playwright.async_api import async_playwright
 
+STAGE_RECORDER = """(() => {
+  window.__bootStages = [];
+  const t0 = performance.now();
+  new MutationObserver(records => records.forEach(r => {
+    const s = r.target.dataset.bootStage;
+    if (s) window.__bootStages.push({stage: s, t: performance.now() - t0, game: !!window.__game,
+      logo: getComputedStyle(document.querySelector('#boot-splash-logo')).opacity,
+      overlay: getComputedStyle(r.target).opacity});
+  })).observe(document, {subtree: true, attributes: true, attributeFilter: ['data-boot-stage']});
+  window.__logoSamples = [];
+  const sample = () => {
+    const l = document.querySelector('#boot-splash-logo');
+    if (l) window.__logoSamples.push(Number(getComputedStyle(l).opacity));
+    if (!window.__bootDone) requestAnimationFrame(sample);
+  };
+  requestAnimationFrame(sample);
+})()"""
+
 URL = os.environ.get("ARK_URL", "http://127.0.0.1:8799/index.html")
+SHOTS = os.environ.get("ARK_SHOTS", "C:/Users/Lenovo/AppData/Local/hermes/cache/scratch")
+
 
 async def main():
     async with async_playwright() as p:
@@ -12,6 +32,7 @@ async def main():
         await page.emulate_media(reduced_motion="no-preference")
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
+        await page.add_init_script(STAGE_RECORDER)
 
         async def delay_ground(route):
             await asyncio.sleep(1.0)
@@ -19,45 +40,38 @@ async def main():
 
         await page.route("**/img/map_ground.png", delay_ground)
         await page.goto(URL, wait_until="domcontentloaded")
-        boot = page.locator("#boot-splash")
-        assert await boot.is_visible()
-        assert not await page.evaluate("!!window.__game"), "boot logo should appear before game readiness"
-        await page.wait_for_function("(() => { const i=document.querySelector('#boot-splash img'); const a=Number(getComputedStyle(i).opacity); return i.classList.contains('loaded') && a > .25 && a < .75; })()", timeout=3000)
-        intro = await page.evaluate("""() => ({opacity:Number(getComputedStyle(document.querySelector('#boot-splash img')).opacity),
-          state:document.querySelector('#boot-splash').dataset.state, revealStarted:window.__bootRevealStarted})""")
-        assert intro["state"] is None and intro["revealStarted"] is False, f"logo must emerge from black before the handoff: {intro}"
-        await page.screenshot(path=r"C:\Users\Lenovo\AppData\Local\hermes\cache\scratch\splash-logo-in-mobile.png", full_page=True)
+        assert await page.locator("#boot-splash").is_visible()
+        assert not await page.evaluate("!!window.__game"), "logo appears before the game is ready"
 
-        await page.wait_for_function("window.__game && document.querySelector('#boot-splash').dataset.state === 'fading'", timeout=60000)
-        await page.wait_for_function("(() => { const a=Number(getComputedStyle(document.querySelector('#boot-splash')).opacity); return a > .35 && a < .65; })()", timeout=3000)
-        midpoint = await page.evaluate("""() => {
-          const boot=document.querySelector('#boot-splash'), c=document.querySelector('canvas'), x=c.getContext('2d');
-          const d=x.getImageData(0,0,c.width,c.height).data, colors=new Set();
-          for(let y=0;y<c.height;y+=Math.max(1,Math.floor(c.height/24)))
-            for(let px=0;px<c.width;px+=Math.max(1,Math.floor(c.width/24))) {
-              const i=(y*c.width+px)*4; colors.add(`${d[i]},${d[i+1]},${d[i+2]}`);
-            }
-          return {opacity:Number(getComputedStyle(boot).opacity), stage:window.__game.openingStage,
-            uiAlpha:window.__openingUiAlpha, scene:window.__game.scene, sampledColors:colors.size,
-            nameField:!!document.querySelector('#player-name-input')};
+        await page.wait_for_function("__arkBoot.stage === 'logo-out'", timeout=60000)
+        await page.wait_for_function("__arkBoot.stage === 'black'", timeout=3000)
+        black = await page.evaluate("""() => ({logo: getComputedStyle(document.querySelector('#boot-splash-logo')).opacity,
+          overlay: getComputedStyle(document.querySelector('#boot-splash')).opacity,
+          bg: getComputedStyle(document.querySelector('#boot-splash')).backgroundColor})""")
+        assert black == {"logo": "0", "overlay": "1", "bg": "rgb(0, 0, 0)"}, f"full black frame must contain no logo: {black}"
+        await page.screenshot(path=f"{SHOTS}/splash-black-mobile.png")
+
+        await page.wait_for_function("__arkBoot.stage === 'map-in'", timeout=3000)
+        mid = await page.evaluate("""() => {
+          const o = document.querySelector('#boot-splash'), input = document.querySelector('#player-name-input');
+          const r = input.getBoundingClientRect(), top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          return {logo: getComputedStyle(document.querySelector('#boot-splash-logo')).opacity, blocked: o.contains(top), game: !!window.__game};
         }""")
-        assert midpoint["stage"] == "reveal", midpoint
-        assert midpoint["scene"] == "title", midpoint
-        assert midpoint["sampledColors"] > 20, f"village should already be pixel-revealing under the fading logo: {midpoint}"
-        assert midpoint["uiAlpha"] == 0, f"HUD/instructions must remain hidden during the logo fade: {midpoint}"
-        assert not midpoint["nameField"], "name prompt/HUD must not appear while logo is still fading"
-        await page.screenshot(path=r"C:\Users\Lenovo\AppData\Local\hermes\cache\scratch\splash-fade-mobile.png", full_page=True)
-
-        await page.wait_for_function("document.querySelector('#boot-splash').dataset.state === 'hidden'", timeout=3000)
-        assert await page.evaluate("__game.openingStage") == "reveal", "logo should finish fading before the selector/HUD phase"
-        assert not await page.locator("#player-name-input").count(), "name prompt must wait until after the logo disappears"
-        await page.wait_for_function("window.__openingUiAlpha > 0", timeout=3000)
-        assert await page.locator("#boot-splash").get_attribute("data-state") == "hidden", "HUD must begin only after the logo is gone"
-        await page.wait_for_function("__game.openingStage === 'selector'", timeout=3000)
-        assert await page.locator("#player-name-input").is_visible()
-        assert await page.evaluate("__game.scene") == "title", "the opening must not auto-start"
+        assert mid["logo"] == "0" and mid["game"], f"the logo must not return during the map reveal: {mid}"
+        assert mid["blocked"], "the reveal overlay must still block clicks on the selector"
+        await page.wait_for_function("__arkBoot.stage === 'ready'", timeout=5000)
+        assert await page.evaluate("getComputedStyle(document.querySelector('#boot-splash')).display") == "none"
+        await page.evaluate("window.__bootDone = true")
+        samples = await page.evaluate("__logoSamples")
+        assert samples[0] == 1 and any(.1 < s < .9 for s in samples), f"the logo must fade out smoothly, not cut: {samples[:4]}...{samples[-4:]}"
+        stages = await page.evaluate("__bootStages")
+        order = [s["stage"] for s in stages]
+        assert order == ["logo-out", "black", "map-in", "ready"], order
+        assert stages[0]["game"], "the logo may only start fading after real game init finished"
+        assert [round(s["t"]) for s in stages] == sorted(round(s["t"]) for s in stages)
+        assert await page.evaluate("__game.scene") == "title" and await page.locator("#player-name-input").is_visible()
         assert not errors, errors
         await browser.close()
-        print(f"Fade overlap verified: logo opacity {midpoint['opacity']:.2f}, pixelated board visible, UI delayed until after logo, no auto-start/errors")
+        print(f"Splash timing: {order} (logo-out starts only after init), black frame without logo, overlay blocks input until ready")
 
 asyncio.run(main())

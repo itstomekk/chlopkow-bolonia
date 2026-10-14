@@ -47,19 +47,16 @@ def boot(page):
 
 def check_chat(page):
     page.wait_for_function("!document.getElementById('arek-global-chat').classList.contains('arek-chat-away')")
-    for state in ("open", "minimized"):
-        if state == "minimized":
-            page.locator("#arek-chat-close").click()
-        g = page.evaluate("""() => {
-            const root = document.getElementById('arek-global-chat'), r = root.getBoundingClientRect();
-            const vis = ['#arek-chat-panel', '#arek-chat-launch'].map(s => document.querySelector(s)).find(e => e.offsetParent);
-            const q = getComputedStyle(root), v = vis.getBoundingClientRect();
-            return { left: r.left, right: r.right, bottom: r.bottom, align: q.textAlign, vw: innerWidth, vh: innerHeight,
-                     visLeft: v.left, visAlign: getComputedStyle(vis).textAlign };
-        }""")
-        assert g["left"] <= 16 and g["right"] < g["vw"] * .75, f"chat ({state}) must sit at the left edge: {g}"
-        assert g["align"] == "left" and g["visAlign"] == "left", f"chat ({state}) text must be left-aligned: {g}"
-    page.locator("#arek-chat-launch").click()
+    g = page.evaluate("""() => {
+        const root = document.getElementById('arek-global-chat'), r = root.getBoundingClientRect();
+        const panel = document.getElementById('arek-chat-panel'), v = panel.getBoundingClientRect();
+        return { left: r.left, right: r.right, align: getComputedStyle(root).textAlign,
+                 vw: innerWidth, visLeft: v.left, visAlign: getComputedStyle(panel).textAlign };
+    }""")
+    assert g["left"] <= 16 and g["right"] < g["vw"] * .75, f"chat must sit at the left edge: {g}"
+    assert g["align"] == "left" and g["visAlign"] == "left", f"chat text must be left-aligned: {g}"
+    assert page.locator("#arek-chat-panel").is_visible()
+    assert page.locator("#arek-chat-launch, #arek-chat-close").count() == 0
 
 
 def check_corner(page):

@@ -13,20 +13,21 @@
   const SAVE_VERSION = 2;   // D04: explicit payload version; a missing `v` means a legacy v1 save
   let saveFrozen = false;   // D04: a newer-version save must never be overwritten this session
   const APPLES_NEEDED = 10, MUSHROOMS_TOTAL = 15, MUSHROOMS_NEEDED = 10, TRASH_TOTAL = 5;
-  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat'];
+  const PLAYABLE_CHARACTERS = ['arek', 'marcin', 'damian', 'edytka', 'renik', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'wesoly_swiat'];
   // Hard-alpha pixel sheets: draw the player without smoothing.
   const PIXEL_CHARACTERS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat']);
   // NPCs drawn from their own walk sheet in the world (the older cast keeps docs/img/npcs.png and quest markers).
   const PIXEL_NPCS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa']);
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
-  if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) selectedCharacter = 'arek';
+  // Hidden/retired choices (e.g. 'patryk', now NPC-only) fall back to Arek and the stale stored value is dropped.
+  if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) { selectedCharacter = 'arek'; try { localStorage.setItem(CHARACTER_KEY, 'arek'); } catch (e) { } }
 
   /* ---------- text ---------- */
   const T = {
     pl: {
       title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { szept: 'SZEPT', arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
+      names: { szept: 'SZEPT', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -124,7 +125,7 @@
     en: {
       title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { szept: 'WHISPER', arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
+      names: { szept: 'WHISPER', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -530,80 +531,86 @@
   /* ---------- input ---------- */
   function cancelClickMove() { clickTarget.active = false; }
   let namePrompt = null;
-  /* Opening sequence: reveal the live village board -> selector and name prompt. */
-  const REDUCED_MOTION = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const OPENING = { reveal: REDUCED_MOTION ? .8 : 1.7 };
-  const OPENING_UI_FADE = REDUCED_MOTION ? .3 : .6;
-  let openingT = 0, openingUiStart = null, openingUiAlpha = 0, pixCvs = null;
-  const openingStage = () => openingT >= OPENING.reveal ? 'selector' : 'reveal';
-  const skipOpeningReveal = () => { openingT = Math.max(openingT, OPENING.reveal); };
+  // Default player names: the selected card's own name; blank input submits it. The cast that always had a person-style
+  // name keeps its casing; every other card (the NPC-turned-playable ones) uses its selector label.
+  const DEFAULT_PLAYER_NAMES = Object.assign(Object.fromEntries(PLAYABLE_CHARACTERS.map(id => [id, T.names[id] || id.toUpperCase()])),
+    { arek: 'Arek', marcin: 'Marcin', damian: 'Damian', edytka: 'Edytka', renik: 'DJ Renik', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' });
+  const defaultPlayerName = () => DEFAULT_PLAYER_NAMES[selectedCharacter] || DEFAULT_PLAYER_NAMES.arek;
+  // Loading is handled by the HTML boot overlay (js/loading-splash.js): logo on black -> map + selector.
+  // The title is always the live map with the selector on top, never a crest or a timed art sequence.
+  const openingStage = () => 'selector';
   const nameInput = () => namePrompt && namePrompt.querySelector('input');
-  function placeNameForm() {   // docks the form into the selector's form panel (see selectorLayout)
+  const NAME_FOOT = { startH: 42, gap: 8, below: 12 };   // CSS px: Start button, gap to disclosure, gap grid -> Start
+  const disclosureText = () => LANG === 'pl' ? 'Imię i wejście pojawią się publicznie w Nostr.' : 'Your name and arrival will be public on Nostr.';
+  function nameFootMetrics() {   // CSS px footer under the grid; shared by selectorLayout (space it reserves) and placeNameForm
+    const w = Math.min(330, innerWidth - 24), lines = disclosureText().length * 7 > w - 12 ? 2 : 1;
+    return { w, h: NAME_FOOT.startH + NAME_FOOT.gap + lines * 17 + 8 };
+  }
+  // The DOM input sits exactly over the selected card's name label; Start + the Nostr disclosure sit under the grid.
+  function placeNameForm() {
     if (!namePrompt || !cvs.width) return;
-    const { form } = selectorLayout(), k = innerWidth / cvs.width;
-    const U = Math.min(cvs.width, cvs.height * 1.6) / 100, stripTop = innerHeight - U * 9.5 * k;
-    const w = form.w * k;
-    namePrompt.style.width = w + 'px';
-    const h = namePrompt.getBoundingClientRect().height;
-    const heroLines = hasSave ? 46 : 0;   // the saved hero's name is drawn on the canvas just above the form
-    const top = Math.max(8, Math.min(form.y * k + heroLines, stripTop - h - 8));
-    namePrompt.style.left = form.x * k + 'px';
-    namePrompt.style.top = top + 'px';
+    const L = selectorLayout(), b = L.cards.find(x => x.id === selectedCharacter), k = innerWidth / cvs.width;
+    if (!b) return;
+    const input = nameInput(), stripH = b.h * .21 * k, h = Math.max(24, stripH);
+    // On small cards the field grows sideways (clamped to the viewport) so a long name is still readable.
+    const cx = (b.x + b.w / 2) * k, room = 2 * Math.min(cx, innerWidth - cx) - 8;   // stay centred on the label
+    const w = Math.max(Math.min(b.w * k - 8, room), Math.min(Math.max(b.w * k - 8, 150), room));
+    Object.assign(input.style, {
+      left: cx - w / 2 + 'px',
+      top: Math.max(0, Math.min(innerHeight - h - 2, (b.y + b.h) * k - stripH / 2 - h / 2)) + 'px',
+      width: w + 'px', height: h + 'px' });
+    const submit = namePrompt.querySelector('button'), disclosure = namePrompt.querySelector('p');
+    const fw = Math.min(330, innerWidth - 24), fx = (innerWidth - fw) / 2;
+    Object.assign(submit.style, { left: fx + 'px', width: fw + 'px', height: NAME_FOOT.startH + 'px' });
+    Object.assign(disclosure.style, { left: fx + 'px', width: fw + 'px' });
+    let top = L.foot.y * k;
+    const total = NAME_FOOT.startH + NAME_FOOT.gap + disclosure.getBoundingClientRect().height;
+    top = Math.max(0, Math.min(top, innerHeight - 4 - total));   // Start + disclosure never leave the viewport
+    submit.style.top = top + 'px';
+    disclosure.style.top = top + NAME_FOOT.startH + NAME_FOOT.gap + 'px';
   }
   function requestPlayerName(fresh = true, auto = false) {
     if (scene !== 'title') return;
     if (namePrompt) { if (!auto && nameInput()) nameInput().focus(); return; }
-    skipOpeningReveal();
     const overlay = document.createElement('div'); overlay.id = 'player-name-overlay';
-    Object.assign(overlay.style, { position: 'fixed', zIndex: '20', boxSizing: 'border-box', fontFamily: 'sans-serif', touchAction: 'auto', animation: REDUCED_MOTION ? 'none' : 'ark-name-in .5s ease-out both' });
-    if (!document.getElementById('ark-name-style')) {
-      const st = document.createElement('style'); st.id = 'ark-name-style';
-      st.textContent = '@keyframes ark-name-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}';
-      document.head.appendChild(st);
-    }
+    overlay.dataset.fresh = String(fresh);
+    Object.assign(overlay.style, { position: 'fixed', inset: '0', zIndex: '20', pointerEvents: 'none', fontFamily: 'PixelifySans, monospace', touchAction: 'auto' });
     const form = document.createElement('form');
-    Object.assign(form.style, { boxSizing: 'border-box', padding: '12px', border: '3px solid #ffd21f', background: 'rgba(16,22,58,.93)', color: '#f5f0e0', textAlign: 'center', display: 'grid', gap: '8px' });
-    const label = document.createElement('label'); label.htmlFor = 'player-name-input'; label.textContent = LANG === 'pl' ? 'JAK MASZ NA IMIĘ?' : 'WHAT IS YOUR NAME?';
-    Object.assign(label.style, { fontWeight: 'bold', fontSize: '13px', letterSpacing: '.04em' });
-    const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'nickname'; input.placeholder = LANG === 'pl' ? 'Wpisz imię' : 'Enter a name'; input.value = fresh ? '' : sanitizePlayerName(Q.playerName); input.required = true;
-    Object.assign(input.style, { width: '100%', boxSizing: 'border-box', padding: '10px', fontSize: '16px', border: '2px solid #c8cee0', borderRadius: '4px' });
+    const input = document.createElement('input'); input.id = 'player-name-input'; input.name = 'playerName'; input.type = 'text'; input.maxLength = 80; input.autocomplete = 'off';
+    input.placeholder = defaultPlayerName(); input.value = ''; input.setAttribute('aria-label', LANG === 'pl' ? 'Imię gracza (opcjonalne)' : 'Player name (optional)');
+    Object.assign(input.style, { position: 'fixed', pointerEvents: 'auto', boxSizing: 'border-box', padding: '2px', font: '16px PixelifySans, monospace', textAlign: 'center', textOverflow: 'ellipsis', color: '#ffd21f', background: 'rgba(8,12,40,.88)', border: '0', borderBottom: '1px solid #ffd21f', borderRadius: '0' });
     const disclosure = document.createElement('p'); disclosure.id = 'player-name-disclosure';
-    disclosure.textContent = LANG === 'pl'
-      ? 'Imię i informacja o wejściu pojawią się publicznie w Nostr (globalny czat).'
-      : 'Your name and arrival will be public on Nostr (global chat).';
-    Object.assign(disclosure.style, { margin: '0', padding: '5px 6px', background: 'rgba(8,12,40,.92)', borderRadius: '3px', fontSize: '13px', fontWeight: '600', lineHeight: '1.4', color: '#d8ffee' });
+    disclosure.textContent = disclosureText();
+    Object.assign(disclosure.style, { position: 'fixed', margin: '0', padding: '4px', boxSizing: 'border-box', fontSize: '12px', lineHeight: '1.4', color: '#d8ffee', textAlign: 'center', background: 'rgba(8,12,40,.82)' });
     const submit = document.createElement('button'); submit.id = 'player-name-submit'; submit.type = 'submit'; submit.textContent = LANG === 'pl' ? 'ZACZNIJ GRĘ' : 'START GAME';
-    Object.assign(submit.style, { padding: '11px', border: '0', borderRadius: '4px', background: '#ffd21f', color: '#10163a', fontWeight: 'bold', fontSize: '15px', touchAction: 'manipulation' });
-    const error = document.createElement('div'); error.setAttribute('aria-live', 'polite'); error.style.cssText = 'color:#ff9b8f;font-size:12px;min-height:0';
-    form.append(label, input, disclosure, submit, error); overlay.appendChild(form);
+    Object.assign(submit.style, { position: 'fixed', pointerEvents: 'auto', boxSizing: 'border-box', border: '0', background: '#ffd21f', color: '#10163a', font: 'bold 15px PixelifySans, monospace', touchAction: 'manipulation' });
+    form.append(input, submit, disclosure); overlay.appendChild(form);
     overlay.addEventListener('pointerdown', e => e.stopPropagation());
     form.addEventListener('submit', e => {
       e.preventDefault();
-      const playerName = sanitizePlayerName(input.value);
-      if (!playerName) { error.textContent = LANG === 'pl' ? 'Wpisz niepuste imię.' : 'Please enter a non-blank name.'; input.focus(); return; }
+      const playerName = sanitizePlayerName(input.value) || defaultPlayerName();
+      const newGame = overlay.dataset.fresh === 'true';
       overlay.remove(); namePrompt = null;
-      if (fresh) startGame(true, playerName);
+      if (newGame) startGame(true, playerName);
       else { Q.playerName = playerName; save(); startGame(false); }
     });
     document.body.appendChild(overlay); namePrompt = overlay; placeNameForm();
-    // Desktop: typing can begin at once. Touch: no autofocus, so the soft keyboard never hides the opening.
-    if (!auto || (window.matchMedia && matchMedia('(pointer: fine)').matches)) input.focus();
+    // No automatic soft keyboard on touch. Clicking the selected card can begin typing on desktop.
+    if (!auto && window.matchMedia && matchMedia('(pointer: fine)').matches) input.focus();
   }
-  // Character selector layout. The cards fill the whole board between the title line and the help strip;
-  // the name form gets its own panel (right side on landscape screens, below the cards on portrait ones).
+  // Character selector layout. The 24 cards use the whole board; Start + the Nostr disclosure (DOM, see
+  // placeNameForm) sit directly under the grid and the whole block is centred, always inside the viewport.
+  // A saved game reserves a short header strip above the grid for the hero name and the ENTER / N hint.
   let selectorCache = null;
   function selectorLayout() {
     const W = cvs.width, H = cvs.height, U = Math.min(W, H * 1.6) / 100;
     const k = W / Math.max(1, innerWidth);   // canvas px per CSS px
-    const key = [W, H, innerWidth, PLAYABLE_CHARACTERS.length, hasSave].join();
+    const key = [W, H, innerWidth, innerHeight, PLAYABLE_CHARACTERS.length, hasSave].join();
     if (selectorCache && selectorCache.key === key) return selectorCache;
     const pad = 12 * k, gap = Math.max(4 * k, U * .9);
-    const top = Math.max(H * .075, 30 * k), bottom = H - U * 9.5 - pad;
-    const side = W / k >= 720 && W / H >= 1.15;   // landscape: name form on the right
-    const formW = Math.min(300 * k, W - 2 * pad), formH = (hasSave ? 270 : 215) * k;   // measured DOM form height plus margin
-    const area = side
-      ? { x: pad, y: top, w: W - formW - 3 * pad, h: bottom - top }
-      : { x: pad, y: top, w: W - 2 * pad, h: Math.max(60 * k, bottom - top - formH - pad) };
+    const head = hasSave ? Math.max(U * 5.6, 30 * k) : 0;
+    const top = pad + head, footReserve = (NAME_FOOT.below + nameFootMetrics().h) * k;
+    const area = { x: pad, y: top, w: W - 2 * pad, h: Math.max(60 * k, H - pad - top - footReserve) };
     const n = PLAYABLE_CHARACTERS.length;
     let best = null;
     for (let cols = 1; cols <= n; cols++) {
@@ -615,14 +622,11 @@
     }
     const { cols, rows } = best, w = best.w, h = Math.min(w * 1.12, (area.h - gap * (rows - 1)) / rows);
     const gridW = cols * w + (cols - 1) * gap, gridH = rows * h + (rows - 1) * gap;
-    const x0 = area.x + (area.w - gridW) / 2, y0 = area.y + Math.max(0, (area.h - gridH) / 2);
+    const x0 = area.x + (area.w - gridW) / 2, y0 = area.y + Math.max(0, (H - pad - top - gridH - footReserve) / 2);
     const cards = PLAYABLE_CHARACTERS.map((id, i) => ({
       id, x: x0 + (i % cols) * (w + gap), y: y0 + Math.floor(i / cols) * (h + gap), w, h,
     }));
-    const form = side
-      ? { x: W - pad - formW, y: top, w: formW }
-      : { x: (W - formW) / 2, y: Math.min(y0 + gridH + pad, bottom - formH), w: formW };
-    selectorCache = { key, cards, form, cols, rows, side };
+    selectorCache = { key, cards, cols, rows, head: { y: pad, h: head }, foot: { y: y0 + gridH + NAME_FOOT.below * k } };
     return selectorCache;
   }
   function characterButtonBounds() { return selectorLayout().cards; }
@@ -631,6 +635,12 @@
     selectedCharacter = char;
     try { localStorage.setItem(CHARACTER_KEY, char); } catch (e) { }
     if (PLAYER_SHEETS[char]) SPR = PLAYER_SHEETS[char];
+    if (scene === 'title') {
+      if (!namePrompt) requestPlayerName(true, true);
+      nameInput().value = ''; nameInput().placeholder = defaultPlayerName();
+      placeNameForm();
+      if (window.matchMedia && matchMedia('(pointer: fine)').matches) nameInput().focus({ preventScroll: true });
+    }
   }
   function startGame(fresh, playerName) {
     if (fresh) {
@@ -649,16 +659,15 @@
   }
   addEventListener('keydown', e => {
     if (namePrompt) {
-      if (e.code === 'Enter' && nameInput() && document.activeElement !== nameInput()) { e.preventDefault(); nameInput().focus(); }
+      if (e.code === 'Enter' && nameInput() && document.activeElement !== nameInput() && document.activeElement !== namePrompt.querySelector('button')) { e.preventDefault(); nameInput().focus(); }
       return;
     }
     keys.add(e.code);
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) cancelClickMove();
     if (scene === 'title') {
-      if (e.code === 'KeyN') hasSave ? requestPlayerName(false) : startGame(true);
-      else if (e.code === 'KeyR') startGame(true);
-      else if (e.code === 'Enter' || e.code === 'Space') startGame(!hasSave);
+      if (e.code === 'KeyN' || e.code === 'KeyR') { e.preventDefault(); startGame(true); }
+      else if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); startGame(!hasSave); }
       return;
     }
     if (scene === 'end') {
@@ -848,11 +857,12 @@
       const [px, py] = toCanvas(e);
       const button = characterButtonBounds().find(b => px >= b.x && px < b.x + b.w && py >= b.y && py < b.y + b.h);
       if (button) {
-        selectCharacter(button.id); skipOpeningReveal();
-        if (nameInput() && window.matchMedia && matchMedia('(pointer: fine)').matches) nameInput().focus();
+        // Prevent the canvas's native pointer focus from stealing focus back from the name input.
+        e.preventDefault();
+        selectCharacter(button.id);
         return;
       }
-      skipOpeningReveal();
+      if (namePrompt) return;   // Only Start may submit/cancel the current fresh-name choice.
       startGame(!hasSave);
       return;
     }
@@ -1323,8 +1333,7 @@
   function update(dt) {
     time += dt;
     if (scene === 'title') {
-      if (window.__bootRevealStarted !== false) openingT += dt;
-      if (!hasSave && !namePrompt && openingStage() !== 'reveal' && window.__bootSplashDone !== false) requestPlayerName(true, true);
+      if (!hasSave && !namePrompt) requestPlayerName(true, true);
     }
     dust = dust.filter(d => (d.t += dt) < .5);
     fx = fx.filter(f => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 320 * dt; return f.t < 1.2; });
@@ -1809,36 +1818,8 @@ function drawFrodo(sx, sy, s) {
     for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) ctx.fillText(txt, x + dx * px, y + dy * px);
     ctx.fillStyle = fill; ctx.fillText(txt, x, y);
   }
-  const clamp01 = v => Math.max(0, Math.min(1, v));
   function drawSplash(W, H, U) {
-    const reveal = clamp01(openingT / OPENING.reveal);
-    if (window.__bootSplashDone === false) openingUiAlpha = 0;
-    else {
-      if (openingUiStart === null) openingUiStart = Math.max(OPENING.reveal - (REDUCED_MOTION ? .25 : .5), openingT);
-      openingUiAlpha = clamp01((openingT - openingUiStart) / OPENING_UI_FADE);
-    }
-    window.__openingUiAlpha = openingUiAlpha;
-    const ui = openingUiAlpha;
-    if (reveal < 1) {
-      // Downsample the already-rendered live map and enlarge it with nearest-neighbour.
-      const steps = [120, 96, 72, 54, 38, 26, 18, 12, 8, 5, 3, 2];
-      const b = Math.max(2, Math.round(steps[Math.min(steps.length - 1, Math.floor(reveal * steps.length))] * W / 1280));
-      window.__openingPixelBlock = b;
-      pixCvs = pixCvs || document.createElement('canvas');
-      const cw = Math.ceil(W / b), ch = Math.ceil(H / b);
-      pixCvs.width = cw; pixCvs.height = ch;
-      const pc = pixCvs.getContext('2d'); pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'low';
-      pc.drawImage(cvs, 0, 0, W, H, 0, 0, cw, ch);
-      ctx.imageSmoothingEnabled = false;
-      ctx.globalAlpha = 1;
-      ctx.drawImage(pixCvs, 0, 0, cw, ch, 0, 0, W, H);
-    } else {
-      window.__openingPixelBlock = 0;
-    }
-    ctx.globalAlpha = ui;
-    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.font = `${U * 1.5}px PixelifySans`; outlined(LANG === 'pl' ? 'GMINA PLATERÓW · MAZOWSZE' : 'PLATERÓW COMMUNE · MASOVIA', W * .04, H * .04, '#f5f0e0', Math.max(1, U * .2));
-    // Character selection (same geometry is used by pointer input, including before first paint).
+    // Loading logo belongs only to the HTML overlay. The map/HUD stay beneath the selector.
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const button of characterButtonBounds()) {
       const isSelected = button.id === selectedCharacter;
@@ -1882,21 +1863,15 @@ function drawFrodo(sx, sy, s) {
       ctx.fillRect(button.x, button.y + button.h - stripH, button.w, stripH);
       ctx.fillStyle = isSelected ? '#ffd21f' : '#f5f0e0';
       const mid = button.y + button.h - stripH / 2, lh = fontPx * 1.05;
-      lines.forEach((l, i) => ctx.fillText(l, button.x + button.w / 2, mid + (i - (lines.length - 1) / 2) * lh));
+      if (!(isSelected && namePrompt)) lines.forEach((l, i) => ctx.fillText(l, button.x + button.w / 2, mid + (i - (lines.length - 1) / 2) * lh));   // the name input replaces the selected label
     }
-    if (hasSave) {
-      const { form } = selectorLayout();
-      ctx.font = `${U * 1.8}px PixelifySans`; ctx.fillStyle = '#fff7d6';
-      ctx.fillText(`${LANG === 'pl' ? 'BOHATER' : 'HERO'}: ${heroName()}`, form.x + form.w / 2, form.y + U * 1.2);
-      ctx.font = `${U * 1.15}px PixelifySans`; ctx.fillStyle = '#c8cee0';
-      ctx.fillText(LANG === 'pl' ? 'N - ZMIEŃ IMIĘ   R - NOWA GRA' : 'N - CHANGE NAME   R - NEW GAME', form.x + form.w / 2, form.y + U * 3.2);
+    if (hasSave && !namePrompt) {   // saved hero + how to continue / start over, in the strip above the grid
+      const { head } = selectorLayout();
+      ctx.font = `${Math.max(U * 1.8, 12 * cvs.width / Math.max(1, innerWidth))}px PixelifySans`;
+      outlined(heroName(), W / 2, head.y + head.h * .3, '#fff7d6', Math.max(1, U * .2));
+      ctx.font = `${Math.max(U * 1.15, 10 * cvs.width / Math.max(1, innerWidth))}px PixelifySans`;
+      outlined(LANG === 'pl' ? 'ENTER - KONTYNUUJ   N - NOWA GRA' : 'ENTER - CONTINUE   N - NEW GAME', W / 2, head.y + head.h * .72, '#c8cee0', Math.max(1, U * .15));
     }
-    // prompt + help on a translucent strip at the bottom
-    ctx.fillStyle = 'rgba(8,12,40,.72)'; ctx.fillRect(0, H - U * 9.5, W, U * 9.5);
-    ctx.textAlign = 'center';
-    if (Math.floor(time * 2) % 2) { ctx.font = `${U * 2.5}px PixelifySans`; outlined(hasSave ? T.cont : T.start, W / 2, H - U * 6.2, '#ffd21f', Math.max(1, U * .25)); }
-    ctx.font = `${U * 1.4}px PixelifySans`; ctx.fillStyle = '#c8cee0'; ctx.fillText(T.help, W / 2, H - U * 2.6);
-    ctx.globalAlpha = 1;
     placeNameForm();
   }
 
@@ -1972,7 +1947,7 @@ function drawFrodo(sx, sy, s) {
       ctx.textAlign = 'center'; ctx.fillStyle = '#10163a'; ctx.fillRect(bx - U * 2.2, by - U * 2.2, U * 4.4, U * 4.4);
       ctx.fillStyle = '#ffd21f'; ctx.font = `${U * 3}px PixelifySans`; ctx.fillText('…', bx, by);
     }
-    // HUD: apples + quest log
+    // HUD: apples + quest log (the 23-card selector covers the board, so it stays out of the title scene)
     if (scene === 'play' || scene === 'end') {
       const qx = U * 2, qy = U * 2, qw = U * 40, lines = [];
       if (Q.kasia) lines.push([`${T.quests[0]} (${Math.min(mushroomCount(), MUSHROOMS_NEEDED)}/${MUSHROOMS_NEEDED})`, Q.kasia === 2]);
@@ -2264,5 +2239,10 @@ function drawFrodo(sx, sy, s) {
                mushroomRight: qx + u * 12.2 + u * 2 + mushW };
     }, enterChurch, enterCrypt, rooms, get parentRoom() { return STACK.length ? STACK[STACK.length - 1].ROOM : null; }, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs, cap: CLOUD_GEOM.cap, radii: CLOUD_GEOM.radii }), cloudShadowAt: (x, y) => inCloudShadow(+x, +y), weatherSoundState: () => ({ inShadow: WEATHER.inShadow, playing: WEATHER.playing, kind: WEATHER.kind, gustCount: WEATHER.gustCount, rainCount: WEATHER.rainCount, windCount: WEATHER.windCount, hasAudio: !!(WEATHER.ac && WEATHER.master) }), forestTextureStats: () => FOREST_STATS };
   }
-  init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
+  init().then(() => {
+    if (window.__arkBoot) window.__arkBoot.finish();
+  }).catch(error => {
+    console.error('Game initialization failed:', error);
+    if (window.__arkBoot) window.__arkBoot.fail(LANG === 'pl' ? 'Nie udało się załadować gry. Spróbuj ponownie.' : 'The game could not load. Please try again.');
+  });
 })();

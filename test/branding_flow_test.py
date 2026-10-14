@@ -1,4 +1,4 @@
-"""Opening reveal, integrated name/character controls, no repeated crest and reduced motion."""
+"""Post-load map selector, inline identity controls and reduced motion."""
 import os
 from playwright.sync_api import sync_playwright
 
@@ -12,6 +12,7 @@ with sync_playwright() as p:
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(URL)
     page.wait_for_function("window.__game")
+    page.wait_for_function("window.__arkBoot && __arkBoot.stage === 'ready'")
 
     page.wait_for_function("__game.openingStage === 'selector'", timeout=8000)
     name = page.locator("#player-name-input")
@@ -19,13 +20,13 @@ with sync_playwright() as p:
     assert page.locator("#player-name-submit").is_visible()
     assert page.evaluate("__game.scene") == "title"
 
-    # The selector remains the title screen; the crest must not replace the village later.
+    # After loading there is only the map/selector; no timed emblem phase.
     center = page.evaluate("__game.characterButtonCenter('damian')")
     page.mouse.click(*center)
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "damian"
-    page.wait_for_timeout(5600)
-    assert page.evaluate("__game.openingStage") == "selector", "the old timed crest phase must not return"
-    assert name.is_visible(), "the name field must remain available on the title screen"
+    page.wait_for_timeout(1400)
+    assert page.evaluate("__game.openingStage") == 'selector'
+    assert name.is_visible(), "the inline name field must remain available"
     assert page.locator("#player-name-submit").is_visible()
     assert page.evaluate("__game.scene") == "title", "the timed logo must never auto-start the game"
 
@@ -42,11 +43,12 @@ with sync_playwright() as p:
     reduced.on("pageerror", lambda error: reduced_errors.append(str(error)))
     reduced.goto(URL)
     reduced.wait_for_function("window.__game")
-    reduced.wait_for_function("__game.openingStage === 'selector'", timeout=3000)
+    reduced.wait_for_function("__arkBoot.stage === 'ready'", timeout=8000)
+    assert reduced.evaluate("__game.openingStage") == 'selector'
     assert reduced.locator("#player-name-input").is_visible()
     assert reduced.locator("#player-name-submit").is_visible()
     assert reduced.evaluate("__game.scene") == "title"
     assert not reduced_errors, reduced_errors
 
     browser.close()
-    print("Brand opening flow: reveal, name/character selection, no repeated crest, no auto-start, reduced-motion/mobile passed")
+    print("Brand opening flow: map/inline selector after load, no crest or auto-start, reduced-motion/mobile passed")

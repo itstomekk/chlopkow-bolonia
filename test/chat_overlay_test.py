@@ -1,17 +1,14 @@
 """
-A06 + P05 — transparent chat docked at the BOTTOM of the screen (layout/behaviour regression).
+Always-visible transparent chat docked at the bottom-left (layout/behaviour regression).
 
-Asserts the product contract for the optional Nostr chat as a transparent overlay:
-  * docked to the very bottom edge of the viewport (P05: was right side in A06),
-    left-anchored (bottom-left), open by default for a fresh visitor once the play scene runs,
-    minimized preference persisted in localStorage and reopenable via the launch chip;
+Asserts the product contract for the in-play Nostr chat:
+  * hidden on title/name selection; visible throughout play regardless of old minimized preference,
   * panel itself transparent and borderless (readable text comes from shadow/colour,
     never from an enclosing box); day separators stay hidden by CSS;
-  * form/send/minimize controls present and visible; text input never leaks game keys
+  * no heading/launch/minimize/close controls; form/send present and visible; text input never leaks game keys
     (WASD/arrows/Space/jump/map) while focused;
   * no overlap with the top-right minimap or the bottom-right HUD coordinate readout;
-    the overlay steps aside while a dialogue box or the big M-map is open, returning
-    without losing the draft input or the loaded messages;
+    * the overlay remains visible while dialogue, shop, or big M-map is open;
   * P05 rolling window: history stays in state but only the last 10 messages render
     (newest at the bottom, older ones fall off the render);
   * P05 flake fix: the nostr-tools "WebSocket is already in CLOSING or CLOSED state"
@@ -38,15 +35,15 @@ TRANSPARENT = ("rgba(0, 0, 0, 0)", "transparent")
 
 
 def new_page(browser, viewport):
-    """Fresh context: no chat preference, no guest key, no real relay traffic."""
+    """Fresh context with legacy minimized preference and no public relay traffic."""
     page = browser.new_page(viewport=viewport)
-    # Keep the test fully offline/mock: the layout must not depend on Nostr at all.
-    page.route("wss://**", lambda route: route.abort())
-    page.route("https://esm.sh/**", lambda route: route.abort())
+    # isolated_browser_runner installs the disabled CDN module and intercepts WebSockets.
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(URL + "?debug=1")
     page.evaluate("localStorage.clear()")
+    # A legacy minimize preference must not hide in-play chat.
+    page.evaluate(f"localStorage.setItem('{CHAT_MINIMIZED_KEY}', '1')")
     page.reload()
     page.wait_for_function("window.__game && window.__arekGlobalChat")
     page.errors = errors
@@ -55,7 +52,9 @@ def new_page(browser, viewport):
 
 def start_game(page):
     """Title -> player-name overlay -> scene 'play' (same flow as other tests)."""
+    assert not page.locator("#arek-chat-panel").is_visible(), "chat must stay out of title UI"
     page.keyboard.press("KeyN")
+    assert not page.locator("#arek-chat-panel").is_visible(), "chat must stay out of name selection"
     page.locator("#player-name-input").fill("A06")
     page.locator("#player-name-submit").click()
     page.wait_for_function("window.__game && window.__game.scene === 'play'")
@@ -72,7 +71,7 @@ def rects(page):
         return {
             root: b(document.getElementById('arek-global-chat')),
             panel: b(document.getElementById('arek-chat-panel')),
-            launch: b(document.getElementById('arek-chat-launch')),
+
             minimap: { left: W - mw - U * 2, top: U * 2, right: W - U * 2, bottom: U * 2 + mh },
             // Bottom-right HUD coordinate strip as drawn by drawCoords(): a fixed 2.4U-tall
             // box at the very corner. Text width is bounded conservatively (hero names +
@@ -83,8 +82,7 @@ def rects(page):
     }""")
     data["panelBg"] = page.evaluate("getComputedStyle(document.querySelector('#arek-chat-panel')).backgroundColor")
     data["panelBorder"] = page.evaluate("getComputedStyle(document.querySelector('#arek-chat-panel')).borderWidth")
-    data["launchBg"] = page.evaluate("getComputedStyle(document.querySelector('#arek-chat-launch')).backgroundColor")
-    data["launchBorder"] = page.evaluate("getComputedStyle(document.querySelector('#arek-chat-launch')).borderWidth")
+
     # .arek-chat-day only exists while history messages render; probe the CSS rule directly.
     data["dayDisplay"] = page.evaluate("""(() => {
         const d = document.createElement('div');
@@ -119,9 +117,11 @@ def check_open_chat(page, viewport, r):
     """Default-open, transparent, borderless, left-aligned, controls visible."""
     W, H = r["W"], r["H"]
     assert page.locator("#arek-chat-panel").is_visible(), "chat is not open for a fresh visitor"
-    assert page.evaluate(f"localStorage.getItem('{CHAT_MINIMIZED_KEY}')") is None, \
-        "fresh visitor must not have a minimize preference"
-    assert not page.locator("#arek-chat-launch").is_visible(), "launch chip must hide while open"
+    assert page.evaluate(f"localStorage.getItem('{CHAT_MINIMIZED_KEY}')") == "1", \
+        "legacy minimize preference must remain ignored"
+    assert "global chat" not in page.locator("#arek-global-chat").inner_text().lower()
+    for sel in ("#arek-chat-launch", "#arek-chat-title", "#arek-chat-close"):
+        assert page.locator(sel).count() == 0, f"obsolete chat title/control remains: {sel}"
     assert r["panelBg"] in TRANSPARENT, f"panel background must be transparent, got {r['panelBg']}"
     assert r["panelBorder"] == "0px", f"panel must have no enclosing border, got {r['panelBorder']}"
     # P05: docked to the very bottom edge of the viewport (was right side in A06).
@@ -132,12 +132,13 @@ def check_open_chat(page, viewport, r):
     assert r["msgColor"] == "rgb(255, 247, 214)", f"message text colour off: {r['msgColor']}"
     assert r["msgShadow"] != "none", "message text must carry a shadow for readability"
     assert float(r["msgFont"].removesuffix("px")) >= 12, f"message font too small: {r['msgFont']}"
+    assert page.locator("#arek-chat-panel").evaluate("e => getComputedStyle(e).pointerEvents") == "none"
+    assert page.locator("#arek-chat-form").evaluate("e => getComputedStyle(e).pointerEvents") == "auto"
     assert r["dayDisplay"] == "none", "day separators must stay hidden"
-    # Form / send / minimize controls exist and are visible.
-    for sel in ("#arek-chat-form", "#arek-chat-text", "#arek-chat-send", "#arek-chat-close"):
+    # Composer controls exist and are visible.
+    for sel in ("#arek-chat-form", "#arek-chat-text", "#arek-chat-send"):
         assert page.locator(sel).is_visible(), f"{sel} not visible"
     assert page.locator("#arek-chat-text").get_attribute("aria-label") == "Message"
-    assert page.locator("#arek-chat-close").get_attribute("aria-label") == "Close global chat"
     # No overlap with the top-right minimap or the bottom-left HUD coordinate strip
     # (the bar is left-anchored, so it never reaches across to the readout). The A06
     # right-side touch-zone/corridor pins are gone by design: the map/jump zones were
@@ -166,27 +167,37 @@ def check_keyboard_isolation(page):
 
 
 def check_map_dialogue_adaptation(page):
-    """Chat steps aside for the M-map and a dialogue, then returns intact."""
-    # Big M-map: hidden while open (even with a draft in the input), restored after.
+    """Chat stays visible for the M-map and dialogue, preserving draft/history."""
     page.locator("#arek-chat-text").fill("draft kept")
-    page.locator("#arek-chat-text").blur()   # while typing the chat stays visible by design
+    page.locator("#arek-chat-text").blur()
     before_msgs = page.evaluate("__arekGlobalChat.messageCount()")
+    page.evaluate("__game.scene = 'end'")
+    page.wait_for_timeout(250)
+    assert page.locator("#arek-chat-panel").is_visible(), "chat must remain visible outside the title scene"
+    page.evaluate("__game.scene = 'play'")
     page.evaluate("__game.showMap = true")
-    page.wait_for_function("document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-    assert page.evaluate("getComputedStyle(document.getElementById('arek-global-chat')).visibility") == "hidden"
+    page.wait_for_timeout(250)
+    assert page.evaluate("getComputedStyle(document.getElementById('arek-global-chat')).visibility") == "visible"
     page.evaluate("__game.showMap = false")
-    page.wait_for_function("!document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-    assert page.locator("#arek-chat-text").input_value() == "draft kept", "draft input lost after map"
-    assert page.evaluate("__arekGlobalChat.messageCount()") == before_msgs, "messages lost after map"
+    assert page.locator("#arek-chat-panel").is_visible()
+    assert page.locator("#arek-chat-text").input_value() == "draft kept"
+    assert page.evaluate("__arekGlobalChat.messageCount()") == before_msgs
 
-    # Dialogue: same step-aside, same intact restore.
     page.evaluate("__game.talkTo('wesoly_swiat')")
-    page.wait_for_function("document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-    assert not page.locator("#arek-chat-panel").is_visible(), "chat must hide during dialogue"
+    page.wait_for_timeout(250)
+    assert page.locator("#arek-chat-panel").is_visible(), "chat must remain visible during dialogue"
     close_talk(page)
-    page.wait_for_function("!document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-    assert page.locator("#arek-chat-text").input_value() == "draft kept", "draft input lost after dialogue"
-    assert page.evaluate("__arekGlobalChat.messageCount()") == before_msgs, "messages lost after dialogue"
+    assert page.locator("#arek-chat-panel").is_visible()
+    assert page.locator("#arek-chat-text").input_value() == "draft kept"
+    assert page.evaluate("__arekGlobalChat.messageCount()") == before_msgs
+
+    page.evaluate("""() => {
+        const node = document.createElement('div');
+        node.className = 'shop-game';
+        document.body.appendChild(node);
+    }""")
+    assert page.locator("#arek-chat-panel").is_visible(), "chat must remain visible during shop UI"
+    page.evaluate("document.querySelector('.shop-game').remove()")
 
 
 def check_bottom_dock_and_max10(page, viewport, r):
@@ -246,32 +257,10 @@ def check_ws_closing_flake_suppressed(page):
         p.close()
 
 
-def check_minimize_cycle(page, tag=None):
-    """Close -> launch chip visible -> reopen; preference survives reload."""
-    page.locator("#arek-chat-close").click()
-    assert not page.locator("#arek-chat-panel").is_visible(), "chat did not minimise"
-    assert page.locator("#arek-chat-launch").is_visible(), "launch chip missing while minimised"
-    assert page.evaluate(f"localStorage.getItem('{CHAT_MINIMIZED_KEY}')") == "1"
-    if tag:
-        # Minimised: only the transparent launch chip remains on the left side.
-        page.screenshot(path=os.path.join(SHOTS, f"chat-minimized-{tag}.png"))
-    page.reload()
-    page.wait_for_function("window.__arekGlobalChat")
-    assert not page.locator("#arek-chat-panel").is_visible(), "minimised preference lost on reload"
-    assert page.locator("#arek-chat-launch").is_visible()
-    page.locator("#arek-chat-launch").click()
-    assert page.locator("#arek-chat-panel").is_visible(), "launch chip did not reopen the chat"
-    assert page.evaluate(f"localStorage.getItem('{CHAT_MINIMIZED_KEY}')") is None
-    page.locator("#arek-chat-close").click()
-
-
 def run_viewport(browser, viewport, tag):
     page = new_page(browser, viewport)
     try:
-        # The overlay opens by default once the game runs (scene 'play'): on the
-        # title screen it would sit over the character selector / name prompt on
-        # touch layouts, so a fresh visitor starts the game before the open-state
-        # contract is asserted. Minimize preference must still be absent.
+        # Chat is kept out of the title/name selector, then stays visible during play.
         start_game(page)
         r = rects(page)
         check_open_chat(page, viewport, r)
@@ -279,20 +268,17 @@ def run_viewport(browser, viewport, tag):
         check_bottom_dock_and_max10(page, viewport, rects(page))
         check_keyboard_isolation(page)
         check_map_dialogue_adaptation(page)
-        # M-map open: the chat is gone from the left side (proof of no overlap).
         page.evaluate("__game.showMap = true")
-        page.wait_for_function("document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
+        page.wait_for_timeout(250)
+        assert page.locator("#arek-chat-panel").is_visible()
         page.screenshot(path=os.path.join(SHOTS, f"chat-map-{tag}.png"))
         page.evaluate("__game.showMap = false")
-        page.wait_for_function("!document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-        # Dialogue box open: chat steps aside; screenshot shows the dialogue.
+        # Dialogue box open: chat remains visible.
         page.evaluate("__game.talkTo('wesoly_swiat')")
-        page.wait_for_function("document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
+        page.wait_for_timeout(250)
+        assert page.locator("#arek-chat-panel").is_visible()
         page.screenshot(path=os.path.join(SHOTS, f"chat-dialogue-{tag}.png"))
         close_talk(page)
-        page.wait_for_function("!document.getElementById('arek-global-chat').classList.contains('arek-chat-away')", timeout=3000)
-        # Minimised: only the transparent launch chip remains at the bottom-left.
-        check_minimize_cycle(page, f"{viewport['width']}")
         check_ws_closing_flake_suppressed(page)
         assert not page.errors, page.errors
         print(f"PASS chat overlay @ {viewport['width']}x{viewport['height']}")

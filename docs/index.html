@@ -13,83 +13,54 @@
 <link rel="preload" as="image" href="img/boot-logo.png" fetchpriority="high">
 <link rel="stylesheet" href="fonts.css">
 <style>
-  html, body { margin: 0; height: 100%; background: #0c0f1c; overflow: hidden; touch-action: none; }
-  canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
+  html, body { width: 100%; height: 100%; margin: 0; background: #000; overflow: hidden; touch-action: none; }
+  #game { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
   #boot-splash {
-    --boot-logo-in-duration: 1.2s;
-    --boot-fade-duration: .95s;
-    position: fixed; z-index: 100; inset: 0; display: grid; place-items: center;
-    background: #050609; opacity: 1; visibility: visible;
-    transition: opacity var(--boot-fade-duration) ease, visibility 0s linear var(--boot-fade-duration);
+    position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center;
+    background: #000; opacity: 1; visibility: visible; pointer-events: auto;
+    transition: opacity 650ms ease;
   }
-  #boot-splash[data-state="fading"], #boot-splash[data-state="hidden"] {
-    opacity: 0; visibility: hidden; pointer-events: none;
+  #boot-splash.boot-map-in { opacity: 0; }
+  #boot-splash[hidden] { display: none; }
+  #boot-splash-logo {
+    display: block; width: min(76vw, 560px); max-height: 72vh; height: auto; object-fit: contain;
+    opacity: 1; transition: opacity 450ms ease;
   }
-  #boot-splash[data-state="hidden"] { display: none; }
-  #boot-splash img {
-    display: block; width: min(82vw, 540px); max-height: 78vh; object-fit: contain;
-    image-rendering: pixelated; opacity: 0;
+  #boot-splash.boot-logo-out #boot-splash-logo { opacity: 0; }
+  #boot-splash-title {
+    display: none; max-width: 90vw; color: #fff; font: 700 clamp(1.25rem, 6vw, 3rem)/1.2 system-ui, sans-serif;
+    letter-spacing: .08em; text-align: center; padding: 1rem;
+    opacity: 1; transition: opacity 450ms ease;
   }
-  #boot-splash img.loaded { animation: boot-logo-in var(--boot-logo-in-duration) ease-out both; }
-  @keyframes boot-logo-in { from { opacity: 0; } to { opacity: 1; } }
+  #boot-splash.boot-logo-out #boot-splash-title { opacity: 0; }
+  #boot-splash.logo-missing #boot-splash-logo { display: none; }
+  #boot-splash.logo-missing #boot-splash-title { display: block; }
+  #boot-splash-error-box {
+    display: none; position: absolute; inset: auto 1rem 12vh; margin: auto; max-width: 32rem;
+    color: #fff; text-align: center; font: 1rem/1.5 system-ui, sans-serif;
+  }
+  #boot-splash.boot-error #boot-splash-error-box { display: block; }
+  #boot-splash-error { white-space: pre-wrap; overflow-wrap: anywhere; }
+  #boot-splash-reload {
+    margin-top: .75rem; padding: .65rem 1rem; border: 1px solid #fff; border-radius: .25rem;
+    background: #111; color: #fff; font: inherit; cursor: pointer;
+  }
   @media (prefers-reduced-motion: reduce) {
-    #boot-splash { --boot-logo-in-duration: .35s; --boot-fade-duration: .35s; }
+    #boot-splash, #boot-splash-logo, #boot-splash-title { transition-duration: 0ms; }
   }
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="boot-splash" role="status" aria-label="Ładowanie gry">
-  <img src="img/boot-logo.png" alt="CHŁOPKÓW POLONIA" width="768" height="544">
+<div id="boot-splash" role="status" aria-live="polite" aria-label="Ładowanie CHŁOPKÓW POLONII">
+  <img id="boot-splash-logo" src="img/boot-logo.png" width="768" height="544" loading="eager" fetchpriority="high" alt="CHŁOPKÓW POLONIA">
+  <div id="boot-splash-title" role="img" aria-label="CHŁOPKÓW POLONIA">CHŁOPKÓW POLONIA</div>
+  <div id="boot-splash-error-box" role="alert">
+    <div id="boot-splash-error"></div>
+    <button id="boot-splash-reload" type="button">Spróbuj ponownie</button>
+  </div>
 </div>
-<script>
-(() => {
-  const boot = document.getElementById('boot-splash');
-  const logo = boot.querySelector('img');
-  window.__bootRevealStarted = false;
-  window.__bootSplashDone = false;
-  let resolveLogoIn, resolveGameReady;
-  const logoIn = new Promise(resolve => { resolveLogoIn = resolve; });
-  const gameReady = new Promise(resolve => { resolveGameReady = resolve; });
-  let logoInFallback;
-  const finishLogoIn = () => { clearTimeout(logoInFallback); resolveLogoIn(); };
-  logoInFallback = setTimeout(finishLogoIn, 5000);
-  logo.addEventListener('animationend', event => {
-    if (event.animationName === 'boot-logo-in') finishLogoIn();
-  }, { once: true });
-  const showLogo = () => {
-    logo.classList.add('loaded');
-    if (!logo.naturalWidth) finishLogoIn();
-  };
-  if (logo.complete) showLogo();
-  else {
-    logo.addEventListener('load', showLogo, { once: true });
-    logo.addEventListener('error', finishLogoIn, { once: true });
-  }
-  const startHandoff = () => {
-    window.__bootRevealStarted = true;
-    let finished = false, fallback;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(fallback);
-      boot.removeEventListener('transitionend', onFadeEnd);
-      boot.dataset.state = 'hidden';
-      boot.setAttribute('aria-hidden', 'true');
-      window.__bootSplashDone = true;
-      window.dispatchEvent(new Event('ark-boot-faded'));
-    };
-    const onFadeEnd = event => {
-      if (event.target === boot && event.propertyName === 'opacity') finish();
-    };
-    boot.addEventListener('transitionend', onFadeEnd);
-    boot.dataset.state = 'fading';
-    fallback = setTimeout(finish, 3000);
-  };
-  window.addEventListener('ark-ready', resolveGameReady, { once: true });
-  Promise.all([logoIn, gameReady]).then(startHandoff);
-})();
-</script>
+<script src="js/loading-splash.js"></script>
+<canvas id="game"></canvas>
 <script defer src="js/quiz.js"></script>
 <script defer src="js/features.js"></script>
 <script defer src="js/minigames.js"></script>

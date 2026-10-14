@@ -5,7 +5,11 @@ Tests can override the disabled CDN module with their own controlled module rout
 """
 import runpy
 import sys
-from playwright.sync_api import Browser, BrowserContext
+from playwright.sync_api import Browser, BrowserContext, Page
+
+
+EMPTY_BOARD = ('{"ok":true,"best":[],"recent":[],"average":{"score":null,"count":0},'
+               '"cpu":{"score":null,"count":0,"trace":null},"players":0}')
 
 
 EMPTY_BOARD = ('{"ok":true,"best":[],"recent":[],"average":{"score":null,"count":0},'
@@ -27,9 +31,23 @@ def isolate(original):
     return new_page
 
 
+def after_loading(original):
+    def navigate(self, *args, **kwargs):
+        response = original(self, *args, **kwargs)
+        # Ordinary regressions operate on the revealed game, not through a blocking loading overlay.
+        # The splash regressions (loading_splash_test.py, splash_*_test.py) intentionally own navigation timing and are not wrapped.
+        if self.evaluate('Boolean(window.__arkBoot)'):
+            self.wait_for_function("['ready', 'error'].includes(window.__arkBoot.stage)")
+        return response
+    return navigate
+
+
 if __name__ == '__main__':
     Browser.new_page = isolate(Browser.new_page)
     BrowserContext.new_page = isolate(BrowserContext.new_page)
     target = sys.argv[1]
+    if not (target.endswith('loading_splash_test.py') or 'splash_' in target.replace('\\', '/').rsplit('/', 1)[-1]):
+        Page.goto = after_loading(Page.goto)
+        Page.reload = after_loading(Page.reload)
     sys.argv = sys.argv[1:]
     runpy.run_path(target, run_name='__main__')

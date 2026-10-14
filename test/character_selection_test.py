@@ -15,6 +15,7 @@ with sync_playwright() as p:
     page.evaluate("localStorage.clear()")
     page.reload()
     page.wait_for_function("window.__game")
+    page.wait_for_function("!window.__arkBoot || __arkBoot.stage === 'ready'")
 
     # Select Damian on the title screen, using the game's own selector geometry.
     center = lambda pg, cid: pg.evaluate(f"__game.characterButtonCenter('{cid}')")
@@ -24,11 +25,12 @@ with sync_playwright() as p:
     # Selection survives reload and the displayed selector can change it before starting.
     page.reload()
     page.wait_for_function("window.__game")
+    page.wait_for_function("!window.__arkBoot || __arkBoot.stage === 'ready'")
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "damian"
     page.mouse.click(*center(page, "arek"))
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "arek"
 
-    # DJ Renik is selectable and his button sits fully above the bottom prompt strip.
+    # DJ Renik is selectable and leaves room for the Start action below the grid.
     page.mouse.click(*center(page, "renik"))
     assert page.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "renik"
     assert center(page, "renik")[1] + 50 < 720 - min(1280, 720 * 1.6) / 100 * 9.5, center(page, "renik")
@@ -81,6 +83,7 @@ with sync_playwright() as p:
     mobile = browser.new_page(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
     mobile.goto(URL)
     mobile.wait_for_function("window.__game")
+    mobile.wait_for_function("!window.__arkBoot || __arkBoot.stage === 'ready'")
     mobile.touchscreen.tap(*center(mobile, "damian"))
     assert mobile.evaluate(f"localStorage.getItem('{CHARACTER_KEY}')") == "damian"
     assert mobile.evaluate("__game.scene") == "title"

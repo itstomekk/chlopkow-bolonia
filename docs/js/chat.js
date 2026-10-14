@@ -5,8 +5,7 @@
  *   <script src="js/chat.js"></script>
  *
  * This does not talk to the game canvas and it does not require a server.
- * The panel is visible on first visit; users can minimise it and that choice
- * is stored locally. Chat typing is isolated from the game's keyboard input.
+ * The panel is always visible while in play. Chat typing is isolated from the game's keyboard input.
  *
  * CHANNEL_ID is the id of a real NIP-28 kind-40 channel-creation event, not a
  * locally invented identifier. It was published and read back from the relays
@@ -37,7 +36,7 @@
   const NOSTR_TOOLS_URL = 'https://esm.sh/nostr-tools@2.25.2?bundle&target=es2020';
   const SECRET_KEY_STORAGE = 'arek-chlopkowie-nostr-guest-secret-v1';
   const NICKNAME_STORAGE = 'arek-chlopkowie-nostr-nickname-v1';
-  const CHAT_MINIMIZED_STORAGE = 'arek-chlopkowie-chat-minimized-v1';
+
   const MAX_MESSAGE_CHARS = 100;      // what this client lets you type
   const MAX_SHOWN_CHARS = 280;        // longer messages from other clients are ignored as spam
   const MAX_EVENTS = 500;
@@ -61,9 +60,8 @@
   }
 
   const state = {
-      open: false,
-      userClosed: false,   // set when the user minimised during this session (title-screen default-open must then stay away)
       started: false,
+    connectionAttempted: false,
     connected: false,
     tools: null,
     secretKey: null,
@@ -108,22 +106,14 @@
     #arek-global-chat button:focus-visible {
       outline: 1px dashed #ffd21f; outline-offset: 2px; color: #ffd21f;
     }
-    #arek-chat-launch {
-      display: inline-block; pointer-events: auto; text-align: left;
-      background: transparent; color: #fff7d6; padding: 2px 0;
-      border: 0; text-transform: uppercase;
-    }
     #arek-chat-panel {
-      display: none; pointer-events: none; overflow: hidden;
+      display: block; pointer-events: none; overflow: hidden;
       padding: 3px 7px 6px; border: 0; background: transparent;
       text-align: left;
     }
     /* Only the chat's own controls are interactive; the message area and the rest of
        the panel pass pointer events through to the game canvas underneath. */
-    #arek-chat-header, #arek-chat-form { pointer-events: auto; }
-    #arek-chat-header { display: flex; align-items: center; gap: 6px; padding: 1px 0 2px; }
-    #arek-chat-title { flex: 1; color: #ffd21f; }
-    #arek-chat-close { padding: 3px 7px !important; }
+    #arek-chat-form { pointer-events: auto; }
     #arek-chat-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     #arek-chat-messages {
       height: 206px; overflow: hidden; padding: 2px 0 4px;   /* fits the rolled-in last 10 messages */
@@ -148,7 +138,6 @@
     #arek-chat-send { color: #fff7d6; background: transparent; padding: 0; text-shadow: inherit; }
     #arek-chat-send:disabled { cursor: wait; opacity: .6; }
     #arek-global-chat.arek-chat-away { visibility: hidden; }
-    #arek-global-chat.arek-chat-loading { visibility: hidden; }
     @media (max-width: 480px) {
       #arek-global-chat { left: 8px; width: min(340px, calc(100vw - 64px)); }   /* keeps the bottom-right music note clear */
       #arek-chat-messages { height: 206px; }
@@ -158,22 +147,11 @@
 
   const root = el('aside');
   root.id = 'arek-global-chat';
-  root.setAttribute('aria-label', 'Global chat');
-  const launch = el('button', 'GLOBAL CHAT', root);
-  launch.id = 'arek-chat-launch';
-  launch.type = 'button';
-  launch.title = 'Open the optional global chat';
+  root.setAttribute('aria-label', 'Chat');
 
   const panel = el('section', undefined, root);
   panel.id = 'arek-chat-panel';
-  panel.setAttribute('aria-label', 'Global chat');
-  const header = el('div', undefined, panel);
-  header.id = 'arek-chat-header';
-  el('div', 'GLOBAL CHAT', header).id = 'arek-chat-title';
-  const close = el('button', '×', header);
-  close.id = 'arek-chat-close';
-  close.type = 'button';
-  close.setAttribute('aria-label', 'Close global chat');
+  panel.setAttribute('aria-label', 'Chat messages and composer');
   const status = el('div', '', panel);
   status.id = 'arek-chat-status';
   const messages = el('div', undefined, panel);
@@ -197,17 +175,6 @@
   send.id = 'arek-chat-send';
   send.type = 'submit';
   document.body.appendChild(root);
-  const bootSplash = document.getElementById('boot-splash');
-  if (bootSplash && bootSplash.dataset.state !== 'hidden') {
-    root.classList.add('arek-chat-loading');
-    const observer = new MutationObserver(() => {
-      if (bootSplash.dataset.state === 'hidden') {
-        root.classList.remove('arek-chat-loading');
-        observer.disconnect();
-      }
-    });
-    observer.observe(bootSplash, { attributes: true, attributeFilter: ['data-state'] });
-  }
   // Chat typing must never trigger the game's WASD, jump or map shortcuts.
   root.addEventListener('keydown', event => event.stopPropagation());
 
@@ -358,7 +325,8 @@
   }
 
   async function start() {
-    if (state.started) return;
+    if (state.started || state.connectionAttempted) return;
+    state.connectionAttempted = true;
     state.started = true;
     setStatus('Connecting to public Nostr relays...');
     try {
@@ -395,7 +363,7 @@
             state.subscription = null;
             if (state.pool && state.pool.close) state.pool.close(RELAYS);
             state.pool = null;
-            setStatus('All relays disconnected. Close and reopen the chat to retry.', true);
+            setStatus('All relays disconnected. Reconnect by going online or try sending again.', true);
             if (window.console) console.warn('chat relays closed', reasons);
           },
         },
@@ -460,12 +428,14 @@
     if (!state.arrival || state.arrival.accepted || state.arrival.publishing || state.arrival.attempts >= 3) return;
     // Reuse an active connection; replacing its pool would race old subscription callbacks.
     if (state.connected) publishArrival();
-    else start();
+    else { state.connectionAttempted = false; start(); }
   }
 
   async function sendMessage() {
     if (!state.started || !state.pool || !state.tools || !state.secretKey) {
-      setStatus('Chat is not connected. Open it again to retry.', true);
+      state.connectionAttempted = false;
+      start();
+      setStatus('Chat is not connected. Check your connection, then try sending again.', true);
       return;
     }
     const content = trimUnicode(text.value, MAX_MESSAGE_CHARS);
@@ -505,50 +475,31 @@
     count.textContent = `${unicodeLength(text.value)}/${MAX_MESSAGE_CHARS}`;
   }
 
-  function openChat(focusInput = false, persist = true) {
-      state.open = true;
-      state.userClosed = false;
-      launch.style.display = 'none';
-      panel.style.display = 'block';
-      if (focusInput) text.focus();
-      if (persist) { try { localStorage.removeItem(CHAT_MINIMIZED_STORAGE); } catch (e) { /* keep chat usable when storage is disabled */ } }
-      start();
-      // Only explicit reopen retries; default-open must not consume an attempt on entry.
-      if (persist) retryArrival();
-    }
-
-    function closeChat(persist = true) {
-      state.open = false;
-      state.userClosed = true;
-      panel.style.display = 'none';
-      launch.style.display = 'block';
-      if (persist) { try { localStorage.setItem(CHAT_MINIMIZED_STORAGE, '1'); } catch (e) { /* session can still minimise */ } }
-    }
-
-  // Layout: a transparent, left-aligned bar docked to the bottom-left corner. It is
+  // Layout: a transparent, left-aligned chat docked to the bottom-left corner. It is
   // left-anchored at `bottom: 10px` so it never reaches across to the bottom-right
   // music note + sector readout or up to the top-right minimap; the
   // message area stays pointer-transparent, so the game canvas keeps every pointer
-  // event except the chat's own controls. placeChat() only manages the step-aside:
-  // the bar hides (the arek-chat-away class) while a dialogue box, the big M-map,
-  // the shop minigame or the name prompt is on screen, and returns by itself without
-  // losing the draft input or the loaded messages.
+  // event except the chat's own controls. The chat stays visible during play, including
+  // dialogues, map, and shop. It is hidden only on title/name-selection screens.
   function placeChat() {
-    const g = window.__game, typing = document.activeElement === text;
-    const busy = !!(g && (g.talk || g.showMap || document.querySelector('.shop-game, #shop-game')
-                           || document.querySelector('#player-name-input')));
-    root.classList.toggle('arek-chat-away', busy && !typing);
+    const g = window.__game;
+    const booting = !!(window.__arkBoot && window.__arkBoot.stage !== 'ready');   // logo / black / error overlay still covers the page
+    const notPlaying = !g || booting || g.scene === 'title' || !!document.querySelector('#player-name-input');
+    root.classList.toggle('arek-chat-away', notPlaying);
+    if (!notPlaying) start();
   }
   addEventListener('resize', placeChat);
   addEventListener('ark-player-arrived', event => {
     queueArrival(event.detail && event.detail.name);
     publishArrival();
   });
-  addEventListener('online', retryArrival);
+  addEventListener('online', () => {
+    if (!state.started) { state.connectionAttempted = false; start(); }
+    retryArrival();
+  });
   setInterval(placeChat, 200);
   placeChat();
-  launch.addEventListener('click', () => openChat(true));
-  close.addEventListener('click', () => closeChat());
+
   text.addEventListener('input', updateCount);
   text.addEventListener('keydown', event => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -573,24 +524,9 @@
     messageCount: () => state.events.size,
     isConnected: () => state.connected,
     unicodeLength,
-    open: openChat,
-    close: closeChat,
+
     // Test-only: push a fully-formed kind-42 event through the same validation/duplicate
     // path as a relay event (tests abort wss:// and the CDN, so nothing else can feed it).
     injectEvent: addEvent,
   });
-  try {
-      if (localStorage.getItem(CHAT_MINIMIZED_STORAGE) === '1') closeChat(false);
-      // Open by default only once the play scene is running: on the title screen
-      // the panel would sit over the character selector / name prompt (touch
-      // layouts measure it right on top of the buttons). maybeOpenWhenPlay()
-      // below re-checks every placeChat tick, so fresh visitors still get the
-      // overlay automatically the moment the game starts.
-    } catch (e) { /* keep chat usable when storage is disabled */ }
-    function maybeOpenWhenPlay() {
-      if (state.open || state.userClosed) return;
-      const g = window.__game;
-      if (g && g.scene === 'play') openChat(false, false);
-    }
-    setInterval(maybeOpenWhenPlay, 200);
   })();

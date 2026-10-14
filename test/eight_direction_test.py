@@ -28,9 +28,11 @@ with sync_playwright() as p:
     # read the facing while both keys are still held: under a loaded full-suite run a fixed 180 ms wait
     # sometimes elapsed before the first game frame processed the input
     page.wait_for_function("__game.P.dir === 'down_right'", timeout=3000)
+    assert page.evaluate("__game.P.dir") == "down_right"
+    # Releasing keys is not atomic: a frame after the first keyup may correctly face down.
+    # Assert the diagonal while both keys are held, not after two independent release calls.
     page.keyboard.up("ArrowRight")
     page.keyboard.up("ArrowDown")
-    assert page.evaluate("__game.P.dir") == "down_right"
     assert not errors, errors
     browser.close()
     print("8-direction Arek passed: asset metadata, diagonal input, runtime sheet")

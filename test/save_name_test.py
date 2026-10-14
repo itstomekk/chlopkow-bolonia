@@ -13,12 +13,16 @@ URL = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('ARK_URL', 'http://lo
 KEY = 'arek-chlopkow-save-v1'
 
 
-def run(page, payload):
+def run(browser, payload):
+    # Seed before game startup in an independent context. A prior world's pagehide
+    # autosave must not overwrite the fixture that the next scenario wants to load.
+    page = browser.new_page(viewport={'width': 1280, 'height': 720})
+    page.add_init_script('localStorage.setItem(' + json.dumps(KEY) + ', ' + json.dumps(json.dumps(payload)) + ');')
     page.goto(URL + '?music=0')
-    page.evaluate('([k, v]) => localStorage.setItem(k, v)', [KEY, json.dumps(payload)])
-    page.reload()
     page.wait_for_function('window.__game && window.__game.Q', timeout=60000)
-    return page.evaluate('() => ({ name: window.__game.Q.playerName, apples: window.__game.Q.apples.length, x: window.__game.P.x })')
+    result = page.evaluate('() => ({ name: window.__game.Q.playerName, apples: window.__game.Q.apples.length, x: window.__game.P.x })')
+    page.close()
+    return result
 
 
 with sync_playwright() as p:
@@ -32,14 +36,14 @@ with sync_playwright() as p:
     q = page.evaluate('() => JSON.parse(JSON.stringify(window.__game.Q))')
     q.update(playerName='Arek', apples=[0, 1, 2])
     ok = True
-    r = run(page, {'v': 2, 'Q': q, 'x': 1200, 'y': 4050})
+    r = run(b, {'v': 2, 'Q': q, 'x': 1200, 'y': 4050})
     print('v2 Arek:', r)
     ok &= r['name'] == 'Arek' and r['apples'] == 3 and r['x'] == 1200
     q['playerName'] = 'AREK'
-    r = run(page, {'Q': q, 'x': 1210, 'y': 4050})
+    r = run(b, {'Q': q, 'x': 1210, 'y': 4050})
     print('v1 AREK:', r)
     ok &= r['name'] == '' and r['apples'] == 3 and r['x'] == 1210
-    r = run(page, {'v': 2, 'Q': q, 'x': 'bad', 'y': None})
+    r = run(b, {'v': 2, 'Q': q, 'x': 'bad', 'y': None})
     print('bad coords:', r)
     ok &= isinstance(r['x'], (int, float))
     b.close()

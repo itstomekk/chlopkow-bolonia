@@ -42,7 +42,7 @@ export class SimplePool {
 def setup(page):
     page.add_init_script("const s=JSON.parse(localStorage.getItem('__arrivalHarness')||'{}'); window.__nostrHarness = {nextId:s.nextId||0, failures:0, calls:s.calls||[], accepted:s.accepted||[], history:s.history||[], subscriptions:[]};")
     page.route("https://esm.sh/nostr-tools@2.25.2?bundle&target=es2020", lambda route: route.fulfill(status=200, content_type="application/javascript", body=STUB))
-    page.route("wss://**", lambda route: route.abort())
+    page.route_web_socket("wss://**", lambda socket: socket.close())
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(URL + "?debug=1&music=0")
@@ -68,9 +68,9 @@ with sync_playwright() as p:
     page.keyboard.press("KeyN")
     disclosure = page.locator("#player-name-disclosure")
     assert disclosure.is_visible() and "public" in disclosure.inner_text().lower() and "nostr" in disclosure.inner_text().lower()
-    page.locator("#player-name-input").fill("   ")
-    page.locator("#player-name-submit").click()
-    assert page.locator("#player-name-input").is_visible(), "blank name must not enter play"
+    # Blank now means the character default (covered by inline_character_name_test).
+    # Merely choosing/editing must still never publish before Start is submitted.
+    assert page.locator("#player-name-input").get_attribute('placeholder') == 'Arek'
     assert page.evaluate("__nostrHarness.calls.length") == 0
     page.locator("#player-name-input").fill("  Żaneta <img>  ")
     page.locator("#player-name-submit").click()
@@ -91,9 +91,7 @@ with sync_playwright() as p:
     arrival_color = page.locator(".arek-chat-arrival").evaluate("e => getComputedStyle(e).color")
     assert arrival_color not in ("rgb(255, 247, 214)", "rgba(0, 0, 0, 0)"), arrival_color
 
-    # Reopening and dialogue/map visibility do not publish again; arrival and regular chat coexist.
-    page.locator("#arek-chat-close").click()
-    page.evaluate("__arekGlobalChat.open()")
+    # Always-visible chat renders arrival and regular messages together without republishing.
     page.evaluate("""() => __arekGlobalChat.injectEvent({kind:42,id:'f'.repeat(64),created_at:Math.floor(Date.now()/1000),content:'Zwykła wiadomość',pubkey:'a'.repeat(64),tags:[['e',__arekGlobalChat.channelId,'','root'],['name','Sąsiad']]})""")
     page.evaluate("""() => __arekGlobalChat.injectEvent({kind:42,id:'2'.repeat(64),created_at:Math.floor(Date.now()/1000),content:'Do Chłopkowa zagląda Mira.',pubkey:'a'.repeat(64),tags:[['e',__arekGlobalChat.channelId,'','root'],['name','Mira']]})""")
     page.evaluate("""() => __arekGlobalChat.injectEvent({kind:42,id:'3'.repeat(64),created_at:Math.floor(Date.now()/1000),content:'invalid arrival',pubkey:'a'.repeat(64),tags:[['e',__arekGlobalChat.channelId,'','root'],['arrival','v1'],['name','No session']]})""")
@@ -151,7 +149,7 @@ with sync_playwright() as p:
     assert legacy.evaluate("__game.Q.apples.length") == 2, "name continuation must keep existing progress"
     assert not legacy_errors, legacy_errors
 
-    # A failed first write stays out of history; minimized UI remains closed, then online retries the same signature.
+    # A failed first write stays out of history; online retries the same signature.
     offline = browser.new_page(viewport={"width": 1280, "height": 720})
     offline_errors = setup(offline)
     offline.evaluate("localStorage.setItem('arek-chlopkowie-chat-minimized-v1','1')")
@@ -163,10 +161,9 @@ with sync_playwright() as p:
     offline.wait_for_timeout(30)
     assert offline.evaluate("__nostrHarness.accepted.length") == 0
     assert offline.evaluate("__arekGlobalChat.messageCount()") == 0, "failed arrival must not appear as persisted"
-    assert not offline.locator("#arek-chat-panel").is_visible(), "arrival publishing must not reopen minimized chat"
-    offline.evaluate("__arekGlobalChat.open()")
+    assert offline.locator("#arek-chat-panel").is_visible(), "legacy minimize preference must be ignored"
+    offline.evaluate("dispatchEvent(new Event('online'))")
     offline.wait_for_function("__nostrHarness.accepted.length === 1")
-    offline.evaluate("__arekGlobalChat.close()")
     calls = offline.evaluate("__nostrHarness.calls")
     assert len(calls) == 2 and calls[0] == calls[1], "retry must reuse the exact signed event"
     assert offline.evaluate("__arekGlobalChat.messageCount()") == 1
@@ -188,6 +185,21 @@ with sync_playwright() as p:
     assert len({event['id'] for event in cap_calls}) == 1, "all bounded retries must reuse one signed event"
     assert capped.evaluate("__arekGlobalChat.messageCount()") == 0
     assert not capped_errors, capped_errors
+
+    sender = browser.new_page(viewport={"width": 1280, "height": 720})
+    sender_errors = setup(sender)
+    submit_name(sender, "Sender")
+    sender.wait_for_function("__nostrHarness.accepted.length === 1")
+    sender.locator("#arek-chat-text").fill("Wiadomość testowa")
+    sender.locator("#arek-chat-form").evaluate("form => form.requestSubmit()")
+    sender.wait_for_function("__nostrHarness.accepted.length === 2")
+    sent = sender.evaluate("__nostrHarness.accepted[1]")
+    assert sent["content"] == "Wiadomość testowa"
+    assert next(tag[1] for tag in sent["tags"] if tag[0] == "name") == "Sender"
+    sender.wait_for_function("[...document.querySelectorAll('.arek-chat-regular')].some(e => e.textContent.includes('Wiadomość testowa'))")
+    assert sender.locator("#arek-chat-panel").is_visible()
+    assert not sender_errors, sender_errors
+    sender.close()
     capped.close()
     legacy.close()
     offline.close()
