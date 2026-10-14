@@ -542,7 +542,7 @@ window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_T
     const pick = () => {
       const sc = A.scene;
       if (sc === 'title') return 'title';   // the printed Polka Dziadek is the entrance screen only
-      if (A.room && A.room.kind === 'crypt') return 'krypta';
+      if (A.room && (A.room.kind === 'crypt' || A.room.kind === 'tunnel')) return 'krypta';   // the crypt and the tunnel below it share one song
       if (A.room && A.room.soltys) return 'choral';
       if (A.room && A.room.kind === 'shop') return 'mazurka';
       if (sc === 'end' || nearCemetery()) return 'nokturn';

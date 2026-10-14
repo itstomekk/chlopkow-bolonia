@@ -8,7 +8,12 @@
         that rolls the round stone door aside and reveals the hidden final chamber.
    Rooms use the same shape as church.js: { w, h, top, ground, obj, objects, solid, pois, candles, spawn, exit }.
    Extras used by game.js: lights (flickering additive pools), vignette, kind:'crypt'.
-   Save state (all additive, no SAVE_VERSION bump): Q.cryptHint, Q.cryptNotes[], Q.cryptOpen, Q.cryptSeen, Q.cryptDoor, Q.cryptReward. */
+   The hidden chamber also hides a loose brick (POI 'cryptBrick', slightly redder than the gold ones) in its east wall: touching it slides
+   a wall block up into the lintel and reveals a short passage whose dark mouth leads into the tunnel to the cemetery. The tunnel itself is
+   NOT here: passages.js lazy-loads it (docs/data/passages.json, 'church-cemetery'). This file only draws the crypt side of the door and
+   publishes room.openPassages['church-cemetery'] so the passage engine knows the mouth is live.
+   Save state (all additive, no SAVE_VERSION bump): Q.cryptHint, Q.cryptNotes[], Q.cryptOpen, Q.cryptSeen, Q.cryptDoor, Q.cryptReward,
+   Q.tunnelOpen (the loose brick was pressed: the tunnel exists), Q.tunnelSeen (the tunnel was entered once). */
 'use strict';
 (() => {
   const NUM = { candles: 4, pew: 7, glass: 2, altar: 3 };                       // what each church clue says
@@ -20,8 +25,9 @@
     CODE, ORDER, NUM, RIDDLE,
     CLUE_KEYS: Object.keys(NUM),
     sanitize(Q) {   // old saves lack these fields; bad ones are dropped, nothing else is touched
-      for (const k of ['cryptHint', 'cryptOpen', 'cryptSeen', 'cryptDoor', 'cryptReward']) Q[k] = !!Q[k];
+      for (const k of ['cryptHint', 'cryptOpen', 'cryptSeen', 'cryptDoor', 'cryptReward', 'tunnelOpen', 'tunnelSeen']) Q[k] = !!Q[k];
       Q.cryptNotes = Array.isArray(Q.cryptNotes) ? Q.cryptNotes.filter((k, i, a) => k in NUM && a.indexOf(k) === i) : [];
+      if (Q.tunnelOpen) Q.cryptDoor = true;   // the brick sits in the hidden chamber, so the stone door must be open
       if (Q.cryptDoor) Q.cryptOpen = true;
       return Q;
     },
@@ -191,6 +197,39 @@
       lights.push({ x: 160, y: 114, r: 104, a: .26, c: '255,205,120' });
       openRect(100, 76, 120, 84); openRect(144, 156, 32, 46);
       pois.push({ key: 'cryptMap', x: 126, y: 94, r: 24 }, { key: 'cryptBook', x: 160, y: 138, r: 24 });
+      // the loose brick in the east wall: redder than its gold neighbours, with a few crumbs under it
+      R(g, 221, 118, 6, 5, '#8c5f3e'); R(g, 221, 118, 6, 1, '#bd8d5f'); R(g, 221, 122, 6, 1, '#4a301c'); R(g, 222, 124, 3, 1, '#3d3020'); dot(g, 225, 126, '#5a4a2c');
+      pois.push({ key: 'cryptBrick', x: 213, y: 121, r: 20 });
+      if (opts.tunnel) openTunnel(false);
+    };
+
+    /* ---------- the secret passage behind the east wall (opens from the loose brick; the tunnel itself is lazy-loaded) ---------- */
+    const MOUTH = { x0: 276, x1: 296, y0: 108, y1: 136 };   // keep in sync with ends.a.outer.mouth in docs/data/passages.json
+    const openPassages = {};
+    let tunnelOpened = false, slide = null, piece = null, floorCache = null;
+    const drawCorridor = () => {
+      bricks(g, 228, 88, 68, 20, BRG); R(g, 228, 84, 68, 4, '#8a7447'); R(g, 228, 104, 68, 4, 'rgba(0,0,0,.4)');    // north wall face
+      bricks(g, 228, 136, 68, 8, BR); R(g, 228, 136, 68, 2, '#6a6359');                                               // low south wall
+      bricks(g, 296, 84, 8, 60, BR);                                                                                   // the end of the passage
+      flags(220, 108, 76, 28, false); R(g, 220, 108, 76, 5, 'rgba(0,0,0,.3)');
+      for (let k = 0; k < 6; k++) R(g, 290 + k, 108, 1, 28, `rgba(5,4,3,${.12 + k * .13})`);                         // the floor falls into the dark
+      R(g, 286, 104, 10, 4, '#2a2622'); R(g, 288, 108, 8, 28, 'rgba(8,7,5,.72)'); R(g, 284, 104, 2, 36, '#4a443d');   // arch stones and the black mouth
+      for (const x of [244, 262]) R(g, x, 90, 4, 14, '#2b2520');                                                       // soot above the sconces
+      torch(252, 112, 252, false); lights.push({ x: 262, y: 122, r: 46, a: .16, c: '255,168,70' });
+    };
+    function openTunnel(animate, done) {
+      if (tunnelOpened) return; tunnelOpened = true;
+      piece = document.createElement('canvas'); piece.width = 8; piece.height = 28; piece.getContext('2d').drawImage(ground, 220, 108, 8, 28, 0, 0, 8, 28);
+      drawCorridor();
+      floorCache = document.createElement('canvas'); floorCache.width = 8; floorCache.height = 28; floorCache.getContext('2d').drawImage(ground, 220, 108, 8, 28, 0, 0, 8, 28);
+      const finish = () => { slide = null; R(g, 220, 108, 8, 28, 'rgba(0,0,0,0)'); g.clearRect(220, 108, 8, 28); g.drawImage(floorCache, 220, 108); openRect(220, 108, 76, 28); openPassages['church-cemetery'] = true; if (done) done(); };
+      if (animate) { slide = { t: 0, finish }; g.drawImage(piece, 220, 108); } else finish();
+    }
+    const tick = dt => {   // the wall block slides up into the lintel (0.6 s), then the walkable floor appears
+      if (!slide) return;
+      slide.t += dt; const k = Math.min(1, slide.t / .6), e = k * k * (3 - 2 * k), vis = Math.round(28 * (1 - e));
+      g.clearRect(220, 108, 8, 28); g.drawImage(floorCache, 220, 108); if (vis > 0) g.drawImage(piece, 0, 28 - vis, 8, vis, 220, 108, 8, vis);
+      if (k >= 1) slide.finish();
     };
     const openDoor = () => {
       if (doorOpen) return; doorOpen = true;
@@ -230,8 +269,8 @@
     if (opts.door) openDoor(); else for (const k of ORDER) drawSym(k, false);
     return {
       w: W, h: H, top: 0, ground, obj, objects, solid, pois, candles, lights, vignette: true, kind: 'crypt',
-      spawn: { x: 160, y: 466 }, exit: { x0: 140, x1: 180, y: 497 },
-      seq: 0, get doorOpen() { return doorOpen; },
+      spawn: { x: 160, y: 466 }, exit: { x0: 140, x1: 180, y: 497 }, rid: 'crypt',
+      seq: 0, get doorOpen() { return doorOpen; }, get tunnelOpened() { return tunnelOpened; }, openPassages, mouth: MOUTH, openTunnel, tick,
       setLit: (key, on) => drawSym(key, on), openDoor,
       resetSymbols() { this.seq = 0; for (const k of ORDER) drawSym(k, false); },
     };
@@ -269,6 +308,16 @@
       return true;
     }
     if (poi === 'cryptDoor') { say('arek', Q.cryptDoor ? T.cryptDoorOpened : T.cryptDoorShut); return true; }
+    if (poi === 'cryptBrick') {   // the loose brick: slides the wall open and starts the lazy-load of the tunnel
+      if (room.tunnelOpened) { say('arek', T.tunnelBrickAgain); return true; }
+      say('arek', T.tunnelBrick, () => {
+        Q.tunnelOpen = true; save(); popToast(T.tunnelClick);
+        if (window.PASSAGES) window.PASSAGES.preload('church-cemetery');
+        if (window.ARK && window.ARK.burst) window.ARK.burst(224, 122, ['#8a7447', '#5d4f33', '#3d3020'], 14);
+        room.openTunnel(true, () => say('arek', T.tunnelWallOpen, () => popToast(T.tunnelToast)));
+      });
+      return true;
+    }
     if (poi === 'cryptBook') {
       if (Q.cryptReward) { say('arek', T.cryptBookAgain); return true; }
       say('arek', T.cryptBook, () => { Q.cryptReward = true; save(); popToast(T.cryptFound); if (api.celebrate) api.celebrate(); });
@@ -326,8 +375,8 @@
       ctx.fillStyle = '#1d1713'; ctx.fillRect(px, py, pw, ph);
       ctx.strokeStyle = '#8a6a2a'; ctx.lineWidth = Math.max(2, U * .45); ctx.strokeRect(px + U * .4, py + U * .4, pw - U * .8, ph - U * .8);
       ctx.strokeStyle = '#4a3a1a'; ctx.lineWidth = Math.max(1, U * .2); ctx.strokeRect(px + U * 1.2, py + U * 1.2, pw - U * 2.4, ph - U * 2.4);
-      ctx.textAlign = 'center'; ctx.font = `${U * 2.5}px Silkscreen`; ctx.fillStyle = '#ffd21f'; ctx.fillText(T.cryptPuzzleTitle, W / 2, py + U * 4);
-      ctx.font = `${U * 1.45}px Silkscreen`; ctx.fillStyle = '#c9b27a';
+      ctx.textAlign = 'center'; ctx.font = `${U * 2.5}px PixelifySans`; ctx.fillStyle = '#ffd21f'; ctx.fillText(T.cryptPuzzleTitle, W / 2, py + U * 4);
+      ctx.font = `${U * 1.45}px PixelifySans`; ctx.fillStyle = '#c9b27a';
       A.wrapText(T.cryptRiddle.toUpperCase(), pw - U * 8).slice(0, 3).forEach((l, i) => ctx.fillText(l, W / 2, py + U * 8 + i * U * 2.1));
       // the four rings
       const cw = U * 8.4, gap = U * 3.2, rh = U * 11, total = cw * 4 + gap * 3, rx0 = (W - total) / 2, ry = py + U * 16.5;
@@ -341,9 +390,9 @@
         ctx.fillStyle = PZ.bad > 0 ? '#9a4a3a' : '#a98234'; ctx.fillRect(xs, ry, cw, rh);
         ctx.fillStyle = PZ.bad > 0 ? '#c86a58' : '#d8b04a'; ctx.fillRect(xs, ry + U * .6, cw, U * .9);
         ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(xs, ry + rh - U * 1.4, cw, U * 1.4);
-        ctx.textAlign = 'center'; ctx.font = `${U * 2.6}px Silkscreen`; ctx.fillStyle = '#8a6a2a';
+        ctx.textAlign = 'center'; ctx.font = `${U * 2.6}px PixelifySans`; ctx.fillStyle = '#8a6a2a';
         ctx.fillText(String((PZ.d[i] + 1) % 10), xs + cw / 2, ry - U * 1.7); ctx.fillText(String((PZ.d[i] + 9) % 10), xs + cw / 2, ry + rh + U * 1.7);
-        ctx.font = `${U * 6}px Silkscreen`; ctx.fillStyle = '#2b1d0a'; ctx.fillText(String(PZ.d[i]), xs + cw / 2 + U * .3, ry + rh / 2 + U * .3);
+        ctx.font = `${U * 6}px PixelifySans`; ctx.fillStyle = '#2b1d0a'; ctx.fillText(String(PZ.d[i]), xs + cw / 2 + U * .3, ry + rh / 2 + U * .3);
         ctx.fillStyle = '#fff1c0'; ctx.fillText(String(PZ.d[i]), xs + cw / 2, ry + rh / 2);
         if (sel) {
           ctx.strokeStyle = Math.floor(PZ.t * 3) % 2 ? '#ffd21f' : '#fff1c0'; ctx.lineWidth = Math.max(2, U * .4); ctx.strokeRect(xs - U * .3, ry - U * 3.5, cw + U * .6, rh + U * 7);
@@ -354,18 +403,18 @@
       }
       // notebook
       const ny = ry + rh + U * 9.5, notes = Q().cryptNotes || [];
-      ctx.textAlign = 'left'; ctx.font = `${U * 1.45}px Silkscreen`; ctx.fillStyle = '#ffd21f'; ctx.fillText(T.cryptNotesTitle, px + U * 4, ny);
+      ctx.textAlign = 'left'; ctx.font = `${U * 1.45}px PixelifySans`; ctx.fillStyle = '#ffd21f'; ctx.fillText(T.cryptNotesTitle, px + U * 4, ny);
       ctx.fillStyle = '#f5f0e0';
       const txt = notes.length ? notes.map(k => `${T.cryptNoteNames[k]} ${NUM[k]}`).join('  ·  ') : T.cryptNotesEmpty;
       A.wrapText(txt, pw - U * 8).slice(0, 2).forEach((l, i) => ctx.fillText(l, px + U * 4, ny + U * 2.4 + i * U * 2.1));
       // buttons + help
       const bw = U * 15, bh = U * 4.2, bx = px + pw - bw - U * 4, by = py + ph - bh - U * 3.4;
       PZ.ok = [bx, by, bw, bh]; ctx.fillStyle = '#6b5120'; ctx.fillRect(bx, by, bw, bh); ctx.fillStyle = '#a98234'; ctx.fillRect(bx, by, bw, U * .6);
-      ctx.textAlign = 'center'; ctx.font = `${U * 1.8}px Silkscreen`; ctx.fillStyle = '#fff1c0'; ctx.fillText(T.cryptTry, bx + bw / 2, by + bh / 2 + U * .1);
+      ctx.textAlign = 'center'; ctx.font = `${U * 1.8}px PixelifySans`; ctx.fillStyle = '#fff1c0'; ctx.fillText(T.cryptTry, bx + bw / 2, by + bh / 2 + U * .1);
       const xs = U * 3.6; PZ.close = [px + pw - xs - U * 1.6, py + U * 1.6, xs, xs];
-      ctx.fillStyle = '#4a3a1a'; ctx.fillRect(...PZ.close); ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2}px Silkscreen`; ctx.fillText('X', PZ.close[0] + xs / 2, PZ.close[1] + xs / 2);
-      ctx.textAlign = 'left'; ctx.font = `${U * 1.2}px Silkscreen`; ctx.fillStyle = '#8f8468'; ctx.fillText(T.cryptHelp, px + U * 4, py + ph - U * 2.4);
-      if (PZ.bad > 0) { ctx.textAlign = 'center'; ctx.font = `${U * 2}px Silkscreen`; ctx.fillStyle = '#ff6a58'; ctx.fillText(T.cryptWrong, W / 2, ry + rh + U * 7.2 - U * 0); }
+      ctx.fillStyle = '#4a3a1a'; ctx.fillRect(...PZ.close); ctx.fillStyle = '#f5f0e0'; ctx.font = `${U * 2}px PixelifySans`; ctx.fillText('X', PZ.close[0] + xs / 2, PZ.close[1] + xs / 2);
+      ctx.textAlign = 'left'; ctx.font = `${U * 1.2}px PixelifySans`; ctx.fillStyle = '#8f8468'; ctx.fillText(T.cryptHelp, px + U * 4, py + ph - U * 2.4);
+      if (PZ.bad > 0) { ctx.textAlign = 'center'; ctx.font = `${U * 2}px PixelifySans`; ctx.fillStyle = '#ff6a58'; ctx.fillText(T.cryptWrong, W / 2, ry + rh + U * 7.2 - U * 0); }
       ctx.restore();
     });
   });

@@ -97,6 +97,10 @@
       cryptMap: ['Mapa Chłopkowa wyryta w kamieniu: rzeka, wiatrak, kościół. Przy kościele mały znak X.', 'Czyli stoimy dokładnie tutaj. Arek jest pod wrażeniem. I trochę urażony, że nikt nie dał mu tej mapy wcześniej.'],
       cryptBook: ['Na kamiennym pulpicie leży zapieczętowana księga. Na okładce róża, krzyż i krąg.', 'Pierwsza strona: „Kto to czyta, ten nie jest już gościem w Chłopkowie. Strzeż tego miejsca i nie mów, gdzie jest wejście. Konfesjonał słucha, ale nie powtarza.”', 'Arek zamyka księgę. Niektóre tajemnice lepiej zostawić w ciemności. Ale ta była przednia.'],
       cryptBookAgain: ['Księga czeka na pulpicie. Konfesjonał słucha, ale nie powtarza.'], cryptFound: 'ZNALEZIONO: KSIĘGA KRYPTY',
+      tunnelBrick: ['Jedna cegła w ścianie jest jaśniejsza od reszty i lekko się chwieje.', 'Arek naciska ją kciukiem. Coś w murze zaczyna mruczeć jak stary traktor.'],
+      tunnelWallOpen: ['Ściana odsuwa się w bok. Za nią wąski korytarz i zimny przeciąg.', 'Legenda mówi, że krypta ma drugie wyjście. Tylko nikt nie mówi dokąd.'], tunnelBrickAgain: ['Cegła jest wciśnięta, a ściana stoi otwarta. Z korytarza ciągnie chłodem.'],
+      tunnelClick: 'KLIK!', tunnelToast: 'TAJNE PRZEJŚCIE', tunnelLabel: 'TUNEL', passageHint: 'TAJNE PRZEJŚCIE', passageFail: 'PRZEJŚCIE ZASYPANE. SPRÓBUJ JESZCZE RAZ.', passageLocked: 'NA RAZIE ZAMKNIĘTE',
+      tunnelSlab: ['Jedna płyta przy grobach ma świeże pęknięcie. Jakby ktoś często ją podnosił.', 'Pod spodem schody w dół i zapach wilgotnej cegły. Arek schodzi.'],
       churchIn: ['Wnętrze kościoła. Chłodno, cicho, pachnie woskiem i kwiatami.'],
       altar: ['Ołtarz w białym obrusie z koronką. Arek niczego nie dotyka. Tym razem.'],
       mary: ['Matka Boża w marmurowej niszy. Ktoś zostawił świeże kwiaty i wieniec z kłosów.'],
@@ -191,6 +195,10 @@
       cryptMap: ['A map of Chłopków carved in stone: river, windmill, church. By the church, a small X.', 'So we are standing right here. Arek is impressed. And a little offended nobody gave him this map earlier.'],
       cryptBook: ['A sealed book lies on the stone lectern. On the cover: a rose, a cross and a circle.', 'First page: "Whoever reads this is no longer a guest in Chłopków. Guard this place and do not tell where the entrance is. The confessional listens, but does not repeat."', 'Arek closes the book. Some secrets are better left in the dark. But this one was a good one.'],
       cryptBookAgain: ['The book waits on the lectern. The confessional listens, but does not repeat.'], cryptFound: 'FOUND: THE CRYPT BOOK',
+      tunnelBrick: ['One brick in the wall is lighter than the rest and wobbles a little.', 'Arek presses it with his thumb. Something in the wall starts to hum like an old tractor.'],
+      tunnelWallOpen: ['The wall slides aside. Behind it, a narrow passage and a cold draught.', 'Legend says the crypt has a second exit. Nobody says where it leads.'], tunnelBrickAgain: ['The brick is pushed in and the wall stands open. A chill drifts out of the passage.'],
+      tunnelClick: 'CLICK!', tunnelToast: 'SECRET PASSAGE', tunnelLabel: 'TUNNEL', passageHint: 'SECRET PASSAGE', passageFail: 'THE PASSAGE IS BLOCKED. TRY AGAIN.', passageLocked: 'CLOSED FOR NOW',
+      tunnelSlab: ['One slab among the graves has a fresh crack. As if someone lifted it often.', 'Underneath, stairs going down and the smell of damp brick. Arek goes down.'],
       churchIn: ['Inside the church. Cool, quiet, it smells of wax and flowers.'],
       altar: ['The altar in its white lace cloth. Arek touches nothing. This time.'],
       mary: ['Our Lady in a marble niche. Someone left fresh flowers and a wreath of wheat.'],
@@ -243,7 +251,8 @@
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
   let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, MEMORY_ART = [], FOREST_STATS = null;
-  let ROOM = null, OUT = null, PARENT = null, trans = null, shopGame = null;   // OUT: the village to return to (always the village, so save() is right at any depth); PARENT: the church while in the crypt
+  let ROOM = null, OUT = null, trans = null, shopGame = null;   // OUT: the village to return to (always the village, so save() is right at any depth)
+  const STACK = [];   // room stack: frames of the rooms ABOVE the current one (church -> crypt -> tunnel gives [church, crypt] while in the tunnel); leaveRoom pops one level
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
@@ -260,7 +269,7 @@
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
-  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], trashSpots: [], trash: [], cap: false, orange: false, playTime: 0, cryptHint: false, cryptNotes: [], cryptOpen: false, cryptSeen: false, cryptDoor: false, cryptReward: false });
+  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], trashSpots: [], trash: [], cap: false, orange: false, playTime: 0, cryptHint: false, cryptNotes: [], cryptOpen: false, cryptSeen: false, cryptDoor: false, cryptReward: false, tunnelOpen: false, tunnelSeen: false });
   function sanitizePlayerName(value) {
     return Array.from(String(value || '').normalize('NFC').replace(/[^\p{L}\p{N} _'-]/gu, '').replace(/\s+/g, ' ').trim()).slice(0, 20).join('');
   }
@@ -890,7 +899,7 @@
   function fade(fn) { if (!trans) trans = { t: 0, fn, done: false }; }
   function enterChurch() {
     fade(() => {
-      const c = window.buildChurch({ cryptOpen: !!Q.cryptOpen });
+      const c = window.buildChurch({ cryptOpen: !!Q.cryptOpen }); c.rid = 'church';
       OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y, dog: { x: FRODO.x, y: FRODO.y } };
       ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
       GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
@@ -929,14 +938,26 @@
     game.element.addEventListener('keyup', e => e.stopPropagation());
     document.body.appendChild(game.element);
   }
-  /* The crypt hangs under the church: OUT stays the village (save() keeps writing the door), PARENT is the church to climb back to. */
+  /* ROOM STACK. OUT is always the village (save() writes its door coordinates at any depth). STACK holds the rooms above the
+     current one: church -> crypt -> tunnel gives [church, crypt] while in the tunnel. Rooms carry an id (room.rid) so the
+     passage engine (passages.js) can tell where it is. */
+  const roomMap = c => ({ w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn });
+  const frameOf = (c, x, y) => ({ ROOM: c, MAP: roomMap(c), GROUND: c.ground, OBJ: c.obj, SOLID: c.solid, x, y });
+  const frameHere = (x = P.x, y = P.y) => ({ ROOM, MAP, GROUND, OBJ, SOLID, x, y });
+  function installRoom(c) { ROOM = c; MAP = roomMap(c); GROUND = c.ground; OBJ = c.obj; SOLID = c.solid; }
+  function arriveAt(x, y, dir) { P.x = x; P.y = y; P.dir = dir || 'up'; P.air = false; P.z = 0; camX = P.x; camY = P.y; dust = []; clickTarget.active = false; trail.length = 0; placeFrodoNearArek(); }
+  const ROOM_BUILD = {
+    church: () => { const c = window.buildChurch({ cryptOpen: !!Q.cryptOpen }); c.rid = 'church'; return c; },
+    crypt: () => { const c = window.buildCrypt({ door: !!Q.cryptDoor, tunnel: !!Q.tunnelOpen }); c.rid = 'crypt'; return c; },
+  };
+  const ROOM_CHAIN = { church: ['church'], crypt: ['church', 'crypt'] };   // rooms to stack up, bottom first, to reach a room from the village
+  /* The crypt hangs under the church: OUT stays the village (save() keeps writing the door), the church is the top of STACK to climb back to. */
   function enterCrypt() {
     if (trans || !ROOM || ROOM.kind || !window.buildCrypt) return;   // only from inside the church
     fade(() => {
-      const c = window.buildCrypt({ door: !!Q.cryptDoor });
-      PARENT = { ROOM, MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y };
-      ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
-      GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
+      const c = ROOM_BUILD.crypt();
+      STACK.push(frameHere());
+      installRoom(c);
       P.x = c.spawn.x; P.y = c.spawn.y; P.dir = 'up'; camX = P.x; camY = P.y; dust = []; clickTarget.active = false;
       placeFrodoNearArek();
       if (!Q.cryptSeen) { Q.cryptSeen = true; say('arek', T.cryptIn); }
@@ -944,20 +965,62 @@
     });
   }
   const cryptApi = () => ({ Q, say, popToast, save, T, celebrate, room: ROOM, enter: enterCrypt });
+  // Back out to the village (OUT) at (x, y); clears the whole stack. Used by leaveRoom and by passages that surface elsewhere.
+  function surfaceTo(x, y, dir = 'down', dogWaits = true) {
+    STACK.length = 0;
+    ({ MAP, GROUND, OBJ, SOLID } = OUT); P.x = x; P.y = y; P.dir = dir; P.air = false; P.z = 0;
+    ROOM = null; unstick(); trail.length = 0;
+    if (dogWaits && OUT.dog && !blocked(OUT.dog.x, OUT.dog.y)) { FRODO.x = OUT.dog.x; FRODO.y = OUT.dog.y; } else placeFrodoNearArek();   // he waited by the door
+    camX = P.x; camY = P.y; dust = []; clickTarget.active = false; save();
+  }
   function leaveRoom() {
     fade(() => {
-      if (PARENT) {   // crypt -> back up into the church, at the confessional
-        const p = PARENT; PARENT = null;
+      if (STACK.length) {   // crypt -> back up into the church, at the confessional
+        const p = STACK.pop();
         ({ MAP, GROUND, OBJ, SOLID } = p); ROOM = p.ROOM; P.x = p.x; P.y = p.y; P.dir = 'down'; clickTarget.active = false;
         unstick(); trail.length = 0; placeFrodoNearArek(); camX = P.x; camY = P.y; dust = []; save();
         return;
       }
-      ({ MAP, GROUND, OBJ, SOLID } = OUT); P.x = OUT.x; P.y = OUT.y + 6; P.dir = 'down';
-      ROOM = null; unstick(); trail.length = 0;
-      if (OUT.dog && !blocked(OUT.dog.x, OUT.dog.y)) { FRODO.x = OUT.dog.x; FRODO.y = OUT.dog.y; } else placeFrodoNearArek();   // he waited by the door
-      camX = P.x; camY = P.y; dust = []; save();
+      surfaceTo(OUT.x, OUT.y + 6);
     });
   }
+  /* Generic room-stack API for the passage engine. Every call fades and swaps at the black frame. */
+  const rooms = {
+    get id() { return ROOM ? (ROOM.rid || null) : null; },
+    get depth() { return STACK.length + (ROOM ? 1 : 0); },
+    get stackIds() { return STACK.map(f => f.ROOM.rid || null); },
+    get busy() { return !!trans; },
+    // Go deeper from the current room (or from the village): the current room is remembered (at `back`) and `c` is installed at `at`.
+    descend(c, at, back) {
+      if (trans) return false;
+      fade(() => {
+        if (ROOM) STACK.push(frameHere(back ? back.x : P.x, back ? back.y : P.y));
+        else OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y, dog: { x: FRODO.x, y: FRODO.y } };
+        installRoom(c); arriveAt(at.x, at.y, at.dir); save();
+      });
+      return true;
+    },
+    // Climb one level (the top of STACK) and stand at `at`; if the stack is empty and a room id is given, rebuild that room's whole chain
+    // (the player came into a deep room from the village and walks out the other way). OUT moves to the church door so a reload is sane.
+    ascend(roomId, at) {
+      if (trans) return false;
+      fade(() => {
+        if (STACK.length && STACK[STACK.length - 1].ROOM.rid === roomId) {
+          const p = STACK.pop(); ({ MAP, GROUND, OBJ, SOLID } = p); ROOM = p.ROOM; arriveAt(at ? at.x : p.x, at ? at.y : p.y, (at && at.dir) || 'down'); unstick(); save(); return;
+        }
+        const chain = ROOM_CHAIN[roomId]; if (!chain) return;
+        STACK.length = 0;
+        const built = chain.map(id => ROOM_BUILD[id]());
+        const ch = OUT.MAP.pois.find(p => p.key === 'church');
+        if (ch) { OUT.x = ch.x; OUT.y = ch.y + 40; OUT.dog = { x: ch.x + 14, y: ch.y + 50 }; }
+        built.slice(0, -1).forEach((c, i) => { const cf = c.pois.find(p => p.key === 'confession'); STACK.push(frameOf(c, cf ? cf.x : c.spawn.x, cf ? cf.y : c.spawn.y)); });
+        installRoom(built[built.length - 1]); arriveAt(at.x, at.y, at.dir || 'down'); unstick(); save();
+      });
+      return true;
+    },
+    // Come up to the village at (x, y): the whole stack is dropped.
+    surface(x, y, dir) { if (trans) return false; fade(() => surfaceTo(x, y, dir, false)); return true; },
+  };
   const npcsHere = () => ROOM ? (ROOM.soltys ? [{ id: 'soltys', x: ROOM.soltys.x, y: ROOM.soltys.y }] : []) : ITEMS.npcs;
 
   /* ---------- dialogue & quests ---------- */
@@ -1063,6 +1126,7 @@
     if (s.feat) { turnTo(s); s.feat.onInteract(); return; }
     if (s.poi === 'church') { if (!HOOKS.busy.some(f => f())) enterChurch(); return; }
     if (s.poi === 'shop') { if (!HOOKS.busy.some(f => f())) enterShop(); return; }
+    if (ROOM && ROOM.interact) { if (!ROOM.interact(s.poi, cryptApi())) say('arek', T[s.poi]); return; }   // lazy rooms (passages) bring their own POI logic
     if (ROOM && ROOM.kind === 'crypt') { if (!window.CRYPT.cryptInteract(s.poi, cryptApi())) say('arek', T[s.poi]); return; }
     if (ROOM && !ROOM.kind && window.CRYPT && window.CRYPT.churchInteract(s.poi, cryptApi())) return;   // confessional riddle + counting clues
     if (ROOM && ROOM.kind === 'shop') {
@@ -1269,6 +1333,7 @@
     if (scene !== 'play') return;
     Q.playTime += dt;
     updateWeatherSound(dt);
+    if (ROOM && ROOM.tick) ROOM.tick(dt);   // room animations (the crypt's sliding wall)
     if (shopGame) { P.moving = false; return; }
     if (talk) { talkT += dt; P.moving = false; return; }
     HOOKS.update.forEach(f => f(dt));
@@ -1311,7 +1376,7 @@
     }
     updateBales(dt);
     updateFrodo(dt);
-    if (ROOM) { const e = ROOM.exit; if (P.y > e.y && P.x > e.x0 && P.x < e.x1) leaveRoom(); return; }
+    if (ROOM) { const e = ROOM.exit; if (e && P.y > e.y && P.x > e.x0 && P.x < e.x1) leaveRoom(); return; }   // passage rooms have no plain exit: their mouths are handled by passages.js
     // pickups
     ITEMS.apples.forEach((a, i) => {
       if (Q.apples.includes(i) || Math.hypot(P.x - a.x, P.y - a.y) > 14) return;
@@ -1958,7 +2023,7 @@ function drawFrodo(sx, sy, s) {
     }
     if (scene === 'play' && ROOM) {   // room label instead of the village minimap
       ctx.font = `${U * 1.8}px PixelifySans`; ctx.textAlign = 'right';
-      const txt = `${ROOM.kind === 'shop' ? (LANG === 'pl' ? 'SKLEP' : 'SHOP') : ROOM.kind === 'crypt' ? T.cryptLabel : T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
+      const txt = `${ROOM.kind === 'shop' ? (LANG === 'pl' ? 'SKLEP' : 'SHOP') : ROOM.kind === 'crypt' ? T.cryptLabel : ROOM.labelKey ? (T[ROOM.labelKey] || '') : T.churchLabel} · ${ROOM.exit ? T.exitHint : (T.passageHint || '')}`, tw = ctx.measureText(txt).width + U * 2;
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(W - tw - U * 2, U * 2, tw, U * 4); ctx.fillStyle = '#ffd21f'; ctx.fillText(txt, W - U * 3, U * 4);
     }
     // minimap
@@ -2173,7 +2238,7 @@ function drawFrodo(sx, sy, s) {
       get saveVersion() { return SAVE_VERSION; }, get saveFrozen() { return saveFrozen; },
       get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; }, get room() { return ROOM; },
       pointer, clickTarget, mapCursor, copyMapCoordinates, get camera() { return lastCam; },
-      save, say, popToast, heroText, celebrate, blocked, unstick, enterCrypt, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
+      save, say, popToast, heroText, celebrate, blocked, unstick, enterCrypt, rooms, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
       terrainSpeed: (x, y) => TERRAIN_SPEED[terrainAt(x, y)] || 1,
       teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },
       burst(x, y, colors, n = 16) { for (let k = 0; k < n; k++) fx.push({ x, y, vx: (Math.random() - .5) * 120, vy: -Math.random() * 150, t: 0, c: colors[k % colors.length] }); },
@@ -2197,7 +2262,7 @@ function drawFrodo(sx, sy, s) {
       return { text, textW: tw, textLeft: rightX - tw, textRight: rightX, textBottom: ay + u, textTop: ay - u,
                boxLeft: qx, boxRight: qx + qw, bandBottom: qy + u * 5.2,
                mushroomRight: qx + u * 12.2 + u * 2 + mushW };
-    }, enterChurch, enterCrypt, get parentRoom() { return PARENT && PARENT.ROOM; }, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs, cap: CLOUD_GEOM.cap, radii: CLOUD_GEOM.radii }), cloudShadowAt: (x, y) => inCloudShadow(+x, +y), weatherSoundState: () => ({ inShadow: WEATHER.inShadow, playing: WEATHER.playing, kind: WEATHER.kind, gustCount: WEATHER.gustCount, rainCount: WEATHER.rainCount, windCount: WEATHER.windCount, hasAudio: !!(WEATHER.ac && WEATHER.master) }), forestTextureStats: () => FOREST_STATS };
+    }, enterChurch, enterCrypt, rooms, get parentRoom() { return STACK.length ? STACK[STACK.length - 1].ROOM : null; }, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs, cap: CLOUD_GEOM.cap, radii: CLOUD_GEOM.radii }), cloudShadowAt: (x, y) => inCloudShadow(+x, +y), weatherSoundState: () => ({ inShadow: WEATHER.inShadow, playing: WEATHER.playing, kind: WEATHER.kind, gustCount: WEATHER.gustCount, rainCount: WEATHER.rainCount, windCount: WEATHER.windCount, hasAudio: !!(WEATHER.ac && WEATHER.master) }), forestTextureStats: () => FOREST_STATS };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

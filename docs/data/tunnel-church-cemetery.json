@@ -1,0 +1,39 @@
+{
+  "id": "church-cemetery",
+  "_doc": "Layout + lore for js/underground-tunnel.js. 1 unit = 1 art pixel. Corridor runs north (cemetery slab) to south (crypt).",
+  "w": 256,
+  "h": 1536,
+  "corridor": { "x0": 100, "x1": 156, "y0": 56, "y1": 1496 },
+  "stairs": { "y0": 56, "y1": 104 },
+  "beams": [200, 440, 680, 920, 1160, 1400],
+  "torches": [[94, 132], [162, 330], [94, 560], [162, 830], [94, 1010], [162, 1230], [94, 1390]],
+  "puddles": [[112, 520, 28, 8], [130, 590, 22, 6], [106, 940, 32, 9], [128, 1290, 24, 7], [120, 260, 18, 5]],
+  "bones": [[108, 422]],
+  "rats": [[104, 882], [150, 1340]],
+  "niche": { "y0": 742, "y1": 790, "depth": 30 },
+  "sealed": { "y0": 1084, "y1": 1124, "depth": 30 },
+  "spawns": {
+    "crypt": { "x": 128, "y": 1452, "dir": "up" },
+    "cemetery": { "x": 128, "y": 140, "dir": "down" }
+  },
+  "portals": {
+    "crypt": { "x0": 100, "x1": 156, "y0": 1504, "y1": 1532 },
+    "cemetery": { "x0": 100, "x1": 156, "y0": 56, "y1": 68 }
+  },
+  "text": {
+    "pl": {
+      "tunnelFirst": ["Wąski tunel, który pachnie ziemią i starą świecą.", "Gdzieś daleko kapie woda. Arek idzie na palcach, a Frodo na czterech łapach, jak zwykle."],
+      "tunnelNiche": ["We wnęce stoi ogarek świecy, kamienna tabliczka i miseczka po czymś, co kiedyś było chlebem.", "Na tabliczce wyryto trzy znaki: różę, krzyż i krąg. Legenda mówi, że kto idzie tędy w nocy, zostawia tu okruch na szczęście."],
+      "tunnelSealed": ["Zamurowane. Na razie.", "Cegły są nowsze niż reszta, a na nich kredą róża, krzyż i krąg. Za murem coś cichutko szumi, jakby ktoś pilnował, żeby było na co czekać."],
+      "tunnelBones": ["Stare kości i zardzewiała łopata. Legenda mówi, że kopacz poszedł po obiad i już nie wrócił.", "Arek rozumie go doskonale. Nie dotyka niczego."],
+      "tunnelStairs": ["Kamienne schody w górę. Przez szparę nad głową wpada światło i zapach trawy."]
+    },
+    "en": {
+      "tunnelFirst": ["A narrow tunnel that smells of earth and an old candle.", "Water drips somewhere far away. Arek tiptoes, and Frodo walks on four paws, as usual."],
+      "tunnelNiche": ["In the niche there is a candle stub, a stone tablet and a little bowl that once held bread.", "Three signs are carved on the tablet: a rose, a cross and a circle. Legend says whoever walks here at night leaves a crumb for luck."],
+      "tunnelSealed": ["Bricked up. For now.", "These bricks are newer than the rest, with a rose, a cross and a circle in chalk. Something hums softly behind the wall, as if someone made sure there was something to wait for."],
+      "tunnelBones": ["Old bones and a rusty shovel. Legend says the digger went for lunch and never came back.", "Arek understands him perfectly. He touches nothing."],
+      "tunnelStairs": ["Stone steps going up. A crack overhead lets in light and the smell of grass."]
+    }
+  }
+}

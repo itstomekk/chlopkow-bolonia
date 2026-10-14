@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "_doc": "Registry of passages (docs/js/passages.js). One entry per underground/secret link between two places. See DEVELOPMENT.md, section 'Passages engine'. Only this small file is fetched at startup; `module` and `data` are fetched on first need.",
+  "passages": [
+    {
+      "id": "church-cemetery",
+      "kind": "tunnel",
+      "seen": "tunnelSeen",
+      "module": "js/underground-tunnel.js",
+      "data": "data/tunnel-church-cemetery.json",
+      "gate": { "type": "flag", "key": "tunnelOpen" },
+      "ends": {
+        "crypt": {
+          "room": "crypt",
+          "mouth": { "x0": 276, "x1": 296, "y0": 108, "y1": 136 },
+          "arrive": { "x": 258, "y": 122, "dir": "left" },
+          "gate": { "type": "flag", "key": "tunnelOpen" }
+        },
+        "cemetery": {
+          "room": "village",
+          "poi": "cemetery",
+          "slab": { "dx": 8, "dy": -36, "w": 20, "h": 13, "r": 22 },
+          "surface": { "dx": 8, "dy": -14, "dir": "down" },
+          "visible": { "type": "any", "of": [ { "type": "flag", "key": "tunnelOpen" }, { "type": "flag", "key": "tunnelSeen" } ] },
+          "gate": { "type": "flag", "key": "tunnelOpen" }
+        }
+      },
+      "text": { "slab": "tunnelSlab", "label": "tunnelLabel", "locked": "passageLocked", "fail": "passageFail" }
+    }
+  ],
+  "_future": [
+    { "id": "example-quiz-gated", "gate": { "type": "quiz", "quiz": "<quiz id from quiz.js>" }, "note": "documented stub: evaluates to locked until the quiz bridge exists" },
+    { "id": "example-mission-gated", "gate": { "type": "mission", "mission": "<mission id>", "step": "<step id>" }, "note": "documented stub: reads Q.missions[mission][step] once wired" }
+  ]
+}
