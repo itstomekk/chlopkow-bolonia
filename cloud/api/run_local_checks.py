@@ -12,7 +12,7 @@ def up(url, t=90):
 def kill(p):
     if p and p.poll() is None: subprocess.run(['taskkill', '/PID', str(p.pid), '/T', '/F'], capture_output=True)
 npx = 'npx.cmd' if os.name == 'nt' else 'npx'
-subprocess.run([npx, '--yes', 'wrangler@4', 'd1', 'execute', 'chlopkow', '--local', '--command', 'DROP TABLE IF EXISTS runs'], cwd=API, capture_output=True, stdin=subprocess.DEVNULL)
+subprocess.run([npx, '--yes', 'wrangler@4', 'd1', 'execute', 'chlopkow', '--local', '--command', 'DROP TABLE IF EXISTS runs; DROP TABLE IF EXISTS reviews; DROP TABLE IF EXISTS review_history'], cwd=API, capture_output=True, stdin=subprocess.DEVNULL)
 subprocess.run([npx, '--yes', 'wrangler@4', 'd1', 'execute', 'chlopkow', '--local', '--file', 'schema.sql'], cwd=API, capture_output=True, stdin=subprocess.DEVNULL)
 w = subprocess.Popen([npx, '--yes', 'wrangler@4', 'dev', '--local', '--port', str(WPORT), '--ip', '127.0.0.1'], cwd=API, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
 d = subprocess.Popen([sys.executable, '-m', 'http.server', str(DPORT), '--bind', '127.0.0.1', '--directory', os.path.join(ROOT, 'docs')], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -22,6 +22,7 @@ try:
     assert up(f'http://127.0.0.1:{DPORT}/index.html'), 'docs server did not start'
     W, G = f'http://127.0.0.1:{WPORT}', f'http://127.0.0.1:{DPORT}/index.html'
     rc['api'] = subprocess.run([sys.executable, os.path.join(API, 'test_api.py'), W], env=env).returncode
+    rc['review'] = subprocess.run([sys.executable, os.path.join(API, 'test_review.py'), W], env=env).returncode
     # fresh DB for the e2e so the rate-limited spam rows from the API test do not block it
     kill(w); time.sleep(1)
     subprocess.run([npx, '--yes', 'wrangler@4', 'd1', 'execute', 'chlopkow', '--local', '--command', 'DELETE FROM runs'], cwd=API, capture_output=True, stdin=subprocess.DEVNULL)

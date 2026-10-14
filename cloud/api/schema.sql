@@ -18,3 +18,22 @@ CREATE INDEX IF NOT EXISTS idx_runs_game_score ON runs (game, score);
 CREATE INDEX IF NOT EXISTS idx_runs_game_created ON runs (game, created);
 CREATE INDEX IF NOT EXISTS idx_runs_game_player ON runs (game, device, name);
 CREATE INDEX IF NOT EXISTS idx_runs_ip_created ON runs (ip, created);
+
+-- ---- review store (added 2026-10-14; additive, separate from the game's runs) ----
+-- One private JSON document per review page. Only the SHA-256 of the access key is stored. The newest 20 saves are kept in review_history.
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY,             -- e.g. 'yard-east-v3'
+  key_hash TEXT NOT NULL,          -- sha256 hex of the key sent in X-Review-Key
+  doc TEXT NOT NULL DEFAULT '{}',  -- latest state (JSON object)
+  rev INTEGER NOT NULL DEFAULT 0,  -- +1 on every save
+  updated_at INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS review_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  review_id TEXT NOT NULL,
+  rev INTEGER NOT NULL,
+  doc TEXT NOT NULL,
+  saved_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_review_history ON review_history (review_id, rev);

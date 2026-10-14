@@ -18,7 +18,20 @@ One Worker + one D1 database for the whole Chłopków Bolonia game. Plan and roa
 
 Sprint trace = time (s, without penalties) at 10, 20, ... 100 m.
 
-CORS: `https://itstomekk.github.io`, `http://127.0.0.1:*`, `http://localhost:*`.
+### Review store (not part of the game)
+
+A tiny private store for art-review pages hosted on `https://itstomekk.pages.dev` (first user: the east1/east2 yard review, id `yard-east-v3`). Tables `reviews` + `review_history` (additive, in `schema.sql`).
+
+| Call | Result |
+|---|---|
+| `GET /review/:id` | `{ ok, id, rev, updated_at, doc }`, header `X-Review-Key` required |
+| `PUT /review/:id` (JSON object, max 256 KB) | `{ ok, rev, updated_at }`; optional `X-Base-Rev` -> 409 `conflict` if the server moved on |
+| `GET /review/:id/history[?rev=N]` | list of the last 20 saves, or one saved document |
+
+Only the SHA-256 of the key is stored. Wrong/missing key or unknown id -> 401 (same answer, no enumeration); 413 over 256 KB; 400 not a JSON object. CORS only `https://itstomekk.pages.dev` (local dev: `REVIEW_EXTRA_ORIGIN` in `.dev.vars`, gitignored). The page (`gen/yards/reviews/2026-10-14-east1/build_v3_web.py`) takes the key from the URL fragment `#k=...`.
+Add a review: pick an id (`[a-z0-9-]`, max 40), generate a key, `INSERT INTO reviews (id, key_hash, created_at) VALUES (?, sha256hex(key), now_ms)` via `wrangler d1 execute chlopkow --remote`; never commit keys. Read/reset: `gen/yards/reviews/2026-10-14-east1/fetch_review.py`. Tests: `test_review.py` (runs in `run_local_checks.py`).
+
+CORS (scores): `https://itstomekk.github.io`, `http://127.0.0.1:*`, `http://localhost:*`.
 
 ## Anti-cheat (light for now)
 
