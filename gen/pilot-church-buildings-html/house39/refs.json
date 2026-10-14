@@ -1,0 +1,58 @@
+{
+ "osm_way": 413730657,
+ "address": "Chłopków 39",
+ "building": "yes",
+ "levels": null,
+ "lat": 52.2602347,
+ "lon": 22.8765802,
+ "game_xy": [
+  2450,
+  5477
+ ],
+ "ridge_bearing_guess": 98,
+ "edges": [
+  {
+   "len_m": 11.0,
+   "dir": 8,
+   "faces": 283,
+   "side": "W"
+  },
+  {
+   "len_m": 8.5,
+   "dir": 98,
+   "faces": 222,
+   "side": "S"
+  },
+  {
+   "len_m": 3.6,
+   "dir": 8,
+   "faces": 169,
+   "side": "S"
+  },
+  {
+   "len_m": 0.5,
+   "dir": 38,
+   "faces": 139,
+   "side": "S"
+  },
+  {
+   "len_m": 4.5,
+   "dir": 98,
+   "faces": 110,
+   "side": "E"
+  },
+  {
+   "len_m": 7.0,
+   "dir": 8,
+   "faces": 73,
+   "side": "E"
+  },
+  {
+   "len_m": 13.2,
+   "dir": 98,
+   "faces": 0,
+   "side": "N"
+  }
+ ],
+ "frames": []
+}

@@ -1,0 +1,26 @@
+{
+  "house": {
+    "osm_way": 993157691,
+    "address": "Chłopków 3",
+    "local_name": "Dom Muchy",
+    "local_name_source": "Owner identification in Telegram"
+  },
+  "owner_correction": "The small feature called B3 is a bus-stop shelter north of Dom Muchy, not a farm outbuilding. Leave the accepted preview unchanged.",
+  "streetview_confirmation": {
+    "structure": "small open-front roadside bus shelter",
+    "relative_direction": "north / northwest of the house, across the road",
+    "observations": "Brown side panels, lighter grey rear/interior, dark shallow single-pitch roof; open towards the road. Bench not clearly visible.",
+    "views": [
+      {"file": "shelter_west_close.jpg", "panoid": "x6Y_xD3hv503c0IX3yAAag", "yaw": 295, "pitch": 0, "fov": 35, "image_bbox": [452,289,600,407]},
+      {"file": "shelter_near_close.jpg", "panoid": "FwXCydlXslK6XYsWNsaaFw", "yaw": 298, "pitch": 0, "fov": 45, "image_bbox": [456,302,615,434]}
+    ]
+  },
+  "satellite_match": {
+    "status": "Not precisely resolved. Broad satellite-model guesses contradicted each other; do not transfer them into map coordinates.",
+    "old_B3_box": [365,500,430,555],
+    "old_B3_box_identity": "Original provisional guess retained, not independently matched to the confirmed Street View shelter."
+  },
+  "gameChangesApplied": false,
+  "accepted_preview_unchanged": true,
+  "integration_authorized": false
+}

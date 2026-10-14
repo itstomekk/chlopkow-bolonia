@@ -1,0 +1,77 @@
+[
+ {
+  "box": [
+   302,
+   270,
+   432,
+   700
+  ],
+  "title": "Utwardzony plac podwórzowy",
+  "observation": "Jasny, nieregularny pas utwardzonej nawierzchni biegnie między budynkami i tworzy centralny plac gospodarstwa.",
+  "alternatives": [
+   "betonowy podjazd",
+   "żwirowy plac"
+  ],
+  "confidence": "Średnia"
+ },
+ {
+  "box": [
+   350,
+   440,
+   410,
+   550
+  ],
+  "title": "Ciemny pojazd lub maszyna",
+  "observation": "Przy środku podwórza widać podłużny ciemny obiekt z jasnym fragmentem, przypominający mały pojazd albo maszynę.",
+  "alternatives": [
+   "samochód",
+   "mała maszyna rolnicza"
+  ],
+  "confidence": "Niska"
+ },
+ {
+  "box": [
+   600,
+   405,
+   925,
+   525
+  ],
+  "title": "Ogrodzenie",
+  "observation": "Wzdłuż północno-wschodniej krawędzi podwórza widoczny jest długi rząd ciemnych słupków lub przęseł ogrodzeniowych.",
+  "alternatives": [
+   "płot",
+   "ogrodzenie z bramą"
+  ],
+  "confidence": "Średnia"
+ },
+ {
+  "box": [
+   555,
+   450,
+   620,
+   525
+  ],
+  "title": "Pojedynczy krzew",
+  "observation": "Na trawiastej części podwórza znajduje się zwarta, ciemna kępa roślinności.",
+  "alternatives": [
+   "małe drzewo",
+   "stos gałęzi"
+  ],
+  "confidence": "Niska"
+ },
+ {
+  "box": [
+   605,
+   600,
+   675,
+   690
+  ],
+  "title": "Pojedynczy krzew lub drzewko",
+  "observation": "W środkowo-wschodniej części posesji widać oddzieloną od innych ciemną kępę roślinności.",
+  "alternatives": [
+   "małe drzewo",
+   "zarośla"
+  ],
+  "confidence": "Niska"
+ }
+]

@@ -1,0 +1,12 @@
+**B is closer to the satellite.** Its panel 3 preserves the village’s overall building arrangement better: the long barns in the upper/central area, the large dark-roofed barn in the centre, and the dense group on the right retain roughly the correct neighbour relationships. A has several buildings compressed or rearranged into a more regular grid.
+
+Remaining clear positional errors in **B panel 3**:
+
+- **Far-left red-roof house beside the road:** it is too far north/too close to the road compared with the satellite. Move it slightly **down and left**, leaving a larger strip of grass between it and the road.
+- **Small yellow/orange house just below the road on the left:** it is too close to the red-roof house and too far left. Move it **rightward and slightly down**, so it sits more directly below the road and separated from the red-roof house.
+- **Long tan-roofed house just right of centre, immediately above the road:** it is too far from the central group and too low. Move it **up and slightly right**, closer to the small barns behind it.
+- **Large brown-roofed house to the right of that tan-roofed house:** it is too close to the road and too far left relative to the orange/red-roof house on its right. Move it **up and right**, preserving a clearer gap from the road.
+- **Large orange/red-roofed house in the right-hand cluster:** it is too far right and slightly too low. Move it **left and up**, so it remains beside—but not overlapping—the brown-roofed house, as in the satellite.
+- **Tall narrow dark-roofed building in the middle-right cluster:** it is placed too far left, almost against the two long grey-roofed sheds. Move it **rightward**, leaving the narrow access gap visible between it and the sheds.
+- **Rust-coloured long shed in the upper-right:** it is too low relative to the grey sheds beneath it. Move it **up and slightly right**, keeping it behind the right-hand cluster rather than alongside it.
+- **Small red-roofed house at the extreme lower-right by the road:** it is too close to the road junction and too far left. Move it **right and slightly down**, nearer the edge of the mapped settlement.

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "shelter_other_angle.jpg",
+    "panoid": "d1exMEfDQSY24_dp_stAuw",
+    "yaw": 325,
+    "pitch": 0,
+    "fov": 70,
+    "bytes": 170498
+  },
+  {
+    "file": "shelter_side.jpg",
+    "panoid": "d1exMEfDQSY24_dp_stAuw",
+    "yaw": 300,
+    "pitch": 0,
+    "fov": 45,
+    "bytes": 154966
+  },
+  {
+    "file": "shelter_east_side.jpg",
+    "panoid": "BDhFlk9mSxinXgpn87nbpg",
+    "yaw": 290,
+    "pitch": 0,
+    "fov": 35,
+    "bytes": 107406
+  }
+]

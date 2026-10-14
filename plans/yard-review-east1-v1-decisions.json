@@ -1,0 +1,711 @@
+{
+  "review": "yard-review-east1-v1",
+  "strip": "east1",
+  "gameChangesApplied": false,
+  "decisions": {
+    "house-909989530": {
+      "decision": "ok",
+      "identification": "",
+      "note": "musisz mi w tych plikach pokazywać od razu na mapie (żebym zobaczył orientację i kąt czy działa dobrze) - no i tutaj ściana jest szara"
+    },
+    "house-909989529": {
+      "decision": "ok",
+      "identification": "",
+      "note": ""
+    },
+    "house-909989528": {
+      "decision": "regen",
+      "identification": "",
+      "note": "tam nic nie ma, ruiny drewnianego domku"
+    },
+    "house-909988586": {
+      "decision": "regen",
+      "identification": "",
+      "note": "zostaje, ale gach ma jakiś dziwny skos, wsyzstkie domy mamy na planie prospodadłościanu!"
+    },
+    "house-1095382357": {
+      "decision": "ok",
+      "identification": "",
+      "note": "zostaje, no ale muszę w  tych review widzieć na mapie"
+    },
+    "east1-19-p1": {
+      "decision": "add",
+      "identification": "wóz na słomę pusty",
+      "note": ""
+    },
+    "east1-19-p2": {
+      "decision": "add",
+      "identification": "wiata blaszana",
+      "note": ""
+    },
+    "east1-19-p3": {
+      "decision": "add",
+      "identification": "warsztat",
+      "note": ""
+    },
+    "east1-19-p4": {
+      "decision": "add",
+      "identification": "żywopłot",
+      "note": ""
+    },
+    "east1-19-p5": {
+      "decision": "add",
+      "identification": "drzewka iglaste po prawej a po lewej czeresnie",
+      "note": ""
+    },
+    "east1-19-p6": {
+      "decision": "add",
+      "identification": "maszyny gospodarcze, traktor, pług",
+      "note": ""
+    },
+    "east1-19-p7": {
+      "decision": "add",
+      "identification": "studnia",
+      "note": ""
+    },
+    "east1-20-p1": {
+      "decision": "skip",
+      "identification": "",
+      "note": ""
+    },
+    "east1-20-p2": {
+      "decision": "add",
+      "identification": "opel astra",
+      "note": ""
+    },
+    "east1-20-p3": {
+      "decision": "add",
+      "identification": "żywopłot",
+      "note": ""
+    },
+    "east1-20-p4": {
+      "decision": "add",
+      "identification": "balia do gorącej kąpieli",
+      "note": ""
+    },
+    "east1-20-p5": {
+      "decision": "add",
+      "identification": "studnia",
+      "note": ""
+    },
+    "east1-22-p1": {
+      "decision": "add",
+      "identification": "auto biale",
+      "note": ""
+    },
+    "east1-22-p2": {
+      "decision": "skip",
+      "identification": "",
+      "note": ""
+    },
+    "east1-22-p3": {
+      "decision": "add",
+      "identification": "studnia",
+      "note": ""
+    },
+    "east1-22-p4": {
+      "decision": "skip",
+      "identification": "",
+      "note": ""
+    },
+    "east1-22-p5": {
+      "decision": "add",
+      "identification": "drzewka z mirabelkami",
+      "note": ""
+    },
+    "east1-23-p1": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-23-p2": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-23-p3": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-23-p4": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-E1-p1": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-E1-p2": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-E1-p3": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-E1-p4": {
+      "decision": "pending",
+      "identification": "",
+      "note": ""
+    },
+    "east1-E1-p5": {
+      "decision": "add",
+      "identification": "kojec dla psa",
+      "note": ""
+    }
+  },
+  "provenance": [
+    {
+      "id": "east1-19-p1",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        642,
+        300,
+        778,
+        391
+      ],
+      "mapPointApprox": [
+        1074,
+        4114
+      ],
+      "sizeM": [
+        12.7,
+        8.5
+      ],
+      "guess": "Stos desek lub drewna"
+    },
+    {
+      "id": "east1-19-p2",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        822,
+        328,
+        965,
+        478
+      ],
+      "mapPointApprox": [
+        1109,
+        4124
+      ],
+      "sizeM": [
+        13.4,
+        14.1
+      ],
+      "guess": "Mały budynek gospodarczy"
+    },
+    {
+      "id": "east1-19-p3",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        822,
+        470,
+        965,
+        735
+      ],
+      "mapPointApprox": [
+        1109,
+        4162
+      ],
+      "sizeM": [
+        13.4,
+        24.8
+      ],
+      "guess": "Czerwony budynek gospodarczy"
+    },
+    {
+      "id": "east1-19-p4",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        36,
+        500,
+        285,
+        855
+      ],
+      "mapPointApprox": [
+        971,
+        4176
+      ],
+      "sizeM": [
+        23.3,
+        33.3
+      ],
+      "guess": "Grządki lub ogród warzywny"
+    },
+    {
+      "id": "east1-19-p5",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        337,
+        550,
+        535,
+        837
+      ],
+      "mapPointApprox": [
+        1023,
+        4179
+      ],
+      "sizeM": [
+        18.6,
+        26.9
+      ],
+      "guess": "Skupisko krzewów"
+    },
+    {
+      "id": "east1-19-p6",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        705,
+        582,
+        805,
+        750
+      ],
+      "mapPointApprox": [
+        1083,
+        4174
+      ],
+      "sizeM": [
+        9.4,
+        15.7
+      ],
+      "guess": "Maszyny lub pojazdy gospodarcze"
+    },
+    {
+      "id": "east1-19-p7",
+      "yard": "19",
+      "source": "gen/yards/strip_east1/yard_19/sat_clean.png",
+      "box": [
+        690,
+        690,
+        780,
+        785
+      ],
+      "mapPointApprox": [
+        1079,
+        4187
+      ],
+      "sizeM": [
+        8.4,
+        8.9
+      ],
+      "guess": "Mały pojazd lub sprzęt"
+    },
+    {
+      "id": "east1-20-p1",
+      "yard": "20",
+      "source": "gen/yards/strip_east1/yard_20/sat_clean.png",
+      "box": [
+        302,
+        270,
+        432,
+        700
+      ],
+      "mapPointApprox": [
+        925,
+        4151
+      ],
+      "sizeM": [
+        7.9,
+        26
+      ],
+      "guess": "Utwardzony plac podwórzowy"
+    },
+    {
+      "id": "east1-20-p2",
+      "yard": "20",
+      "source": "gen/yards/strip_east1/yard_20/sat_clean.png",
+      "box": [
+        350,
+        440,
+        410,
+        550
+      ],
+      "mapPointApprox": [
+        926,
+        4153
+      ],
+      "sizeM": [
+        3.6,
+        6.6
+      ],
+      "guess": "Ciemny pojazd lub maszyna"
+    },
+    {
+      "id": "east1-20-p3",
+      "yard": "20",
+      "source": "gen/yards/strip_east1/yard_20/sat_clean.png",
+      "box": [
+        600,
+        405,
+        925,
+        525
+      ],
+      "mapPointApprox": [
+        973,
+        4149
+      ],
+      "sizeM": [
+        19.6,
+        7.3
+      ],
+      "guess": "Ogrodzenie"
+    },
+    {
+      "id": "east1-20-p4",
+      "yard": "20",
+      "source": "gen/yards/strip_east1/yard_20/sat_clean.png",
+      "box": [
+        555,
+        450,
+        620,
+        525
+      ],
+      "mapPointApprox": [
+        952,
+        4152
+      ],
+      "sizeM": [
+        3.9,
+        4.5
+      ],
+      "guess": "Pojedynczy krzew"
+    },
+    {
+      "id": "east1-20-p5",
+      "yard": "20",
+      "source": "gen/yards/strip_east1/yard_20/sat_clean.png",
+      "box": [
+        605,
+        600,
+        675,
+        690
+      ],
+      "mapPointApprox": [
+        958,
+        4171
+      ],
+      "sizeM": [
+        4.2,
+        5.4
+      ],
+      "guess": "Pojedynczy krzew lub drzewko"
+    },
+    {
+      "id": "east1-22-p1",
+      "yard": "22",
+      "source": "gen/yards/strip_east1/yard_22/sat_clean.png",
+      "box": [
+        532,
+        347,
+        609,
+        390
+      ],
+      "mapPointApprox": [
+        917,
+        4254
+      ],
+      "sizeM": [
+        4.8,
+        2.7
+      ],
+      "guess": "samochód"
+    },
+    {
+      "id": "east1-22-p2",
+      "yard": "22",
+      "source": "gen/yards/strip_east1/yard_22/sat_clean.png",
+      "box": [
+        452,
+        280,
+        535,
+        321
+      ],
+      "mapPointApprox": [
+        908,
+        4245
+      ],
+      "sizeM": [
+        5.2,
+        2.6
+      ],
+      "guess": "jasny stos lub materiał"
+    },
+    {
+      "id": "east1-22-p3",
+      "yard": "22",
+      "source": "gen/yards/strip_east1/yard_22/sat_clean.png",
+      "box": [
+        777,
+        402,
+        825,
+        447
+      ],
+      "mapPointApprox": [
+        946,
+        4261
+      ],
+      "sizeM": [
+        3,
+        2.8
+      ],
+      "guess": "mały biały pojazd lub przedmiot"
+    },
+    {
+      "id": "east1-22-p4",
+      "yard": "22",
+      "source": "gen/yards/strip_east1/yard_22/sat_clean.png",
+      "box": [
+        445,
+        305,
+        755,
+        700
+      ],
+      "mapPointApprox": [
+        921,
+        4270
+      ],
+      "sizeM": [
+        19.5,
+        24.8
+      ],
+      "guess": "utwardzona nawierzchnia podwórza"
+    },
+    {
+      "id": "east1-22-p5",
+      "yard": "22",
+      "source": "gen/yards/strip_east1/yard_22/sat_clean.png",
+      "box": [
+        430,
+        690,
+        710,
+        762
+      ],
+      "mapPointApprox": [
+        917,
+        4298
+      ],
+      "sizeM": [
+        17.6,
+        4.5
+      ],
+      "guess": "ogrodzenie lub rząd słupków"
+    },
+    {
+      "id": "east1-23-p1",
+      "yard": "23",
+      "source": "gen/yards/strip_east1/yard_23/sat_clean.png",
+      "box": [
+        505,
+        670,
+        565,
+        770
+      ],
+      "mapPointApprox": [
+        926,
+        4152
+      ],
+      "sizeM": [
+        3.8,
+        6.3
+      ],
+      "guess": "Samochód"
+    },
+    {
+      "id": "east1-23-p2",
+      "yard": "23",
+      "source": "gen/yards/strip_east1/yard_23/sat_clean.png",
+      "box": [
+        430,
+        500,
+        620,
+        930
+      ],
+      "mapPointApprox": [
+        925,
+        4151
+      ],
+      "sizeM": [
+        11.9,
+        27
+      ],
+      "guess": "Utwardzony plac"
+    },
+    {
+      "id": "east1-23-p3",
+      "yard": "23",
+      "source": "gen/yards/strip_east1/yard_23/sat_clean.png",
+      "box": [
+        360,
+        260,
+        455,
+        480
+      ],
+      "mapPointApprox": [
+        910,
+        4108
+      ],
+      "sizeM": [
+        6,
+        13.8
+      ],
+      "guess": "Krzew lub drzewo"
+    },
+    {
+      "id": "east1-23-p4",
+      "yard": "23",
+      "source": "gen/yards/strip_east1/yard_23/sat_clean.png",
+      "box": [
+        235,
+        250,
+        430,
+        590
+      ],
+      "mapPointApprox": [
+        901,
+        4114
+      ],
+      "sizeM": [
+        12.3,
+        21.4
+      ],
+      "guess": "Kępa drzew i krzewów"
+    },
+    {
+      "id": "east1-E1-p1",
+      "yard": "E1",
+      "source": "gen/yards/strip_east1/yard_E1/sat_clean.png",
+      "box": [
+        480,
+        235,
+        575,
+        745
+      ],
+      "mapPointApprox": [
+        1085,
+        4148
+      ],
+      "sizeM": [
+        8.1,
+        43.7
+      ],
+      "guess": "Utwardzona nawierzchnia podwórza"
+    },
+    {
+      "id": "east1-E1-p2",
+      "yard": "E1",
+      "source": "gen/yards/strip_east1/yard_E1/sat_clean.png",
+      "box": [
+        420,
+        275,
+        495,
+        320
+      ],
+      "mapPointApprox": [
+        1073,
+        4115
+      ],
+      "sizeM": [
+        6.4,
+        3.9
+      ],
+      "guess": "Mała przyczepa lub maszyna"
+    },
+    {
+      "id": "east1-E1-p3",
+      "yard": "E1",
+      "source": "gen/yards/strip_east1/yard_E1/sat_clean.png",
+      "box": [
+        495,
+        430,
+        550,
+        515
+      ],
+      "mapPointApprox": [
+        1084,
+        4145
+      ],
+      "sizeM": [
+        4.7,
+        7.3
+      ],
+      "guess": "Drobny sprzęt gospodarski"
+    },
+    {
+      "id": "east1-E1-p4",
+      "yard": "E1",
+      "source": "gen/yards/strip_east1/yard_E1/sat_clean.png",
+      "box": [
+        490,
+        535,
+        555,
+        625
+      ],
+      "mapPointApprox": [
+        1084,
+        4163
+      ],
+      "sizeM": [
+        5.6,
+        7.7
+      ],
+      "guess": "Stos materiałów"
+    },
+    {
+      "id": "east1-E1-p5",
+      "yard": "E1",
+      "source": "gen/yards/strip_east1/yard_E1/sat_clean.png",
+      "box": [
+        385,
+        600,
+        450,
+        705
+      ],
+      "mapPointApprox": [
+        1066,
+        4176
+      ],
+      "sizeM": [
+        5.6,
+        9
+      ],
+      "guess": "Mały sprzęt lub pojemniki"
+    }
+  ],
+  "houses": [
+    {
+      "id": "house-909989530",
+      "way": 909989530,
+      "yard": "23"
+    },
+    {
+      "id": "house-909989529",
+      "way": 909989529,
+      "yard": "22"
+    },
+    {
+      "id": "house-909989528",
+      "way": 909989528,
+      "yard": "20"
+    },
+    {
+      "id": "house-909988586",
+      "way": 909988586,
+      "yard": "19"
+    },
+    {
+      "id": "house-1095382357",
+      "way": 1095382357,
+      "yard": "E1"
+    }
+  ]
+}

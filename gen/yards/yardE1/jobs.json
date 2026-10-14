@@ -1,0 +1,19 @@
+[
+ {
+  "name": "house_1095382357",
+  "way": 1095382357,
+  "kind": "house",
+  "address": null,
+  "levels": "1",
+  "along_m": 13.1,
+  "depth_m": 12.0,
+  "sat_deg": 35.0,
+  "ew_wall_deg": 125.0,
+  "w": 98,
+  "h_rule": 86,
+  "satellite_only": false,
+  "street_photos_close": true,
+  "road_north": false,
+  "refdir": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-03-chlopkow-building-refs\\w1095382357"
+ }
+]

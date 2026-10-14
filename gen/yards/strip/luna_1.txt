@@ -1,0 +1,6 @@
+#1: dx=0 m, dy=0 m (confidence medium), outline appears to cover the large, low-contrast roof despite dark/shadowed areas.  
+#2: dx=0 m, dy=0 m (confidence medium), outline aligns with the visible roof footprint.  
+#3: dx=0 m, dy=0 m (confidence high), outline sits on the gray roof.  
+#4: dx=0 m, dy=0 m (confidence high), outline closely matches the red roof.  
+#5: dx=0 m, dy=0 m (confidence high), outline matches the roof, including the bright lower roof section.  
+#6: dx=0 m, dy=0 m (confidence high), outline follows the dark roof footprint.

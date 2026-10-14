@@ -1,0 +1,77 @@
+[
+ {
+  "box": [
+   480,
+   235,
+   575,
+   745
+  ],
+  "title": "Utwardzona nawierzchnia podwórza",
+  "observation": "Między budynkami widoczny jest długi, jasnobrązowy pas ubitej lub utwardzonej nawierzchni podwórza.",
+  "alternatives": [
+   "klepisko",
+   "droga wewnętrzna"
+  ],
+  "confidence": "Średnia"
+ },
+ {
+  "box": [
+   420,
+   275,
+   495,
+   320
+  ],
+  "title": "Mała przyczepa lub maszyna",
+  "observation": "Przy północnym skraju podwórza widać niewielki jasny, podłużny obiekt z ciemnymi elementami pod spodem.",
+  "alternatives": [
+   "przyczepa",
+   "maszyna rolnicza"
+  ],
+  "confidence": "Niska"
+ },
+ {
+  "box": [
+   495,
+   430,
+   550,
+   515
+  ],
+  "title": "Drobny sprzęt gospodarski",
+  "observation": "W środkowej części podwórza widoczna jest ciemna, nieregularna grupa niewielkich obiektów.",
+  "alternatives": [
+   "maszyna rolnicza",
+   "stos materiałów"
+  ],
+  "confidence": "Niska"
+ },
+ {
+  "box": [
+   490,
+   535,
+   555,
+   625
+  ],
+  "title": "Stos materiałów",
+  "observation": "Przy południowej stronie podwórza widoczny jest nieregularny brązowawy stos lub skupisko drobnych przedmiotów.",
+  "alternatives": [
+   "drewno",
+   "pryzma materiału"
+  ],
+  "confidence": "Niska"
+ },
+ {
+  "box": [
+   385,
+   600,
+   450,
+   705
+  ],
+  "title": "Mały sprzęt lub pojemniki",
+  "observation": "Na południe od środkowego budynku widać kilka skupionych ciemnych i jasnych obiektów, w tym czerwony element.",
+  "alternatives": [
+   "pojemniki",
+   "narzędzia lub maszyna"
+  ],
+  "confidence": "Niska"
+ }
+]

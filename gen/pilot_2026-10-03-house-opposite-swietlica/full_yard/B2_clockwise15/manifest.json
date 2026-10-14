@@ -1,0 +1,46 @@
+{
+  "preview_only": true,
+  "gameChangesApplied": false,
+  "changed_asset": "B2",
+  "requested_delta_degrees_clockwise": 15,
+  "exact_angle_verified": false,
+  "manual_rotation_or_shear": false,
+  "source": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261004_202351_aa29e4f4.png",
+  "references": [
+    "B2_original_raw_crop.png",
+    "B2_sat_crop.png",
+    "../with_tree/4_raw.png"
+  ],
+  "provider": "openai-codex",
+  "model": "gpt-image-2-medium",
+  "requested_quality": "medium",
+  "reported_quality": "low",
+  "old_size": [
+    55,
+    32
+  ],
+  "new_size": [
+    55,
+    22
+  ],
+  "ground_centre_map": [
+    2191.6154081131954,
+    4652.085914099518
+  ],
+  "old_position": [
+    2164,
+    4626
+  ],
+  "new_position": [
+    2164,
+    4634
+  ],
+  "changed_map_pixels": 1326,
+  "non_B2_map_pixels_unchanged": true,
+  "accepted_sources_and_shared_docs_unchanged": true,
+  "unrelated_overlap_pixels": [
+    0,
+    0
+  ],
+  "delivery": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-04-chlopkow-B2-clockwise"
+}

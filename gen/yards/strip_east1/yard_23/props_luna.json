@@ -1,0 +1,62 @@
+[
+ {
+  "box": [
+   505,
+   670,
+   565,
+   770
+  ],
+  "title": "Samochód",
+  "observation": "Przy utwardzonym placu widać ciemny, podłużny pojazd zaparkowany pionowo wzdłuż drogi lub podjazdu.",
+  "alternatives": [
+   "ciągnik",
+   "maszyna rolnicza"
+  ],
+  "confidence": "Średnia"
+ },
+ {
+  "box": [
+   430,
+   500,
+   620,
+   930
+  ],
+  "title": "Utwardzony plac",
+  "observation": "Między budynkami widoczna jest jasna, szeroka powierzchnia o regularnych krawędziach, prawdopodobnie betonowy lub brukowany plac gospodarczy.",
+  "alternatives": [
+   "podjazd",
+   "droga wewnętrzna"
+  ],
+  "confidence": "Średnia"
+ },
+ {
+  "box": [
+   360,
+   260,
+   455,
+   480
+  ],
+  "title": "Krzew lub drzewo",
+  "observation": "Na środku podwórza widoczna jest ciemna, pionowa kępa roślinności o zwartej sylwetce.",
+  "alternatives": [
+   "stos gałęzi",
+   "zarośla"
+  ],
+  "confidence": "Niska"
+ },
+ {
+  "box": [
+   235,
+   250,
+   430,
+   590
+  ],
+  "title": "Kępa drzew i krzewów",
+  "observation": "W północno-zachodniej części podwórza widać skupisko nieregularnych koron lub krzewów.",
+  "alternatives": [
+   "zarośnięty ogródek",
+   "stos drewna"
+  ],
+  "confidence": "Niska"
+ }
+]

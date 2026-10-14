@@ -1,0 +1,231 @@
+{
+  "sourceReview": "yard-review-east1-v1",
+  "gameChangesApplied": false,
+  "identificationSource": "user-supplied review; literal values preserved",
+  "assets": {
+    "cart": {
+      "file": "gen/yards/strip_east1/props/cart.png",
+      "size": [
+        24,
+        18
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "tractor_plough": {
+      "file": "gen/yards/strip_east1/props/tractor_plough.png",
+      "size": [
+        30,
+        21
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "well": {
+      "file": "gen/yards/strip_east1/props/well.png",
+      "size": [
+        14,
+        13
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "hot_tub": {
+      "file": "gen/yards/strip_east1/props/hot_tub.png",
+      "size": [
+        15,
+        13
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "kennel": {
+      "file": "gen/yards/strip_east1/props/kennel.png",
+      "size": [
+        14,
+        14
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "orchard": {
+      "file": "gen/yards/strip_east1/props/orchard.png",
+      "size": [
+        42,
+        32
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "mirabelle": {
+      "file": "gen/yards/strip_east1/props/mirabelle.png",
+      "size": [
+        20,
+        24
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "opel_astra": {
+      "file": "gen/yards/strip_east1/props/opel_astra.png",
+      "size": [
+        28,
+        20
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "white_car": {
+      "file": "gen/yards/strip_east1/props/white_car.png",
+      "size": [
+        27,
+        21
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "tin_shelter": {
+      "file": "gen/yards/strip_east1/props/tin_shelter.png",
+      "size": [
+        32,
+        24
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "workshop": {
+      "file": "gen/yards/strip_east1/props/workshop.png",
+      "size": [
+        34,
+        27
+      ],
+      "source": "Codex gpt-image-2-medium"
+    },
+    "hedge": {
+      "file": "gen/yards/strip_east1/props/hedge.png",
+      "size": [
+        24,
+        16
+      ],
+      "source": "reused reviewed J12 sprite"
+    }
+  },
+  "props": [
+    {
+      "id": "east1-19-p1:cart",
+      "candidate": "east1-19-p1",
+      "kind": "cart",
+      "x": 1074,
+      "y": 4114,
+      "identification": "wóz na słomę pusty",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-19-p2:tin_shelter",
+      "candidate": "east1-19-p2",
+      "kind": "tin_shelter",
+      "x": 1109,
+      "y": 4124,
+      "identification": "wiata blaszana",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-19-p3:workshop",
+      "candidate": "east1-19-p3",
+      "kind": "workshop",
+      "x": 1109,
+      "y": 4162,
+      "identification": "warsztat",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-19-p4:hedge",
+      "candidate": "east1-19-p4",
+      "kind": "hedge",
+      "x": 972,
+      "y": 4162,
+      "identification": "żywopłot",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-19-p5:orchard",
+      "candidate": "east1-19-p5",
+      "kind": "orchard",
+      "x": 1023,
+      "y": 4179,
+      "identification": "drzewka iglaste po prawej a po lewej czeresnie",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-19-p6:tractor_plough",
+      "candidate": "east1-19-p6",
+      "kind": "tractor_plough",
+      "x": 1083,
+      "y": 4174,
+      "identification": "maszyny gospodarcze, traktor, pług",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-19-p7:well",
+      "candidate": "east1-19-p7",
+      "kind": "well",
+      "x": 1079,
+      "y": 4187,
+      "identification": "studnia",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-20-p2:opel_astra",
+      "candidate": "east1-20-p2",
+      "kind": "opel_astra",
+      "x": 926,
+      "y": 4153,
+      "identification": "opel astra",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-20-p4:hot_tub",
+      "candidate": "east1-20-p4",
+      "kind": "hot_tub",
+      "x": 952,
+      "y": 4152,
+      "identification": "balia do gorącej kąpieli",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-20-p5:well",
+      "candidate": "east1-20-p5",
+      "kind": "well",
+      "x": 958,
+      "y": 4171,
+      "identification": "studnia",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-22-p1:white_car",
+      "candidate": "east1-22-p1",
+      "kind": "white_car",
+      "x": 917,
+      "y": 4254,
+      "identification": "auto biale",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-22-p3:well",
+      "candidate": "east1-22-p3",
+      "kind": "well",
+      "x": 946,
+      "y": 4261,
+      "identification": "studnia",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-22-p5:mirabelle",
+      "candidate": "east1-22-p5",
+      "kind": "mirabelle",
+      "x": 917,
+      "y": 4298,
+      "identification": "drzewka z mirabelkami",
+      "status": "preview-only"
+    },
+    {
+      "id": "east1-E1-p5:kennel",
+      "candidate": "east1-E1-p5",
+      "kind": "kennel",
+      "x": 1066,
+      "y": 4176,
+      "identification": "kojec dla psa",
+      "status": "preview-only"
+    }
+  ]
+}

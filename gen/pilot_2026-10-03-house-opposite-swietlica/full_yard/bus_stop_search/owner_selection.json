@@ -1,0 +1,11 @@
+{
+  "asset_id": "dom_muchy_bus_shelter",
+  "owner_selected_variant": "C",
+  "owner_approval": "C jest super. Róbmy kolejne podwórka",
+  "sprite": "C:/Users/Lenovo/Hermes/image-gen/2026-10-05-chlopkow-przystanek-warianty/C.png",
+  "map_preview": "C:/Users/Lenovo/Hermes/image-gen/2026-10-05-chlopkow-przystanek-warianty/C_on_map.png",
+  "ground_position_estimated": true,
+  "placement_source": "shelter_position_estimate.json",
+  "gameChangesApplied": false,
+  "publishing_authorized": false
+}

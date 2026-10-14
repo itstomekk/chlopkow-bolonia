@@ -1,0 +1,95 @@
+{
+  "preview_only": true,
+  "gameChangesApplied": false,
+  "outbuilding_candidates_count": 3,
+  "confirmed_osm_outbuildings": 2,
+  "uncertain_candidate_count": 1,
+  "generation_source": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261004_201355_56f2c386.png",
+  "provider": "openai-codex",
+  "model": "gpt-image-2-medium",
+  "requested_quality": "medium",
+  "reported_quality": "low",
+  "house_unchanged": true,
+  "house_translation": [
+    2,
+    12
+  ],
+  "docs_unchanged": true,
+  "non_target_layer_pixels_unchanged": true,
+  "unrelated_scenery_occlusion_pixels": 0,
+  "outbuildings": [
+    {
+      "id": "B1",
+      "osm_way": 993157696,
+      "status": "OSM roof corroborated by satellite",
+      "centre_map": [
+        2163.84511387351,
+        4609.8632321998975
+      ],
+      "sprite_size": [
+        36,
+        56
+      ],
+      "position": [
+        2146,
+        4565
+      ],
+      "raw_component_box": [
+        92,
+        32,
+        546,
+        737
+      ],
+      "sprite": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\full_yard\\B1.png"
+    },
+    {
+      "id": "B2",
+      "osm_way": 993157706,
+      "status": "OSM roof corroborated by satellite",
+      "centre_map": [
+        2191.6154081131954,
+        4652.085914099518
+      ],
+      "sprite_size": [
+        55,
+        32
+      ],
+      "position": [
+        2164,
+        4626
+      ],
+      "raw_component_box": [
+        333,
+        664,
+        1153,
+        1139
+      ],
+      "sprite": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\full_yard\\B2.png"
+    },
+    {
+      "id": "B3?",
+      "osm_way": null,
+      "status": "unconfirmed satellite hypothesis",
+      "centre_map": [
+        2183.3117273539115,
+        4595.763842213512
+      ],
+      "sprite_size": [
+        17,
+        16
+      ],
+      "position": [
+        2175,
+        4583
+      ],
+      "raw_component_box": [
+        779,
+        232,
+        1114,
+        549
+      ],
+      "sprite": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\full_yard\\B3_candidate.png"
+    }
+  ],
+  "delivery": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-04-chlopkow-full-yard"
+}

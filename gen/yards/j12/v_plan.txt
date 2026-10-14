@@ -1,0 +1,46 @@
+Coordinates are approximate pixel bounding boxes, with origin at the upper-left of each crop.
+
+## Image 1 — cyan outlines, 770 × 500
+
+### Outlines versus roofs
+All seven cyan outlines appear to correspond to real roofed structures; I do not see an obvious outline lying entirely on bare ground.
+
+- **Upper-left 15, ~126–173 × 167–225:** small, oblique rectangular roof, muted gray/brown.
+- **Small central 15, ~164–208 × 207–235:** very narrow gray roof or roof extension.
+- **Central 15, ~205–251 × 198–240:** medium rectangular, pale gray roof.
+- **Upper-right 15, ~253–300 × 176–209:** small, long rectangular gray roof.
+- **Large left 15, ~140–204 × 219–334:** long, dark gray rectangular roof.
+- **15H, ~329–393 × 251–314:** compact light gray/white rectangular or shallow-hipped roof.
+- **Lower 15, ~257–371 × 369–447:** long, irregular/trapezoidal light gray roof; parts are somewhat obscured or blended with the ground, but a building is visible beneath it.
+
+### Buildings without outlines
+There are clear unoutlined roofs:
+
+- A substantial dark blue/gray roof with a reddish section in the upper central yard, approximately **~180–258 × 75–165**.
+- A dark rectangular roof just northwest of the H building, approximately **~307–350 × 220–255**.
+
+The upper central structure may be a house or a house complex; the second could be an agricultural or utility building.
+
+### H building
+The **15H** building is plausibly the dwelling. It is compact, has a light-colored roof, and sits in a landscaped/treed part of the yard rather than looking like one of the long agricultural buildings. The imagery cannot prove residential use, but it looks more house-like than barn-like.
+
+---
+
+## Image 2 — magenta outlines, 570 × 500
+
+### Outlines versus roofs
+All seven magenta outlines appear to sit over real roofs. None is clearly on empty ground, although several roofs are partly obscured by trees and shadow.
+
+- **Left 18, ~164–207 × 141–214:** long, dark gray rectangular roof.
+- **Upper-center 18, ~233–299 × 97–130:** long, pale gray roof.
+- **Upper-right 18, ~334–370 × 89–128:** small pale gray rectangular roof.
+- **Center 18, ~245–297 × 170–213:** medium gray/brown rectangular roof.
+- **Right 18H, ~351–408 × 172–230:** compact light gray roof, roughly rectangular/hipped.
+- **Lower-left 18, ~168–220 × 231–306:** elongated medium-gray roof.
+- **Large lower 18, ~188–288 × 254–326:** large pale gray, trapezoidal/irregular roof.
+
+### Buildings without outlines
+A clear unoutlined reddish-brown roof is visible near the middle-upper part of the yard, approximately **~286–345 × 143–176**. It appears to be a separate building, not covered by a magenta outline. There may also be small partially hidden roof fragments among the trees, but they are less certain.
+
+### H building
+The **18H** structure is also plausibly the dwelling: it is a compact light-roofed building among trees and yard landscaping, contrasting with the larger, elongated structures that look more agricultural. As with image 1, this is a visual plausibility judgment rather than a definitive identification.

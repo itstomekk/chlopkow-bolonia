@@ -1,0 +1,25 @@
+{
+  "preview_only": true,
+  "osm_way": 993157691,
+  "variant": "warm",
+  "size": [
+    58,
+    55
+  ],
+  "old_object": {
+    "x": 2208,
+    "y": 4580,
+    "w": 31,
+    "h": 44,
+    "base": 4621.286497859738
+  },
+  "placement": {
+    "x": 2195,
+    "y": 4566,
+    "center_x": 2224,
+    "base": 4621
+  },
+  "removed_old_house_pixels": 641,
+  "removed_old_shadow_pixels": 396,
+  "neighbour_layer_unchanged": true
+}

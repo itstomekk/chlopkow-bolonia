@@ -1,0 +1,37 @@
+[
+  {
+    "box": [532, 347, 609, 390],
+    "title": "samochód",
+    "observation": "W centrum podwórza widać mały jasny obiekt o kształcie przypominającym samochód, z ciemnymi fragmentami.",
+    "alternatives": ["ciągnik", "maszyna rolnicza"],
+    "confidence": "Średnia"
+  },
+  {
+    "box": [452, 280, 535, 321],
+    "title": "jasny stos lub materiał",
+    "observation": "Przy północnej krawędzi podwórza widoczny jest jasny, podłużny prostokątny obiekt leżący na ziemi.",
+    "alternatives": ["deski", "przyczepa"],
+    "confidence": "Niska"
+  },
+  {
+    "box": [777, 402, 825, 447],
+    "title": "mały biały pojazd lub przedmiot",
+    "observation": "Po prawej stronie podwórza widać niewielki jasny obiekt częściowo zasłonięty przez otoczenie.",
+    "alternatives": ["przyczepa", "zbiornik"],
+    "confidence": "Niska"
+  },
+  {
+    "box": [445, 305, 755, 700],
+    "title": "utwardzona nawierzchnia podwórza",
+    "observation": "Duża środkowa część siedliska ma jednolitą szarą, ubitą powierzchnię odmienną od otaczających pól.",
+    "alternatives": ["plac żwirowy", "ziemny dziedziniec"],
+    "confidence": "Średnia"
+  },
+  {
+    "box": [430, 690, 710, 762],
+    "title": "ogrodzenie lub rząd słupków",
+    "observation": "Wzdłuż południowej krawędzi podwórza widoczny jest nieregularny rząd ciemnych, pionowych elementów.",
+    "alternatives": ["krzewy", "sterta gałęzi"],
+    "confidence": "Niska"
+  }
+]

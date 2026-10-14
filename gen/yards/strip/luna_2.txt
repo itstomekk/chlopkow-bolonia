@@ -1,0 +1,6 @@
+#7: dx=0 m, dy=0 m (confidence high), outline follows the irregular roof footprint.  
+#8: dx=0 m, dy=0 m (confidence high), outline sits over the long horizontal roof.  
+#9: dx=0 m, dy=0 m (confidence high), outline matches the tall rectangular roof.  
+#10: dx=0 m, dy=0 m (confidence med), outline covers the narrow vertical roof.  
+#11: dx=0 m, dy=0 m (confidence med), outline follows the vertical roof and its lower extension.  
+#12: dx=0 m, dy=0 m (confidence high), outline matches the long horizontal roof.

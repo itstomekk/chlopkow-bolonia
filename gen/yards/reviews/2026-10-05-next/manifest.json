@@ -1,0 +1,217 @@
+{
+  "preview_only": true,
+  "gameChangesApplied": false,
+  "yards": [
+    "23",
+    "22",
+    "20",
+    "19"
+  ],
+  "building_count_per_yard": {
+    "23": 2,
+    "22": 3,
+    "20": 2,
+    "19": 3
+  },
+  "target_building_total": 10,
+  "source": "Existing GPT Image source library, repixelated at current game scale; no new generation claimed.",
+  "house_revisions": {
+    "20": "Owner-corrected wooden ruin",
+    "19": "Owner-corrected rectangular cuboid"
+  },
+  "small_props": [
+    {
+      "id": "east1-19-p1:cart",
+      "candidate": "east1-19-p1",
+      "kind": "cart",
+      "x": 1074,
+      "y": 4114,
+      "identification": "wóz na słomę pusty",
+      "status": "not placed: no clear ground within local preview tolerance"
+    },
+    {
+      "id": "east1-19-p2:tin_shelter",
+      "candidate": "east1-19-p2",
+      "kind": "tin_shelter",
+      "x": 1109,
+      "y": 4124,
+      "identification": "wiata blaszana",
+      "status": "not placed: no clear ground within local preview tolerance"
+    },
+    {
+      "id": "east1-20-p4:hot_tub",
+      "candidate": "east1-20-p4",
+      "kind": "hot_tub",
+      "x": 952,
+      "y": 4152,
+      "identification": "balia do gorącej kąpieli",
+      "status": "placed",
+      "sprite_position": [
+        944,
+        4139
+      ],
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "east1-20-p2:opel_astra",
+      "candidate": "east1-20-p2",
+      "kind": "opel_astra",
+      "x": 926,
+      "y": 4153,
+      "identification": "opel astra",
+      "status": "placed",
+      "sprite_position": [
+        924,
+        4123
+      ],
+      "offset": [
+        12,
+        -10
+      ]
+    },
+    {
+      "id": "east1-19-p4:hedge",
+      "candidate": "east1-19-p4",
+      "kind": "hedge",
+      "x": 972,
+      "y": 4162,
+      "identification": "żywopłot",
+      "status": "placed",
+      "sprite_position": [
+        960,
+        4146
+      ],
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "east1-19-p3:workshop",
+      "candidate": "east1-19-p3",
+      "kind": "workshop",
+      "x": 1109,
+      "y": 4162,
+      "identification": "warsztat",
+      "status": "not placed: no clear ground within local preview tolerance"
+    },
+    {
+      "id": "east1-20-p5:well",
+      "candidate": "east1-20-p5",
+      "kind": "well",
+      "x": 958,
+      "y": 4171,
+      "identification": "studnia",
+      "status": "placed",
+      "sprite_position": [
+        951,
+        4158
+      ],
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "east1-19-p6:tractor_plough",
+      "candidate": "east1-19-p6",
+      "kind": "tractor_plough",
+      "x": 1083,
+      "y": 4174,
+      "identification": "maszyny gospodarcze, traktor, pług",
+      "status": "not placed: no clear ground within local preview tolerance"
+    },
+    {
+      "id": "east1-19-p5:orchard",
+      "candidate": "east1-19-p5",
+      "kind": "orchard",
+      "x": 1023,
+      "y": 4179,
+      "identification": "drzewka iglaste po prawej a po lewej czeresnie",
+      "status": "placed",
+      "sprite_position": [
+        1000,
+        4145
+      ],
+      "offset": [
+        -2,
+        -2
+      ]
+    },
+    {
+      "id": "east1-19-p7:well",
+      "candidate": "east1-19-p7",
+      "kind": "well",
+      "x": 1079,
+      "y": 4187,
+      "identification": "studnia",
+      "status": "placed",
+      "sprite_position": [
+        1078,
+        4158
+      ],
+      "offset": [
+        6,
+        -16
+      ]
+    },
+    {
+      "id": "east1-22-p1:white_car",
+      "candidate": "east1-22-p1",
+      "kind": "white_car",
+      "x": 917,
+      "y": 4254,
+      "identification": "auto biale",
+      "status": "placed",
+      "sprite_position": [
+        906,
+        4243
+      ],
+      "offset": [
+        2,
+        10
+      ]
+    },
+    {
+      "id": "east1-22-p3:well",
+      "candidate": "east1-22-p3",
+      "kind": "well",
+      "x": 946,
+      "y": 4261,
+      "identification": "studnia",
+      "status": "placed",
+      "sprite_position": [
+        939,
+        4248
+      ],
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "east1-22-p5:mirabelle",
+      "candidate": "east1-22-p5",
+      "kind": "mirabelle",
+      "x": 917,
+      "y": 4298,
+      "identification": "drzewka z mirabelkami",
+      "status": "placed",
+      "sprite_position": [
+        907,
+        4270
+      ],
+      "offset": [
+        0,
+        -4
+      ]
+    }
+  ],
+  "ground_pair_overlap_pixels": 0,
+  "ground_centroid_error_max_px": 0.8,
+  "protected_shared_files_unchanged": true,
+  "delivery": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-05-chlopkow-next-yards"
+}

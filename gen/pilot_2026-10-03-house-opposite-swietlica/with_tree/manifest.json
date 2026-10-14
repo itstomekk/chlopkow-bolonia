@@ -1,0 +1,77 @@
+{
+  "count": 4,
+  "reference_files": [
+    "sv_sheet.jpg",
+    "sat.png",
+    "angles/D_raw.png",
+    "cheerful_raw.png"
+  ],
+  "preview_only": true,
+  "docs_unchanged": true,
+  "variants": [
+    {
+      "id": "1",
+      "title": "Natural",
+      "raw": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\with_tree\\1_raw.png",
+      "separate_generation": true,
+      "manual_rotation": false,
+      "house_width_target": 58,
+      "compound_sprite_size": [
+        72,
+        66
+      ],
+      "position": [
+        2182,
+        4555
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Fuller tree",
+      "raw": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\with_tree\\2_raw.png",
+      "separate_generation": true,
+      "manual_rotation": false,
+      "house_width_target": 58,
+      "compound_sprite_size": [
+        80,
+        61
+      ],
+      "position": [
+        2173,
+        4560
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Cheerful warm",
+      "raw": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\with_tree\\3_raw.png",
+      "separate_generation": true,
+      "manual_rotation": false,
+      "house_width_target": 58,
+      "compound_sprite_size": [
+        59,
+        48
+      ],
+      "position": [
+        2195,
+        4574
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Chunky",
+      "raw": "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\with_tree\\4_raw.png",
+      "separate_generation": true,
+      "manual_rotation": false,
+      "house_width_target": 58,
+      "compound_sprite_size": [
+        69,
+        63
+      ],
+      "position": [
+        2184,
+        4558
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+#19: dx=0, dy=0 m (confidence med), outline appears to cover the large grey roof.  
+#20: dx=0, dy=0 m (confidence high), outline is well aligned with the rectangular roof.  
+#21: dx=0, dy=0 m (confidence med), outline overlaps the reddish roof; minor boundary differences are not a clear translation.  
+#22: dx=0, dy=0 m (confidence med), outline covers the dark/purple roof.  
+#23: dx=0, dy=0 m (confidence high), narrow outline closely matches the narrow roof.  
+#24: dx=0, dy=0 m (confidence med), outline sits over the nearby dark roof.

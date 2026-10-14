@@ -1,0 +1,73 @@
+{
+ "osm_way": 993157691,
+ "address": "Chłopków 3",
+ "building": "detached",
+ "levels": "1",
+ "lat": 52.264154,
+ "lon": 22.8748966,
+ "game_xy": [
+  2220,
+  4610
+ ],
+ "ridge_bearing_guess": 6,
+ "edges": [
+  {
+   "len_m": 7.3,
+   "dir": 96,
+   "faces": 186,
+   "side": "S"
+  },
+  {
+   "len_m": 8.7,
+   "dir": 6,
+   "faces": 276,
+   "side": "W"
+  },
+  {
+   "len_m": 7.3,
+   "dir": 96,
+   "faces": 6,
+   "side": "N"
+  },
+  {
+   "len_m": 8.7,
+   "dir": 6,
+   "faces": 96,
+   "side": "E"
+  }
+ ],
+ "frames": [
+  {
+   "file": "sv_0_Nside_d13m_yaw188.jpg",
+   "panoid": "FwXCydlXslK6XYsWNsaaFw",
+   "dist_m": 13,
+   "yaw": 188,
+   "fov": 65,
+   "facade_seen": "N"
+  },
+  {
+   "file": "sv_1_Eside_d16m_yaw231.jpg",
+   "panoid": "x6Y_xD3hv503c0IX3yAAag",
+   "dist_m": 16,
+   "yaw": 231,
+   "fov": 57,
+   "facade_seen": "E"
+  },
+  {
+   "file": "sv_2_Nside_d18m_yaw152.jpg",
+   "panoid": "d1exMEfDQSY24_dp_stAuw",
+   "dist_m": 18,
+   "yaw": 152,
+   "fov": 50,
+   "facade_seen": "N"
+  },
+  {
+   "file": "sv_3_Eside_d22m_yaw256.jpg",
+   "panoid": "BDhFlk9mSxinXgpn87nbpg",
+   "dist_m": 22,
+   "yaw": 256,
+   "fov": 42,
+   "facade_seen": "E"
+  }
+ ]
+}

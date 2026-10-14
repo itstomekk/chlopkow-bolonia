@@ -1,0 +1,32 @@
+{
+  "asset_id": "dom_muchy_bus_shelter",
+  "human_identification": "small bus-stop shelter north of Dom Muchy",
+  "original_asset_unchanged": "B3_candidate.png",
+  "source_reference_files": [
+    "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\full_yard\\bus_stop_search\\shelter_near_close.jpg",
+    "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\full_yard\\bus_stop_search\\shelter_photo_crop.png",
+    "C:\\Users\\Lenovo\\Hermes\\projects\\games\\arek-w-chlopkowie\\gen\\pilot_2026-10-03-house-opposite-swietlica\\with_tree\\4_raw.png"
+  ],
+  "source_generation": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261005_074717_ca074b17.png",
+  "generator": "GPT Image via Codex OAuth",
+  "model": "gpt-image-2-medium",
+  "requested_quality": "medium",
+  "reported_quality": "medium",
+  "request_id": "45a397de-262e-4ece-8b8f-36ce2c218a0e",
+  "native_size": [
+    18,
+    16
+  ],
+  "opaque_colour_count": 22,
+  "alpha_values": [
+    0,
+    255
+  ],
+  "magenta_halo_pixels": 0,
+  "placement": null,
+  "placement_note": "No precise satellite match established; do not reuse guessed B3 coordinates.",
+  "gameChangesApplied": false,
+  "accepted_pilot_and_shared_game_files_unchanged": true,
+  "delivered_sprite": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-05-chlopkow-przystanek-dom-muchy\\shelter.png",
+  "review": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-05-chlopkow-przystanek-dom-muchy\\shelter_review.png"
+}

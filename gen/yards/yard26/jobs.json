@@ -1,0 +1,36 @@
+[
+ {
+  "name": "house_909988213",
+  "way": 909988213,
+  "kind": "house",
+  "address": "Chłopków 26",
+  "levels": "1",
+  "along_m": 8.5,
+  "depth_m": 9.6,
+  "sat_deg": 11.0,
+  "ew_wall_deg": 101.0,
+  "w": 64,
+  "h_rule": 71,
+  "satellite_only": false,
+  "street_photos_close": true,
+  "road_north": false,
+  "refdir": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-03-chlopkow-building-refs\\w909988213"
+ },
+ {
+  "name": "farm1_909988509",
+  "way": 909988509,
+  "kind": "farm",
+  "address": null,
+  "levels": "1",
+  "along_m": 6.4,
+  "depth_m": 15.8,
+  "sat_deg": 179.0,
+  "ew_wall_deg": 89.0,
+  "w": 47,
+  "h_rule": null,
+  "satellite_only": false,
+  "street_photos_close": false,
+  "road_north": false,
+  "refdir": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-03-chlopkow-building-refs\\w909988509"
+ }
+]

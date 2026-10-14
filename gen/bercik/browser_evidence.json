@@ -1,0 +1,56 @@
+{
+  "position": {
+    "x": 4864,
+    "y": 5896,
+    "sector": "J12",
+    "terrain": "track",
+    "reachable": true
+  },
+  "page_errors": [],
+  "asset_responses": [
+    {
+      "url": "http://127.0.0.1:8848/js/bercik.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/img/bercik_sheet.json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/img/bercik_sheet.png",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/js/bercik.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/img/bercik_sheet.png",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/img/bercik_sheet.json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/js/bercik.js",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:8848/img/bercik_sheet.png",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8848/img/bercik_sheet.json",
+      "status": 200
+    }
+  ],
+  "pl_dialogue": true,
+  "en_dialogue": true,
+  "screenshots": [
+    "in_game.png",
+    "dialogue_pl.png",
+    "title_desktop.png",
+    "title_mobile.png"
+  ]
+}

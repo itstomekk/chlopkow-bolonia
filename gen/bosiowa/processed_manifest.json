@@ -1,0 +1,279 @@
+{
+  "asset": "bosiowa",
+  "content_height_small_px": 71,
+  "provider": "GPT Image 2 medium via openai-codex",
+  "inputs": {
+    "frontback": {
+      "path": "gen/bosiowa/bosiowa_walk_frontback_raw.png",
+      "sha256": "b9ceff6f1a8d093d6c33e8c018f54bdac6858929e1b99c1178a6612b449c9579",
+      "dimensions": [
+        1536,
+        1024
+      ]
+    },
+    "side": {
+      "path": "gen/bosiowa/bosiowa_walk_side_raw.png",
+      "sha256": "0828ed2a17170d1fb0580e35357da2811d048d4f8fdf0f829b8a29d3a7dc2468",
+      "dimensions": [
+        1774,
+        887
+      ]
+    }
+  },
+  "rows": {
+    "down": {
+      "source": "frontback",
+      "row": 0,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "up": {
+      "source": "frontback",
+      "row": 1,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "left": {
+      "source": "side",
+      "row": 0,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "right": {
+      "source": "side",
+      "row": 1,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "sway_small_px": 0,
+  "align": "head centroid",
+  "palette": {
+    "size": 40,
+    "colors": [
+      "#F1ECE0",
+      "#EECC86",
+      "#FDC051",
+      "#EBBF71",
+      "#FAB647",
+      "#E6B360",
+      "#F4A940",
+      "#F3A732",
+      "#EF9B2E",
+      "#E19A3D",
+      "#9B9A96",
+      "#E38929",
+      "#E0851C",
+      "#CF8128",
+      "#CC7219",
+      "#C06514",
+      "#898681",
+      "#9B6A3A",
+      "#6F7B82",
+      "#6A6E6F",
+      "#5F6263",
+      "#AF5610",
+      "#A1500F",
+      "#864E1D",
+      "#962C0D",
+      "#6A2F0F",
+      "#555554",
+      "#4A525A",
+      "#464849",
+      "#45372D",
+      "#471D0F",
+      "#283D59",
+      "#283546",
+      "#262E3B",
+      "#272324",
+      "#152131",
+      "#231514",
+      "#1E0812",
+      "#0E1118",
+      "#0D040C"
+    ]
+  },
+  "frames": {
+    "down_0": {
+      "size": [
+        74,
+        142
+      ],
+      "pos_in_cell": [
+        33,
+        22
+      ]
+    },
+    "down_1": {
+      "size": [
+        76,
+        140
+      ],
+      "pos_in_cell": [
+        33,
+        24
+      ]
+    },
+    "down_2": {
+      "size": [
+        76,
+        140
+      ],
+      "pos_in_cell": [
+        32,
+        24
+      ]
+    },
+    "down_3": {
+      "size": [
+        76,
+        140
+      ],
+      "pos_in_cell": [
+        33,
+        24
+      ]
+    },
+    "up_0": {
+      "size": [
+        82,
+        142
+      ],
+      "pos_in_cell": [
+        24,
+        22
+      ]
+    },
+    "up_1": {
+      "size": [
+        76,
+        140
+      ],
+      "pos_in_cell": [
+        27,
+        24
+      ]
+    },
+    "up_2": {
+      "size": [
+        82,
+        142
+      ],
+      "pos_in_cell": [
+        24,
+        22
+      ]
+    },
+    "up_3": {
+      "size": [
+        76,
+        140
+      ],
+      "pos_in_cell": [
+        27,
+        24
+      ]
+    },
+    "left_0": {
+      "size": [
+        86,
+        142
+      ],
+      "pos_in_cell": [
+        17,
+        22
+      ]
+    },
+    "left_1": {
+      "size": [
+        74,
+        142
+      ],
+      "pos_in_cell": [
+        31,
+        22
+      ]
+    },
+    "left_2": {
+      "size": [
+        88,
+        142
+      ],
+      "pos_in_cell": [
+        17,
+        22
+      ]
+    },
+    "left_3": {
+      "size": [
+        74,
+        142
+      ],
+      "pos_in_cell": [
+        29,
+        22
+      ]
+    },
+    "right_0": {
+      "size": [
+        88,
+        142
+      ],
+      "pos_in_cell": [
+        26,
+        22
+      ]
+    },
+    "right_1": {
+      "size": [
+        78,
+        142
+      ],
+      "pos_in_cell": [
+        26,
+        22
+      ]
+    },
+    "right_2": {
+      "size": [
+        90,
+        142
+      ],
+      "pos_in_cell": [
+        25,
+        22
+      ]
+    },
+    "right_3": {
+      "size": [
+        78,
+        142
+      ],
+      "pos_in_cell": [
+        26,
+        22
+      ]
+    }
+  },
+  "output": {
+    "sheet": "docs/img/bosiowa_sheet.png",
+    "metadata": "docs/img/bosiowa_sheet.json",
+    "npc": "docs/img/bosiowa.png"
+  }
+}

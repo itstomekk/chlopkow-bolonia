@@ -1,0 +1,78 @@
+{
+  "preview_only": true,
+  "count": 4,
+  "variants": [
+    {
+      "variant": "A",
+      "requested_delta_degrees": 10,
+      "direction": "CW",
+      "exact_angle_verified": false,
+      "source": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261004_194026_6499090d.png",
+      "sprite_size": [
+        58,
+        54
+      ],
+      "placement": {
+        "center_x": 2224,
+        "base": 4621,
+        "x": 2195,
+        "y": 4567
+      }
+    },
+    {
+      "variant": "B",
+      "requested_delta_degrees": 15,
+      "direction": "CW",
+      "exact_angle_verified": false,
+      "source": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261004_194025_65622518.png",
+      "sprite_size": [
+        58,
+        55
+      ],
+      "placement": {
+        "center_x": 2224,
+        "base": 4621,
+        "x": 2195,
+        "y": 4566
+      }
+    },
+    {
+      "variant": "C",
+      "requested_delta_degrees": 20,
+      "direction": "CW",
+      "exact_angle_verified": false,
+      "source": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261004_194028_2dfdfa86.png",
+      "sprite_size": [
+        58,
+        54
+      ],
+      "placement": {
+        "center_x": 2224,
+        "base": 4621,
+        "x": 2195,
+        "y": 4567
+      }
+    },
+    {
+      "variant": "D",
+      "requested_delta_degrees": 15,
+      "direction": "CCW",
+      "exact_angle_verified": false,
+      "source": "C:\\Users\\Lenovo\\AppData\\Local\\hermes\\cache\\generated\\images\\openai_codex_gpt-image-2-medium_20261004_194029_7814aee4.png",
+      "sprite_size": [
+        58,
+        55
+      ],
+      "placement": {
+        "center_x": 2224,
+        "base": 4621,
+        "x": 2195,
+        "y": 4566
+      }
+    }
+  ],
+  "docs_unchanged": true,
+  "neighbours_unchanged": true,
+  "original_warm_preserved": true,
+  "delivery": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-04-chlopkow-house-angles"
+}

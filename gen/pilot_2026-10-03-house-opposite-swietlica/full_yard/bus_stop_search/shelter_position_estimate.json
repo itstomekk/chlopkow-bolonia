@@ -1,0 +1,16 @@
+{
+  "lat": 52.264387196357305,
+  "lon": 22.874584710008406,
+  "satellite_px": [
+    367.604004830122,
+    316.5973699092865
+  ],
+  "position_method": "triangulated from rounded reference camera distances/bearings and Street View image centre offsets",
+  "residuals_metres": [
+    0.21430258545187186,
+    -0.1548458354013622,
+    -0.06055911274331027
+  ],
+  "estimated_uncertainty_m": 3,
+  "user_direction": "north of Dom Muchy"
+}

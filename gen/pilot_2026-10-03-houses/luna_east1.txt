@@ -1,0 +1,23 @@
+**a) Match to satellite**
+
+- **Overall:** only a **rough positional match**. The main farm cluster is in the correct right/central area, but several footprints, orientations, colours and spacing are inaccurate.
+- **Upper-left long barn:** broadly matches the satellite’s long horizontal barn, but is slightly misplaced and simplified.
+- **Centre-left barn:** orientation is approximately correct, but its footprint is too regular and does not reproduce the satellite shape closely.
+- **Centre-right long barn:** roughly matches the north–south satellite building, though it is enlarged/shifted.
+- **Right-side cluster:** the long dark building and tall red-roof building are recognisable matches, but the arrangement is too tightly packed and some roofs/orientations differ.
+- **Bottom-centre long barn:** position is broadly correct, but its roof colour/shape is only an approximation.
+- **Colours:** grey roofs are generally plausible; the prominent red/blue building is a reasonable colour match, but several brown/grey tones are invented or inconsistent with the imagery.
+
+**b) Problems**
+
+- **Right-side farm cluster:** several sprites visibly touch or overlap, especially the upper horizontal barn, central vertical barn and tall red-roof barn. They read as a crowded composite rather than clearly separated buildings.
+- **Centre-left barn:** its small attached/adjacent pieces look awkwardly layered and potentially floating.
+- **Upper-left buildings:** partly cut off by the viewport, although this is a framing issue rather than a sprite defect.
+- **No obvious invented farm windows or doors:** the farm buildings are appropriately mostly roof/wall forms. The windows and doors are on houses, not barns.
+- **Lawn and trees:** these appear to be map decoration, not details incorrectly painted onto the farm-building sprites. They do, however, sometimes crowd the building footprints.
+
+**c) Style consistency**
+
+- **Generally consistent pixel-art language:** strong outlines, angled roofs, shadows and palette fit the houses.
+- Farm buildings are intentionally simpler and mostly roof-focused, while houses have more façade detail. That is acceptable, but the farms look somewhat flatter/less finished than the houses.
+- Main weakness is not style, but **footprint accuracy and separation**—especially in the right-side cluster.

@@ -1,0 +1,128 @@
+[
+ {
+  "id": 909988586,
+  "yard": "19",
+  "house": true,
+  "strip": "east1",
+  "png": "gen/yards/final/909988586.png",
+  "x": 1009,
+  "y": 4198
+ },
+ {
+  "id": 909989528,
+  "yard": "20",
+  "house": true,
+  "strip": "east1",
+  "png": "gen/yards/final/909989528.png",
+  "x": 920,
+  "y": 4169
+ },
+ {
+  "id": 909989529,
+  "yard": "22",
+  "house": true,
+  "strip": "east1",
+  "png": "gen/yards/final/909989529.png",
+  "x": 893,
+  "y": 4203
+ },
+ {
+  "id": 909989530,
+  "yard": "23",
+  "house": true,
+  "strip": "east1",
+  "png": "gen/yards/final/909989530.png",
+  "x": 877,
+  "y": 4127
+ },
+ {
+  "id": 1095382357,
+  "yard": "E1",
+  "house": true,
+  "strip": "east1",
+  "png": "gen/yards/final/1095382357.png",
+  "x": 1034,
+  "y": 4163
+ },
+ {
+  "id": 909988883,
+  "yard": "22",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/909988883.png",
+  "x": 883,
+  "y": 4245
+ },
+ {
+  "id": 909988334,
+  "yard": "20",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/909988334.png",
+  "x": 927,
+  "y": 4098
+ },
+ {
+  "id": 909988353,
+  "yard": "22",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/909988353.png",
+  "x": 888,
+  "y": 4294
+ },
+ {
+  "id": 909988707,
+  "yard": "19",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/909988707.png",
+  "x": 1008,
+  "y": 4089
+ },
+ {
+  "id": 909988333,
+  "yard": "23",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/909988333.png",
+  "x": 935,
+  "y": 4063
+ },
+ {
+  "id": 909988706,
+  "yard": "19",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/909988706.png",
+  "x": 1016,
+  "y": 4053
+ },
+ {
+  "id": 1095382351,
+  "yard": "E1",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/1095382351.png",
+  "x": 1048,
+  "y": 4099
+ },
+ {
+  "id": 1095382354,
+  "yard": "E1",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/1095382354.png",
+  "x": 1092,
+  "y": 4088
+ },
+ {
+  "id": 1095382352,
+  "yard": "E1",
+  "house": false,
+  "strip": "east1",
+  "png": "gen/yards/final/1095382352.png",
+  "x": 1070,
+  "y": 4085
+ }
+]

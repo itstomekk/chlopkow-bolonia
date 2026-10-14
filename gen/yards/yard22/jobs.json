@@ -1,0 +1,19 @@
+[
+ {
+  "name": "house_909989529",
+  "way": 909989529,
+  "kind": "house",
+  "address": "Chłopków 22",
+  "levels": "1",
+  "along_m": 9.3,
+  "depth_m": 9.1,
+  "sat_deg": 17.0,
+  "ew_wall_deg": 107.0,
+  "w": 70,
+  "h_rule": 68,
+  "satellite_only": false,
+  "street_photos_close": true,
+  "road_north": true,
+  "refdir": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-03-chlopkow-building-refs\\w909989529"
+ }
+]

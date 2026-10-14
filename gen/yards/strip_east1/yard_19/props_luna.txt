@@ -1,0 +1,51 @@
+[
+  {
+    "box": [642, 300, 778, 391],
+    "title": "Stos desek lub drewna",
+    "observation": "Przy północnym skraju podwórza widać kilka jasnych, równoległych elementów ułożonych jeden na drugim.",
+    "alternatives": ["palety", "materiały budowlane"],
+    "confidence": "Niska"
+  },
+  {
+    "box": [822, 328, 965, 478],
+    "title": "Mały budynek gospodarczy",
+    "observation": "Po prawej stronie podwórza widoczny jest niewielki prostokątny obiekt z niebieskoszarym dachem, nieobjęty obrysem.",
+    "alternatives": ["szopa", "wiata"],
+    "confidence": "Średnia"
+  },
+  {
+    "box": [822, 470, 965, 735],
+    "title": "Czerwony budynek gospodarczy",
+    "observation": "W prawej części obrazu widoczny jest długi, wąski obiekt z czerwonym dachem, poza zaznaczonymi budynkami.",
+    "alternatives": ["stodoła", "szopa"],
+    "confidence": "Średnia"
+  },
+  {
+    "box": [36, 500, 285, 855],
+    "title": "Grządki lub ogród warzywny",
+    "observation": "Po lewej stronie podwórza widać nieregularne ciemne rzędy i kępy ułożone w pasach, przypominające grządki.",
+    "alternatives": ["zagon uprawny", "krzewy"],
+    "confidence": "Niska"
+  },
+  {
+    "box": [337, 550, 535, 837],
+    "title": "Skupisko krzewów",
+    "observation": "Między drogą a środkowym budynkiem znajduje się gęste, ciemne skupisko krzewów lub niskich drzew.",
+    "alternatives": ["żywopłot", "zarośla"],
+    "confidence": "Średnia"
+  },
+  {
+    "box": [705, 582, 805, 750],
+    "title": "Maszyny lub pojazdy gospodarcze",
+    "observation": "Na wąskim podwórzu po prawej stronie środkowego budynku widać kilka małych, ciemnych obiektów ustawionych przy przejeździe.",
+    "alternatives": ["przyczepa", "pojemniki"],
+    "confidence": "Niska"
+  },
+  {
+    "box": [690, 690, 780, 785],
+    "title": "Mały pojazd lub sprzęt",
+    "observation": "Poniżej środkowego budynku widoczny jest skupiony ciemny obiekt z jaśniejszym elementem, przypominający zaparkowany sprzęt.",
+    "alternatives": ["taczka", "przyczepa"],
+    "confidence": "Niska"
+  }
+]

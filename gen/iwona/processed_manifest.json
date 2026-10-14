@@ -1,0 +1,279 @@
+{
+  "asset": "iwona",
+  "content_height_small_px": 71,
+  "provider": "GPT Image 2 medium via openai-codex",
+  "inputs": {
+    "frontback": {
+      "path": "gen/iwona/iwona_walk_frontback_raw.png",
+      "sha256": "c5d727f9a2f9d38fd057808405bd843fa7c3d157e167edf9248bc5c27a70216d",
+      "dimensions": [
+        1774,
+        887
+      ]
+    },
+    "side": {
+      "path": "gen/iwona/iwona_walk_side_raw.png",
+      "sha256": "9926d3331742b2348c97d4686ae18a3d18f2b3ed43308469a667d90c02cab6de",
+      "dimensions": [
+        1774,
+        887
+      ]
+    }
+  },
+  "rows": {
+    "down": {
+      "source": "frontback",
+      "row": 0,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "up": {
+      "source": "frontback",
+      "row": 1,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "left": {
+      "source": "side",
+      "row": 0,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "right": {
+      "source": "side",
+      "row": 1,
+      "lean_small_px": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "sway_small_px": 0,
+  "align": "head centroid",
+  "palette": {
+    "size": 40,
+    "colors": [
+      "#F9F0C9",
+      "#F8E29D",
+      "#EEE5C2",
+      "#DAE0D7",
+      "#E8CC9F",
+      "#F3CA76",
+      "#D7CDAB",
+      "#BACCD0",
+      "#EABE82",
+      "#F8B75A",
+      "#D3B78C",
+      "#A8B8BC",
+      "#EFA64C",
+      "#C5A67B",
+      "#DD8F3F",
+      "#D17B2D",
+      "#AD9F86",
+      "#A7885F",
+      "#7A9BB7",
+      "#7F7E76",
+      "#C77027",
+      "#C16824",
+      "#B46424",
+      "#A0622B",
+      "#746652",
+      "#A3551E",
+      "#98511E",
+      "#8D4D1E",
+      "#695238",
+      "#824118",
+      "#693716",
+      "#504D47",
+      "#443528",
+      "#482311",
+      "#2B201B",
+      "#2A0E15",
+      "#1C0B13",
+      "#130B0D",
+      "#10050B",
+      "#0E020C"
+    ]
+  },
+  "frames": {
+    "down_0": {
+      "size": [
+        80,
+        142
+      ],
+      "pos_in_cell": [
+        18,
+        22
+      ]
+    },
+    "down_1": {
+      "size": [
+        76,
+        142
+      ],
+      "pos_in_cell": [
+        23,
+        22
+      ]
+    },
+    "down_2": {
+      "size": [
+        78,
+        142
+      ],
+      "pos_in_cell": [
+        21,
+        22
+      ]
+    },
+    "down_3": {
+      "size": [
+        74,
+        142
+      ],
+      "pos_in_cell": [
+        24,
+        22
+      ]
+    },
+    "up_0": {
+      "size": [
+        84,
+        142
+      ],
+      "pos_in_cell": [
+        28,
+        22
+      ]
+    },
+    "up_1": {
+      "size": [
+        80,
+        142
+      ],
+      "pos_in_cell": [
+        30,
+        22
+      ]
+    },
+    "up_2": {
+      "size": [
+        84,
+        142
+      ],
+      "pos_in_cell": [
+        28,
+        22
+      ]
+    },
+    "up_3": {
+      "size": [
+        80,
+        142
+      ],
+      "pos_in_cell": [
+        31,
+        22
+      ]
+    },
+    "left_0": {
+      "size": [
+        98,
+        142
+      ],
+      "pos_in_cell": [
+        5,
+        22
+      ]
+    },
+    "left_1": {
+      "size": [
+        72,
+        142
+      ],
+      "pos_in_cell": [
+        33,
+        22
+      ]
+    },
+    "left_2": {
+      "size": [
+        96,
+        142
+      ],
+      "pos_in_cell": [
+        20,
+        22
+      ]
+    },
+    "left_3": {
+      "size": [
+        82,
+        142
+      ],
+      "pos_in_cell": [
+        32,
+        22
+      ]
+    },
+    "right_0": {
+      "size": [
+        102,
+        142
+      ],
+      "pos_in_cell": [
+        24,
+        22
+      ]
+    },
+    "right_1": {
+      "size": [
+        78,
+        142
+      ],
+      "pos_in_cell": [
+        22,
+        22
+      ]
+    },
+    "right_2": {
+      "size": [
+        100,
+        142
+      ],
+      "pos_in_cell": [
+        11,
+        22
+      ]
+    },
+    "right_3": {
+      "size": [
+        84,
+        142
+      ],
+      "pos_in_cell": [
+        17,
+        22
+      ]
+    }
+  },
+  "output": {
+    "sheet": "docs/img/iwona_sheet.png",
+    "metadata": "docs/img/iwona_sheet.json",
+    "npc": "docs/img/iwona.png"
+  }
+}

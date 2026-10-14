@@ -1,0 +1,321 @@
+{
+  "asset": "bercik",
+  "provider": "openai-codex request 4abfff7d-ad71-4b02-974f-35c97db61c47",
+  "input": {
+    "path": "gen/darek/walk_painter/darek_walkcycle_raw.png",
+    "sha256": "d6b2af3d046c963d64c03859fca0ed69285cc615b894dad23d964f5110f7ef87",
+    "dimensions": [
+      1774,
+      887
+    ],
+    "grid": {
+      "columns": 4,
+      "rows": 2
+    },
+    "cell_bounds": {
+      "down_a": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "down_b": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "right_a": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "right_b": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "up_a": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "up_b": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "left_a": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "left_b": [
+        1330,
+        444,
+        1774,
+        887
+      ]
+    },
+    "background_key": "magenta-like edge-connected pixels and adjacent fringe"
+  },
+  "output": {
+    "sheet": "gen/darek/walk_painter/darek_sheet.png",
+    "sheet_dimensions": [
+      520,
+      680
+    ],
+    "cell_dimensions": [
+      130,
+      170
+    ],
+    "npc": "gen/darek/walk_painter/darek.png",
+    "preview": "gen/darek/walk_painter/preview.png"
+  },
+  "palette": {
+    "size": 40,
+    "colors": [
+      "#F2F3F3",
+      "#DDE0E0",
+      "#F2C891",
+      "#C6CBCB",
+      "#FCBF75",
+      "#FCB86E",
+      "#D6BA97",
+      "#FBAE65",
+      "#F9A058",
+      "#E99F5D",
+      "#A4A29D",
+      "#E98D4B",
+      "#E47F43",
+      "#B3835B",
+      "#C36734",
+      "#955931",
+      "#747878",
+      "#645B51",
+      "#784B2C",
+      "#554940",
+      "#BF1C20",
+      "#C01219",
+      "#7E251E",
+      "#5E3C24",
+      "#5A241B",
+      "#3C3A38",
+      "#38322C",
+      "#432D22",
+      "#2F2E2D",
+      "#3B241D",
+      "#391314",
+      "#2A2C2A",
+      "#262624",
+      "#211F1F",
+      "#221617",
+      "#151414",
+      "#1D0A12",
+      "#1A0316",
+      "#0D0A0C",
+      "#0B020A"
+    ],
+    "dither": false
+  },
+  "frames": {
+    "down_a": {
+      "source_cell": "down_a",
+      "bbox": [
+        117,
+        25,
+        328,
+        419
+      ],
+      "content_grid": [
+        37,
+        70
+      ],
+      "final_content_dimensions": [
+        74,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        28,
+        24,
+        102,
+        164
+      ]
+    },
+    "down_b": {
+      "source_cell": "down_b",
+      "bbox": [
+        115,
+        25,
+        323,
+        419
+      ],
+      "content_grid": [
+        37,
+        70
+      ],
+      "final_content_dimensions": [
+        74,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        28,
+        24,
+        102,
+        164
+      ]
+    },
+    "right_a": {
+      "source_cell": "right_a",
+      "bbox": [
+        109,
+        25,
+        345,
+        419
+      ],
+      "content_grid": [
+        42,
+        70
+      ],
+      "final_content_dimensions": [
+        84,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        23,
+        24,
+        107,
+        164
+      ]
+    },
+    "right_b": {
+      "source_cell": "right_b",
+      "bbox": [
+        115,
+        26,
+        352,
+        419
+      ],
+      "content_grid": [
+        42,
+        70
+      ],
+      "final_content_dimensions": [
+        84,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        23,
+        24,
+        107,
+        164
+      ]
+    },
+    "up_a": {
+      "source_cell": "up_a",
+      "bbox": [
+        114,
+        20,
+        327,
+        411
+      ],
+      "content_grid": [
+        38,
+        70
+      ],
+      "final_content_dimensions": [
+        76,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        27,
+        24,
+        103,
+        164
+      ]
+    },
+    "up_b": {
+      "source_cell": "up_b",
+      "bbox": [
+        115,
+        20,
+        326,
+        411
+      ],
+      "content_grid": [
+        38,
+        70
+      ],
+      "final_content_dimensions": [
+        76,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        27,
+        24,
+        103,
+        164
+      ]
+    },
+    "left_a": {
+      "source_cell": "left_a",
+      "bbox": [
+        88,
+        20,
+        322,
+        407
+      ],
+      "content_grid": [
+        42,
+        70
+      ],
+      "final_content_dimensions": [
+        84,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        23,
+        24,
+        107,
+        164
+      ]
+    },
+    "left_b": {
+      "source_cell": "left_b",
+      "bbox": [
+        85,
+        20,
+        328,
+        407
+      ],
+      "content_grid": [
+        44,
+        70
+      ],
+      "final_content_dimensions": [
+        88,
+        140
+      ],
+      "sheet_bbox_within_cell": [
+        21,
+        24,
+        109,
+        164
+      ]
+    }
+  },
+  "recipe": [
+    "round(col*width/4) and round(row*height/2) cell boundaries",
+    "edge-connected magenta key plus nearby magenta fringe removal",
+    "largest connected sprite component plus substantial nearby components; detached debris removed",
+    "crop each cell independently; BOX regrid to 75px content height",
+    "one shared <=40-colour palette, no dithering, hard alpha 0/255",
+    "integer 2x NEAREST upscale to 150px content height",
+    "place on 130x170 cells with 6px foot and repeat A,B,A,B"
+  ]
+}

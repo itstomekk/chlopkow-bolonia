@@ -1,0 +1,279 @@
+{
+  "asset": "wiesio",
+  "content_height_small_px": 65,
+  "provider": "GPT Image 2 medium via openai-codex",
+  "inputs": {
+    "frontback": {
+      "path": "gen/wiesio/wiesio_walk_frontback_raw.png",
+      "sha256": "e6d207096d65135c16ac4703d2a85b04707ce6fd4f37a181209097f0375dbb7b",
+      "dimensions": [
+        1774,
+        887
+      ]
+    },
+    "side": {
+      "path": "gen/wiesio/wiesio_walk_side_raw.png",
+      "sha256": "2bf82dd384db1f7b9920662c2de6155ed6b2eb7cbf6e643ab151ade3a5f22964",
+      "dimensions": [
+        1774,
+        887
+      ]
+    }
+  },
+  "rows": {
+    "down": {
+      "source": "frontback",
+      "row": 0,
+      "lean_small_px": [
+        -3,
+        0,
+        3,
+        0
+      ]
+    },
+    "up": {
+      "source": "frontback",
+      "row": 1,
+      "lean_small_px": [
+        -3,
+        0,
+        3,
+        0
+      ]
+    },
+    "left": {
+      "source": "side",
+      "row": 0,
+      "lean_small_px": [
+        -1,
+        0,
+        1,
+        0
+      ]
+    },
+    "right": {
+      "source": "side",
+      "row": 1,
+      "lean_small_px": [
+        1,
+        0,
+        -1,
+        0
+      ]
+    }
+  },
+  "sway_small_px": 1,
+  "align": "bbox centre offset + lean/sway",
+  "palette": {
+    "size": 40,
+    "colors": [
+      "#FBC061",
+      "#FBB855",
+      "#F4AA4D",
+      "#EC943C",
+      "#C78D4C",
+      "#DE7C2E",
+      "#CA7B33",
+      "#BC7432",
+      "#91795B",
+      "#7A7367",
+      "#BE6323",
+      "#AC642B",
+      "#A15F2A",
+      "#85613E",
+      "#895226",
+      "#686258",
+      "#605547",
+      "#515451",
+      "#3A5161",
+      "#3E4D55",
+      "#814820",
+      "#7D3C18",
+      "#5E371E",
+      "#4A4841",
+      "#474138",
+      "#482C1E",
+      "#364856",
+      "#2F4859",
+      "#324049",
+      "#36312B",
+      "#331D18",
+      "#294252",
+      "#273A47",
+      "#23323B",
+      "#20272A",
+      "#1E1F1F",
+      "#211618",
+      "#141517",
+      "#1D0818",
+      "#0F080E"
+    ]
+  },
+  "frames": {
+    "down_0": {
+      "size": [
+        78,
+        130
+      ],
+      "pos_in_cell": [
+        26,
+        34
+      ]
+    },
+    "down_1": {
+      "size": [
+        74,
+        128
+      ],
+      "pos_in_cell": [
+        28,
+        36
+      ]
+    },
+    "down_2": {
+      "size": [
+        78,
+        130
+      ],
+      "pos_in_cell": [
+        28,
+        34
+      ]
+    },
+    "down_3": {
+      "size": [
+        76,
+        130
+      ],
+      "pos_in_cell": [
+        25,
+        34
+      ]
+    },
+    "up_0": {
+      "size": [
+        80,
+        128
+      ],
+      "pos_in_cell": [
+        23,
+        36
+      ]
+    },
+    "up_1": {
+      "size": [
+        76,
+        128
+      ],
+      "pos_in_cell": [
+        27,
+        36
+      ]
+    },
+    "up_2": {
+      "size": [
+        82,
+        130
+      ],
+      "pos_in_cell": [
+        28,
+        34
+      ]
+    },
+    "up_3": {
+      "size": [
+        76,
+        130
+      ],
+      "pos_in_cell": [
+        25,
+        34
+      ]
+    },
+    "left_0": {
+      "size": [
+        80,
+        130
+      ],
+      "pos_in_cell": [
+        29,
+        34
+      ]
+    },
+    "left_1": {
+      "size": [
+        56,
+        128
+      ],
+      "pos_in_cell": [
+        37,
+        36
+      ]
+    },
+    "left_2": {
+      "size": [
+        78,
+        130
+      ],
+      "pos_in_cell": [
+        22,
+        34
+      ]
+    },
+    "left_3": {
+      "size": [
+        54,
+        128
+      ],
+      "pos_in_cell": [
+        38,
+        36
+      ]
+    },
+    "right_0": {
+      "size": [
+        82,
+        130
+      ],
+      "pos_in_cell": [
+        30,
+        34
+      ]
+    },
+    "right_1": {
+      "size": [
+        58,
+        130
+      ],
+      "pos_in_cell": [
+        36,
+        34
+      ]
+    },
+    "right_2": {
+      "size": [
+        84,
+        128
+      ],
+      "pos_in_cell": [
+        19,
+        36
+      ]
+    },
+    "right_3": {
+      "size": [
+        60,
+        130
+      ],
+      "pos_in_cell": [
+        33,
+        34
+      ]
+    }
+  },
+  "output": {
+    "sheet": "docs/img/wiesio_sheet.png",
+    "metadata": "docs/img/wiesio_sheet.json",
+    "npc": "docs/img/wiesio.png"
+  }
+}

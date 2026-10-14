@@ -1,0 +1,6 @@
+#13: dx=0 m, dy=0 m (high), outline matches the rectangular roof.  
+#14: dx=0 m, dy=0 m (high), outline matches the long roof.  
+#15: dx=0 m, dy=0 m (high), outline matches the narrow roof.  
+#16: dx=0 m, dy=0 m (high), outline matches the angled roof.  
+#17: dx=0 m, dy=0 m (high), outline matches the vertical roof.  
+#18: dx=0 m, dy=0 m (high), outline matches the angled roof.

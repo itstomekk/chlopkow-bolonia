@@ -1,0 +1,19 @@
+[
+ {
+  "name": "house_909989528",
+  "way": 909989528,
+  "kind": "house",
+  "address": "Chłopków 20",
+  "levels": "1",
+  "along_m": 8.4,
+  "depth_m": 9.6,
+  "sat_deg": 15.0,
+  "ew_wall_deg": 105.0,
+  "w": 63,
+  "h_rule": 71,
+  "satellite_only": false,
+  "street_photos_close": true,
+  "road_north": false,
+  "refdir": "C:\\Users\\Lenovo\\Hermes\\image-gen\\2026-10-03-chlopkow-building-refs\\w909989528"
+ }
+]
