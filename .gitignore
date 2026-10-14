@@ -26,3 +26,11 @@ editor/cache/
 
 # local asset review sheets (gen/build_asset_review.py)
 asset-review/
+
+# BIJATYKA sources: raw art (incl. Street View-derived crops) and preview media stay local (backup branch backup/pre-live-merge-20261013-untracked)
+gen/brawl/raw/
+gen/brawl/*.png
+gen/brawl/*.jpg
+gen/brawl/*.gif
+gen/brawl/*.mp4
+gen/brawl/*.webp

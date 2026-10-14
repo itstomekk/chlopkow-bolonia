@@ -1,0 +1,282 @@
+[
+ {
+  "nr": 1,
+  "id": "track96",
+  "x": 1452,
+  "w": 0,
+  "h": 0,
+  "m": 96,
+  "kind": "road:track",
+  "name": "polna droga"
+ },
+ {
+  "nr": 2,
+  "id": "h00",
+  "x": 1980,
+  "w": 667,
+  "h": 317,
+  "m": 140,
+  "kind": "house",
+  "name": "nr 27A"
+ },
+ {
+  "nr": 3,
+  "id": "h01",
+  "x": 3360,
+  "w": 678,
+  "h": 328,
+  "m": 255,
+  "kind": "house",
+  "name": "nr 27"
+ },
+ {
+  "nr": 4,
+  "id": "h02",
+  "x": 4236,
+  "w": 586,
+  "h": 232,
+  "m": 328,
+  "kind": "house",
+  "name": "nr 26, garaż"
+ },
+ {
+  "nr": 5,
+  "id": "h03",
+  "x": 4692,
+  "w": 719,
+  "h": 288,
+  "m": 366,
+  "kind": "house",
+  "name": "nr 25"
+ },
+ {
+  "nr": 6,
+  "id": "h04",
+  "x": 5148,
+  "w": 690,
+  "h": 313,
+  "m": 404,
+  "kind": "house",
+  "name": "nr 24"
+ },
+ {
+  "nr": 7,
+  "id": "h05",
+  "x": 5524,
+  "w": 678,
+  "h": 256,
+  "m": 430,
+  "kind": "house",
+  "name": "nr 23"
+ },
+ {
+  "nr": 8,
+  "id": "road469",
+  "x": 5908,
+  "w": 0,
+  "h": 0,
+  "m": 462,
+  "kind": "road:asphalt",
+  "name": "droga przy kapliczce"
+ },
+ {
+  "nr": 9,
+  "id": "kapliczka",
+  "x": 6100,
+  "w": 115,
+  "h": 188,
+  "m": 478,
+  "kind": "front",
+  "name": "kapliczka"
+ },
+ {
+  "nr": 10,
+  "id": "h07",
+  "x": 6364,
+  "w": 683,
+  "h": 293,
+  "m": 500,
+  "kind": "house",
+  "name": "nr 19"
+ },
+ {
+  "nr": 11,
+  "id": "h08",
+  "x": 6728,
+  "w": 639,
+  "h": 320,
+  "m": 522,
+  "kind": "house",
+  "name": "niebieski dach"
+ },
+ {
+  "nr": 12,
+  "id": "booths",
+  "x": 7106,
+  "w": 735,
+  "h": 316,
+  "m": 548,
+  "kind": "house",
+  "name": "budki"
+ },
+ {
+  "nr": 13,
+  "id": "track569",
+  "x": 7473,
+  "w": 0,
+  "h": 0,
+  "m": 572,
+  "kind": "road:track",
+  "name": "polna droga"
+ },
+ {
+  "nr": 14,
+  "id": "h09",
+  "x": 7822,
+  "w": 670,
+  "h": 324,
+  "m": 600,
+  "kind": "house",
+  "name": "drewniany w krzakach"
+ },
+ {
+  "nr": 15,
+  "id": "track625",
+  "x": 8171,
+  "w": 0,
+  "h": 0,
+  "m": 626,
+  "kind": "road:track",
+  "name": "droga w prawo"
+ },
+ {
+  "nr": 16,
+  "id": "orange",
+  "x": 8532,
+  "w": 711,
+  "h": 289,
+  "m": 652,
+  "kind": "house",
+  "name": "pomarańczowy"
+ },
+ {
+  "nr": 17,
+  "id": "pks",
+  "x": 8820,
+  "w": 68,
+  "h": 183,
+  "m": 676,
+  "kind": "front",
+  "name": "przystanek PKS"
+ },
+ {
+  "nr": 18,
+  "id": "h10",
+  "x": 8952,
+  "w": 727,
+  "h": 329,
+  "m": 687,
+  "kind": "house",
+  "name": "chatka, zielona brama"
+ },
+ {
+  "nr": 19,
+  "id": "h11",
+  "x": 9350,
+  "w": 720,
+  "h": 295,
+  "m": 712,
+  "kind": "house",
+  "name": "szary, wysoki"
+ },
+ {
+  "nr": 20,
+  "id": "h12",
+  "x": 9914,
+  "w": 741,
+  "h": 343,
+  "m": 759,
+  "kind": "house",
+  "name": "stodoła + biały domek"
+ },
+ {
+  "nr": 21,
+  "id": "h12b",
+  "x": 10406,
+  "w": 738,
+  "h": 278,
+  "m": 800,
+  "kind": "house",
+  "name": "dom z wieżyczką"
+ },
+ {
+  "nr": 22,
+  "id": "h13",
+  "x": 11570,
+  "w": 743,
+  "h": 272,
+  "m": 897,
+  "kind": "house",
+  "name": "grafitowy z balkonem"
+ },
+ {
+  "nr": 23,
+  "id": "gate",
+  "x": 11976,
+  "w": 734,
+  "h": 261,
+  "m": 921,
+  "kind": "house",
+  "name": "duża brama"
+ },
+ {
+  "nr": 24,
+  "id": "h14",
+  "x": 12375,
+  "w": 717,
+  "h": 302,
+  "m": 946,
+  "kind": "house",
+  "name": "kremowy, czarna brama"
+ },
+ {
+  "nr": 25,
+  "id": "h15",
+  "x": 12807,
+  "w": 604,
+  "h": 232,
+  "m": 982,
+  "kind": "back",
+  "name": "miętowy"
+ },
+ {
+  "nr": 26,
+  "id": "h16",
+  "x": 13239,
+  "w": 685,
+  "h": 327,
+  "m": 1018,
+  "kind": "house",
+  "name": "biały z gankiem"
+ },
+ {
+  "nr": 27,
+  "id": "h17",
+  "x": 13610,
+  "w": 664,
+  "h": 332,
+  "m": 1043,
+  "kind": "house",
+  "name": "bordowy w krzakach"
+ },
+ {
+  "nr": 28,
+  "id": "h18",
+  "x": 13989,
+  "w": 716,
+  "h": 332,
+  "m": 1074,
+  "kind": "house",
+  "name": "pomarańczowy drewniany"
+ }
+]
