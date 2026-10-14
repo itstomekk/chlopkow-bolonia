@@ -33,6 +33,7 @@ docs/                    ← the game (GitHub Pages serves this folder)
   js/boards/sprint.js    ← BIEG NA 100 METRÓW: alternate left/right on asphalt + grass; PRZECIĘTNIAK replays last-200 global mean
   js/quiz.js             ← the 13 quiz questions (PL/EN), each bound to a map spot
   js/church.js           ← church interior room (drawn in code from reference photos, AI sprites auto-load from img/church/) + Sołtys
+  js/crypt.js            ← secret crypt under the church (room drawn in code), the confessional cipher + cryptex overlay, sign-order puzzle, hidden chamber
   map.json               ← map size, y-sortable objects, points of interest, minigame venues, spawn point
   items.json             ← NPC positions, apples, the cap, quiz signboards
   img/map_ground.png     ← ground layer (fields, roads, river, fences)
@@ -88,7 +89,7 @@ python test/run_all.py https://itstomekk.github.io/chlopkow-bolonia/   # against
 ```
 
 `quest_test` (main quest), `jump_test` (river jump), `features_test` (quiz), `minigames_test` (all four games, medals, retry, ghost),
-`church_test`, `frodo_test`, `soltys_surprise_test`, `cemetery_memories_test`, `village_sign_test`, `play_test`, `branding_flow_test` (title sequence: pixel reveal, name + character picker, sign phase, reduced motion), `site_metadata_test`.
+`church_test`, `crypt_test` (confessional riddle, cryptex, crypt, reload mid-crypt), `frodo_test`, `soltys_surprise_test`, `cemetery_memories_test`, `village_sign_test`, `play_test`, `branding_flow_test` (title sequence: pixel reveal, name + character picker, sign phase, reduced motion), `site_metadata_test`.
 
 The full runner isolates public Nostr sockets and disables the CDN module for every browser, so test names never enter the public arrival history. For individual regressions use `python test/isolated_browser_runner.py test/branding_flow_test.py`; `arrival_log_test.py` overrides the disabled module with a controlled transport and tests submission, history, deduplication, retries and mobile disclosure. A successful controlled transport is not proof of persistence on public relays.
 

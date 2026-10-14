@@ -8,6 +8,7 @@
      oberek    — fast 3/4 whirling eighths, um-pa-PA accompaniment, D major                                   (minigames)
      pastoralka— slow 3/4 lullaby, soft pads, F major                                    (available as a quiet piece)
      choral    — sacred organ hymn in D Dorian, 4/4 half notes, a church bell on each section           (church interior)
+     krypta    — sparse, low D-Phrygian drone with long breaths and silences                              (the crypt under the church)
      nokturn   — Chopin-style nocturne in A minor, rolling left-hand arpeggios, ornamented melody  (cemetery, memory archive)
    Every pass is re-arranged: section order, a second fiddle in thirds, octave jumps, grace notes and drum fills
    are chosen at random, so the loop never repeats exactly.
@@ -81,6 +82,14 @@
         D5:8 F5:4 D5:4   C5:8 A4:8   Bb4:8 A4:4 G4:4   A4:16` },
       forms: ['AB', 'AAB', 'ABA'],
     },
+    krypta: {   // the crypt under the church: sparse, low and modal (D Phrygian-ish), a held drone, long organ-like breaths and a lot of silence
+      bpm: 52, bar: 16, beat: 4, key: 2, scale: [0, 1, 3, 5, 7, 8, 10], drone: [38, 45], drums: null, acc: 'pad', style: 'crypt', range: [.8, 1], second: false,
+      A: { chords: 'Dm Dm Bb Dm Gm Dm A Dm', mel: `
+        D4:12 -:4   A4:8 -:8   F4:12 E4:4   D4:16   G4:8 F4:8   E4:12 -:4   C#5:8 A4:8   D4:16` },
+      B: { chords: 'Dm Gm Dm Bb A Dm Bb A', mel: `
+        A4:12 -:4   Bb4:8 A4:8   F4:8 D4:8   D5:12 -:4   C#5:8 E5:8   D5:12 A4:4   Bb4:8 F4:8   E4:16` },
+      forms: ['AB', 'AAB', 'ABA'],
+    },
     nokturn: {  // night piece for the cemetery: rolling arpeggios under a singing, ornamented line
       bpm: 66, bar: 12, beat: 4, key: 9, scale: [0, 2, 3, 5, 7, 8, 11], drone: null, drums: null, acc: 'nocturne', style: 'piano', range: [.8, 1], second: false,
       A: { chords: 'Am Am Dm E Am F E7 Am', mel: `
@@ -132,7 +141,7 @@
       for (const n of sec.notes) {
         if (n.m != null) {
           let m = n.m + (part === 'B' && octaveB && n.m < 72 ? 12 : 0);
-          if (n.len >= 2 && Math.random() < graces && (song.style || 'folk') !== 'soft' && song.style !== 'organ') {   // grace note from above (fiddle / Chopin turn)
+          if (n.len >= 2 && Math.random() < graces && (song.style || 'folk') !== 'soft' && song.style !== 'organ' && song.style !== 'crypt') {   // grace note from above (fiddle / Chopin turn)
             ev.push({ t: st, d: .5, ch: 'lead', m: diatonic(song, m, 1), v: .7 }); ev.push({ t: st + .5, d: n.len - .5, ch: 'lead', m, v: 1 });
           } else ev.push({ t: st, d: n.len, ch: 'lead', m, v: 1 });
           if (second && repeat) ev.push({ t: st, d: n.len, ch: 'second', m: diatonic(song, m, -2), v: 1 });
@@ -253,6 +262,7 @@
     lead: (e, t, d, s) => {
       const v = e.v ?? 1;
       if (s.style === 'organ') { tone(e.out, 'p50', e.m, t, d * .97, .11 * v, { a: .06, r: .25 }); tone(e.out, 'p25', e.m - 12, t, d * .97, .05 * v, { a: .08, r: .25 }); return; }
+      if (s.style === 'crypt') { tone(e.out, 'p50', e.m, t, d * .95, .07 * v, { a: .45, r: .9, vib: 9 }); tone(e.out, 'tri', e.m - 12, t, d * .95, .08 * v, { a: .6, r: .9 }); return; }
       if (s.style === 'piano') { tone(e.out, 'p25', e.m, t, d * 1.05, .24 * v, { a: .004, r: .35, decay: .4, vib: 6 }); return; }
       if (s.style === 'jazz') {   // tenor-sax-ish: soft attack, scoop into the note, late vibrato, a breath of air
         tone(e.out, 'p50', e.m, t, d * .9, .12 * v, { a: .03, r: .08, vib: 16, slide: Math.random() < .35 });
@@ -266,7 +276,7 @@
     harp: (e, t, d) => tone(e.out, 'p50', e.m, t, d, .085 * (e.v ?? 1), { a: .004, r: .4, decay: .2 }),
     bell: (e, t) => { for (const [r, v, len] of [[1, .12, 3], [2.76, .05, 1.6], [5.4, .03, .9], [.5, .06, 3.5]]) partial(e.out, freq(e.m) * r, t, v, len); },
     second: (e, t, d, s) => tone(e.out, 'p12', e.m, t, d * .9, .07, { vib: 10 }),
-    bass: (e, t, d, s) => { const soft = s.style === 'soft' || s.style === 'organ'; tone(e.out, 'tri', e.m - 12 + (s.style === 'soft' ? 12 : 0), t, d * (soft ? .98 : .85), soft ? .22 : .45, { r: soft ? .2 : .03, a: soft ? .05 : .005 }); },
+    bass: (e, t, d, s) => { const soft = s.style === 'soft' || s.style === 'organ' || s.style === 'crypt'; tone(e.out, 'tri', e.m - 12 + (s.style === 'soft' ? 12 : 0), t, d * (soft ? .98 : .85), soft ? .22 : .45, { r: soft ? .2 : .03, a: soft ? .05 : .005 }); },
     chord: (e, t, d) => { e.ms.forEach((m, k) => tone(e.out, 'p50', m, t + k * .012, d, .035 * (e.v ?? 1), { r: .03 })); },
     pad: (e, t, d) => tone(e.out, 'p50', e.m, t, d, .04 * (e.v ?? 1), { a: .25, r: .5, vib: 6 }),
     drone: (e, t, d) => tone(e.out, 'p12', e.m, t, d, .025, { a: .3, r: .4 }),
@@ -438,6 +448,7 @@
     if (!from) return;
     if (to === 'choral') { VOICE.bell({ out: master, m: midi('D5') }, t); VOICE.bell({ out: master, m: midi('A4') }, t + 1.1); }
     else if (to === 'nokturn') VOICE.bell({ out: master, m: midi('A4') }, t);
+    else if (to === 'krypta') VOICE.bell({ out: master, m: midi('D3') }, t);   // one low bell going down the stairs
     else if (from === 'choral' || from === 'nokturn') ['G4', 'D5', 'G5'].forEach((n, i) => tone(master, 'p25', midi(n), t + i * .08, .08, .1, { r: .02 }));   // back outside
   }
   let SCENE_START = true;
@@ -531,6 +542,7 @@ window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_T
     const pick = () => {
       const sc = A.scene;
       if (sc === 'title') return 'title';   // the printed Polka Dziadek is the entrance screen only
+      if (A.room && A.room.kind === 'crypt') return 'krypta';
       if (A.room && A.room.soltys) return 'choral';
       if (A.room && A.room.kind === 'shop') return 'mazurka';
       if (sc === 'end' || nearCemetery()) return 'nokturn';

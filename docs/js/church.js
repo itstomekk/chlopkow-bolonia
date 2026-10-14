@@ -22,7 +22,7 @@ window.fitSprite = function (ctx, img, x, y, w, h, stretch) {
   const k = Math.min(w / img.width, h / img.height), dw = img.width * k, dh = img.height * k;
   ctx.drawImage(img, x + (w - dw) / 2, y + h - dh, dw, dh);
 };
-window.buildChurch = function buildChurch() {
+window.buildChurch = function buildChurch(opts = {}) {
   const W = 320, H = 440;
   const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
   const ground = mk(), obj = mk();
@@ -158,8 +158,20 @@ window.buildChurch = function buildChurch() {
   const pois = [
     { key: 'altar', x: 160, y: 158, r: 30 }, { key: 'mary', x: 38, y: 160, r: 26 }, { key: 'glass', x: 86, y: 118, r: 22 },
     { key: 'flowers', x: 160, y: 186, r: 16 }, { key: 'confession', x: 60, y: 418, r: 20 }, { key: 'pew', x: 160, y: 300, r: 16 },
+    { key: 'glass', x: 234, y: 118, r: 22 }, { key: 'candles', x: 112, y: 152, r: 14 },
   ];
-  return { w: W, h: H, top: 0, ground, obj, objects, solid, pois, candles, spawn: { x: 160, y: 418 }, exit: { x0: 140, x1: 180, y: 433 }, soltys: { x: 216, y: 158 } };
+  // Secret crypt: once the cryptex is solved the confessional's right door stands ajar on a dark stairwell with a faint warm glow
+  let confOpen = false;
+  const openConfessional = () => {
+    if (confOpen) return; confOpen = true;
+    o.clearRect(34, 398, 12, 26);
+    R(o, 34, 398, 10, 26, '#0b0705');
+    for (let i = 0; i < 5; i++) { R(o, 35, 402 + i * 4, 8, 3, ['#2a1c10', '#3a2713', '#4d3317', '#64431c', '#8a5a22'][i]); R(o, 35, 405 + i * 4, 8, 1, '#120b06'); }
+    R(o, 44, 398, 3, 26, '#6b3b16'); R(o, 44, 398, 1, 26, '#9a5f28'); R(o, 38, 402, 2, 8, '#e0b23a');
+    candles.push({ x: 39, y: 421 });
+  };
+  if (opts.cryptOpen) openConfessional();
+  return { w: W, h: H, top: 0, ground, obj, objects, solid, pois, candles, spawn: { x: 160, y: 418 }, exit: { x0: 140, x1: 180, y: 433 }, soltys: { x: 216, y: 158 }, openConfessional };
 };
 
 /* Sołtys (village head) sprite, drawn at 1 unit = 1 px, feet at (0,0). From Tomek's photo: grey hair, glasses,

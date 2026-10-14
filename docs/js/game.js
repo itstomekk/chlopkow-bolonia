@@ -26,7 +26,7 @@
     pl: {
       title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
+      names: { szept: 'SZEPT', arek: 'BOHATER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -69,6 +69,34 @@
       grandpa2: ['Pomogłeś całej ekipie. Dobra robota, Arek.', 'Masz tu kluczyki do mojego Ursusa. Tylko w niedzielę i tylko do wzgórza.', 'I nie mów babci Irenki.'],
       apple: 'JABŁKO', mushroom: 'PIECZARKA', trash: 'WOREK ŚMIECI', cap: 'CZAPKA DAMIANA', gotCap: ['Czapka Damiana! Trochę zakurzona, ale cała.'],
       quests: ['10 pieczarek dla Kasi', 'Czapka Damiana', 'Oranżada dla Marcina', 'Pogadaj z dziadkiem Zdziśkiem'],
+      candles: ['Złote świece na stojaku przy ołtarzu. Pachnie woskiem i ciszą.'],
+      confessionHint: ['Konfesjonał. Z kratki dochodzi cichy szept. Chyba. Albo to wiatr w organach.', 'SZEPT: „Kto szuka, ten znajdzie. Ale najpierw policz. Co płonie. Co siedzi. Co świeci kolorami. Na co się wchodzi.”', 'Pod kratą ktoś wyciął cztery kółka z cyframi. Szyfr! Trzeba rozejrzeć się po kościele i policzyć.'],
+      clue: {
+        candles: ['Policzone: cztery złote świece. Cztery płomienie, ani jednego więcej.'],
+        pew: ['Policzone: siedem rzędów ławek po każdej stronie nawy. Siedem.'],
+        glass: ['Policzone: dwa witraże za ołtarzem, po obu stronach obrazu. Dwa.'],
+        altar: ['Policzone: do ołtarza prowadzą trzy stopnie. Trzy.'],
+        flowers: ['Złote sto z kwiatów. Ale szyfr z konfesjonału to małe cyfry, nie jubileusze.'],
+      },
+      cryptNote: 'NOTATKA', cryptNoteNames: { candles: 'ŚWIECE', pew: 'ŁAWKI', glass: 'WITRAŻE', altar: 'STOPNIE' },
+      cryptNotesTitle: 'NOTATNIK AREKA', cryptNotesEmpty: 'Jeszcze pusto. Policz rzeczy z szeptu.',
+      cryptPuzzleTitle: 'SZYFR KONFESJONAŁU', cryptRiddle: 'Co płonie. Co siedzi. Co świeci kolorami. Na co się wchodzi.',
+      cryptTry: 'SPRAWDŹ', cryptHelp: 'STRZAŁKI: KÓŁKA · CYFRY · ENTER · ESC', cryptWrong: 'TO NIE TEN KOD', cryptUnlocked: 'KLIK!',
+      cryptSolved: ['Kółka wskakują na miejsce z cichym kliknięciem.', 'Tylna ścianka konfesjonału odsuwa się ze zgrzytem. Za nią kamienne schody w dół. Pachnie wilgocią i starym woskiem.', 'Arek przełyka ślinę i schodzi.'],
+      cryptQuest: 'Sekret konfesjonału', cryptLabel: 'KRYPTA',
+      cryptIn: ['Zimno jak w lodówce u babci. Pochodnie same chyba się nie zapaliły.', 'Kościół ma piwnicę. Cała wieś to przeoczyła. Albo udawała, że nie wie.'],
+      cryptArch: ['Na progu wyryto napis: QUI DESCENDIT, ASCENDIT.', 'Łacina. Arek tłumaczy po swojemu: „Kto schodzi, ten się wspina.” Chyba o schodach. Albo o życiu.'],
+      cryptTomb: ['Kamienne sarkofagi bez nazwisk. Na jednych krzyż, na drugich dwie skrzyżowane kosy.', 'Na wieku rok: MDCCCLXIII. Legenda mówi, że w 1863 ukrywano tu kosynierów, a potem parafialne księgi i srebra, w gorszych czasach.', 'Nikt nie wie, kto naprawdę tu leży. Arek mówi cicho „dzień dobry”.'],
+      cryptFloor: ['W posadzce wykuto krąg wpisany w kwadrat. W środku człowiek z rozpostartymi rękami i nogami.', 'Arek zna to z plakatu w klasie od plastyki. Leonardo. Ktoś miał tu dużo czasu i szeroki gust.', 'Wokół kręgu biegną drobne nacięcia. Wyglądają jak podziałka. Albo jak szyfr.'],
+      cryptPlaque: ['Kamienna tablica. Cztery słowa w jednym rzędzie: CRUX · ROSA · CIRCULUS · LUX.', 'Niżej mniejszymi literami: ORDO EST CLAVIS.', 'Krzyż, róża, krąg, światło. A kolejność jest kluczem. To na pewno nie przypadek.'],
+      cryptDoorShut: ['Okrągłe kamienne drzwi z czterema pierścieniami. Ani klamki, ani dziurki od klucza.', 'Na ścianie obok cztery znaki, wszystkie wymieszane. Może trzeba ich dotknąć po kolei.'],
+      cryptDoorOpened: ['Drzwi stoczyły się w głąb ściany. Z komnaty płynie ciepłe światło.'],
+      cryptDoorOpen: ['Cztery znaki rozbłyskują złotem. Pierścienie na drzwiach obracają się z jękiem kamienia.', 'Drzwi staczają się w głąb ściany. Za nimi ciepłe światło i cisza.'], cryptDoorToast: 'TAJNA KOMNATA',
+      symOk: 'ZNAK', symWrong: 'KAMIEŃ ZGRZYTA. OD NOWA.', symDone: ['Znak świeci spokojnym, złotym światłem.'],
+      symCrux: ['Wyryty krzyż.'], symRosa: ['Wyryta róża.'], symCirculus: ['Wyryty krąg.'], symLux: ['Wyryty płomień.'],
+      cryptMap: ['Mapa Chłopkowa wyryta w kamieniu: rzeka, wiatrak, kościół. Przy kościele mały znak X.', 'Czyli stoimy dokładnie tutaj. Arek jest pod wrażeniem. I trochę urażony, że nikt nie dał mu tej mapy wcześniej.'],
+      cryptBook: ['Na kamiennym pulpicie leży zapieczętowana księga. Na okładce róża, krzyż i krąg.', 'Pierwsza strona: „Kto to czyta, ten nie jest już gościem w Chłopkowie. Strzeż tego miejsca i nie mów, gdzie jest wejście. Konfesjonał słucha, ale nie powtarza.”', 'Arek zamyka księgę. Niektóre tajemnice lepiej zostawić w ciemności. Ale ta była przednia.'],
+      cryptBookAgain: ['Księga czeka na pulpicie. Konfesjonał słucha, ale nie powtarza.'], cryptFound: 'ZNALEZIONO: KSIĘGA KRYPTY',
       churchIn: ['Wnętrze kościoła. Chłodno, cicho, pachnie woskiem i kwiatami.'],
       altar: ['Ołtarz w białym obrusie z koronką. Arek niczego nie dotyka. Tym razem.'],
       mary: ['Matka Boża w marmurowej niszy. Ktoś zostawił świeże kwiaty i wieniec z kłosów.'],
@@ -92,7 +120,7 @@
     en: {
       title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
+      names: { szept: 'WHISPER', arek: 'PLAYER', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -135,6 +163,34 @@
       grandpa2: ['You helped the whole crew. Good job, Arek.', 'Here are the keys to my Ursus. Sundays only, and only to the hill.', "And don't tell Granny Irenka."],
       apple: 'APPLE', mushroom: 'MUSHROOM', trash: 'TRASH BAG', cap: "DAMIAN'S CAP", gotCap: ["Damian's cap! A bit dusty, but in one piece."],
       quests: ['10 mushrooms for Kasia', "Damian's cap", 'Orangeade for Marcin', 'Talk to Grandpa Zdzisiek'],
+      candles: ['Gold candles on a stand by the altar. It smells of wax and silence.'],
+      confessionHint: ['The confessional. A quiet whisper comes through the grille. Probably. Or it is the wind in the organ.', 'WHISPER: "Who seeks, shall find. But first, count. What burns. What sits. What shines in colour. What one climbs."', 'Under the grille someone carved four little rings with digits. A cipher! Time to look around the church and count.'],
+      clue: {
+        candles: ['Counted: four gold candles. Four flames, not one more.'],
+        pew: ['Counted: seven rows of pews on each side of the nave. Seven.'],
+        glass: ['Counted: two stained-glass windows behind the altar, one on each side of the painting. Two.'],
+        altar: ['Counted: three steps lead up to the altar. Three.'],
+        flowers: ['A golden hundred made of flowers. But the confessional cipher is small digits, not jubilees.'],
+      },
+      cryptNote: 'NOTE', cryptNoteNames: { candles: 'CANDLES', pew: 'PEW ROWS', glass: 'WINDOWS', altar: 'STEPS' },
+      cryptNotesTitle: "AREK'S NOTEBOOK", cryptNotesEmpty: 'Empty so far. Count the things from the whisper.',
+      cryptPuzzleTitle: 'THE CONFESSIONAL CIPHER', cryptRiddle: 'What burns. What sits. What shines in colour. What one climbs.',
+      cryptTry: 'TRY IT', cryptHelp: 'ARROWS: RINGS · DIGITS · ENTER · ESC', cryptWrong: 'NOT THAT CODE', cryptUnlocked: 'CLICK!',
+      cryptSolved: ['The rings snap into place with a soft click.', 'The back panel of the confessional slides aside with a scrape. Behind it, stone stairs going down. It smells of damp and old wax.', 'Arek swallows and descends.'],
+      cryptQuest: 'Secret of the confessional', cryptLabel: 'CRYPT',
+      cryptIn: ["Cold like Granny's fridge. The torches can't have lit themselves.", 'The church has a cellar. The whole village missed it. Or pretended not to know.'],
+      cryptArch: ['On the threshold someone carved: QUI DESCENDIT, ASCENDIT.', 'Latin. Arek translates it his own way: "Who goes down, climbs up." Must be about stairs. Or about life.'],
+      cryptTomb: ['Stone sarcophagi without names. Some bear a cross, others two crossed scythes.', 'The year on the lid: MDCCCLXIII. Legend says scythemen hid here in 1863, and later the parish books and silver, in darker times.', 'Nobody knows who really lies here. Arek whispers "good morning".'],
+      cryptFloor: ['A circle inside a square is cut into the floor. In the middle, a man with arms and legs spread wide.', 'Arek knows it from the poster in art class. Leonardo. Someone here had a lot of time and wide tastes.', 'Fine notches run around the circle. They look like a scale. Or like a cipher.'],
+      cryptPlaque: ['A stone tablet. Four words in a row: CRUX · ROSA · CIRCULUS · LUX.', 'Below, in smaller letters: ORDO EST CLAVIS.', 'Cross, rose, circle, light. And the order is the key. This is no accident.'],
+      cryptDoorShut: ['A round stone door with four rings. No handle, no keyhole.', 'On the wall beside it, four signs, all mixed up. Maybe they must be touched one after another.'],
+      cryptDoorOpened: ['The door has rolled into the wall. Warm light flows from the chamber.'],
+      cryptDoorOpen: ['The four signs flash gold. The rings on the door turn with a groan of stone.', 'The door rolls into the wall. Behind it, warm light and silence.'], cryptDoorToast: 'SECRET CHAMBER',
+      symOk: 'SIGN', symWrong: 'THE STONE GRINDS. START AGAIN.', symDone: ['The sign glows with a calm, golden light.'],
+      symCrux: ['A carved cross.'], symRosa: ['A carved rose.'], symCirculus: ['A carved circle.'], symLux: ['A carved flame.'],
+      cryptMap: ['A map of Chłopków carved in stone: river, windmill, church. By the church, a small X.', 'So we are standing right here. Arek is impressed. And a little offended nobody gave him this map earlier.'],
+      cryptBook: ['A sealed book lies on the stone lectern. On the cover: a rose, a cross and a circle.', 'First page: "Whoever reads this is no longer a guest in Chłopków. Guard this place and do not tell where the entrance is. The confessional listens, but does not repeat."', 'Arek closes the book. Some secrets are better left in the dark. But this one was a good one.'],
+      cryptBookAgain: ['The book waits on the lectern. The confessional listens, but does not repeat.'], cryptFound: 'FOUND: THE CRYPT BOOK',
       churchIn: ['Inside the church. Cool, quiet, it smells of wax and flowers.'],
       altar: ['The altar in its white lace cloth. Arek touches nothing. This time.'],
       mary: ['Our Lady in a marble niche. Someone left fresh flowers and a wreath of wheat.'],
@@ -187,7 +243,7 @@
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
   const MEMORY_PATHS = ['img/memories/procession.png', 'img/memories/memorial.png', 'img/memories/wooden_cross.png'];
   let MAP, GROUND, OBJ, SOLID, SPR, PLAYER_SHEETS = {}, MINI, NPCIMG, DOGIMG, FRODO_IDLE = null, TRASH_IMG = null, ITEMS, MEMORY_ART = [], FOREST_STATS = null;
-  let ROOM = null, OUT = null, trans = null, shopGame = null;   // OUT: the village to return to
+  let ROOM = null, OUT = null, PARENT = null, trans = null, shopGame = null;   // OUT: the village to return to (always the village, so save() is right at any depth); PARENT: the church while in the crypt
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
@@ -204,7 +260,7 @@
   const CHAR_H = 40, SPEED = 110, HIT = { w: 14, h: 6 };
   let scene = 'title', talkClosedAt = -9, talk = null, talkT = 0, time = 0, dust = [], showMap = false, fx = [], toast = null;
   // Q.kasia/damian/marcin: 0 not met, 1 active, 2 done. Q.grandpa: 0/1 met, 2 got keys.
-  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], trashSpots: [], trash: [], cap: false, orange: false, playTime: 0 });
+  const freshQ = () => ({ playerName: '', kasia: 0, damian: 0, marcin: 0, grandpa: 0, halina: 0, edytka: 0, edytkaN: 0, quiz: {}, mg: {}, apples: [], mushroomSpots: [], mushrooms: [], trashSpots: [], trash: [], cap: false, orange: false, playTime: 0, cryptHint: false, cryptNotes: [], cryptOpen: false, cryptSeen: false, cryptDoor: false, cryptReward: false });
   function sanitizePlayerName(value) {
     return Array.from(String(value || '').normalize('NFC').replace(/[^\p{L}\p{N} _'-]/gu, '').replace(/\s+/g, ' ').trim()).slice(0, 20).join('');
   }
@@ -257,7 +313,8 @@
           showFutureSaveWarning();
         }
         Q = Object.assign(Q, s.Q);
-        Q.missions = normalizeMissions(s.Q.missions);   // D04: only the new mission fields are normalized
+        Q.missions = normalizeMissions(s.Q.missions);
+        if (window.CRYPT) window.CRYPT.sanitize(Q);   // crypt fields are additive: old saves simply lack them   // D04: only the new mission fields are normalized
         Q.playerName = sanitizePlayerName(Q.playerName);
         // Legacy v1 saves defaulted the name to AREK: blank it so the player is asked once.
         // A blank name must not hide the save (that let a new game overwrite real progress);
@@ -833,7 +890,7 @@
   function fade(fn) { if (!trans) trans = { t: 0, fn, done: false }; }
   function enterChurch() {
     fade(() => {
-      const c = window.buildChurch();
+      const c = window.buildChurch({ cryptOpen: !!Q.cryptOpen });
       OUT = { MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y, dog: { x: FRODO.x, y: FRODO.y } };
       ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
       GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
@@ -872,8 +929,29 @@
     game.element.addEventListener('keyup', e => e.stopPropagation());
     document.body.appendChild(game.element);
   }
+  /* The crypt hangs under the church: OUT stays the village (save() keeps writing the door), PARENT is the church to climb back to. */
+  function enterCrypt() {
+    if (trans || !ROOM || ROOM.kind || !window.buildCrypt) return;   // only from inside the church
+    fade(() => {
+      const c = window.buildCrypt({ door: !!Q.cryptDoor });
+      PARENT = { ROOM, MAP, GROUND, OBJ, SOLID, x: P.x, y: P.y };
+      ROOM = c; MAP = { w: c.w, h: c.h, top: c.top, objects: c.objects, pois: c.pois, spawn: c.spawn };
+      GROUND = c.ground; OBJ = c.obj; SOLID = c.solid;
+      P.x = c.spawn.x; P.y = c.spawn.y; P.dir = 'up'; camX = P.x; camY = P.y; dust = []; clickTarget.active = false;
+      placeFrodoNearArek();
+      if (!Q.cryptSeen) { Q.cryptSeen = true; say('arek', T.cryptIn); }
+      save();
+    });
+  }
+  const cryptApi = () => ({ Q, say, popToast, save, T, celebrate, room: ROOM, enter: enterCrypt });
   function leaveRoom() {
     fade(() => {
+      if (PARENT) {   // crypt -> back up into the church, at the confessional
+        const p = PARENT; PARENT = null;
+        ({ MAP, GROUND, OBJ, SOLID } = p); ROOM = p.ROOM; P.x = p.x; P.y = p.y; P.dir = 'down'; clickTarget.active = false;
+        unstick(); trail.length = 0; placeFrodoNearArek(); camX = P.x; camY = P.y; dust = []; save();
+        return;
+      }
       ({ MAP, GROUND, OBJ, SOLID } = OUT); P.x = OUT.x; P.y = OUT.y + 6; P.dir = 'down';
       ROOM = null; unstick(); trail.length = 0;
       if (OUT.dog && !blocked(OUT.dog.x, OUT.dog.y)) { FRODO.x = OUT.dog.x; FRODO.y = OUT.dog.y; } else placeFrodoNearArek();   // he waited by the door
@@ -985,6 +1063,8 @@
     if (s.feat) { turnTo(s); s.feat.onInteract(); return; }
     if (s.poi === 'church') { if (!HOOKS.busy.some(f => f())) enterChurch(); return; }
     if (s.poi === 'shop') { if (!HOOKS.busy.some(f => f())) enterShop(); return; }
+    if (ROOM && ROOM.kind === 'crypt') { if (!window.CRYPT.cryptInteract(s.poi, cryptApi())) say('arek', T[s.poi]); return; }
+    if (ROOM && !ROOM.kind && window.CRYPT && window.CRYPT.churchInteract(s.poi, cryptApi())) return;   // confessional riddle + counting clues
     if (ROOM && ROOM.kind === 'shop') {
       if (s.poi === 'checkout' || s.poi === 'scale' || s.poi === 'bread' || s.poi === 'produce' || s.poi === 'beer') playShop();
       else say('arek', [LANG === 'pl' ? 'W tym sklepie można płacić bitcoinem.' : 'This shop accepts Bitcoin.']);
@@ -1800,6 +1880,21 @@ function drawFrodo(sx, sy, s) {
       ctx.fillStyle = '#ffb02e'; ctx.fillRect(a - zoom, b - (2 + fl * .6) * zoom, 2 * zoom, (3 + fl * .6) * zoom);
       ctx.fillStyle = '#fff4c0'; ctx.fillRect(a - zoom * .5, b - (1 + fl * .4) * zoom, zoom, 2 * zoom);
     }
+    if (ROOM && ROOM.lights) {   // warm additive light pools (torches, candles, the chamber), flickering
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      for (const l of ROOM.lights) {
+        if (!(l.a > 0)) continue;
+        const fl = 1 + Math.sin(time * 9 + l.x * .7) * .05 + Math.sin(time * 5.3 + l.y) * .04, [a, b] = S(l.x, l.y), r = l.r * zoom * fl;
+        if (a + r < 0 || a - r > W || b + r < 0 || b - r > H) continue;
+        const gr = ctx.createRadialGradient(a, b, 0, a, b, r); gr.addColorStop(0, `rgba(${l.c},${l.a})`); gr.addColorStop(1, `rgba(${l.c},0)`);
+        ctx.fillStyle = gr; ctx.fillRect(a - r, b - r, r * 2, r * 2);
+      }
+      ctx.restore();
+    }
+    if (ROOM && ROOM.vignette) {   // the crypt is dark: only a pool around Arek is lit properly
+      const [a, b] = S(P.x, P.y - 16), gr = ctx.createRadialGradient(a, b, 60 * zoom, a, b, 250 * zoom);
+      gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.62)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    }
     for (const f of fx) { ctx.globalAlpha = 1 - f.t / 1.2; ctx.fillStyle = f.c; const s = zoom * 2; ctx.fillRect(ox + f.x * zoom - s / 2, oy + f.y * zoom - s / 2, s, s); }
     ctx.globalAlpha = 1;
     if (DEBUG) { ctx.strokeStyle = 'cyan'; for (const s of MAP.pois) { ctx.beginPath(); ctx.arc(ox + s.x * zoom, oy + s.y * zoom, (s.r || SPOT_R[s.key] || 50) * zoom, 0, 7); ctx.stroke(); } }
@@ -1863,7 +1958,7 @@ function drawFrodo(sx, sy, s) {
     }
     if (scene === 'play' && ROOM) {   // room label instead of the village minimap
       ctx.font = `${U * 1.8}px PixelifySans`; ctx.textAlign = 'right';
-      const txt = `${ROOM.kind === 'shop' ? (LANG === 'pl' ? 'SKLEP' : 'SHOP') : T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
+      const txt = `${ROOM.kind === 'shop' ? (LANG === 'pl' ? 'SKLEP' : 'SHOP') : ROOM.kind === 'crypt' ? T.cryptLabel : T.churchLabel} · ${T.exitHint}`, tw = ctx.measureText(txt).width + U * 2;
       ctx.fillStyle = 'rgba(8,12,40,0.78)'; ctx.fillRect(W - tw - U * 2, U * 2, tw, U * 4); ctx.fillStyle = '#ffd21f'; ctx.fillText(txt, W - U * 3, U * 4);
     }
     // minimap
@@ -2078,7 +2173,7 @@ function drawFrodo(sx, sy, s) {
       get saveVersion() { return SAVE_VERSION; }, get saveFrozen() { return saveFrozen; },
       get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; }, get room() { return ROOM; },
       pointer, clickTarget, mapCursor, copyMapCoordinates, get camera() { return lastCam; },
-      save, say, popToast, heroText, celebrate, blocked, unstick, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
+      save, say, popToast, heroText, celebrate, blocked, unstick, enterCrypt, drawNpc, drawArekPose, shadow, box, wrapText, fmtTime, terrainAt,
       terrainSpeed: (x, y) => TERRAIN_SPEED[terrainAt(x, y)] || 1,
       teleport(x, y) { P.x = x; P.y = y; P.air = false; P.z = 0; unstick(); },
       burst(x, y, colors, n = 16) { for (let k = 0; k < n; k++) fx.push({ x, y, vx: (Math.random() - .5) * 120, vy: -Math.random() * 150, t: 0, c: colors[k % colors.length] }); },
@@ -2102,7 +2197,7 @@ function drawFrodo(sx, sy, s) {
       return { text, textW: tw, textLeft: rightX - tw, textRight: rightX, textBottom: ay + u, textTop: ay - u,
                boxLeft: qx, boxRight: qx + qw, bandBottom: qy + u * 5.2,
                mushroomRight: qx + u * 12.2 + u * 2 + mushW };
-    }, enterChurch, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs, cap: CLOUD_GEOM.cap, radii: CLOUD_GEOM.radii }), cloudShadowAt: (x, y) => inCloudShadow(+x, +y), weatherSoundState: () => ({ inShadow: WEATHER.inShadow, playing: WEATHER.playing, kind: WEATHER.kind, gustCount: WEATHER.gustCount, rainCount: WEATHER.rainCount, windCount: WEATHER.windCount, hasAudio: !!(WEATHER.ac && WEATHER.master) }), forestTextureStats: () => FOREST_STATS };
+    }, enterChurch, enterCrypt, get parentRoom() { return PARENT && PARENT.ROOM; }, get Q() { return Q; }, get scene() { return scene; }, set scene(v) { scene = v; }, isSpawnReachable(x, y) { const gx = Math.floor(x / reachableStep), gy = Math.floor(y / reachableStep); return !!(reachableMask && gx >= 0 && gy >= 0 && gx < reachableW && gy < Math.ceil(MAP.h / reachableStep) && reachableMask[gy * reachableW + gx]); }, get room() { return ROOM; }, get talk() { return talk; }, get toastText() { return toast ? toast.text : null; }, baleMoved() { return BALES.reduce((m, b) => Math.max(m, Math.hypot(b.x - b.hx, b.y - b.hy)), 0); }, pitchState() { return window.__pitchState ? window.__pitchState() : null; }, talkTo: talkNpc, get memoryIndex() { return memoryIndex; }, memoryCount: T.memoryFacts.length, baleGeometry: (zoom = 1) => ({ w: BALE_DRAW.w, h: BALE_DRAW.h, halfW: BALE_DRAW.halfW, top: BALE_DRAW.top, aspect: BALE_DRAW.aspect, area: BALE_DRAW.area, minX: BALE_DRAW.minX, minY: BALE_DRAW.minY, maxX: BALE_DRAW.maxX, maxY: BALE_DRAW.maxY, screenW: BALE_DRAW.w * zoom, screenH: BALE_DRAW.h * zoom }), clouds: () => CLOUDS.map(c => ({ x: (c.x + time * c.speed) % MAP.w, y: c.y, scale: c.scale, alpha: c.alpha })), cloudGeometry: () => ({ unitW: CLOUD_GEOM.unitW, unitH: CLOUD_GEOM.unitH, halfW: CLOUD_GEOM.halfW, halfH: CLOUD_GEOM.halfH, marginX: CLOUD_GEOM.marginX, marginY: CLOUD_GEOM.marginY, blobs: CLOUD_GEOM.blobs, cap: CLOUD_GEOM.cap, radii: CLOUD_GEOM.radii }), cloudShadowAt: (x, y) => inCloudShadow(+x, +y), weatherSoundState: () => ({ inShadow: WEATHER.inShadow, playing: WEATHER.playing, kind: WEATHER.kind, gustCount: WEATHER.gustCount, rainCount: WEATHER.rainCount, windCount: WEATHER.windCount, hasAudio: !!(WEATHER.ac && WEATHER.master) }), forestTextureStats: () => FOREST_STATS };
   }
   init().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f66">${e.message}</pre>`); });
 })();

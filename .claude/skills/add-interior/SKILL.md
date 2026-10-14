@@ -28,3 +28,6 @@ The church (`docs/js/church.js`) is the working template. A room is a function r
 - Images pasted into chat are visible to the model but are NOT files in the container. To use them as references, Tomek must
   put them on disk: the local PC, or a Google Drive folder the session can download into the gitignored `references/`.
 - The camera centres rooms that are smaller than the viewport (the `MAP.w < vw` check in `render`).
+- Rooms can nest (church -> crypt, `docs/js/crypt.js`): `OUT` always stays the village so `save()` writes the right door coordinates at any depth; `PARENT` holds the room to climb back to. `leaveRoom()` checks `PARENT` first. Give a nested room `kind:'crypt'` and pick its music in `music.js` `pick()`.
+- A dark room can set `lights` (additive pools, flickering) and `vignette:true`; game.js draws both after the candle flames. Carve walkable floor out of a fully solid `solid` array (`openRect`) instead of blocking walls one by one, and hide secret areas by drawing them only when unlocked (the returned `objects`/`pois`/`lights` arrays are shared by reference, so they can grow after entry).
+- Run Playwright through `python test/isolated_browser_runner.py test/<name>.py` so test names never reach the public Nostr arrival log. If port 8765 is taken by another checkout's server, serve the worktree on another port and set `ARK_URL`.
