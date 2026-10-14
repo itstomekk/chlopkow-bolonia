@@ -18,6 +18,7 @@ sys.path.insert(0, 'osm'); sys.path.insert(0, 'gen')
 from geo import A, BBOX, W, H, P, to_latlon, legacy_i, pre_expansion_i, REAL_POIS, PRE_EXPANSION_ADDITIONS
 from slice_sheet import key as chroma_key
 import edits          # osm/edits.py: manual add/remove layers keyed by pipeline stage
+import quantize_ground   # osm/quantize_ground.py: ground palette that keeps the Wapnica change local
 EDITS = edits.load()  # ARK_EDITS or osm/edits.json; a missing file is empty edits (no-op)
 
 OSM = 'osm/chlopkow.json'
@@ -179,7 +180,12 @@ low |= wm_art & ~pond_m
 RW = {'tertiary': 11, 'unclassified': 9, 'residential': 9, 'service': 5, 'track': 5, 'footway': 2.5, 'path': 2.5}
 paved = [(pts(e), RW[e['tags']['highway']] * A) for e in ways if e['tags'].get('highway') in ('tertiary', 'unclassified', 'residential')]
 dirt = [(pts(e), RW[e['tags']['highway']] * A) for e in ways if e['tags'].get('highway') in ('service', 'track', 'footway', 'path')]
+# The Wapnica roadside track (WAP_NEW_WAYS) was added after the layout was frozen: it is drawn and walkable, but it must
+# not steer any placement decision or random stream elsewhere, so every layout/occupancy step reads dm_old instead of dm.
+WAP_NEW_WAYS = {-9000021}
+dirt_old = [(pts(e), RW[e['tags']['highway']] * A) for e in ways if e['tags'].get('highway') in ('service', 'track', 'footway', 'path') and e['id'] not in WAP_NEW_WAYS]
 dm = mask_of([], dirt); de = mask_of([], [(l, w + 3) for l, w in dirt]) & ~dm
+dm_old = mask_of([], dirt_old) if len(dirt_old) != len(dirt) else dm
 dn = noise2(W, H, 4, 61)[..., None]
 dcol = np.array(hexc('#cfae78')) * (1 - dn) + np.array(hexc('#bb9a66')) * dn
 g[de] *= .85; g[dm] = dcol[dm]
@@ -200,7 +206,7 @@ for l, w in paved:  # centre dashes
 objects_img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
 od = ImageDraw.Draw(objects_img)
 objects = []  # dicts with rect + base (sort key)
-occupied = pm | dm | wm
+occupied = pm | dm_old | wm
 
 
 def shade(c, k): return tuple(int(max(0, min(255, v * k))) for v in c)
@@ -231,7 +237,7 @@ for e in ways:
 
 # Fit exaggerated footprints: largest scale (<= target) that avoids roads and already-placed buildings.
 placed = np.zeros((H, W), bool)
-road_block = pm | dm | wm
+road_block = pm | dm_old | wm
 def footprint(b, k):
     c, ax, nx = b['c'], b['ax'], b['nx']; L, Wd = b['L0'] * k, b['W0'] * k
     return [tuple(c + ax * sx * L / 2 + nx * sy * Wd / 2) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))], L, Wd
@@ -389,7 +395,7 @@ def clear_rect(cx, cy, w, h, block, soft=None, search=600, step=10):
 
 _forest_early = mask_of(classes.get('forest', []) + classes.get('wood', []))   # the forest is walkable but reads as woods, not a clearing
 _venue_block = collide | wm | placed | _forest_early
-_venue_soft = pm | dm | mask_of(classes.get('farmland', []) + classes.get('orchard', []))
+_venue_soft = pm | dm_old | mask_of(classes.get('farmland', []) + classes.get('orchard', []))
 
 # The race oval is at the supplied coordinate on the preceding map.
 _tc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['race_oval'])
@@ -401,22 +407,44 @@ _mx0, _my0 = clear_rect(*CUR_SITES['dogs'], 840, 540, _venue_block, _venue_soft)
 MEADOW = dict(x0=_mx0, y0=_my0, x1=_mx0 + 840, y1=_my0 + 540)
 # JAZZ W STODOLE: a smaller barn sprite in the supplied developed-area location,
 # with an open yard in front of the door.
-_jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 160, 190, _venue_block | pm, dm)
+_jx0, _jy0 = clear_rect(*CUR_SITES['jazz'], 160, 190, _venue_block | pm, dm_old)
 BARN = dict(cx=_jx0 + 80, foot=_jy0 + 112, w=120)
 JAZZ = dict(x=BARN['cx'], y=BARN['foot'] + 38, r=140)
-# Wapnica: gravel pit / village dump, on the real dump outline traced from satellite imagery
-# (local_features.json, landuse=landfill name=Wapnica); falls back to a cleared oval site.
+# Wapnica: satellite-traced roadside dump footprint, with GPT Image pixel-art ground decal.
 _wap = [pts(e) for e in ways if e['tags'].get('landuse') == 'landfill' and e['tags'].get('name') == 'Wapnica']
+PIT_ASSET = Image.open('gen/wapnica/ground.png').convert('RGBA') if os.path.exists('gen/wapnica/ground.png') else None
 if _wap:
-    PIT_MASK = mask_of(_wap)
-    _py, _px = np.nonzero(PIT_MASK)
+    _outline = mask_of(_wap)
+    _py, _px = np.nonzero(_outline)
     PIT = dict(cx=int(_px.mean()), cy=int(_py.mean()), rx=int((_px.max() - _px.min()) / 2), ry=int((_py.max() - _py.min()) / 2))
+    if PIT_ASSET is not None:
+        _ax, _ay = int(round(PIT['cx'] - PIT_ASSET.width / 2)), int(round(PIT['cy'] - PIT_ASSET.height / 2))
+        _aa = np.array(PIT_ASSET.getchannel('A')) > 0
+        _x0, _y0 = max(0, _ax), max(0, _ay); _x1, _y1 = min(W, _ax + PIT_ASSET.width), min(H, _ay + PIT_ASSET.height)
+        _asset_mask = _aa[_y0 - _ay:_y1 - _ay, _x0 - _ax:_x1 - _ax]
+        _road_clear = np.array(Image.fromarray((dm[_y0:_y1, _x0:_x1] * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(19))) > 0
+        _asset_mask = _asset_mask & ~_road_clear
+        PIT_MASK = np.zeros((H, W), bool); PIT_MASK[_y0:_y1, _x0:_x1] = _asset_mask
+        _py, _px = np.nonzero(PIT_MASK)
+        PIT['rx'] = max(PIT['cx'] - int(_px.min()), int(_px.max()) - PIT['cx'])
+        PIT['ry'] = max(PIT['cy'] - int(_py.min()), int(_py.max()) - PIT['cy'])
+    else:
+        PIT_MASK = _outline
 else:
     _gx0, _gy0 = clear_rect(*CUR_SITES['gravel'], 300, 220, _venue_block, _venue_soft)
     PIT = dict(cx=_gx0 + 150, cy=_gy0 + 110, rx=140, ry=100)
     _em = Image.new('L', (W, H), 0); ImageDraw.Draw(_em).ellipse([PIT['cx'] - PIT['rx'], PIT['cy'] - PIT['ry'], PIT['cx'] + PIT['rx'], PIT['cy'] + PIT['ry']], fill=255)
     PIT_MASK = np.array(_em) > 0; del _em
 GRAVEL = dict(x=PIT['cx'], y=PIT['cy'] + 15, r=60)
+# Former dump footprint (local_features.json, tag ark:keepout): never drawn, it only keeps trees, bales and props off the old
+# ground and keeps the shrine choice on its old anchor, so every placement and random stream matches the pre-decal layout.
+_wap_old = [pts(e) for e in ways if e['tags'].get('ark:keepout') == 'wapnica_legacy']
+if _wap_old:
+    PIT_OLD_MASK = mask_of(_wap_old)
+    _py, _px = np.nonzero(PIT_OLD_MASK)
+    PIT_OLD = dict(cx=int(_px.mean()), cy=int(_py.mean()), rx=int((_px.max() - _px.min()) / 2), ry=int((_py.max() - _py.min()) / 2))
+else:
+    PIT_OLD, PIT_OLD_MASK = PIT, PIT_MASK
 print('venues', dict(corral=CORRAL, meadow=MEADOW, barn=BARN, jazz=JAZZ, pit=PIT, gravel=GRAVEL))
 _rc = tuple(int(round(v)) for v in P(52.2736642, 22.867767)); RANGE = dict(x=_rc[0], y=_rc[1])   # PPM Strzelectwo
 _pc = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['football_pitch']); FOOTBALL_PITCH = dict(cx=_pc[0] + 200, cy=_pc[1] + 100, w=110, h=190)
@@ -479,29 +507,27 @@ _keep = (_edge > 10 + 60 * noise2(840, 540, 48, 95)) & ~(pm | dm)[MEADOW['y0']:M
 _sub6 = g6[MEADOW['y0']:MEADOW['y1'], MEADOW['x0']:MEADOW['x1']]
 _sub6[_keep] = (np.array(hexc('#80bb50')) * (1 - mn) + np.array(hexc('#70ab46')) * mn)[_keep]
 ground = Image.fromarray(g6.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g6, _sub6
-# Wapnica (gravel pit + village dump): pale excavated floor, walkable; heaps, spoil and the skip are solid.
-x0_, y0_, yy, xx = window(PIT['cx'], PIT['cy'], PIT['rx'] + 20, PIT['ry'] + 20)
-g4 = np.array(ground).astype(np.float32); sub = g4[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
-pm_ = PIT_MASK[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
-_pmi = Image.fromarray((pm_ * 255).astype(np.uint8))
-pit_floor = np.array(_pmi.filter(ImageFilter.MinFilter(7))) > 0
-pit_rim = (np.array(_pmi.filter(ImageFilter.MaxFilter(7))) > 0) & ~pit_floor
-gn = noise2(xx.shape[1], xx.shape[0], 5, 97)[..., None]
-sub[pit_rim] = np.array(hexc('#9a8a66'))
-sub[pit_floor] = (np.array(hexc('#d9cfb4')) * (1 - gn) + np.array(hexc('#bfb398')) * gn)[pit_floor]
-pebble = (np.random.RandomState(98).rand(*pm_.shape) > .93) & pit_floor
-sub[pebble] = np.array(hexc('#8e8a82'))
-# excavated look: the north wall of the pit is in shadow, the south edge catches the light
-wall_n = pit_floor & ~np.roll(pm_, 16, 0)      # within 16 px of the northern edge
-sub[wall_n] = sub[wall_n] * .72 + np.array(hexc('#6e6048')) * .28
-lip_s = pit_floor & ~np.roll(pm_, -6, 0)       # within 6 px of the southern edge
-sub[lip_s] = sub[lip_s] * .7 + np.array(hexc('#efe6cc')) * .3
-ground = Image.fromarray(g4.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g4, sub
-for i_ in range(2):       # two tyre ruts along the dump, roughly parallel to the access road
-    gd.line([(PIT['cx'] - PIT['rx'] * .75, PIT['cy'] - 38 + i_ * 9), (PIT['cx'] + PIT['rx'] * .6, PIT['cy'] + 22 + i_ * 9)],
-            fill=hexc('#a89c80'), width=3)
-_pw = (slice(PIT['cy'] - PIT['ry'] - 40, PIT['cy'] + PIT['ry'] + 40), slice(PIT['cx'] - PIT['rx'] - 40, PIT['cx'] + PIT['rx'] + 40))
-occupied[_pw] |= np.array(Image.fromarray((PIT_MASK[_pw] * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(51))) > 0   # no trees/props on or right around the dump
+# Wapnica GPT Image terrain decal. Keep the local highway track on top/clear; no artificial rut stripe.
+if PIT_ASSET is not None:
+    _ax, _ay = int(round(PIT['cx'] - PIT_ASSET.width / 2)), int(round(PIT['cy'] - PIT_ASSET.height / 2))
+    _decal = PIT_ASSET.copy()
+    _da = np.array(_decal.getchannel('A'))
+    _road_clear = np.array(Image.fromarray((dm[_ay:_ay + PIT_ASSET.height, _ax:_ax + PIT_ASSET.width] * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(19))) > 0
+    _da[_road_clear] = 0; _decal.putalpha(Image.fromarray(_da))
+    _under = ground.convert('RGBA'); _under.alpha_composite(_decal, (_ax, _ay))
+    ground = _under.convert('RGB'); gd = ImageDraw.Draw(ground)
+else:
+    x0_, y0_, yy, xx = window(PIT['cx'], PIT['cy'], PIT['rx'] + 20, PIT['ry'] + 20)
+    g4 = np.array(ground).astype(np.float32); sub = g4[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
+    pm_ = PIT_MASK[y0_:y0_ + xx.shape[0], x0_:x0_ + xx.shape[1]]
+    gn = noise2(xx.shape[1], xx.shape[0], 5, 97)[..., None]
+    sub[pm_] = (np.array(hexc('#d9cfb4')) * (1 - gn) + np.array(hexc('#bfb398')) * gn)[pm_]
+    ground = Image.fromarray(g4.clip(0, 255).astype(np.uint8)); gd = ImageDraw.Draw(ground); del g4, sub
+_pw = (slice(PIT_OLD['cy'] - PIT_OLD['ry'] - 40, PIT_OLD['cy'] + PIT_OLD['ry'] + 40), slice(PIT_OLD['cx'] - PIT_OLD['rx'] - 40, PIT_OLD['cx'] + PIT_OLD['rx'] + 40))
+occupied[_pw] |= np.array(Image.fromarray((PIT_OLD_MASK[_pw] * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(51))) > 0   # no trees/props on or right around the old dump
+# What the Wapnica decal and its roadside track newly cover. Trees and bales on it are skipped AFTER their random draws
+# (see the tree and bale loops), so removing them cannot shift any random stream elsewhere.
+WAP_ZONE = np.array(Image.fromarray(((PIT_MASK | (dm & ~dm_old)) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(15))) > 0
 
 
 def gravel_heap(cx, cy, r, col='#a9a296'):
@@ -538,13 +564,7 @@ for rx_ in (-18, -6, 6, 18): od.line([(kx_ + rx_, ky_ - 18), (kx_ + rx_ * .85, k
 od.rectangle([kx_ - 20, ky_ - 12, kx_ - 10, ky_ - 8], fill=hexc('#8a4a2a'))   # rust patch
 objects.append(dict(x=kx_ - 26, y=ky_ - 30, w=54, h=36, base=float(ky_)))
 collide[ky_ - 8:ky_ + 1, kx_ - 22:kx_ + 22] = True
-# wooden sign post "WAPNICA" (the game draws the readable label; the board is pixel art)
-sx_, sy_ = PIT['cx'] - 118, PIT['cy'] - 42
-od.rectangle([sx_ - 1, sy_ - 22, sx_ + 1, sy_], fill=hexc('#6a4a2a'))
-od.rectangle([sx_ - 16, sy_ - 30, sx_ + 16, sy_ - 18], fill=hexc('#c9a46a'), outline=hexc('#5a3a1a'))
-for lx_ in range(sx_ - 12, sx_ + 12, 4): od.rectangle([lx_, sy_ - 26, lx_ + 2, sy_ - 22], fill=hexc('#5a3a1a'))
-objects.append(dict(x=sx_ - 18, y=sy_ - 32, w=36, h=34, base=float(sy_)))
-collide[sy_ - 3:sy_ + 1, sx_ - 2:sx_ + 3] = True
+# map entrance has no Wapnica sign per Tomek's correction
 
 # JAZZ W STODOLE: barn sprite (generated pixel art) on a farmyard, lit yard with benches in front.
 yx0, yy0, yx1, yy1 = BARN['cx'] - 95, BARN['foot'] - 10, BARN['cx'] + 95, BARN['foot'] + 95
@@ -576,7 +596,7 @@ for lx_ in (yx0 + 10, yx1 - 10):   # two lantern posts at the front corners of t
     collide[ly_ - 2:ly_ + 1, lx_ - 2:lx_ + 3] = True
 
 # ---------------------------------------------------------------- fences around gardens + hay bales (low, jumpable)
-road_near = np.array(Image.fromarray(((pm | dm) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(21))) > 0
+road_near = np.array(Image.fromarray(((pm | dm_old) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(21))) > 0
 for poly_ in classes.get('residential', []):
     run = 0.0   # distance along this fence line; a 16 px gate opens every 110 px so every garden can be entered on foot
     for a_, b_ in zip(poly_, poly_[1:]):
@@ -615,7 +635,7 @@ for p_ in classes.get('farmland', []):
         i_ = rnd.randrange(len(xs_)); x, y = int(xs_[i_]), int(ys_[i_])
         if not (20 < x < W - 20 and 60 < y < H - 20): continue
         if (collide | low)[max(0, y - 8):y + 8, max(0, x - 12):x + 13].any(): continue   # not on a ditch, fence or wall
-        bales.append(dict(x=x, y=y))
+        if not WAP_ZONE[y, x]: bales.append(dict(x=x, y=y))   # a bale on the Wapnica decal/track is dropped, its footprint stays reserved
         occupied[max(0, y - 24):y + 8, max(0, x - 16):x + 17] = True   # reserve the dynamic bale footprint
 print('hay bales', len(bales))
 
@@ -645,7 +665,7 @@ junctions = [P(*k) for k, v in _node_roads.items() if len(v) >= 2]
 junctions = [(x, y) for x, y in junctions if 120 < x < W - 120 and 160 < y < H - 80]
 keep_away = [xy for _, xy in LM_NODES] + [legacy_i(1150, 2405), (TRACK['cx'], TRACK['cy']), (CORRAL['cx'], CORRAL['cy']),
              ((MEADOW['x0'] + MEADOW['x1']) / 2, (MEADOW['y0'] + MEADOW['y1']) / 2), (RANGE['x'], RANGE['y']),
-             (JAZZ['x'], JAZZ['y']), (PIT['cx'], PIT['cy'])]
+             (JAZZ['x'], JAZZ['y']), (PIT_OLD['cx'], PIT_OLD['cy'])]
 cands = [j for j in junctions if all(math.hypot(j[0] - k[0], j[1] - k[1]) > 260 for k in keep_away)]
 chosen = []
 while len(chosen) < len(SHRINE_NAMES) and cands:
@@ -916,6 +936,16 @@ edits.apply('trees', EDITS, dict(tree_pts=kept, W=W, H=H))
 for x, y, r, kind in kept:
     if not isinstance(kind, str):
         kind = 'deciduous'   # trees.add tuples carry (x, y, r, dark): draw the default village tree
+    if WAP_ZONE[min(H - 1, int(y)), min(W - 1, int(x))]:
+        # A tree that would stand on the Wapnica decal or its track: draw it (so it consumes exactly the same random
+        # numbers as before), then restore the pixels, collision and stats it touched.
+        bx0, by0, bx1, by1 = max(0, int(x) - 90), max(0, int(y) - 150), min(W, int(x) + 90), min(H, int(y) + 30)
+        _sv = (objects_img.crop((bx0, by0, bx1, by1)), ground.crop((bx0, by0, bx1, by1)), collide[by0:by1, bx0:bx1].copy(),
+               len(objects), dict(tree_stats))
+        tree(x, y, r, kind)
+        objects_img.paste(_sv[0], (bx0, by0)); ground.paste(_sv[1], (bx0, by0)); collide[by0:by1, bx0:bx1] = _sv[2]
+        del objects[_sv[3]:]; tree_stats.update(_sv[4])
+        continue
     tree(x, y, r, kind)
 
 # forests: species are mixed on the ground layer, preserving walkable forest-floor collision.
@@ -1037,7 +1067,12 @@ _budka_x, _budka_y = pre_expansion_i(*PRE_EXPANSION_ADDITIONS['bus_budka'])
 pois.append(dict(key='bus', x=_budka_x, y=_budka_y, name='BUDKA'))
 
 # 256-colour palette: pixel art survives it and the download shrinks several times
-ground.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save('docs/img/map_ground.png', optimize=True)
+# Wapnica region (old dump footprint + new decal + track, padded): osm/quantize_ground.py keeps the released palette indices
+# outside it, so the Wapnica change does not recolour the rest of the map.
+_ry, _rx = np.nonzero(WAP_ZONE | PIT_OLD_MASK)
+WAP_REGION = (max(0, int(_rx.min()) - 90), max(0, int(_ry.min()) - 90), min(W, int(_rx.max()) + 91), min(H, int(_ry.max()) + 91))
+print('wapnica region', WAP_REGION)
+quantize_ground.save(ground, 'docs/img/map_ground.png', WAP_REGION)
 objects_img.save('docs/img/map_objects.png')
 low &= ~(pm | dm)   # roads and tracks cross the Białka on bridges: walkable, not a jump
 collide &= ~(pm | dm)   # nothing solid on roads/tracks (woods and bridges included)

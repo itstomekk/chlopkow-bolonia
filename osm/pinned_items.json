@@ -1,0 +1,7 @@
+{
+ "note": "Items pinned to their released spot (read by osm/place_items.py). cap: the strided wheat scan moves when ground changes upstream of it; Wapnica decal release, see DEVELOPMENT.md.",
+ "cap": {
+  "x": 1488,
+  "y": 5393
+ }
+}

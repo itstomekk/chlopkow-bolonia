@@ -79,6 +79,27 @@ python gen/build_cemetery_memories.py  # key and pixel-grid the generated archiv
 python gen/brand/build_brand_assets.py # logo lockup, favicon, share card (needs pillow, numpy, playwright)
 ```
 
+### Wapnica (dump decal, roadside track)
+
+Wapnica is a hand-placed GPT Image pixel-art ground decal (`gen/wapnica/ground.png`, see `gen/wapnica/README.md`) laid on the
+satellite-traced outline `local_features.json` id -9000020; the track beside it is id -9000021. `render_map.py` was changed so that
+**the rest of the map stays identical to the layout released before the decal** (commit 40c9aa3): a re-render now differs from it
+only inside `WAP_REGION` (printed as `wapnica region`, about x 485-1012, y 2097-2580). How that is kept:
+
+- **Random streams.** Placement and `rnd` consumption still read the old footprint: id -9000022 (`ark:keepout`, never drawn) is the
+  former dump outline and keeps trees/bales/props off it, `dm_old` is the dirt-road mask without the new track, and the shrine
+  anchor uses the old centre. Trees or bales that would land on the new decal/track (`WAP_ZONE`) are drawn and then undone (or dropped
+  after their random draws), so no later tree, forest species, bale or item moves.
+- **Palette.** `osm/quantize_ground.py` keeps the released palette indices of `map_ground.png` outside the region and maps the region
+  through the released RGB -> index table; the decal's 8 colours use palette slots the released image left empty. It reads the baseline
+  from git (`BASE_REF`), so it needs full history; without it the old global MEDIANCUT runs and the whole ground is recoloured slightly.
+- **Items.** `osm/pinned_items.json` pins Damian's cap: its wheat-pixel scan is strided in row order, and the decal sits in a wheat field,
+  so without the pin the cap jumps across the map. The Wapnica landmark access point is the only other item that moves.
+- Expected diff against 40c9aa3 after `render_map.py` + `place_items.py`: `map_ground.png` inside x 580-916, y 2192-2492;
+  `map_objects.png` x 647-874, y 2305-2442; `map_collide.png` x 661-869, y 2324-2443; `map_terrain.png` quarter-scale x 145-228, y 548-575
+  (the new track is dirt, class 100); `map.json` only the Wapnica props (sign removed), `gravel` and the `wapnica` landmark; `items.json` only
+  the `wapnica` landmark. When the Wapnica map is itself the baseline, set `BASE_REF` to the commit that contains it.
+
 ## Local testing
 
 Run `python -m http.server 8765 --directory docs`, then open http://127.0.0.1:8765.

@@ -355,6 +355,132 @@
    },
    "geometry": [
     {
+     "lat": 52.2747671,
+     "lon": 22.8631952
+    },
+    {
+     "lat": 52.2747287,
+     "lon": 22.8634827
+    },
+    {
+     "lat": 52.2746326,
+     "lon": 22.8637887
+    },
+    {
+     "lat": 52.2745134,
+     "lon": 22.8641063
+    },
+    {
+     "lat": 52.2743998,
+     "lon": 22.8644263
+    },
+    {
+     "lat": 52.2743061,
+     "lon": 22.864755
+    },
+    {
+     "lat": 52.2742026,
+     "lon": 22.8650143
+    },
+    {
+     "lat": 52.2740758,
+     "lon": 22.865046
+    },
+    {
+     "lat": 52.2739691,
+     "lon": 22.8649561
+    },
+    {
+     "lat": 52.2738651,
+     "lon": 22.8647587
+    },
+    {
+     "lat": 52.2738594,
+     "lon": 22.8645172
+    },
+    {
+     "lat": 52.2739745,
+     "lon": 22.8643717
+    },
+    {
+     "lat": 52.274108,
+     "lon": 22.8642994
+    },
+    {
+     "lat": 52.2742365,
+     "lon": 22.8640728
+    },
+    {
+     "lat": 52.2743433,
+     "lon": 22.8637933
+    },
+    {
+     "lat": 52.2744293,
+     "lon": 22.8635482
+    },
+    {
+     "lat": 52.2745437,
+     "lon": 22.8633154
+    },
+    {
+     "lat": 52.2746414,
+     "lon": 22.863184
+    },
+    {
+     "lat": 52.2747671,
+     "lon": 22.8631952
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": -9000021,
+   "tags": {
+    "highway": "track",
+    "surface": "ground",
+    "source": "esri_world_imagery_2021"
+   },
+   "geometry": [
+    {
+     "lat": 52.275055,
+     "lon": 22.862911
+    },
+    {
+     "lat": 52.2749803,
+     "lon": 22.8632545
+    },
+    {
+     "lat": 52.274895,
+     "lon": 22.863617
+    },
+    {
+     "lat": 52.2748203,
+     "lon": 22.8639987
+    },
+    {
+     "lat": 52.2747563,
+     "lon": 22.8643994
+    },
+    {
+     "lat": 52.2746816,
+     "lon": 22.8648002
+    },
+    {
+     "lat": 52.2746069,
+     "lon": 22.8652773
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": -9000022,
+   "tags": {
+    "ark:keepout": "wapnica_legacy",
+    "note": "Former Wapnica dump outline. Not drawn; only keeps trees, bales and props off the old footprint so the placement random streams stay identical to the layout released before the Wapnica decal.",
+    "source": "esri_world_imagery_2021"
+   },
+   "geometry": [
+    {
      "lat": 52.2744098,
      "lon": 22.8633194
     },

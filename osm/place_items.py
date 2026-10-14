@@ -3,7 +3,7 @@
 Run after osm/render_map.py. Hand-tuned spots use legacy_i() (see osm/geo.py), so they stay on
 the same real-world place when the map is resized. Deterministic (fixed seed).
 """
-import json, math, random, re, sys
+import json, math, os, random, re, sys
 import numpy as np
 from PIL import Image
 sys.path.insert(0, 'osm')
@@ -232,6 +232,13 @@ ys, xs = np.nonzero((ground[..., 0] > 190) & (ground[..., 1] > 150) & (ground[..
 dam = next(n for n in npcs if n['id'] == 'damian')   # "I was running through the wheat" -> within ~150-450 m of Damian
 cands = [(x, y) for x, y in zip(xs[::200], ys[::200]) if 300 < math.hypot(x - dam['x'], y - dam['y']) < 900 and free(x, y, 12)]
 cap = dict(zip('xy', map(int, rnd.choice(cands))))
+# The scan above takes every 200th wheat pixel in row order, so any ground change north of a candidate (the Wapnica decal sits in a
+# wheat field) shifts the stride and would move the cap anywhere on the map. osm/pinned_items.json keeps the released spot; delete the
+# file (or the "cap" key) to let the scan choose again. A pinned spot must still be reachable on foot.
+_pins = json.load(open('osm/pinned_items.json', encoding='utf-8')) if os.path.exists('osm/pinned_items.json') else {}
+if 'cap' in _pins:
+    cap = dict(x=int(_pins['cap']['x']), y=int(_pins['cap']['y']))
+    assert free(cap['x'], cap['y'], 12), f'pinned cap {cap} is not on reachable walkable ground'
 
 json.dump(dict(npcs=npcs, apples=apples, cap=cap, boards=boards, landmarks=landmarks, trash=trash), open('docs/items.json', 'w'), indent=1)
 print(f'reachable {reach.mean():.0%} of map |', len(apples), 'apples |', ', '.join(f"{n['id']}@{n['x']},{n['y']}" for n in npcs), '| cap', cap, '| trash', trash,
