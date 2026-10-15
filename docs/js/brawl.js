@@ -143,9 +143,11 @@ window.addEventListener('ark-ready', () => {
       team: ['', 'A', 'B'].includes(s.team) ? s.team : '',
     }));
   }
+  const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function loadOpts() {
     const o = readLS(LS_OPTS, {});
-    return { stage: STAGES[o.stage] || o.stage === 'random' ? o.stage : 'farmyard', items: o.items !== false, level: ['easy', 'normal', 'hard'].includes(o.level) ? o.level : 'normal', sound: o.sound !== false };
+    return { stage: STAGES[o.stage] || o.stage === 'random' ? o.stage : 'farmyard', items: o.items !== false, level: ['easy', 'normal', 'hard'].includes(o.level) ? o.level : 'normal', sound: o.sound !== false,
+      effects: o.effects === undefined ? !reducedMotion() : o.effects !== false };   // screen shake + white hit flash; off by default for people who ask their system for reduced motion
   }
   let KEYS = loadKeys(), SLOTS = loadSlots(), OPTS = loadOpts();
   const keyName = code => !code ? '—' : code.replace(/^Key/, '').replace(/^Digit/, '').replace(/^Arrow(.*)/, (m, d) => ({ Up: '↑', Down: '↓', Left: '←', Right: '→' }[d]))
@@ -946,7 +948,7 @@ window.addEventListener('ark-ready', () => {
     if (opts.rot) c.rotate(opts.rot);
     c.scale(face < 0 ? -s : s, s);
     c.drawImage(a.img, fr.x, fr.y, fr.w, fr.h, -fr.ax, -fr.ay, fr.w, fr.h);
-    if (opts.flash && a.flash) { c.globalAlpha = Math.min(1, opts.flash * 8) * .85; c.drawImage(a.flash, fr.x, fr.y, fr.w, fr.h, -fr.ax, -fr.ay, fr.w, fr.h); }
+    if (opts.flash && a.flash && OPTS.effects) { c.globalAlpha = Math.min(1, opts.flash * 8) * .85; c.drawImage(a.flash, fr.x, fr.y, fr.w, fr.h, -fr.ax, -fr.ay, fr.w, fr.h); }
     c.restore();
     return true;
   }
@@ -1088,7 +1090,7 @@ window.addEventListener('ark-ready', () => {
     const c = cx;
     c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#05070d'; c.fillRect(0, 0, cvs.width, cvs.height);
     const k = Math.min(cvs.width / W, cvs.height / H), ox = (cvs.width - W * k) / 2, oy = (cvs.height - H * k) / 2;
-    const sh = fight.shake > 0 && !fight.paused ? (Math.random() - .5) * 8 : 0;
+    const sh = OPTS.effects && fight.shake > 0 && !fight.paused ? (Math.random() - .5) * 8 : 0;
     c.setTransform(k, 0, 0, k, ox + sh * k, oy + sh * k * .5);
     c.save(); c.beginPath(); c.rect(0, 0, W, H); c.clip();
     drawStage();
@@ -1132,7 +1134,7 @@ window.addEventListener('ark-ready', () => {
     title: 'BIJATYKA', sub: 'Jak w Little Fighter 2: kilka osób przy jednej klawiaturze lub padach + komputer. Ostatnia drużyna na nogach wygrywa.',
     type: { human: 'CZŁOWIEK', cpu: 'KOMPUTER', off: '—' }, team: { '': 'BEZ DRUŻYNY', A: 'DRUŻYNA A', B: 'DRUŻYNA B' },
     start: 'WALKA!', close: 'WYJDŹ', controls: 'STEROWANIE', reset: 'DOMYŚLNE KLAWISZE', press: 'naciśnij klawisz…',
-    stage: 'PLANSZA', random: 'LOSOWA', itemsOpt: 'PRZEDMIOTY', level: 'KOMPUTER', levels: { easy: 'ŁATWY', normal: 'NORMALNY', hard: 'TRUDNY' }, sound: 'DŹWIĘK',
+    stage: 'PLANSZA', random: 'LOSOWA', itemsOpt: 'PRZEDMIOTY', level: 'KOMPUTER', levels: { easy: 'ŁATWY', normal: 'NORMALNY', hard: 'TRUDNY' }, sound: 'DŹWIĘK', effects: 'EFEKTY (TRZĘSIENIE, BŁYSK)',
     moves: 'Bieg: 2× w bok · w biegu ATAK / SKOK / OBRONA = atak z rozpędu / długi skok / przewrót · Kopniak: SKOK + ATAK · Oszołomionego chwyć wchodząc w niego, rzut: kierunek + ATAK · Przedmiot: ATAK nad nim, widły rzucasz: do przodu + ATAK · W locie SKOK = przewrót · Specjalne: OBRONA, kierunek, ATAK oraz OBRONA, góra, ATAK',
     pads: 'Pad: krzyżak/gałka, X/□ atak, A/✕ skok, B/○ lub RB obrona',
     errFew: 'Potrzeba co najmniej 2 zawodników.', errSame: 'Dwóch graczy ma to samo sterowanie: ', errTeam: 'Wszyscy są w jednej drużynie.', errHuman: 'Dodaj co najmniej jednego człowieka.',
@@ -1140,7 +1142,7 @@ window.addEventListener('ark-ready', () => {
     title: 'BRAWL', sub: 'Little Fighter 2 style: several people on one keyboard or gamepads plus computer fighters. Last team standing wins.',
     type: { human: 'HUMAN', cpu: 'COMPUTER', off: '—' }, team: { '': 'NO TEAM', A: 'TEAM A', B: 'TEAM B' },
     start: 'FIGHT!', close: 'LEAVE', controls: 'CONTROLS', reset: 'DEFAULT KEYS', press: 'press a key…',
-    stage: 'STAGE', random: 'RANDOM', itemsOpt: 'ITEMS', level: 'COMPUTER', levels: { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' }, sound: 'SOUND',
+    stage: 'STAGE', random: 'RANDOM', itemsOpt: 'ITEMS', level: 'COMPUTER', levels: { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' }, sound: 'SOUND', effects: 'EFFECTS (SHAKE, FLASH)',
     moves: 'Run: double-tap sideways · Run + ATTACK / JUMP / DEFEND = dash attack / dash jump / roll · Jump kick: JUMP + ATTACK · Walk into a dizzy enemy to grab, direction + ATTACK throws · Items: ATTACK on them, forward + ATTACK throws the pitchfork · JUMP while falling = flip · Specials: DEFEND, direction, ATTACK and DEFEND, up, ATTACK',
     pads: 'Gamepad: d-pad/stick, X/□ attack, A/✕ jump, B/○ or RB defend',
     errFew: 'At least 2 fighters are needed.', errSame: 'Two players share the same controls: ', errTeam: 'Everyone is on one team.', errHuman: 'Add at least one human player.',
@@ -1196,6 +1198,7 @@ window.addEventListener('ark-ready', () => {
         <label style="${lab}">${T.level}<select id="brawl-level" style="${css.sel}">${['easy', 'normal', 'hard'].map(k => opt(k, T.levels[k], OPTS.level)).join('')}</select></label>
         <label style="${chk}"><input id="brawl-items" type="checkbox"${OPTS.items ? ' checked' : ''}> ${T.itemsOpt}</label>
         <label style="${chk}"><input id="brawl-sound" type="checkbox"${OPTS.sound ? ' checked' : ''}> ${T.sound}</label>
+        <label style="${chk}"><input id="brawl-effects" type="checkbox"${OPTS.effects ? ' checked' : ''}> ${T.effects}</label>
       </div>
       <p id="brawl-error" role="alert" style="min-height:1.3em;margin:10px 0;color:#ff6b5e;text-align:center"></p>
       <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
@@ -1221,6 +1224,7 @@ window.addEventListener('ark-ready', () => {
     L.querySelector('#brawl-level').addEventListener('change', e => { OPTS.level = e.target.value; saveOpts(); });
     L.querySelector('#brawl-items').addEventListener('change', e => { OPTS.items = e.target.checked; saveOpts(); });
     L.querySelector('#brawl-sound').addEventListener('change', e => { OPTS.sound = e.target.checked; saveOpts(); });
+    L.querySelector('#brawl-effects').addEventListener('change', e => { OPTS.effects = e.target.checked; saveOpts(); });
     L.querySelector('#brawl-controls').addEventListener('toggle', e => { if (ui) ui.controlsOpen = e.target.open; });
     L.querySelector('#brawl-start').addEventListener('click', () => startFight());
     L.querySelector('#brawl-close').addEventListener('click', closeBrawl);

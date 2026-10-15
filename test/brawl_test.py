@@ -370,6 +370,20 @@ with sync_playwright() as p:
     check(box and box["y"] + box["height"] <= 844 and box["x"] >= 0, f"lobby start button visible on a phone ({box})")
     if SHOTS:
         m.screenshot(path=os.path.join(SHOTS, "brawl_lobby_mobile.png"))
+
+    # Effects option (screen shake + white hit flash): on by default, saved, and off by default for reduced-motion users.
+    check(ev(page, "window.ARK.brawl.opts.effects") is True, "effects (shake, flash) are on by default")
+    ev(page, "window.ARK.brawl.open()")
+    check(page.locator("#brawl-effects").is_checked(), "lobby has an EFFECTS checkbox, checked by default")
+    page.locator("#brawl-effects").uncheck()
+    check(ev(page, "window.ARK.brawl.opts.effects") is False and ev(page, "JSON.parse(localStorage.getItem('ark_brawl_opts_v1')).effects") is False, "unchecking EFFECTS turns them off and saves it")
+    ev(page, "window.ARK.brawl.close(); window.ARK.brawl.setOpts({effects: true})")
+    ctx = browser.new_context(viewport={"width": 1280, "height": 720}, reduced_motion="reduce")
+    rm = ctx.new_page()
+    rm.goto(URL, wait_until="domcontentloaded")
+    rm.wait_for_function("window.ARK && window.ARK.brawl")
+    check(ev(rm, "window.ARK.brawl.opts.effects") is False, "with reduced motion requested, effects start off")
+    ctx.close()
     browser.close()
 
 print("\nRESULT:", "PASS" if not FAILS else f"FAIL ({len(FAILS)})")
