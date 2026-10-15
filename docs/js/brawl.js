@@ -352,7 +352,10 @@ window.addEventListener('ark-ready', () => {
   const lyingSt = s => s === 'lying' || s === 'dead';
   function hurtBox(o) { return { y0: o.y, y1: o.y + (lyingSt(o.st) ? 25 : 100) }; }
   function canBeHit(o) { return alive(o) && o.inv <= 0 && !['lying', 'dead', 'getup', 'roll', 'flip'].includes(o.st) && !(o.st === 'fall' && o.t < .12); }
+  // Hit-stop: the short freeze on impact that makes a punch feel like it landed. The victim freezes slightly longer than the attacker.
+  const HITSTOP = { block: .04, lightA: .07, lightV: .10, heavyA: .11, heavyV: .17, ko: .24 };
   function applyHit(att, o, a, srcX) {
+    let stopV = HITSTOP.block, stopA = HITSTOP.block;   // the pause both fighters feel on impact (seconds)
     const dir = Math.sign(o.x - srcX) || (att ? att.face : 1);
     const frontal = o.face === -dir;
     let dmg = Math.round(a.dmg);
@@ -368,6 +371,7 @@ window.addEventListener('ark-ready', () => {
       spark(o.x - dir * 12, gy(o.z) - o.y - 62, '#fff3b0', 10);
       const heavy = o.fall >= 60 || a.dvy || o.y > 0 || o.hp - dmg <= 0;
       sfx(heavy ? 'heavy' : 'hit');
+      stopV = heavy ? HITSTOP.heavyV : HITSTOP.lightV; stopA = heavy ? HITSTOP.heavyA : HITSTOP.lightA;
       fight.shake = Math.max(fight.shake, heavy ? .16 : .06);
       if (heavy) {
         if (o.hold) dropHold(o);
@@ -378,8 +382,9 @@ window.addEventListener('ark-ready', () => {
     }
     o.hp = Math.max(0, o.hp - dmg); o.hpDark = Math.max(o.hp, o.hpDark - Math.round(dmg / 3));
     o.stats.hpLost += dmg;
-    if (att) { att.stats.dealt += dmg; att.hitstop = .05; }
-    o.hitstop = .05;
+    if (o.hp <= 0) stopV = stopA = HITSTOP.ko;   // the killing blow freezes the longest
+    if (att) { att.stats.dealt += dmg; att.hitstop = Math.max(att.hitstop, stopA); }
+    o.hitstop = Math.max(o.hitstop, stopV);
     if (o.hp <= 0) { o.lastHitBy = att; if (o.st !== 'fall') { setSt(o, 'fall'); o.vx = dir * 200; o.vy = 400; o.y = 1; } }
     return true;
   }
@@ -469,8 +474,13 @@ window.addEventListener('ark-ready', () => {
       f.mp = Math.min(f.mpMax, f.mp + DT * (18 + 30 * (1 - f.hp / f.hpMax)));
       if (f.hp < f.hpDark && f.hp > 0) f.hp = Math.min(f.hpDark, f.hp + DT * 4);
     }
-    if (f.hitstop > 0) { f.hitstop -= DT; return; }
+    if (f.hitstop > 0) {   // frozen on impact: remember what was pressed so a long pause never eats an input (LF2-style buffer)
+      f.hitstop -= DT;
+      for (const a of inp.pressed || []) { f.hist.push([a, now]); if (f.hist.length > 8) f.hist.shift(); (f.buf || (f.buf = new Set())).add(a); }
+      return;
+    }
     for (const a of inp.pressed || []) { f.hist.push([a, now]); if (f.hist.length > 8) f.hist.shift(); }
+    if (f.buf && f.buf.size) { f.input = { held: hd, pressed: [...new Set([...(inp.pressed || []), ...f.buf])] }; f.buf.clear(); }   // replay the buffered presses on the first free tick
     f.t += DT; f.frameT += DT;
     const d = f.def, kind = holdKind(f);
     const mx = (hd.right ? 1 : 0) - (hd.left ? 1 : 0), mz = (hd.down ? 1 : 0) - (hd.up ? 1 : 0);
@@ -479,7 +489,7 @@ window.addEventListener('ark-ready', () => {
     if (f.ko) { physicsGround(f); f.deadT += DT; return; }
 
     if (FREE.has(f.st)) {
-      for (const a of inp.pressed || []) if ((a === 'left' || a === 'right') && kind !== 'heavy') {
+      for (const a of f.input.pressed || []) if ((a === 'left' || a === 'right') && kind !== 'heavy') {
         const dir = a === 'left' ? -1 : 1;
         if (f.running && dir !== f.running) { f.running = 0; setSt(f, 'skid'); f.vx = f.face * d.run * .7; return; }
         if (!f.running && now - f.tap[a] < .26) { f.running = dir; f.face = dir; }

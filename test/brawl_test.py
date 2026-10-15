@@ -117,6 +117,21 @@ with sync_playwright() as p:
     check(ev(page, "[window.ARK.P.x, window.ARK.P.y]") == before, "fight keys never move the village player")
 
     ev(page, f"{F}.paused = true")   # deterministic from here: the test drives ticks itself
+    # Hit pause: both fighters freeze on impact (the victim longer), and a press during the freeze is buffered, not lost.
+    ev(page, RESET_PAIR)
+    ev(page, f"{F}.fighters[1].fall = 0")
+    hp0 = ev(page, f"{F}.fighters[1].hp")
+    page.keyboard.press("KeyF")
+    for _ in range(40):
+        step(page, 16)
+        if ev(page, f"{F}.fighters[1].hp") < hp0: break
+    hs = ev(page, f"[{F}.fighters[0].hitstop, {F}.fighters[1].hitstop]")
+    check(hs[1] >= 0.08 and hs[0] >= 0.06 and hs[1] >= hs[0], f"a light hit pauses attacker and victim, victim longer (attacker {hs[0]:.2f}s, victim {hs[1]:.2f}s)")
+    page.keyboard.press("KeyF"); step(page, 16)
+    check(ev(page, f"{F}.fighters[0].hitstop") > 0 and ev(page, f"{F}.fighters[0].buf ? {F}.fighters[0].buf.has('attack') : false"), "a button pressed during the hit pause is buffered, not lost")
+    step(page, 120)
+    check(ev(page, f"{F}.fighters[0].buf ? {F}.fighters[0].buf.size : 0") == 0, "the buffer is empty again once the pause ends")
+
     # Punch -> punch -> dizzy -> super punch knocks down.
     ev(page, RESET_PAIR)
     hp = ev(page, f"{F}.fighters[1].hp")
@@ -128,7 +143,7 @@ with sync_playwright() as p:
     st2 = ev(page, f"{F}.fighters[1].st")
     check(st2 == "dizzy", f"second punch makes the target dizzy (got {st2})")
     ev(page, f"{F}.fighters[1].x = {F}.fighters[0].x + 45")
-    tap(page, "KeyF", 60)
+    tap(page, "KeyF", 130)   # the hit pause delays the previous punch's recovery a little; the press is buffered until then
     check(ev(page, f"{F}.fighters[0].st") == "super", "punching a dizzy target becomes a super punch")
     step(page, 300)
     check(ev(page, f"{F}.fighters[1].st") in ("fall", "lying"), "super punch knocks down")
