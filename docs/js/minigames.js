@@ -147,7 +147,7 @@ window.addEventListener('ark-ready', () => {
   function setupShooting(type, site) {
     const plan = []; let t = 1.2;
     for (let i = 0; i < 12; i++) { const dbl = i === 4 || i === 8 || i === 11; plan.push({ t, from: i % 2 }); if (dbl) plan.push({ t: t + .15, from: 1 - (i % 2) }); t += dbl ? 2.4 : 1.7; }
-    Object.assign(MG, { site, plan, targets: [], hits: 0, shots: 0, barrel: 2, reload: 0, aim: null, flash: 0, results: [] });
+    Object.assign(MG, { site, plan, targets: [], hits: 0, shots: 0, barrel: 2, reload: 0, aim: null, flash: 0, hitstop: 0, pops: [], results: [] });
   }
 
   /* ------------------------------------------------------------------ hooks: interaction, input, movement */
@@ -200,10 +200,15 @@ window.addEventListener('ark-ready', () => {
       best.alive = false; best.hit = true; MG.hits++; MG.results.push(1);
       A.burst(best.x, best.y - best.z, ['#1b1b1b', '#d8262c', '#f5f0e0', '#ffd21f'], 22);
       A.popToast(`${L.hits} ${MG.hits}`);
+      if (!REDUCED()) { MG.hitstop = .07; MG.flash = .16; }   // hit pause: the clays freeze for a beat, the flash is stronger
+      const [hx, hy] = cam.S(best.x, best.y - best.z); MG.pops.push({ x: hx, y: hy, t: 0 });   // floating +1
     }
   }
+  const REDUCED = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function updateSkeet(dt) {
     MG.flash = Math.max(0, MG.flash - dt);
+    for (const q of MG.pops) q.t += dt;
+    MG.pops = MG.pops.filter(q => q.t < .7);
     if (MG.shotAt) MG.shotAt[2] -= dt;
     if (MG.reload > 0 && (MG.reload -= dt) <= 0) { MG.reload = 0; MG.barrel = 2; }
     // aim: mouse on desktop, arrows move the crosshair, touch aims where you tap
@@ -219,6 +224,7 @@ window.addEventListener('ark-ready', () => {
       const [x0, y0] = BOOTH(p.from, MG.site), [x1, y1] = BOOTH(1 - p.from, MG.site);
       MG.targets.push({ x0, y0, x1: x1 + (Math.random() - .5) * 50, y1: y1 - 10 - Math.random() * 40, T: 1.6 + Math.random() * .5, h: 45 + Math.random() * 45, t: 0, alive: true, x: x0, y: y0, z: 0, spin: Math.random() * 6 });
     }
+    if (MG.hitstop > 0) { MG.hitstop -= dt; return; }   // frozen on impact: nothing launches or flies for a moment
     for (const t of MG.targets) if (t.alive) {
       t.t += dt; const u = t.t / t.T;
       t.x = t.x0 + (t.x1 - t.x0) * u; t.y = t.y0 + (t.y1 - t.y0) * u; t.z = Math.sin(Math.PI * Math.min(1, u)) * t.h; t.spin += dt * 9;
@@ -485,6 +491,8 @@ window.addEventListener('ark-ready', () => {
     ctx.moveTo(cx, cy - r * 1.6); ctx.lineTo(cx, cy - r * .5); ctx.moveTo(cx, cy + r * .5); ctx.lineTo(cx, cy + r * 1.6); ctx.stroke();
     if (MG.shotAt && MG.shotAt[2] > 0) { ctx.strokeStyle = `rgba(255,255,255,${MG.shotAt[2] * 4})`; ctx.beginPath(); ctx.arc(MG.shotAt[0], MG.shotAt[1], r * (1.8 - MG.shotAt[2] * 3), 0, 7); ctx.stroke(); }
     if (MG.flash > 0) { ctx.fillStyle = `rgba(255,240,180,${MG.flash * 3})`; ctx.fillRect(0, 0, W, H); }
+    for (const q of MG.pops) { ctx.globalAlpha = 1 - q.t / .7; ctx.fillStyle = '#7cff6b'; ctx.font = `${U * 3}px Silkscreen`; ctx.textAlign = 'center'; ctx.fillText('+1', q.x, q.y - U * 2 - q.t * U * 10); }
+    ctx.globalAlpha = 1;
     // shells: two barrels
     for (let i = 0; i < 2; i++) { ctx.fillStyle = i < MG.barrel ? '#d8262c' : 'rgba(255,255,255,.2)'; ctx.fillRect(W / 2 - U * 3 + i * U * 3.4, H - U * 6, U * 2.2, U * 4); ctx.fillStyle = i < MG.barrel ? '#ffd21f' : 'rgba(255,255,255,.1)'; ctx.fillRect(W / 2 - U * 3 + i * U * 3.4, H - U * 2.8, U * 2.2, U * .9); }
     // 15 result pips
