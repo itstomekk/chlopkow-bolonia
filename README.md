@@ -97,6 +97,19 @@ Znasz Chłopków lepiej niż my i widzisz błąd? Daj znać. Fakty z tej częśc
 
 Gra to czysty JavaScript na canvasie, bez budowania i bez zależności. Katalog [`docs/`](docs/) jest całą stroną, GitHub Pages serwuje go bez zmian. Uruchomienie lokalne, testy, struktura repozytorium i licencje są w [DEVELOPMENT.md](DEVELOPMENT.md).
 
+### Szybki dostęp do testów
+
+| Parametr | Co robi |
+|---|---|
+| `?dev=1` | panel deweloperski (F2 albo znaczek DEV): szukajka miejsc, dzielnic, NPC, minigier i wnętrz; klik = teleport, przy minigrze start. Klik na minimapie lub mapie M teleportuje. Tymczasowy zapis. |
+| `?play=<id>` | od razu świat i minigra: `pig`, `dogs`, `skeet`, `ducks`, `mowing`, `brawl`, każda plansza z `ARK_BOARDS` (np. `sprint`), albo `world`. Tymczasowy zapis. |
+| `?go=<miejsce>` | teleport po nazwie miejsca, bez polskich znaków (`?go=kosciol`). Prawdziwy zapis, jak `?x=&y=`. |
+| `?save=real` | z `?dev=1` / `?play=` używa prawdziwego zapisu zamiast tymczasowego. |
+| `?x=1243&y=901` | teleport na współrzędne mapy. Ma pierwszeństwo przed `?go`. |
+| `?debug=1`, `?bison=1`, `?lang=en`, `?music=0` | okręgi miejsc, wizyta żubra, wersja angielska, bez muzyki. |
+
+Tymczasowy zapis żyje tylko w pamięci karty: prawdziwy zapis w przeglądarce zostaje nietknięty, wyniki nie idą do globalnej tablicy, a wejście nie jest ogłaszane na Nostr.
+
 Tablica i wordmark powstają ze skryptu `gen/brand/build_brand_assets.py`. Zasady użycia: [księga znaku](https://itstomekk.github.io/chlopkow-bolonia/brand-guidelines.html).
 
 ---
