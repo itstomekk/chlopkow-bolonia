@@ -5,7 +5,7 @@
    (gen/build_liquid_maps.py -> docs/data/liquid-maps.json).
 
    Rules (the contract of the original):
-   * 2-4 teams, one cursor each, a fixed army of fighters (one fighter per grid cell, 160x84 cells).
+   * 2-4 teams, one cursor each, a fixed army of fighters (one fighter per grid cell, 320x168 cells, 3 board px each).
    * Each team has a distance field ("gradient") over the open cells, flooding outwards from its cursor. The flood is progressive: a
      bounded number of cells per tick (like the original), so a wave needs a few ticks to cross the level and cells it has not reached
      yet keep the previous values. Fighters never run a search of their own, they only read the field.
@@ -18,17 +18,18 @@
 'use strict';
 (() => {
   /* ------------------------------------------------------------------ tunables */
-  const GW = 160, GH = 84, N = GW * GH;
-  const CELL = 6, FX = 0, FY = 36;               // a cell is 6 board px; the field starts under the 36 px HUD strip
-  const RES = 2, RW = GW * RES, RH = GH * RES;   // render buffer: 2x2 pixels per cell, drawn 3x on the 960x540 board
+  const GW = 320, GH = 168, N = GW * GH;
+  const CELL = 3, FX = 0, FY = 36;               // a cell is 3 board px (320x3 = 960, 168x3 = 504); the field starts under the 36 px HUD strip
+  // render buffer: one pixel per cell, drawn 3x on the 960x540 board with smoothing off
   const CFG = {
     roundSec: 90,        // round length
-    armyFrac: .30,       // fighters = this share of the open cells in total ...
-    armyMax: 1100,       // ... but at most this many per team
+    armyFrac: .28,       // fighters = this share of the open cells in total ...
+    armyMax: 2000,       // ... but at most this many per team (8000 in all: what holds 60 ticks/s, see plans/2026-10-15-liquid-wars-board.md)
     hp: 60, attack: 5, defence: 1, regenEvery: 6, convertHp: 30, topUp: 1,
-    moveEvery: 2,        // a fighter acts every 2nd tick (30 steps/s)
-    cursorSpeed: .85,    // cells per tick (51 cells/s)
-    floodBudget: 0,      // cells flooded per team and tick; 0 = a third of the open cells
+    moveEvery: 1,        // a fighter acts every tick (60 steps/s = 180 board px/s, the same speed as the old 160x84 grid with 2 ticks per step)
+    cursorSpeed: 1.7,    // cells per tick (102 cells/s = 306 board px/s)
+    floodTicks: 8,       // a flood wave from a moved cursor needs about this many ticks to cross the level
+    floodBudget: 0,      // cells flooded per team and tick; 0 = open cells / floodTicks
     level: null,         // test hook: force a level id
   };
   const COUNT_LEN = 3.4;
@@ -60,20 +61,49 @@
   // level names are listed here (not loaded) so the lobby can show them before the bitmaps arrive; the test compares them with the data file
   const LEVELS = [
     { id: 'village', pl: 'CAŁA WIEŚ', en: 'WHOLE VILLAGE' },
+    { id: 'street', pl: 'GŁÓWNA ULICA', en: 'MAIN STREET' },
     { id: 'shop', pl: 'OKOLICE SKLEPU', en: 'AROUND THE SHOP' },
     { id: 'church', pl: 'KOŚCIÓŁ I PLEBANIA', en: 'CHURCH AND RECTORY' },
     { id: 'cemetery', pl: 'CMENTARZ', en: 'CEMETERY' },
     { id: 'farmyard', pl: 'PODWÓRKA', en: 'FARMYARDS' },
+    { id: 'pond', pl: 'STAW', en: 'THE POND' },
+    { id: 'river', pl: 'MELIORANKA', en: 'MELIORANKA RIVER' },
+    { id: 'forest', pl: 'SKRAJ LASU', en: 'FOREST EDGE' },
+    { id: 'pitch', pl: 'BOISKO I ŚWIETLICA', en: 'PITCH AND COMMUNITY HALL' },
+    { id: 'kolonia', pl: 'CHŁOPKÓW-KOLONIA', en: 'CHŁOPKÓW-KOLONIA' },
+    { id: 'barn', pl: 'JAZZ W STODOLE', en: 'JAZZ IN THE BARN' },
   ];
 
   /* ------------------------------------------------------------------ level data (loaded on first use) */
   let DATA = null, status = 'idle', loading = null;
+  // rows are run-length encoded by gen/build_liquid_maps.py: per row the alternating run lengths (wall first, base 36), rows joined with ';'
+  function decodeRle(s) {
+    const rows = s.split(';'), walk = new Uint8Array(N); if (rows.length !== GH) throw new Error('bad level rows');
+    for (let y = 0; y < GH; y++) {
+      let x = 0, open = 0;
+      for (const r of rows[y].split(',')) { const n = parseInt(r, 36); if (!(n >= 0) || x + n > GW) throw new Error('bad level run'); if (open) walk.fill(1, y * GW + x, y * GW + x + n); x += n; open ^= 1; }
+      if (x !== GW) throw new Error('bad level row length');
+    }
+    for (let x = 0; x < GW; x++) if (walk[x] || walk[N - GW + x]) throw new Error('level border must be wall');
+    for (let y = 0; y < GH; y++) if (walk[y * GW] || walk[y * GW + GW - 1]) throw new Error('level border must be wall');
+    return walk;
+  }
+  // per cell: bit k set = a fighter may step in direction k (target open, and for a diagonal both side cells open)
+  function neighbourMask(walk) {
+    const nb = new Uint8Array(N);
+    for (let y = 1; y < GH - 1; y++) for (let x = 1; x < GW - 1; x++) {
+      const c = y * GW + x; if (!walk[c]) continue; let m = 0;
+      for (let k = 0; k < 8; k++) { if (!walk[c + OFF[k]]) continue; if (k & 1 && !(walk[c + SIDEX[k]] && walk[c + SIDEY[k]])) continue; m |= 1 << k; }
+      nb[c] = m;
+    }
+    return nb;
+  }
   function load() {
     if (loading) return loading;
     status = 'loading';
     loading = fetch('data/liquid-maps.json').then(r => { if (!r.ok) throw new Error(`liquid-maps.json ${r.status}`); return r.json(); }).then(d => {
       if (!d || !Array.isArray(d.levels) || !d.levels.length || d.grid.w !== GW || d.grid.h !== GH) throw new Error('bad liquid-maps.json');
-      for (const l of d.levels) { l.walk = new Uint8Array(N); l.rows.forEach((row, y) => { for (let x = 0; x < GW; x++) l.walk[y * GW + x] = row.charCodeAt(x) === 46 ? 1 : 0; }); }
+      for (const l of d.levels) { l.walk = decodeRle(l.rle); l.nb = neighbourMask(l.walk); }
       DATA = d; status = 'ok'; return d;
     }).catch(e => { status = 'error'; loading = null; throw e; });
     return loading;
@@ -87,7 +117,7 @@
   const rng = () => { seedState = (seedState * 1664525 + 1013904223) >>> 0; return seedState / 4294967296; };
 
   function makeSim(level, nTeams, cfg) {
-    const walk = level.walk;
+    const walk = level.walk, nb = level.nb;
     let openN = 0; for (let i = 0; i < N; i++) openN += walk[i];
     const per = Math.max(20, Math.min(cfg.armyMax, Math.floor(openN * cfg.armyFrac / nTeams)));
     const total = per * nTeams;
@@ -95,7 +125,7 @@
     const occ = new Int32Array(N);                 // fighter index + 1, 0 = free
     const counts = new Int32Array(nTeams);
     const D = [], SEEN = [], FL = [];
-    const budget = cfg.floodBudget || Math.ceil(openN / 3);
+    const budget = cfg.floodBudget || Math.ceil(openN / Math.max(1, cfg.floodTicks));
     for (let t = 0; t < nTeams; t++) { D.push(new Uint16Array(N).fill(65535)); SEEN.push(new Uint32Array(N)); FL.push({ id: 0, head: 0, tail: 0, src: -1, q: new Int32Array(N) }); }
     const cur = [];                                // cursors in cell units
     const dmg = Math.max(1, cfg.attack - cfg.defence);
@@ -107,16 +137,16 @@
       while (h < tl && got < per) {
         const c = qs[h++];
         if (!taken[c]) { taken[c] = 1; fpos[f] = c; fteam[f] = t; fhp[f] = cfg.hp; occ[c] = f + 1; f++; got++; }
+        const m = nb[c];
         for (let k = 0; k < 8; k++) {
-          const n = c + OFF[k]; if (!walk[n] || mark[n]) continue;
-          if (k & 1 && !(walk[c + SIDEX[k]] && walk[c + SIDEY[k]])) continue;
+          if (!(m & (1 << k))) continue; const n = c + OFF[k]; if (mark[n]) continue;
           mark[n] = 1; qs[tl++] = n;
         }
       }
       if (got < per) throw new Error(`level ${level.id}: no room for team ${t} (${got}/${per})`);
       counts[t] = per;
     }
-    const sim = { level, walk, nTeams, per, total, fpos, fteam, fhp, occ, counts, D, cur, tick: 0, conv: [], convCount: 0, convTick: 0, openN, cfg, out: new Array(nTeams).fill(false), outAt: new Array(nTeams).fill(-1) };
+    const sim = { level, walk, nTeams, per, total, fpos, fteam, fhp, occ, counts, D, cur, tick: 0, conv: [], convCount: 0, convTick: 0, openN, cfg, floodSum: 0, out: new Array(nTeams).fill(false), outAt: new Array(nTeams).fill(-1) };
 
     function flood(t, n) {   // progressive wavefront from the team's cursor cell
       const fl = FL[t], d = D[t], seen = SEEN[t], q = fl.q;
@@ -125,44 +155,43 @@
         if (c === fl.src) return;
         fl.id++; fl.src = c; q[0] = c; fl.head = 0; fl.tail = 1; d[c] = 0; seen[c] = fl.id;
       }
-      let k0 = 0; const id = fl.id;
-      while (fl.head < fl.tail && k0 < n) {
-        const c = q[fl.head++], dc = d[c] + 1; k0++;
+      let k0 = 0, head = fl.head, tail = fl.tail; const id = fl.id;
+      while (head < tail && k0 < n) {
+        const c = q[head++], dc = d[c] + 1, m = nb[c]; k0++;
         for (let k = 0; k < 8; k++) {
-          const nb = c + OFF[k]; if (!walk[nb] || seen[nb] === id) continue;
-          if (k & 1 && !(walk[c + SIDEX[k]] && walk[c + SIDEY[k]])) continue;
-          seen[nb] = id; d[nb] = dc; q[fl.tail++] = nb;
+          if (!(m & (1 << k))) continue; const x = c + OFF[k]; if (seen[x] === id) continue;
+          seen[x] = id; d[x] = dc; q[tail++] = x;
         }
       }
+      fl.head = head; fl.tail = tail;
     }
     sim.floodAll = () => { for (let t = 0; t < nTeams; t++) if (!sim.out[t]) { FL[t].head = FL[t].tail; flood(t, N); } };
     sim.floodAll();
 
-    const P = 7919;   // prime > any army: a fixed scramble of the visiting order, re-offset every tick
+    const P = 7919 % total;   // a prime step (the army is smaller than 7919): a fixed scramble of the visiting order, re-offset every tick
     sim.step = () => {
       const tick = ++sim.tick, me = cfg.moveEvery, regen = cfg.regenEvery, hpMax = cfg.hp;
+      const f0 = performance.now();
       for (let t = 0; t < nTeams; t++) if (!sim.out[t]) flood(t, budget);
-      sim.convTick = 0;
-      const off = (tick * 2654435761) >>> 0;
-      for (let j = 0; j < total; j++) {
-        const i = (((j * P) % total) + off) % total;
-        if (regen && fhp[i] < hpMax && (i + tick) % regen === 0) fhp[i]++;
-        if ((i + tick) % me !== 0) continue;
-        const c = fpos[i], t = fteam[i], d = D[t], dc = d[c], r = (tick + i) & 7;
+      sim.floodSum += performance.now() - f0; sim.convTick = 0;
+      if (regen) for (let q = (regen - (tick % regen)) % regen; q < total; q += regen) if (fhp[q] < hpMax) fhp[q]++;   // every `regen` ticks each fighter heals 1
+      let i = (((tick * 2654435761) >>> 0) % total);
+      for (let j = 0; j < total; j++, i += P) {
+        if (i >= total) i -= total;
+        if (me > 1 && (i + tick) % me !== 0) continue;
+        const c = fpos[i], t = fteam[i], d = D[t], dc = d[c], r = (tick + i) & 7, m = nb[c];
         let bk = -1, bd = 65535;
         for (let jj = 0; jj < 8; jj++) {
-          const k = (jj + r) & 7, n = c + OFF[k]; if (!walk[n]) continue;
-          if (k & 1 && !(walk[c + SIDEX[k]] && walk[c + SIDEY[k]])) continue;
-          const nd = d[n]; if (nd < bd) { bd = nd; bk = k; }
+          const k = (jj + r) & 7; if (!(m & (1 << k))) continue;
+          const nd = d[c + OFF[k]]; if (nd < bd) { bd = nd; bk = k; }
         }
         if (bk < 0) continue;
         // priority list: the best direction, then its two neighbours (alternating which side first), then the two beyond
         const s = (r & 1) ? 1 : -1;
         for (let p = 0; p < 5; p++) {
-          const k = (bk + (p === 0 ? 0 : p === 1 ? s : p === 2 ? -s : p === 3 ? 2 * s : -2 * s) + 8) & 7, n = c + OFF[k];
-          if (!walk[n]) continue;
-          if (k & 1 && !(walk[c + SIDEX[k]] && walk[c + SIDEY[k]])) continue;
-          const nd = d[n]; if (p === 0 ? nd >= dc : nd > dc) continue;
+          const k = (bk + (p === 0 ? 0 : p === 1 ? s : p === 2 ? -s : p === 3 ? 2 * s : -2 * s) + 8) & 7;
+          if (!(m & (1 << k))) continue;
+          const n = c + OFF[k], nd = d[n]; if (p === 0 ? nd >= dc : nd > dc) continue;
           const o = occ[n];
           if (o === 0) { occ[c] = 0; occ[n] = i + 1; fpos[i] = n; break; }
           const e = o - 1;
@@ -188,10 +217,9 @@
     sim.bfs = (src, out) => {   // plain full distance field (computer cursors steer by it)
       out.fill(65535); const q = qs; let h = 0, tl = 0; q[tl++] = src; out[src] = 0;
       while (h < tl) {
-        const c = q[h++], dc = out[c] + 1;
+        const c = q[h++], dc = out[c] + 1, m = nb[c];
         for (let k = 0; k < 8; k++) {
-          const n = c + OFF[k]; if (!walk[n] || out[n] !== 65535) continue;
-          if (k & 1 && !(walk[c + SIDEX[k]] && walk[c + SIDEY[k]])) continue;
+          if (!(m & (1 << k))) continue; const n = c + OFF[k]; if (out[n] !== 65535) continue;
           out[n] = dc; q[tl++] = n;
         }
       }
@@ -227,24 +255,22 @@
     /* ---- colours */
     const pack = (r, g, b) => (255 << 24) | (b << 16) | (g << 8) | r;
     const clampc = v => Math.max(0, Math.min(255, v | 0));
-    const PAL = teams.map(t => { const lv8 = []; for (let l = 0; l < 8; l++) { const sh = .5 + .5 * (l / 7), c = t.col; lv8.push([pack(clampc(c[0] * sh * 1.28 + 18), clampc(c[1] * sh * 1.28 + 18), clampc(c[2] * sh * 1.28 + 18)), pack(clampc(c[0] * sh), clampc(c[1] * sh), clampc(c[2] * sh)), pack(clampc(c[0] * sh * .82), clampc(c[1] * sh * .82), clampc(c[2] * sh * .82))]); } return lv8; });
-    const off = document.createElement('canvas'); off.width = RW; off.height = RH;
-    const octx = off.getContext('2d'), img = octx.createImageData(RW, RH), u32 = new Uint32Array(img.data.buffer);
-    const base = new Uint32Array(RW * RH);
+    // fighter colour per health level (8 steps, dim = hurt); a fighter is one pixel of the GW x GH buffer, drawn 3x
+    const PAL = teams.map(t => { const lv8 = new Uint32Array(8); for (let l = 0; l < 8; l++) { const sh = .45 + .55 * (l / 7), c = t.col; lv8[l] = pack(clampc(c[0] * sh * 1.12 + 8), clampc(c[1] * sh * 1.12 + 8), clampc(c[2] * sh * 1.12 + 8)); } return lv8; });
+    const HPL = new Uint8Array(cfg.hp + 1); for (let h = 0; h <= cfg.hp; h++) HPL[h] = Math.min(7, Math.max(0, (h * 7 / cfg.hp + .5) | 0));
+    const off = document.createElement('canvas'); off.width = GW; off.height = GH;
+    const octx = off.getContext('2d'), img = octx.createImageData(GW, GH), u32 = new Uint32Array(img.data.buffer);
+    const base = new Uint32Array(N);
     (() => {   // static layer: dark floor with a little grain, walls with lit tops and shaded feet
       const w = level.walk, hash = (x, y) => { let h = (x * 374761393 + y * 668265263) >>> 0; h = ((h ^ (h >>> 13)) * 1274126177) >>> 0; return (h ^ (h >>> 16)) & 255; };
       for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) {
-        const c = y * GW + x, open = w[c] === 1;
-        for (let py = 0; py < RES; py++) for (let px = 0; px < RES; px++) {
-          const g = hash(x * RES + px, y * RES + py) / 255 - .5; let col;
-          if (open) col = [30 + g * 7, 46 + g * 8, 38 + g * 7];
-          else {
-            let k = 1; const up = y > 0 && w[c - GW], dn = y < GH - 1 && w[c + GW];
-            if (py === 0 && up) k = 1.35; else if (py === RES - 1 && dn) k = .62; else k = .92 + g * .18;
-            col = [92 * k, 104 * k, 128 * k];
-          }
-          base[(y * RES + py) * RW + x * RES + px] = pack(clampc(col[0]), clampc(col[1]), clampc(col[2]));
+        const c = y * GW + x, open = w[c] === 1, g = hash(x, y) / 255 - .5; let col;
+        if (open) col = [30 + g * 7, 46 + g * 8, 38 + g * 7];
+        else {
+          const up = y > 0 && w[c - GW], dn = y < GH - 1 && w[c + GW], k = up ? 1.35 : dn ? .62 : .92 + g * .18;
+          col = [92 * k, 104 * k, 128 * k];
         }
+        base[c] = pack(clampc(col[0]), clampc(col[1]), clampc(col[2]));
       }
     })();
 
@@ -257,7 +283,7 @@
           if (t.cpu) cpuDrive(t);
           else {
             let dx = (api.down(t.p, 'right') ? 1 : 0) - (api.down(t.p, 'left') ? 1 : 0), dy = (api.down(t.p, 'down') ? 1 : 0) - (api.down(t.p, 'up') ? 1 : 0);
-            if (!dx && !dy && t.ptr && t.ptr.active) { const c = sim.cur[t.i]; dx = t.ptr.x - c.x; dy = t.ptr.y - c.y; if (Math.hypot(dx, dy) < .4) dx = dy = 0; }
+            if (!dx && !dy && t.ptr && t.ptr.active) { const c = sim.cur[t.i]; dx = t.ptr.x - c.x; dy = t.ptr.y - c.y; if (Math.hypot(dx, dy) < .8) dx = dy = 0; }
             if (dx || dy) sim.moveCursor(t.i, dx, dy, cfg.cursorSpeed);
           }
         }
@@ -274,7 +300,7 @@
       const cv = sim.conv; let n = 0;
       for (let i = 0; i < cv.length && n < 6; i += 2, n++) {
         const c = cv[i], x = c % GW, y = (c / GW) | 0, col = teams[cv[i + 1]].col;
-        if (parts.length < 320) parts.push({ x: x * CELL + 3, y: FY + y * CELL + 3, vx: (Math.random() - .5) * 70, vy: -30 - Math.random() * 60, t: .45 + Math.random() * .25, col });
+        if (parts.length < 320) parts.push({ x: x * CELL + 1, y: FY + y * CELL + 1, vx: (Math.random() - .5) * 70, vy: -30 - Math.random() * 60, t: .45 + Math.random() * .25, col });
       }
       sim.conv.length = 0;
       if (sim.convTick > 0 && time - lastChlup > .14) { lastChlup = time; api.sfx('chlup'); }
@@ -288,10 +314,10 @@
         const tries = 20 + ((60 * k.skill) | 0), cc = sim.cursorCell(me), cx = cc % GW, cy = (cc / GW) | 0;
         for (let q = 0; q < tries; q++) {
           const f = (rng() * sim.total) | 0; if (sim.fteam[f] === me) continue;
-          const pos = sim.fpos[f], x = pos % GW, y = (pos / GW) | 0; if (x < 2 || y < 2 || x > GW - 3 || y > GH - 3) continue;
+          const pos = sim.fpos[f], x = pos % GW, y = (pos / GW) | 0; if (x < 4 || y < 4 || x > GW - 5 || y > GH - 5) continue;
           let fr = 0, en = 0;
-          for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const o = sim.occ[pos + dy * GW + dx]; if (o) { if (sim.fteam[o - 1] === me) fr++; else en++; } }
-          const sc = fr * 1.2 - en * .5 + (1 - sim.fhp[f] / cfg.hp) * 3 - Math.hypot(x - cx, y - cy) * .03 + (rng() - .5) * (1 - k.skill) * 8;
+          for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const o = sim.occ[pos + dy * GW + dx]; if (o) { if (sim.fteam[o - 1] === me) fr++; else en++; } }
+          const sc = (fr * 1.2 - en * .5) * .5 + (1 - sim.fhp[f] / cfg.hp) * 3 - Math.hypot(x - cx, y - cy) * .015 + (rng() - .5) * (1 - k.skill) * 8;
           if (sc > best) { best = sc; bf = f; }
         }
         if (bf >= 0) { k.target = sim.fpos[bf]; sim.bfs(k.target, k.field); k.has = true; }
@@ -353,11 +379,8 @@
     function draw(c, phase, t) {
       const d0 = performance.now();
       u32.set(base);
-      const fp = sim.fpos, ft = sim.fteam, fh = sim.fhp, hpMax = cfg.hp;
-      for (let i = 0; i < sim.total; i++) {
-        const cell = fp[i], x = (cell % GW) * RES, y = ((cell / GW) | 0) * RES, pal = PAL[ft[i]][Math.min(7, Math.max(0, (fh[i] * 7 / hpMax + .5) | 0))], o = y * RW + x;
-        u32[o] = pal[0]; u32[o + 1] = pal[1]; u32[o + RW] = pal[1]; u32[o + RW + 1] = pal[2];
-      }
+      const fp = sim.fpos, ft = sim.fteam, fh = sim.fhp, total = sim.total;
+      for (let i = 0; i < total; i++) u32[fp[i]] = PAL[ft[i]][HPL[fh[i]]];
       octx.putImageData(img, 0, 0);
       c.fillStyle = '#05070d'; c.fillRect(0, 0, W, H);
       c.imageSmoothingEnabled = false; c.drawImage(off, FX, FY, GW * CELL, GH * CELL);
@@ -373,7 +396,7 @@
     const finished = () => over;
     function results() {
       return teams.map(t => ({ slot: t.p.slot, score: Math.round(sim.counts[t.i] / sim.total * 1000) / 10,
-        note: `${t.name}${sim.out[t.i] ? ' · ' + TX.out : ''}`, proof: { fighters: sim.counts[t.i], total: sim.total, level: level.id } }));
+        note: `${t.name}${sim.out[t.i] ? ' · ' + TX.out : ''}`, col: t.hex, proof: { fighters: sim.counts[t.i], total: sim.total, level: level.id } }));
     }
     function pointer(kind, x, y, p) {
       const t = teams.find(q => q.p === p); if (!t) return;
@@ -389,9 +412,9 @@
       return { total: sim.total, countsSum: sim.counts.reduce((s, v) => s + v, 0), occupied: occN, bad, byTeamMatches: byTeam.every((v, i) => v === sim.counts[i]), hpOk: Array.from(sim.fhp).every(h => h > 0 && h <= cfg.hp) };
     }
     function debug() {
-      return { level: level.id, levelName: lname, started, over, why, time, tick: sim.tick, total: sim.total, per: sim.per, conv: sim.convCount, open: sim.openN,
+      return { level: level.id, levelName: lname, grid: [GW, GH], cell: CELL, started, over, why, time, tick: sim.tick, total: sim.total, per: sim.per, conv: sim.convCount, open: sim.openN,
         teams: teams.map(t => ({ slot: t.p.slot, i: t.i, sub: t.sub.id, name: t.name, cpu: !!t.p.cpu, count: sim.counts[t.i], out: sim.out[t.i], outAt: sim.outAt[t.i], x: sim.cur[t.i].x, y: sim.cur[t.i].y, skill: t.cpu ? t.cpu.skill : null })),
-        perf: { tickAvg: avg(perfT), tickP95: q(perfT), tickMax: Math.max(0, ...perfT), drawAvg: avg(perfD), drawP95: q(perfD), drawMax: Math.max(0, ...perfD), n: perfT.length } };
+        perf: { floodAvg: sim.floodSum / Math.max(1, sim.tick), tickAvg: avg(perfT), tickP95: q(perfT), tickMax: Math.max(0, ...perfT), drawAvg: avg(perfD), drawP95: q(perfD), drawMax: Math.max(0, ...perfD), n: perfT.length } };
     }
     window.__liquid.sim = sim; window.__liquid.audit = audit; window.__liquid.game = { teams, level };
     return { countLen: COUNT_LEN, update, go, finished, results, draw, debug, pointer };
@@ -399,11 +422,26 @@
 
   /* ------------------------------------------------------------------ registration */
   const lobbyLevels = PL => [...LEVELS.map(l => [l.id, PL ? l.pl : l.en]), ['random', PL ? 'LOSOWY' : 'RANDOM']];
+  // lobby thumbnail of the chosen level (board.js calls it after a level change): walls, open ground and the four start areas
+  function preview(cv, opts) {
+    const g = cv.getContext('2d'), w = cv.width, h = cv.height; g.clearRect(0, 0, w, h);
+    const l = DATA && DATA.levels.find(x => x.id === (opts && opts.level));
+    g.fillStyle = '#0b1220'; g.fillRect(0, 0, w, h);
+    if (!l) {
+      g.fillStyle = '#9aa0c0'; g.font = `${Math.round(h * .4)}px PixelifySans, monospace`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(opts && opts.level === 'random' ? '?' : '…', w / 2, h / 2); return false;
+    }
+    const im = g.createImageData(w, h), px = new Uint32Array(im.data.buffer), sx = GW / w, sy = GH / h;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px[y * w + x] = l.walk[((y * sy) | 0) * GW + ((x * sx) | 0)] ? 0xff262e1e : 0xff80684c;
+    g.putImageData(im, 0, 0);
+    l.anchors.forEach(([ax, ay], i) => { g.fillStyle = hex(SUBS[i].col); g.beginPath(); g.arc(ax / sx, ay / sy, Math.max(3, h / 22), 0, 7); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1; g.stroke(); });
+    return true;
+  }
   window.__liquid = window.__liquid || { tune: {} };
-  Object.assign(window.__liquid, { CFG, SUBS, LEVELS, VENUE, GW, GH, load, venue: A => (VENUE_RESOLVERS[VENUE.kind] || (() => null))(A, VENUE) });
+  Object.assign(window.__liquid, { CFG, SUBS, LEVELS, VENUE, GW, GH, load, preview, venue: A => (VENUE_RESOLVERS[VENUE.kind] || (() => null))(A, VENUE) });
   Object.defineProperties(window.__liquid, { data: { get: () => DATA, configurable: true }, status: { get: () => status, configurable: true } });
   window.ARK_BOARD_REGISTER({
-    id: 'liquid', host: null, global: false,
+    id: 'liquid', host: null, global: false, records: false,   // records: false = no medals, best, top 10, history or global board (board.js)
     title: PL => (PL ? 'WOJNA PŁYNÓW' : 'LIQUID WAR'),
     sub: PL => (PL
       ? 'Minigra: ruszasz tylko kursorem. Cała twoja substancja płynie do niego, wokół ścian. Kto wpadnie na cudzą, zbija jej zdrowie i przejmuje ją. Nikt nie znika, wygrywa ostatni na polu albo ten, kto ma najwięcej po upływie czasu.'
@@ -421,8 +459,9 @@
     pointer: true,
     slotOption: { key: 'sub', label: PL => (PL ? 'substancja' : 'substance'), values: PL => SUBS.map(s => [s.id, PL ? s.pl : s.en]), defaults: ['slurry', 'melior', 'milk', 'orange'] },
     options: [{ key: 'level', label: PL => (PL ? 'poziom' : 'level'), values: lobbyLevels, default: 'village' }],
-    cpuNote: (PL, v, src) => (PL ? `PRZECIĘTNIAK = przeciętny gracz (${src === 'local' ? 'średnia udziałów z tego komputera' : 'jeszcze brak wyników'}): ${v}. KOMPUTER walczy trochę lepiej albo gorzej, zależnie od tego.` : `AVERAGE JOE = the average player (${src === 'local' ? 'mean share on this computer' : 'no results yet'}): ${v}. COMPUTER fights somewhat better or worse accordingly.`),
-    score: { unit: 'percent', lower: false, medals: [30, 50, 75], cpuDefault: 25, traceLen: 0, format: v => `${v.toFixed(1)}%` },
+    cpuNote: PL => (PL ? 'KOMPUTER sam steruje swoim kursorem. Liczy się tylko ta runda.' : 'COMPUTER steers its own cursor. Only this round counts.'),
+    preview,
+    score: { unit: 'percent', lower: false, medals: [], cpuDefault: 25, traceLen: 0, format: v => `${v.toFixed(1)}%` },
     load, status: () => status,
     venue: A => window.__liquid.venue(A),
     create(api) { api.subs = api.players.map(p => p.sub); return create(api); },

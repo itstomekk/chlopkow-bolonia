@@ -13,7 +13,11 @@
      api.down(player, action) (keyboard schemes, gamepad stick/d-pad);   pointer: true  adds a TOUCH / MOUSE control scheme and forwards
      pointer events to game.pointer(kind, x, y, player) in board coordinates;   slotOption: { key, label(PL), values(PL), defaults }  adds one
      more select to every lobby slot (the liquid's substance);   options: [{ key, label(PL), values(PL), default }]  adds board-wide selects
-     (the liquid's level), read back as api.opts;   cpuNote(PL, formatted, source)  replaces the lobby's PRZECIĘTNIAK explanation. */
+     (the liquid's level), read back as api.opts;   cpuNote(PL, formatted, source)  replaces the lobby's PRZECIĘTNIAK explanation;
+     preview(canvas, opts)  paints a small thumbnail under the board-wide selects (repainted when one changes);
+     records: false  turns the whole record layer off for that board: no tries/best/medal/history in Q.mg, no top 10, no global board, no
+     PRZECIĘTNIAK (average-based) computer, no medal/record marks on the flag, quest log or result screen; the results screen is just the
+     final ranking. Old saved records of such a board are removed when its lobby opens. */
 'use strict';
 window.ARK_BOARDS = window.ARK_BOARDS || {};
 window.ARK_BOARD_REGISTER = def => { window.ARK_BOARDS[def.id] = def; };
@@ -112,6 +116,8 @@ window.addEventListener('ark-ready', () => {
     r.unit = def.score.unit; if (!Array.isArray(r.history)) r.history = [];
     return r;
   };
+  const recOn = def => def.records !== false;   // false: the board keeps no records at all (see the header)
+  const typesOf = def => (recOn(def) ? ['human', 'avg', 'cpu', 'off'] : ['human', 'cpu', 'off']);
   const better = (def, a, b) => def.score.lower ? a < b : a > b;
   const medalFor = (def, v) => { let m = 0; def.score.medals.forEach((th, i) => { if (def.score.lower ? v <= th : v >= th) m = i + 1; }); return m; };
   /* ================================================================== global scores (docs/js/scores.js -> cloud/api, Cloudflare) */
@@ -153,7 +159,7 @@ window.addEventListener('ark-ready', () => {
     A.shadow(sx, sy, s, 5);
     px(-1, -30, 2, 30, '#5a3a1e');
     for (let i = 0; i < 12; i++) for (let j = 0; j < 4; j++) px(1 + i, -29 + j * 2 + i * .35 + Math.sin(A.time * 5 + i * .5) * .8, 1, 2, (Math.floor(i / 2) + j) % 2 ? def.flagColors[0] : def.flagColors[1]);
-    const r = A.Q && A.Q.mg && A.Q.mg[def.id], label = def.flagLabel + (r && r.medal ? ' ★' : '');
+    const r = recOn(def) && A.Q && A.Q.mg && A.Q.mg[def.id], label = def.flagLabel + (r && r.medal ? ' ★' : '');
     c.font = `${6 * s}px PixelifySans`; c.textAlign = 'center'; c.textBaseline = 'middle';
     const tw = c.measureText(label).width + 3 * s;
     c.fillStyle = 'rgba(8,12,40,.8)'; c.fillRect(sx - tw / 2, sy - 40 * s, tw, 8 * s);
@@ -171,7 +177,7 @@ window.addEventListener('ark-ready', () => {
   A.HOOKS.minimap.push(dot => { for (const id of Object.keys(venues)) dot(venues[id].x, venues[id].y, window.ARK_BOARDS[id].flagColors[0]); });
   A.HOOKS.questLog.push(lines => {
     for (const id of Object.keys(venues)) {
-      const def = window.ARK_BOARDS[id], r = A.Q && A.Q.mg && A.Q.mg[id]; if (!r || !r.tries) continue;
+      const def = window.ARK_BOARDS[id], r = recOn(def) && A.Q && A.Q.mg && A.Q.mg[id]; if (!r || !r.tries) continue;
       lines.push([def.logName(PL) + (r.best ? ` ${def.score.format(r.best)}` : '') + (r.medal ? ` ★${T.medal[r.medal]}` : ''), r.medal >= 3]);
     }
   });
@@ -228,7 +234,7 @@ window.addEventListener('ark-ready', () => {
     const k = Object.keys(def.keys);
     const d = [
       { type: 'human', char: pick(me, 0), ctrl: k[0], name: '' },
-      { type: 'avg', char: pick('damian', 3), ctrl: k[1], name: '' },
+      { type: recOn(def) ? 'avg' : 'cpu', char: pick('damian', 3), ctrl: k[1], name: '' },
       { type: 'cpu', char: pick('edytka', 1), ctrl: k[2], name: '' },
       { type: 'cpu', char: pick('soltys', 6), ctrl: k[3], name: '' },
     ];
@@ -242,7 +248,7 @@ window.addEventListener('ark-ready', () => {
     const so = def.slotOption;
     return saved.map((s, i) => {
       const r = {
-        type: ['human', 'avg', 'cpu', 'off'].includes(s && s.type) ? s.type : d[i].type,
+        type: typesOf(def).includes(s && s.type) ? s.type : (s && s.type === 'avg' ? 'cpu' : d[i].type),
         char: ids.includes(s && s.char) ? s.char : d[i].char,
         ctrl: schemes.includes(s && s.ctrl) ? s.ctrl : d[i].ctrl,
         name: cleanName(s && s.name),
@@ -296,12 +302,12 @@ window.addEventListener('ark-ready', () => {
       <div class="board-slot" data-slot="${i}" style="display:grid;grid-template-columns:44px ${def.slotOption ? 'repeat(auto-fit,minmax(104px,1fr))' : 'repeat(4,minmax(0,1fr))'};gap:6px;align-items:center;padding:6px;border-left:4px solid ${SLOT_COLORS[i]};background:#1c2b4d;border-radius:4px${s.type === 'off' ? ';opacity:.6' : ''}">
         <div style="position:relative;width:44px;height:56px"><canvas data-portrait="${esc(s.char)}" width="88" height="112" style="width:44px;height:56px"></canvas><strong style="position:absolute;left:0;top:0;color:${SLOT_COLORS[i]};text-shadow:0 1px 2px #000">P${i + 1}</strong></div>
         <input data-k="name" aria-label="name ${i + 1}" maxlength="14" placeholder="${esc(s.type === 'avg' ? T.avgName : s.type === 'cpu' ? ((R.find(r => r.id === s.char) || {}).name || '') : i === 0 && meName ? meName : T.name)}" value="${esc(s.type === 'human' ? s.name : '')}" style="${css.sel}"${s.type !== 'human' ? ' disabled' : ''}>
-        <select data-k="type" aria-label="P${i + 1}" style="${css.sel}">${['human', 'avg', 'cpu', 'off'].map(v => opt(v, T.type[v], s.type)).join('')}</select>
+        <select data-k="type" aria-label="P${i + 1}" style="${css.sel}">${typesOf(def).map(v => opt(v, T.type[v], s.type)).join('')}</select>
         <select data-k="char" aria-label="character ${i + 1}" style="${css.sel}"${s.type === 'off' ? ' disabled' : ''}>${R.map(r => opt(r.id, r.name, s.char)).join('')}</select>
         ${def.slotOption ? `<select data-k="${def.slotOption.key}" aria-label="${esc(def.slotOption.label(PL))} ${i + 1}" style="${css.sel}"${s.type === 'off' ? ' disabled' : ''}>${def.slotOption.values(PL).map(v => opt(v[0], v[1], s[def.slotOption.key])).join('')}</select>` : ''}
         <select data-k="ctrl" aria-label="controls ${i + 1}" style="${css.sel}"${s.type !== 'human' ? ' disabled' : ''}>${schemes.map(v => opt(v, schemeLabel(def, v), s.ctrl)).join('')}</select>
       </div>`).join('');
-    const top = topList(def).slice(0, 5).map((e, i) => `<li>${i + 1}. ${esc(e.name)} — ${esc(def.score.format(e.score))}</li>`).join('');
+    const top = !recOn(def) ? '' : topList(def).slice(0, 5).map((e, i) => `<li>${i + 1}. ${esc(e.name)} — ${esc(def.score.format(e.score))}</li>`).join('');
     const g = gBoard(def), list = l => `<ol style="list-style:none;margin:6px 0 0;padding:0;font-size:13px;line-height:1.5">${l}</ol>`;
     const li = l => l.slice(0, 5).map((e, i) => `<li>${i + 1}. ${esc(e.name)} — ${esc(def.score.format(e.score))}</li>`).join('');
     const col = (id, title, body) => `<div data-list="${id}" style="flex:1 1 150px"><strong style="color:#9fd0f0;font-size:12px">${title}</strong>${body}</div>`;
@@ -317,8 +323,9 @@ window.addEventListener('ark-ready', () => {
       <h2 style="margin:0 0 6px;font-size:clamp(20px,5vw,32px);color:#ffd21f;text-align:center;letter-spacing:2px">${esc(def.title(PL))}</h2>
       <p style="margin:0 0 14px;text-align:center;line-height:1.4;color:#c8cee0">${esc(def.sub(PL))}</p>
       <div style="display:grid;gap:6px">${rows}</div>
-      <p style="margin:10px 0 0;text-align:center;font-size:12px;color:#9aa0c0">${esc(def.cpuNote ? def.cpuNote(PL, def.score.format(cpuRef(def).score), cpuRef(def).source) : T.cpuInfo(def.score.format(cpuRef(def).score), cpuRef(def).source))} · ${esc(T.pads)}</p>
+      <p style="margin:10px 0 0;text-align:center;font-size:12px;color:#9aa0c0">${esc(!recOn(def) ? (def.cpuNote ? def.cpuNote(PL) : '') : def.cpuNote ? def.cpuNote(PL, def.score.format(cpuRef(def).score), cpuRef(def).source) : T.cpuInfo(def.score.format(cpuRef(def).score), cpuRef(def).source))} · ${esc(T.pads)}</p>
       ${(def.options || []).length ? `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:10px">${def.options.map(op => `<label style="display:flex;gap:6px;align-items:center;font-size:13px;color:#c8cee0">${esc(op.label(PL))} <select class="board-opt" data-opt="${op.key}" aria-label="${esc(op.label(PL))}" style="${css.sel};width:auto;min-width:200px">${op.values(PL).map(v => opt(v[0], v[1], ui.opts[op.key])).join('')}</select></label>`).join('')}</div>` : ''}
+      ${def.preview ? `<div style="display:flex;justify-content:center;margin-top:8px"><canvas id="board-preview" width="192" height="101" role="img" aria-label="${esc(PL ? 'podgląd poziomu' : 'level preview')}" style="width:min(192px,60vw);height:auto;border:2px solid #34476e;border-radius:4px;image-rendering:pixelated;background:#0b1220"></canvas></div>` : ''}
       <p id="board-error" role="alert" style="min-height:1.3em;margin:10px 0;color:#ff6b5e;text-align:center"></p>
       <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <button id="board-start" type="button" style="${css.btn};border-color:#7cff6b;font-size:17px">${T.start}</button>
@@ -330,7 +337,7 @@ window.addEventListener('ark-ready', () => {
     L.querySelectorAll('.board-slot select').forEach(sel => sel.addEventListener('change', () => {
       const i = +sel.closest('.board-slot').dataset.slot; ui.slots[i][sel.dataset.k] = sel.value; writeLS(slotsKey(def), ui.slots); renderLobby();
     }));
-    L.querySelectorAll('.board-opt').forEach(sel => sel.addEventListener('change', () => { ui.opts[sel.dataset.opt] = sel.value; writeLS(optsKey(def), ui.opts); }));
+    L.querySelectorAll('.board-opt').forEach(sel => sel.addEventListener('change', () => { ui.opts[sel.dataset.opt] = sel.value; writeLS(optsKey(def), ui.opts); paintPreview(); }));
     L.querySelectorAll('.board-slot input').forEach(inp => inp.addEventListener('input', () => {
       const i = +inp.closest('.board-slot').dataset.slot; ui.slots[i].name = cleanName(inp.value); writeLS(slotsKey(def), ui.slots);
     }));
@@ -339,7 +346,10 @@ window.addEventListener('ark-ready', () => {
     L.querySelector('#board-close').addEventListener('click', close);
     const gs = L.querySelector('#board-global-send'); if (gs) gs.addEventListener('change', () => SC && SC.setEnabled(gs.checked));
     const err = validate(); L.querySelector('#board-error').textContent = err || '';
-    paintPortraits();
+    paintPortraits(); paintPreview();
+  }
+  function paintPreview() {
+    const cv = ui && ui.lobby.querySelector('#board-preview'); if (cv && ui.def.preview) { try { ui.def.preview(cv, ui.opts); } catch (e) { /* data not loaded yet */ } }
   }
 
   /* ================================================================== open / run / close */
@@ -373,6 +383,7 @@ window.addEventListener('ark-ready', () => {
     cvs.addEventListener('pointerdown', forward('down')); cvs.addEventListener('pointermove', forward('move'));
     cvs.addEventListener('pointerup', forward('up')); cvs.addEventListener('pointercancel', forward('up'));
     root.append(lobby, cvs); document.body.appendChild(root);
+    if (!recOn(def)) { try { localStorage.removeItem(topKey(def)); if (A.Q && A.Q.mg && A.Q.mg[def.id]) { delete A.Q.mg[def.id]; A.save(); } } catch (e) { /* private mode */ } }
     ui = { def, root, lobby, cvs, cx: cvs.getContext('2d'), slots: loadSlots(def), opts: loadOpts(def), openedAt: performance.now() };
     showLobby(true);
     held.clear(); events.length = 0; if (A.keys && A.keys.clear) A.keys.clear();
@@ -385,11 +396,11 @@ window.addEventListener('ark-ready', () => {
   function startRun() {
     if (!ui) return false;
     const err = validate(); if (err) { const e = ui.lobby.querySelector('#board-error'); if (e) e.textContent = err; return false; }
-    const def = ui.def, R = Object.fromEntries(roster().map(r => [r.id, r])), ref = cpuRef(def), base = ref.score;
+    const def = ui.def, R = Object.fromEntries(roster().map(r => [r.id, r])), ref = recOn(def) ? cpuRef(def) : { score: def.score.cpuDefault, trace: null, source: 'default', count: 0 }, base = ref.score;
     const meName = window.__game && window.__game.playerName;
     let cpuN = 0, humanN = 0;
     const players = ui.slots.map((s, i) => [s, i]).filter(([s]) => s.type !== 'off').map(([s, i]) => {
-      const r = R[s.char] || roster()[0], cpu = s.type === 'cpu' || s.type === 'avg', avg = s.type === 'avg';
+      const r = R[s.char] || roster()[0], avg = s.type === 'avg' && recOn(def), cpu = s.type === 'cpu' || s.type === 'avg';
       const name = avg ? T.avgName : cpu ? `${r.name}` : (s.name || (humanN === 0 && meName ? cleanName(meName) : `${PL ? 'GRACZ' : 'PLAYER'} ${i + 1}`));
       if (!cpu) humanN++;
       const p = { slot: i, lane: i, cpu, avg, name, ...(def.slotOption ? { [def.slotOption.key]: s[def.slotOption.key] } : {}), char: r.id, charName: r.name, atlas: r.atlas, color: SLOT_COLORS[i], ctrl: s.ctrl, tag: avg ? (PL ? 'ŚR' : 'AVG') : cpu ? 'CPU' : `P${i + 1}` };
@@ -399,7 +410,7 @@ window.addEventListener('ark-ready', () => {
       return p;
     });
     for (const p of players) atlas(p.atlas);
-    const r0 = rec(def); r0.tries++; A.save();
+    if (recOn(def)) { const r0 = rec(def); r0.tries++; A.save(); }
     const api = { A, PL, W, H, players, opts: { ...ui.opts }, drawSprite, atlas, sfx, down: (p, a) => isDown(p, a), keyLabel: (p, a) => (def.keys[p.ctrl] ? keyName(def.keys[p.ctrl][a]) : (a === 'left' ? 'LB' : 'RB')) };
     run = { def, players, game: def.create(api), phase: 'count', t: 0, time: 0, doneT: 0, results: null, cpuBase: base, cpuSource: ref.source, cpuTrace: ref.trace };
     held.clear(); events.length = 0;
@@ -413,6 +424,11 @@ window.addEventListener('ark-ready', () => {
     const key = r => (r.score == null ? Infinity : def.score.lower ? r.score : -r.score);
     res.sort((a, b) => key(a) - key(b));
     res.forEach((r, i) => { r.place = r.score == null ? null : i + 1; });
+    if (!recOn(def)) {   // no records: just the final ranking (+ the cheer when a human wins), nothing is stored
+      if (res[0] && res[0].score != null && !res[0].player.cpu && A.celebrate) A.celebrate();
+      run.results = res; run.phase = 'done'; run.doneT = 0;
+      return;
+    }
     const R = rec(def), top = topList(def);
     for (const r of res) {
       if (r.player.cpu || r.score == null) continue;
@@ -468,7 +484,27 @@ window.addEventListener('ark-ready', () => {
     c.fillStyle = MEDAL_COL[m]; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
     c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = r * .18; c.beginPath(); c.arc(x, y, r * .7, 0, 7); c.stroke();
   }
+  function drawRanking(c) {   // boards without records: who won and what share each team ended with, nothing else
+    const def = run.def, rows = run.results, bw = 600, rh = 40, bh = 96 + rows.length * rh, bx = (W - bw) / 2, by = Math.max(14, (H - bh) / 2);
+    c.fillStyle = 'rgba(8,12,40,.92)'; c.fillRect(bx, by, bw, bh); c.strokeStyle = '#ffd21f'; c.lineWidth = 2; c.strokeRect(bx, by, bw, bh);
+    const w = rows[0] && rows[0].score != null ? rows[0].player : null;
+    c.textAlign = 'center'; c.font = '20px PixelifySans'; c.fillStyle = w && !w.cpu ? '#7cff6b' : '#ffd21f';
+    c.fillText(w ? `${T.wins} ${w.name}${w.cpu && !w.avg ? ' (CPU)' : ''}` : T.dnf, W / 2, by + 32);
+    rows.forEach((r, i) => {
+      const y = by + 74 + i * rh, p = r.player, col = r.col || p.color;
+      c.fillStyle = 'rgba(255,255,255,.05)'; if (i % 2) c.fillRect(bx + 10, y - 22, bw - 20, rh);
+      c.textAlign = 'left'; c.font = '18px PixelifySans'; c.fillStyle = '#f5f0e0'; c.fillText(r.place ? `${r.place}.` : '—', bx + 20, y);
+      c.fillStyle = col; c.fillRect(bx + 56, y - 14, 6, 26);
+      c.font = '14px PixelifySans'; c.fillStyle = p.color; c.fillText(`${p.name}${p.avg ? '' : ` ${p.tag}`}`, bx + 72, y - 2);
+      if (r.note) { c.font = '10px PixelifySans'; c.fillStyle = '#c8cee0'; c.fillText(r.note, bx + 72, y + 11); }
+      c.fillStyle = '#0a1120'; c.fillRect(bx + 300, y - 10, 190, 12); c.fillStyle = col; c.fillRect(bx + 300, y - 10, 190 * Math.max(0, Math.min(100, r.score || 0)) / 100, 12);
+      c.textAlign = 'right'; c.fillStyle = '#f5f0e0'; c.font = '16px PixelifySans'; c.fillText(r.score == null ? T.dnf : def.score.format(r.score), bx + bw - 18, y + 3);
+    });
+    if (run.doneT > .8) { c.font = '12px PixelifySans'; c.fillStyle = Math.floor(run.doneT * 3) % 2 ? '#ffd21f' : '#fff3b0'; c.textAlign = 'center'; c.fillText(T.again, W / 2, by + bh - 14); }
+    c.textAlign = 'left';
+  }
   function drawResults(c) {
+    if (!recOn(run.def)) return drawRanking(c);
     const def = run.def, rows = run.results, bw = 640, rh = 34, g = gBoard(def), useG = !!(g && g.status === 'ok' && g.best.length);
     const top = (useG ? g.best : topList(def)).slice(0, 5);
     const bh = 112 + rows.length * rh + (top.length ? 26 + top.length * 16 + (useG ? 16 : 0) : 0), bx = (W - bw) / 2, by = Math.max(14, (H - bh) / 2);
@@ -515,7 +551,7 @@ window.addEventListener('ark-ready', () => {
     pause() { if (raf) cancelAnimationFrame(raf); raf = 0; },
     resume() { if (run && !raf) { last = 0; acc = 0; raf = requestAnimationFrame(loop); } },
     step(n = 1) { for (let i = 0; i < n && run; i++) tick(); render(); },
-    setSlots(s) { if (!ui) return; ui.slots = s.map(x => ({ ...x, name: cleanName(x.name) })); writeLS(slotsKey(ui.def), ui.slots); renderLobby(); },
+    setSlots(s) { if (!ui) return; ui.slots = s.map(x => ({ ...x, type: x.type === 'avg' && !recOn(ui.def) ? 'cpu' : x.type, name: cleanName(x.name) })); writeLS(slotsKey(ui.def), ui.slots); renderLobby(); },
     get scoresUrl() { return SCORES_URL; }, global: id => { const g = SC && SC.cached(id); return g ? JSON.parse(JSON.stringify(g)) : null; }, cpuRef: id => cpuRef(window.ARK_BOARDS[id]),
     get venues() { return JSON.parse(JSON.stringify(venues)); },
     get ui() { return ui ? { id: ui.def.id, slots: ui.slots.map(s => ({ ...s })), opts: { ...ui.opts }, lobby: !ui.lobby.hidden } : null; },
@@ -523,7 +559,7 @@ window.addEventListener('ark-ready', () => {
     get run() { return run; },
     get state() {
       if (!run) return null;
-      return { phase: run.phase, t: run.t, time: run.time, cpuBase: run.cpuBase, cpuSource: run.cpuSource, cpuTrace: run.cpuTrace, game: run.game.debug ? run.game.debug() : null,
+      return { phase: run.phase, records: recOn(run.def), t: run.t, time: run.time, cpuBase: run.cpuBase, cpuSource: run.cpuSource, cpuTrace: run.cpuTrace, game: run.game.debug ? run.game.debug() : null,
         results: run.results && run.results.map(r => ({ slot: r.slot, name: r.player.name, cpu: r.player.cpu, score: r.score, place: r.place, medal: r.medal || 0, record: !!r.record, note: r.note || '', global: r.global === undefined ? null : r.global })) };
     },
   };
