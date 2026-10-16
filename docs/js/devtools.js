@@ -178,6 +178,9 @@
   async function startBoard(id, lobbyOnly = LOBBY) {
     stopActivities(); const v = A.board.venues[id]; if (v) await toVillage(v.x, v.y);
     if (!A.board.open(id)) { say(`Board '${id}' did not open.`); return; }
+    // boards with on-demand data (def.load / def.status, e.g. WOJNA PŁYNÓW levels) cannot start until it has loaded
+    const def = (window.ARK_BOARDS || {})[id];
+    if (def && def.load) { try { await def.load(); } catch (e) { say(`Board '${id}': data failed to load.`); return; } }
     if (!lobbyOnly && !A.board.start()) say(`Board '${id}': lobby is invalid (see the message in the lobby).`);
   }
   async function activate(e, lobbyOnly) {
