@@ -410,7 +410,29 @@ def kluczyk():   # car key with a four-ring fob: FELCU's thrown special
     return im
 
 
-PROC_ITEMS = {"cytryna": cytryna, "kluczyk": kluczyk, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
+def bitcoin():   # gold Bitcoin coin: TOMEK's thrown special
+    im, px = _canvas(20, 20)
+    glyph = ["010100", "111110", "110011", "110011", "111110", "110011", "110011", "111111", "010100"]
+    for y in range(20):
+        for x in range(20):
+            r = ((x - 9.5) ** 2 + (y - 9.5) ** 2) ** .5
+            if r <= 9.8:
+                if r > 8.8:
+                    px[x, y] = (74, 46, 6, 255)
+                elif r > 7.2:
+                    px[x, y] = (255, 214, 64, 255) if (x + y) < 17 else (214, 150, 20, 255)
+                else:
+                    px[x, y] = (247, 180, 40, 255) if (x + y) < 19 else (232, 150, 22, 255)
+    for gy, row in enumerate(glyph):
+        for gx, v in enumerate(row):
+            if v == "1":
+                px[7 + gx, 5 + gy] = (92, 52, 6, 255)
+    for x, y in ((4, 5), (5, 4), (6, 4), (4, 6)):
+        px[x, y] = (255, 246, 190, 255)
+    return im
+
+
+PROC_ITEMS = {"bitcoin": bitcoin, "cytryna": cytryna, "kluczyk": kluczyk, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
 
 
 def build_items():
@@ -437,6 +459,7 @@ def build_items():
         im = fn().resize(None, Image.NEAREST) if False else fn()
         im = im.resize((im.width * 2, im.height * 2), Image.NEAREST)
         frames[name] = {"img": im, "ax": im.width / 2, "ay": float(im.height)}
+    frames["bitcoin"]["ay"] = frames["bitcoin"]["img"].height * .62   # spins about its centre, not its bottom edge
     pack(frames, OUT / "items.png", OUT / "items.json")
     preview(frames, PREV / "preview_items.png")
     print("items", {n: frames[n]["img"].size for n in frames})
@@ -456,7 +479,7 @@ def build_stages():
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "felcu"):
+    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "felcu", "tomek"):
         build_fighter(fid)
     build_items()
     build_stages()

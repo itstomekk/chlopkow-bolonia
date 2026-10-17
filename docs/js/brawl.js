@@ -140,6 +140,12 @@ window.addEventListener('ark-ready', () => {
       spin: { name: PL ? 'SZARŻA BARKIEM!' : 'SHOULDER CHARGE!', mp: 140, hits: 1, dmg: 55, fall: 95, dur: .5, vx: 430, front: true, reach: 60, hy: [10, 110], dvx: 300, knock: true },
       power: { el: 'fire', name: PL ? 'TURBO PŁOMIEŃ!' : 'TURBO FLAME!', color: '#ff6a1a' },
     },
+    tomek: {
+      name: 'TOMEK', atlas: 'tomek', color: '#f7931a', hp: LF2.hp, superFrame: 'super',
+      ball: { name: PL ? 'ZŁOTY BITCOIN!' : 'GOLD BITCOIN!', item: 'bitcoin', mp: 75, dmg: 40, fall: 42, speed: 560 },
+      spin: { name: PL ? 'DO KSIĘŻYCA!' : 'TO THE MOON!', mp: 150, hits: 1, dmg: 75, fall: 90, dur: .62, vx: 70, front: true, reach: 75, hy: [0, 130], dvx: 140, dvy: 480, knock: true },
+      power: { el: 'beam', name: PL ? 'HODL-HAMEHA!' : 'HODL-HAMEHA!', color: '#f7931a' },
+    },
   };
   const STAGES = {
     farmyard: { name: PL ? 'PODWÓRKO' : 'FARMYARD', img: 'img/brawl/stage_farmyard.webp', top: .535 },
