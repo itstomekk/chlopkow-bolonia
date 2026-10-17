@@ -134,11 +134,19 @@ with sync_playwright() as p:
     fb = ev(page, f"[{F}.fighters[1].fall, {F}.fighters[1].bdef]")
     check(near(fb[0], 40 - 0.45 * 30, 0.5) and near(fb[1], 40 - 0.5 * 30, 0.5), f"fall meter -0.45/TU and guard meter -0.5/TU (30 TU: {fb[0]:.1f}, {fb[1]:.1f})")
 
-    # ---- guard: block while total bdefend <= 30 (punch 16 -> 2nd punch breaks), hit outside the guard sets the counter to 45
+    # ---- guard: block while total bdefend <= 40 (GC.defend.break_limit; punch 16 -> the 3rd punch breaks), hit outside the guard sets the counter to 45
     ev(page, RESET)
     g = ev(page, f"""(() => {{ const [a, o] = {F}.fighters, B = window.ARK.brawl, out = []; o.x = a.x + 40; o.face = -1; o.st = 'defend';
-      const hp0 = o.hp; for (let i = 0; i < 2; i++) {{ o.hitstop = 0; B.applyHit(a, o, B.ATK.punch, a.x); out.push([o.st, +o.bdef.toFixed(1), +(hp0 - o.hp).toFixed(1)]); }} return out; }})()""")
-    check(g[0] == ["defend", 16, 2] and g[1][0] == "brokendef" and g[1][1] == 32, f"guard: 1st punch blocked for 2 hp (10 %), 2nd breaks it (16+16 > 30) ({g})")
+      const hp0 = o.hp; for (let i = 0; i < 3; i++) {{ o.hitstop = 0; B.applyHit(a, o, B.ATK.punch, a.x); out.push([o.st, +o.bdef.toFixed(1), +(hp0 - o.hp).toFixed(1)]); }} return out; }})()""")
+    check(g[0] == ["defend", 16, 2] and g[1] == ["defend", 32, 4] and g[2][0] == "brokendef" and g[2][1] == 48,
+          f"guard: punches 1 and 2 blocked for 2 hp each (10 %), the 3rd breaks it (16+16+16 = 48 > 40) ({g})")
+    ev(page, RESET)
+    g = ev(page, f"""(() => {{ const [a, o] = {F}.fighters, B = window.ARK.brawl, out = []; o.x = a.x + 40; o.face = -1; o.st = 'defend'; o.bdef = 24;
+      B.applyHit(a, o, B.ATK.punch, a.x); out.push([o.st, o.bdef]); o.hitstop = 0; B.applyHit(a, o, B.ATK.punch, a.x); out.push([o.st, o.bdef]); return out; }})()""")
+    check(g[0] == ["defend", 40] and g[1][0] == "brokendef", f"guard total exactly 40 still holds, 41+ breaks ({g})")
+    ev(page, RESET)
+    g = ev(page, f"""(() => {{ const [a, o] = {F}.fighters, B = window.ARK.brawl; o.x = a.x + 40; o.face = -1; o.st = 'defend'; B.applyHit(a, o, B.ATK.super, a.x); return [o.st, o.bdef]; }})()""")
+    check(g[0] in ("fall", "brokendef"), f"super punch (bdefend 60 > 40) cannot be guarded in one hit ({g})")
     ev(page, RESET)
     g = ev(page, f"""(() => {{ const [a, o] = {F}.fighters, B = window.ARK.brawl; o.x = a.x + 40; o.face = -1; o.st = 'defend'; o.bdef = 0; a.x = o.x + 40; B.applyHit(a, o, B.ATK.punch, o.x + 80); return [o.st, o.bdef]; }})()""")
     check(g[0] == "hurt" and g[1] == 45, f"a hit from behind is not blocked and sets the guard counter to 45 ({g})")
@@ -173,12 +181,12 @@ with sync_playwright() as p:
     inv = ev(page, f"({{ st: {F}.fighters[1].st, inv: {F}.fighters[1].inv }})")
     check(near(ly, 31, 0.5) and inv["st"] == "getup" and near(inv["inv"], 30 * TU, 0.05), f"lying 31 TU, then getup with 30 TU invulnerability (lying {ly} TU, {inv})")
 
-    # ---- knock-down arc: super punch dvy -6, gravity 1.7 -> flight time and landing slide
+    # ---- knock-down arc: super punch dvy -10, gravity 1.7 -> flight time and landing slide
     ev(page, RESET)
     ev(page, f"(() => {{ const [a, o] = {F}.fighters; o.x = 400; o.face = -1; window.ARK.brawl.applyHit(a, o, window.ARK.brawl.ATK.super, o.x - 40); o.hitstop = 0; }})()")
     rec = ev(page, f"""n => {{ const o = {F}.fighters[1], out = []; for (let i = 0; i < n; i++) {{ window.ARK.brawl.step(1); out.push([o.y, o.x, o.st]); }} return out; }}""", 140)
     peak = max(r[0] for r in rec)
-    check(near(peak, sum(max(0, 6 - 1.7 * i) for i in range(4)) * S, 1.0), f"knock-down peak follows vy 6 px/TU and gravity 1.7 ({peak:.1f} px)")
+    check(near(peak, sum(max(0, 10 - 1.7 * i) for i in range(7)) * S, 1.0), f"knock-down peak follows vy 10 px/TU (super punch dvy -10) and gravity 1.7 ({peak:.1f} px)")
     check(rec[-1][2] in ("lying", "getup", "stand"), f"knocked-down fighter ends up lying/standing ({rec[-1][2]})")
 
     # ---- rowing: JUMP in the 4 TU window of the fall animation flips; the flip hovers 3 TU
@@ -212,7 +220,7 @@ with sync_playwright() as p:
     x1 = ev(page, f"{F}.fighters[0].x")
     check(st_roll == "roll" and (x1 - x0) >= 100 * S, f"roll slides 12 TU at 9 px/TU (>= {100 * S:.0f} px; measured {x1 - x0:.0f} px, state {st_roll})")
 
-    # ---- Davis attacks through the real inputs: run attack 50 / dash attack 70 / jump attack 35 injury (hp regen may give back up to ~3)
+    # ---- Davis attacks through the real inputs: run attack 55 / dash attack 80 / jump attack 60 injury (hp regen may give back up to ~3)
     def attack(kind, off):
         ev(page, RESET)
         ev(page, f"(() => {{ const [a, o] = {F}.fighters; a.x = 60; o.x = 60 + {off}; o.z = a.z; o.face = -1; }})()")
@@ -230,9 +238,55 @@ with sync_playwright() as p:
         ev(page, f"{F}.fighters[0].st = 'stand'")
         return res
     ra, da, ja = attack("run", 150), attack("dash", 220), attack("jump", 40)
-    check(46 <= ra[0] <= 50 and ra[1] in ("fall", "lying", "getup", "stand"), f"run attack: 50 injury, fall 70 knocks down ({ra})")
-    check(66 <= da[0] <= 70 and da[1] in ("fall", "lying", "getup", "stand"), f"dash attack: 70 injury, fall 70 knocks down ({da})")
-    check(31 <= ja[0] <= 35 and ja[1] in ("hurt", "stand"), f"jump attack: 35 injury, default fall 20 only hurts ({ja})")
+    # the lunging attacker catches the flung victim again once vrest 7 TU is over: frame 87 hit 55, then frame 88 hit 40 (55 + 40 = 95, minus hp regen)
+    check(88 <= ra[0] <= 95 and ra[1] in ("fall", "lying", "getup", "stand"), f"run attack: 55 injury (+ 40 from the 2nd itr after vrest), fall 70 knocks down ({ra})")
+    check(76 <= da[0] <= 80 and da[1] in ("fall", "lying", "getup", "stand"), f"dash attack: 80 injury, fall 70 knocks down ({da})")
+    check(56 <= ja[0] <= 60 and ja[1] in ("fall", "lying", "getup", "stand"), f"jump attack: 60 injury, fall 70 knocks down ({ja})")
+
+    # ---- stock davis.dat attack table (LF2 1.9): injury / fall / bdefend / dvx / dvy / arest / vrest per itr
+    tab = ev(page, """(() => { const B = window.ARK.brawl, k = B.LF2.atk, ph = a => a.itr.map(i => [i.injury, i.fall, i.bdef, i.dvx, i.dvy === undefined ? null : i.dvy, i.arest || 0, i.vrest || 0]);
+      return Object.fromEntries(Object.keys(k).map(n => [n, ph(k[n])])); })()""")
+    want = {
+        "punch": [[20, 20, 16, 2, None, 0, 0]], "punch2": [[20, 20, 16, 2, None, 0, 0]],
+        "super": [[40, 70, 60, 3, -10, 15, 0], [40, 70, 60, 7, -13, 15, 0]],
+        "runatk": [[55, 70, 60, 20, None, 0, 7], [40, 70, 60, 17, None, 0, 10]],
+        "jkick": [[60, 70, 30, 9, -5, 15, 0], [60, 70, 30, 9, -5, 15, 0]],
+        "dashkick": [[80, 70, 60, 14, -5, 9, 0], [80, 70, 60, 14, -5, 9, 0]],
+    }
+    check(tab == want, f"Davis attack table matches stock davis.dat ({tab})")
+    chk = ev(page, "(() => { const B = window.ARK.brawl; return [B.LF2.bdef.limit, B.LF2.bdef.ignore === undefined, B.ATK.punch.dmg, B.ATK.super.dmg, B.ATK.jkick.dmg, B.ATK.runatk.dmg, B.ATK.dashkick.dmg]; })()")
+    check(chk == [40, True, 20, 40, 60, 55, 80], f"guard break limit 40, no 'bdefend > 60 ignores guard' rule, injuries 20 / 40 / 60 / 55 / 80 ({chk})")
+
+    # ---- vrest: the run attack hits the same victim again only after 7 TU (frame 87) / 10 TU (frame 88); arest: super punch waits 15 TU between hits
+    def melee(atk, t_tu, setup=""):
+        return ev(page, f"""(() => {{ const [a, o] = {F}.fighters, B = window.ARK.brawl; a.x = 100; a.z = o.z = 100; a.face = 1; o.x = 155; o.face = -1; a.st = 'stand';
+          o.st = 'stand'; o.fall = 0; o.hitstop = 0; o.inv = 0; o.y = 0; o.vy = 0; o.hp = o.hpDark = 500; {setup}
+          a.t = {t_tu} / 30; B.meleeCheck(a, B.ATK.{atk}); return 500 - o.hp; }})()""")
+    ev(page, RESET)
+    h1 = melee("runatk", 6)
+    h2 = melee("runatk", 6)                 # immediately again: vrest 7 TU blocks it
+    step(page, 10)                          # 5 TU
+    h3 = melee("runatk", 6)
+    step(page, 6)                           # 8 TU after the first hit
+    h4 = melee("runatk", 6)
+    check(h1 == 55 and h2 == 0 and h3 == 0 and h4 == 55, f"run attack: hit 55, vrest 7 TU blocks a re-hit at 0 and 5 TU, hits again after 8 TU ({h1}, {h2}, {h3}, {h4})")
+    ev(page, RESET)
+    melee("runatk", 6); step(page, 16)      # 8 TU later the 7 TU rest of the first itr is over: the second itr (frame 88) hits and sets vrest 10
+    h5 = melee("runatk", 8)
+    h6 = melee("runatk", 8)
+    step(page, 14)                          # 7 TU after the second hit: its vrest 10 TU still blocks
+    h7 = melee("runatk", 8)
+    step(page, 8)                           # 11 TU after the second hit
+    h8 = melee("runatk", 8)
+    check(h5 == 40 and h6 == 0 and h7 == 0 and h8 == 40, f"run attack frame 88 itr: injury 40, vrest 10 TU blocks a re-hit at 0 and 7 TU, hits again after 11 TU ({h5}, {h6}, {h7}, {h8})")
+    ev(page, RESET)
+    a1 = melee("super", 5)
+    a2 = melee("super", 16)                 # second itr (frame 38) while arest 15 TU runs
+    step(page, 20)                          # 10 TU: still resting
+    a3 = melee("super", 16)
+    step(page, 22)                          # 21 TU after the first hit
+    a4 = melee("super", 16)
+    check(a1 == 40 and a2 == 0 and a3 == 0 and a4 == 40, f"super punch: injury 40, arest 15 TU blocks the second itr until 15 TU passed ({a1}, {a2}, {a3}, {a4})")
 
     check(not errs, f"no page errors ({errs[:3]})")
     check(not bad, f"no failed requests ({bad[:3]})")

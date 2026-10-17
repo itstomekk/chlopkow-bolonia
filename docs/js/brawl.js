@@ -48,24 +48,39 @@ window.addEventListener('ark-ready', () => {
     fall: { value: 20, dvy: 6.9, ko: 60, dizzy: 40, recover: .45, juggle: 40 },   // GC.default.fall.*, GC.fall.KO, GC.recover.fall, itr table: falling targets only take fall > 40
     bounce: { xy: 13.4, y: 11, up: 4.25, absorb: { 9: 1, 14: 4, 20: 10, 40: 20, 60: 30 } },   // GC.character.bounceup
     fell: { 2: 0, 3: 1, 5: 2, 6: 4, 9: 5, 13: 7, 25: 9 },        // GC.friction.fell (landing friction by speed)
-    bdef: { limit: 30, ignore: 60, hit: 45, recover: .5, absorb: { 5: 0, 15: 5 } },   // block while total <= 30 (itr docs), >60 ignores guard, counter 45 after a normal hit, GC.recover.bdefend
+    bdef: { limit: 40, hit: 45, recover: .5, absorb: { 5: 0, 15: 5 } },   // GC.defend.break_limit 40: block while total bdefend <= 40, breaks above; counter 45 after an unguarded hit; GC.recover.bdefend
     defendFactor: .1, hitStop: 3, hitStopBlock: 4, hitStopBroken: 5,   // GC.defend.injury.factor, GC.default.itr.hit_stop, victim effect 111 / 112
     zwidth: 12, body: [-18, 25], bodyH: 61, catchBox: [-33, 52],        // itr zwidth, Davis bdy x/h, kind-6 box of dizzy/broken frames
     hpRegen: 12, mpRegen: 3,                                     // +1 hp every 12 TU up to the dark bound; +1+floor(lost/100) mp every 3 TU
-    // Davis itr in LF2 units: t0/t1/dur in TU from the first frame, x forward from the body centre, y height above the feet,
-    // injury / fall (default 20) / bdefend / dvx / dvy (negative = up) per the stock davis.dat. adv = [from TU, to TU, dvx] frame pushes.
+    // Davis itr in LF2 units, stock davis.dat (LF2 1.9) frame by frame. Each itr = one frame's box: t0/t1 in TU from the first frame of the move
+    // (frame lasts wait + 1 TU), x forward from the frame's centerx (itr x - centerx, + w), y = height above the feet (centery - y, - h),
+    // injury / fall (default 20) / bdefend / dvx / dvy (negative = up) / arest (attacker waits N TU before the next hit) / vrest (each victim can be hit again after N TU).
+    // dur = TU of the whole move, adv = [from TU, to TU, dvx] frame pushes (frame dvx).
     atk: {
-      punch: { t0: 2, t1: 4, dur: 8, x: [-18, 25], y: [30, 48], injury: 20, fall: 20, bdef: 16, dvx: 2, adv: [[4, 8, 2]] },
-      super: { t0: 5, t1: 8, dur: 15, x: [1, 36], y: [29, 74], injury: 50, fall: 70, bdef: 60, dvx: 13, dvy: -6, adv: [[8, 10, 5], [13, 15, 6]] },
-      runatk: { t0: 5, t1: 11, dur: 19, x: [-57, 31], y: [25, 55], injury: 50, fall: 70, bdef: 16, dvx: 10, adv: [[3, 5, 16]] },
-      jkick: { t0: 6, t1: 12, dur: 16, x: [-22, 30], y: [25, 42], injury: 35, fall: 20, bdef: 16, dvx: 2 },
-      dashkick: { t0: 6, t1: 16, dur: 16, x: [-22, 30], y: [25, 42], injury: 70, fall: 70, bdef: 60, dvx: 12 },
+      punch: { dur: 8, adv: [[4, 8, 2]], itr: [{ t0: 2, t1: 4, x: [-2, 41], y: [30, 48], injury: 20, fall: 20, bdef: 16, dvx: 2 }] },                 // frames 60-63, itr in 61
+      punch2: { dur: 8, adv: [[4, 8, 2]], itr: [{ t0: 2, t1: 4, x: [-1, 40], y: [26, 41], injury: 20, fall: 20, bdef: 16, dvx: 2 }] },                // frames 65-68, itr in 66
+      super: { dur: 21, adv: [[8, 10, 5], [13, 15, 6], [15, 18, 1]], itr: [                                                                              // frames 70-75, 38, 39
+        { t0: 5, t1: 8, x: [12, 47], y: [29, 74], injury: 40, fall: 70, bdef: 60, dvx: 3, dvy: -10, arest: 15 },                                       // frame 72
+        { t0: 15, t1: 18, x: [2, 34], y: [31, 75], injury: 40, fall: 70, bdef: 60, dvx: 7, dvy: -13, arest: 15 }] },                                  // frame 38
+      runatk: { dur: 19, adv: [[3, 5, 16]], itr: [                                                                                                       // frames 85-89, 97, 98
+        { t0: 5, t1: 7, x: [-43, 45], y: [25, 55], injury: 55, fall: 70, bdef: 60, dvx: 20, vrest: 7 },                                                // frame 87
+        { t0: 7, t1: 11, x: [8, 51], y: [27, 54], injury: 40, fall: 70, bdef: 60, dvx: 17, vrest: 10 }] },                                            // frame 88
+      jkick: { dur: 16, itr: [                                                                                                                           // jump_attack frames 80-84, 79
+        { t0: 6, t1: 10, x: [-8, 44], y: [16, 33], injury: 60, fall: 70, bdef: 30, dvx: 9, dvy: -5, arest: 15 },                                       // frame 83
+        { t0: 10, t1: 12, x: [7, 43], y: [15, 31], injury: 60, fall: 70, bdef: 30, dvx: 9, dvy: -5, arest: 15 }] },                                    // frame 84
+      dashkick: { dur: 16, itr: [                                                                                                                        // dash_attack frames 90-94, 96 (96 loops until landing)
+        { t0: 6, t1: 14, x: [-8, 44], y: [16, 33], injury: 80, fall: 70, bdef: 60, dvx: 14, dvy: -5, arest: 9 },                                       // frame 93
+        { t0: 14, t1: 16, x: [7, 43], y: [15, 31], injury: 80, fall: 70, bdef: 60, dvx: 14, dvy: -5, arest: 9 }] },                                    // frame 94
     },
   };
   const TUS = 1 / LF2.TU, PXTU = LF2.S * LF2.TU;      // seconds per TU; px/s of 1 LF2 px per TU
   const lookupAbs = (tab, v) => { v = Math.abs(v); let last; for (const k of Object.keys(tab)) { last = tab[k]; if (v <= +k) return tab[k]; } return last; };   // F.LF util.lookup_abs
-  const lf2Atk = a => ({ t0: a.t0 * TUS, t1: a.t1 * TUS, dur: a.dur * TUS, bx: a.x.map(v => v * LF2.S), reach: a.x[1] * LF2.S, hy: a.y.map(v => v * LF2.S),
-    dmg: a.injury, fall: a.fall, bdef: a.bdef, dvx: a.dvx * PXTU, dvy: a.dvy === undefined ? undefined : -a.dvy * PXTU, adv: a.adv });
+  const lf2Atk = a => {
+    const ph = a.itr.map(p => ({ t0: p.t0 * TUS, t1: p.t1 * TUS, bx: p.x.map(v => v * LF2.S), hy: p.y.map(v => v * LF2.S), reach: p.x[1] * LF2.S,
+      dmg: p.injury, fall: p.fall, bdef: p.bdef, dvx: p.dvx * PXTU, dvy: p.dvy === undefined ? undefined : -p.dvy * PXTU,
+      arest: p.arest === undefined ? undefined : p.arest * TUS, vrest: p.vrest === undefined ? undefined : p.vrest * TUS }));
+    return { ...ph[0], t1: ph[ph.length - 1].t1, reach: Math.max(...ph.map(p => p.reach)), dur: a.dur * TUS, adv: a.adv, phases: ph.length > 1 ? ph : undefined };
+  };
 
   /* ================================================================== data */
   const FIGHTERS = {
@@ -125,6 +140,7 @@ window.addEventListener('ark-ready', () => {
   // dmg = injury, fall = fall-meter, bdef = guard damage, dvx/dvy knock velocity.
   const ATK = {
     punch: lf2Atk(LF2.atk.punch),            // Davis punch / super_punch / run_attack / jump_attack / dash_attack (LF2 block above)
+    punch2: lf2Atk(LF2.atk.punch2),
     super: lf2Atk(LF2.atk.super),
     runatk: lf2Atk(LF2.atk.runatk),
     jkick: lf2Atk(LF2.atk.jkick),
@@ -384,7 +400,7 @@ window.addEventListener('ark-ready', () => {
       team: slot.team || `solo${i}`, color: SLOT_COLORS[i],
       x, z: depth() * (.3 + .4 * ((i * 37) % 10) / 10), y: 0, vx: 0, vz: 0, vy: 0, face: x < W / 2 ? 1 : -1,
       hp: d.hp, hpDark: d.hp, hpMax: d.hp, mp: 200, mpMax: 500,
-      st: 'stand', t: 0, frameT: 0, fall: 0, bdef: 0, inv: 0, flash: 0, hitstop: 0, punchAlt: 0, hitSet: new Set(), hitsDone: 0,
+      st: 'stand', t: 0, frameT: 0, fall: 0, bdef: 0, inv: 0, flash: 0, hitstop: 0, punchAlt: 0, hitSet: new Set(), hitsDone: 0, arest: 0, vrest: new Map(),
       running: 0, tap: { left: -1, right: -1 }, hist: [], hold: null, grabbing: null, grabbedBy: null, grabT: 0, grabHits: 0,
       lieFront: false, thrownBy: null, released: false, ko: false, deadT: 0, air: false,
       ai: { queue: [], wait: 0, think: 0, block: 0 },
@@ -434,12 +450,12 @@ window.addEventListener('ark-ready', () => {
     let dmg = a.dmg;
     // LF2: horizontal push is dvx - 1 px/TU on the ground; guard absorbs part of it (GC.defend.absorb)
     let kx = a.dvx ? dir * Math.max(0, Math.abs(a.dvx) - (air ? 0 : PXTU)) : 0;
-    if (o.st === 'defend' && frontal && !a.unblockable && !(a.bdef > LF2.bdef.ignore)) {
+    if (o.st === 'defend' && frontal && !a.unblockable) {
       dmg *= LF2.defendFactor; o.bdef += a.bdef;
       kx = dir * Math.max(0, Math.abs(kx) - lookupAbs(LF2.bdef.absorb, kx / PXTU) * PXTU);
       spark(o.x - dir * 18, gy(o.z) - o.y - 60, '#9fd0f0', 6); sfx('block');
       if (o.hp - dmg <= 0) { knockDown(o, dir, frontal, a, kx); stopV = HITSTOP.heavyV; }
-      else if (o.bdef > LF2.bdef.limit && !air) { setSt(o, 'brokendef'); o.vx = kx; stopV = HITSTOP.broken; popText(o, PL ? 'PĘKŁO!' : 'BROKEN!', '#ff6b5e'); }   // total guard > 30 breaks it
+      else if (o.bdef > LF2.bdef.limit && !air) { setSt(o, 'brokendef'); o.vx = kx; stopV = HITSTOP.broken; popText(o, PL ? 'PĘKŁO!' : 'BROKEN!', '#ff6b5e'); }   // total guard > 40 (GC.defend.break_limit) breaks it
       else { o.vx = kx; o.t = 0; stopV = HITSTOP.block; popText(o, PL ? 'BLOK' : 'BLOCK', '#9fd0f0'); }
     } else {
       if (o.grabbedBy) releaseGrab(o.grabbedBy);
@@ -479,10 +495,16 @@ window.addEventListener('ark-ready', () => {
     return W_ATK.get(key);
   }
   function meleeCheck(f, a, opts = {}) {
-    if (f.t < a.t0 || f.t > a.t1) return;
+    if (a.phases) {   // several itr boxes (one per frame): pick the one of the current frame
+      const p = a.phases.find(p => f.t >= p.t0 - 1e-6 && f.t < p.t1 - 1e-6);
+      if (!p) return;
+      a = { ...a, ...p };
+    } else if (f.t < a.t0 || f.t > a.t1) return;
+    if (a.arest && f.arest > 1e-6) return;   // LF2 arest: after a hit the attacker cannot hit again for N TU
     const reach = a.reach;
     for (const o of fight.fighters) {
-      if (o === f || o.team === f.team || f.hitSet.has(o) || !canBeHit(o, a.fall === undefined ? LF2.fall.value : a.fall)) continue;
+      if (o === f || o.team === f.team || !canBeHit(o, a.fall === undefined ? LF2.fall.value : a.fall)) continue;
+      if (a.vrest ? o.vrest.get(f) > 1e-6 : !a.arest && f.hitSet.has(o)) continue;   // vrest: per-victim delay; arest: the attacker timer; otherwise one hit per victim and move
       const dz = Math.abs(o.z - f.z);
       // LF2: the itr rectangle must overlap the target's bdy rectangle (mirrored with facing); z within itr zwidth 12
       const inX = opts.both ? Math.abs(o.x - f.x) <= reach : overlapX(xspan(f, a.bx || [-10, reach]), xspan(o, BODY));
@@ -490,9 +512,11 @@ window.addEventListener('ark-ready', () => {
       const hy0 = f.y + a.hy[0], hy1 = f.y + a.hy[1], hb = hurtBox(o);
       if (hy1 < hb.y0 || hy0 > hb.y1) continue;
       f.hitSet.add(o);
+      if (a.vrest) o.vrest.set(f, a.vrest); else if (a.arest) f.arest = a.arest;
       if (f.hold && holdKind(f) === 'light') wearItem(f);
       applyHit(f, o, a, f.x);
       if (opts.once) return;
+      if (a.arest) break;   // one victim per arest window
     }
     // LF2: attacks bat balls back
     for (const b of fight.balls) if (b.team !== f.team && Math.abs(b.z - f.z) < 18) {
@@ -561,6 +585,8 @@ window.addEventListener('ark-ready', () => {
   function updateFighter(f, now) {
     const inp = f.input, hd = inp.held || {};
     f.inv = Math.max(0, f.inv - DT); f.flash = Math.max(0, f.flash - DT);
+    f.arest = Math.max(0, f.arest - DT);   // LF2 itr.arest / itr.vrest tick down every TU, also during hit stop
+    for (const [k, v] of f.vrest) { if (v - DT <= 1e-6) f.vrest.delete(k); else f.vrest.set(k, v - DT); }
     const tu = !!fight.tuEdge;   // true on the tick that completes one LF2 time unit (every 2nd tick)
     f.fall = Math.max(0, f.fall - LF2.fall.recover * LF2.TU * DT); f.bdef = Math.max(0, f.bdef - LF2.bdef.recover * LF2.TU * DT);   // GC.recover.fall / .bdefend per TU
     if (alive(f) && tu) {   // LF2 health regen: +1 hp / 12 TU (up to the dark bound); +1 + floor(lost hp / 100) mp / 3 TU
@@ -648,7 +674,7 @@ window.addEventListener('ark-ready', () => {
         break;
       }
       case 'punch': case 'super': case 'runatk': case 'w_atk1': case 'w_atk2': {
-        const a = withWeapon(f, f.st === 'punch' ? ATK.punch : f.st === 'super' ? ATK.super : f.st === 'runatk' ? ATK.runatk : f.st === 'w_atk1' ? ATK.w_thrust : ATK.w_swing);
+        const a = withWeapon(f, f.st === 'punch' ? (f.punchAlt ? ATK.punch : ATK.punch2) : f.st === 'super' ? ATK.super : f.st === 'runatk' ? ATK.runatk : f.st === 'w_atk1' ? ATK.w_thrust : ATK.w_swing);
         if (f.t <= DT * 1.01 && f.st !== 'punch') sfx('whoosh');
         if (tu) {   // frame pushes (dvx) then LF2 dynamics: friction slides the lunge out
           for (const [t0, t1, dv] of a.adv || []) if (f.t >= t0 * TUS - 1e-6 && f.t < t1 * TUS - 1e-6 && Math.abs(f.vx) < dv * PXTU) f.vx = f.face * dv * PXTU;
@@ -1520,7 +1546,7 @@ window.addEventListener('ark-ready', () => {
   A.HOOKS.minimap.push(dot => { if (venue) dot(venue.x, venue.y, '#9b3fe0'); });
 
   A.brawl = {
-    FIGHTERS, ATK, STAGES, POWER, LF2, PXTU, applyHit, open: openBrawl, close: closeBrawl, start: startFight, end: endFight, validate,
+    FIGHTERS, ATK, STAGES, POWER, LF2, PXTU, applyHit, meleeCheck, open: openBrawl, close: closeBrawl, start: startFight, end: endFight, validate,
     get venue() { return venue ? { ...venue } : null; }, get fight() { return fight; }, get ui() { return ui; },
     get keys() { return clone(KEYS); }, get slots() { return clone(SLOTS); }, get opts() { return { ...OPTS }; },
     setSlots(s) { SLOTS = s.map(x => ({ ...x })); writeLS(LS_SLOTS, SLOTS); renderLobby(); },
