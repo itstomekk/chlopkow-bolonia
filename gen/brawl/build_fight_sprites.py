@@ -21,6 +21,7 @@ OUT = ROOT / "docs" / "img" / "brawl"
 PREV = ROOT / "gen" / "brawl"
 VERBOSE = True
 FIG_H = 200          # standing figure height in stored pixels (= 100 logical arena px)
+FIG_H_BY = {"ernest": 184}   # per-fighter standing height (ERNEST is short: 184/200 = 0.92)
 
 SHEETS = {
     "s1": ["stand", "walk1", "run1", "punch1", "punch2", "kick", "jump", "jkick", "defend", "hurt", "lying_back", "cast"],
@@ -291,7 +292,7 @@ def build_fighter(fid):
     if s4.exists():
         raw.update(slice_grid(s4, 4, 2, S4))
     stand_h = raw["stand"]["img"].height
-    s = FIG_H / stand_h
+    s = FIG_H_BY.get(fid, FIG_H) / stand_h
     frames = {}
     for n, f in raw.items():
         im = scale_rgba(f["img"], s)
@@ -304,7 +305,7 @@ def build_fighter(fid):
             frames[n]["grip"] = grip
         elif s4.exists() and n in S4 and VERBOSE:
             print(f"  {fid}:{n} no cyan grip found")
-    atlas, meta = pack(frames, OUT / f"{fid}.png", OUT / f"{fid}.json", {"fighter": fid, "standH": FIG_H})
+    atlas, meta = pack(frames, OUT / f"{fid}.png", OUT / f"{fid}.json", {"fighter": fid, "standH": FIG_H_BY.get(fid, FIG_H)})
     preview(frames, PREV / f"preview_{fid}.png")
     print(fid, "scale", round(s, 3), "atlas", atlas.size, "frames", len(frames))
 
@@ -375,7 +376,41 @@ def rzutek():   # orange clay shooting target (skeet) seen slightly from the sid
     return im
 
 
-PROC_ITEMS = {"rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
+def cytryna():   # lemon: ERNEST's thrown special (his shirt is lemon-print)
+    im, px = _canvas(24, 14)
+    for y in range(14):
+        for x in range(24):
+            dx, dy = (x - 11.5) / 11.0, (y - 6.5) / 6.0
+            r = dx * dx + dy * dy
+            if r <= 1 or (x in (0, 1, 22, 23) and y in (6, 7)):
+                px[x, y] = (60, 50, 8, 255) if r > .74 or x in (0, 23) else (255, 226, 52, 255) if y < 7 else (232, 190, 24, 255)
+    for x, y in ((8, 4), (9, 4), (14, 5)):
+        px[x, y] = (255, 248, 170, 255)
+    px[11, 0] = px[12, 0] = (40, 120, 40, 255)
+    return im
+
+
+def kluczyk():   # car key with a four-ring fob: FELCU's thrown special
+    im, px = _canvas(28, 12)
+    for x in range(1, 12):
+        for y in range(4, 8):
+            edge = y in (4, 7) or x in (1, 11)
+            px[x, y] = (40, 40, 48, 255) if edge else (196, 202, 212, 255)
+    for x in (4, 6, 8):
+        px[x, 8] = px[x, 9] = (40, 40, 48, 255)
+    for x in range(12, 27):
+        for y in range(1, 11):
+            edge = x in (12, 26) or y in (1, 10)
+            px[x, y] = (12, 12, 16, 255) if edge else (34, 34, 42, 255)
+    for i in range(4):   # four interlocking rings
+        cx = 14 + i * 3
+        for (x, y) in ((cx, 4), (cx + 1, 4), (cx - 1, 5), (cx + 2, 5), (cx - 1, 6), (cx + 2, 6), (cx, 7), (cx + 1, 7)):
+            if 12 < x < 26:
+                px[x, y] = (214, 218, 226, 255)
+    return im
+
+
+PROC_ITEMS = {"cytryna": cytryna, "kluczyk": kluczyk, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
 
 
 def build_items():
@@ -421,7 +456,7 @@ def build_stages():
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal"):
+    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "felcu"):
         build_fighter(fid)
     build_items()
     build_stages()

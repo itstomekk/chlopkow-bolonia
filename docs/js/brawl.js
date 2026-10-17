@@ -128,6 +128,18 @@ window.addEventListener('ark-ready', () => {
       spin: { name: PL ? 'PIECZĄTKA!' : 'OFFICIAL STAMP!', mp: 150, hits: 1, dmg: 80, fall: 100, dur: .62, vx: 60, front: true, reach: 85, hy: [0, 120], dvx: 120, knock: true, t0: .2 },
       power: { el: 'fire', name: PL ? 'OGIEŃ Z KOMINA!' : 'CHIMNEY FIRE!', color: '#ff8c2a' },
     },
+    ernest: {
+      name: 'ERNEST', atlas: 'ernest', color: '#2ec4b6', hp: LF2.hp, superFrame: 'super',
+      ball: { name: PL ? 'CYTRYNA!' : 'LEMON!', item: 'cytryna', mp: 75, dmg: 38, fall: 40, speed: 500 },
+      spin: { name: PL ? 'MŁYNEK KAPITANA!' : 'CAPTAIN WINDMILL!', mp: 150, hits: 3, dmg: 28, fall: 30, dur: .6, vx: 110, hy: [0, 100], reach: 70, dvx: 200 },
+      power: { el: 'ice', name: PL ? 'ZIMNY REJS!' : 'COLD CRUISE!', color: '#9fe3ff' },
+    },
+    felcu: {
+      name: 'FELCU', atlas: 'felcu', color: '#5b6cff', hp: LF2.hp, superFrame: 'super',
+      ball: { name: PL ? 'KLUCZYK!' : 'CAR KEY!', item: 'kluczyk', mp: 75, dmg: 30, fall: 35, speed: 700 },
+      spin: { name: PL ? 'SZARŻA BARKIEM!' : 'SHOULDER CHARGE!', mp: 140, hits: 1, dmg: 55, fall: 95, dur: .5, vx: 430, front: true, reach: 60, hy: [10, 110], dvx: 300, knock: true },
+      power: { el: 'fire', name: PL ? 'TURBO PŁOMIEŃ!' : 'TURBO FLAME!', color: '#ff6a1a' },
+    },
   };
   const STAGES = {
     farmyard: { name: PL ? 'PODWÓRKO' : 'FARMYARD', img: 'img/brawl/stage_farmyard.webp', top: .535 },

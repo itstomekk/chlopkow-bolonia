@@ -248,7 +248,7 @@ with sync_playwright() as p:
     step(page, 500)
 
     # New fighters: atlases load, specials work.
-    for i, (fid, sp) in enumerate([("damian", "football"), ("wesoly", "hammer"), ("soltys", "teczka"), ("michal", "kulka")]):
+    for i, (fid, sp) in enumerate([("damian", "football"), ("wesoly", "hammer"), ("soltys", "teczka"), ("michal", "kulka"), ("ernest", "cytryna"), ("felcu", "kluczyk")]):
         ev(page, RESET_PAIR)
         ev(page, f"const f = {F}.fighters[0]; f.def = window.ARK.brawl.FIGHTERS['{fid}']; f.key = '{fid}'; f.mp = 500; {F}.fighters[1].z = 230")
         for kk in ("KeyH", "KeyD", "KeyF"):
