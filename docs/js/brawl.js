@@ -14,6 +14,10 @@
      rural throwables carried overhead: kamień, bańka, opona (rolls), wiadro, grabie, łopata, kosa.
      Specials: DEFEND, forward, ATTACK = ball (Arek apple, Edytka mushroom, Renik vinyl);
                DEFEND, up, ATTACK = Arek pitchfork lunge, Edytka spin kick, Renik breakdance.
+     Powers (LF2 Firen / Freeze / Davis style): DEFEND, down, ATTACK = each fighter's element:
+               fire = fireball that knocks down and sets the target burning,
+               ice = ice shard that freezes the target in a block (next hit shatters it for bonus damage),
+               beam = kamehameha: short charge, then a screen-long multi-hit beam (dodge it up/down).
    Art: docs/img/brawl/<fighter>.webp/.json, items.webp/.json, stage_*.webp, built by
    gen/brawl/build_fight_sprites.py from generated sheets. Settings/results in localStorage. */
 'use strict';
@@ -28,38 +32,45 @@ window.addEventListener('ark-ready', () => {
       name: 'AREK', atlas: 'arek', color: '#e34c4c', hp: 500, walk: 150, run: 310, superFrame: 'super',
       ball: { name: PL ? 'JABŁKO!' : 'APPLE!', item: 'apple', mp: 75, dmg: 45, fall: 45, speed: 520 },
       spin: { name: PL ? 'WIDŁY!' : 'PITCHFORK!', mp: 150, hits: 3, dmg: 30, fall: 30, dur: .6, vx: 330, frame: 'w_thrust', weapon: 'widly', front: true, reach: 120, dvx: 260 },
+      power: { el: 'fire', name: PL ? 'OGNISKO!' : 'BONFIRE!', color: '#ff7a1a' },
     },
     edytka: {
       name: 'EDYTKA', atlas: 'edytka', color: '#4aa8e8', hp: 480, walk: 160, run: 325, superFrame: 'kick',
       ball: { name: PL ? 'BOROWIK!' : 'MUSHROOM!', item: 'mushroom', mp: 75, dmg: 45, fall: 45, speed: 470 },
       spin: { name: PL ? 'KOPNIAK Z OBROTU!' : 'SPIN KICK!', mp: 150, hits: 1, dmg: 80, fall: 90, dur: .62, vx: 200, flip: .12, dvy: 480 },
+      power: { el: 'ice', name: PL ? 'LODOWY WIATR!' : 'ICE BLAST!', color: '#9fe3ff' },
     },
     renik: {
       name: 'DJ RENIK', atlas: 'renik', color: '#ffd21f', hp: 540, walk: 140, run: 295, superFrame: 'super',
       ball: { name: PL ? 'WINYL!' : 'VINYL!', item: 'vinyl', mp: 75, dmg: 40, fall: 40, speed: 600 },
       spin: { name: PL ? 'BREAKDANCE!' : 'BREAKDANCE!', mp: 150, hits: 3, dmg: 30, fall: 30, dur: .8, vx: 90, flip: .1, hy: [0, 50] },
+      power: { el: 'beam', name: 'BASS-HAMEHA!', color: '#c86bff' },
     },
     damian: {
       name: 'DAMIAN', atlas: 'damian', color: '#7cff6b', hp: 470, walk: 168, run: 345, superFrame: 'super',
       ball: { name: PL ? 'GOL!' : 'GOAL!', item: 'football', mp: 75, dmg: 42, fall: 45, speed: 640 },
       spin: { name: PL ? 'WŚLIZG!' : 'SLIDE TACKLE!', mp: 140, hits: 1, dmg: 55, fall: 90, dur: .55, vx: 460, front: true, reach: 70, hy: [0, 45], dvx: 240, knock: true },
+      power: { el: 'fire', name: PL ? 'OGNISTA PIŁKA!' : 'FIREBALL!', color: '#ff5a1a' },
     },
     wesoly: {
       name: 'WESOŁYCH ŚWIĄT', atlas: 'wesoly', color: '#c0392b', hp: 560, walk: 135, run: 285, superFrame: 'super',
       ball: { name: PL ? 'MŁOTEK!' : 'HAMMER!', item: 'hammer', mp: 80, dmg: 55, fall: 60, speed: 470 },
       spin: { name: PL ? 'TRZĘSIENIE!' : 'GROUND POUND!', mp: 160, hits: 1, dmg: 60, fall: 100, dur: .6, vx: 0, reach: 115, hy: [0, 40], dvx: 160, knock: true, t0: .22 },
+      power: { el: 'ice', name: PL ? 'ŚNIEŻYCA!' : 'BLIZZARD!', color: '#e8f6ff' },
     },
     michal: {
       name: 'MICHAŁ', atlas: 'michal', color: '#8a9a3a', hp: 510, walk: 150, run: 315, superFrame: 'super',
       start: 'pistol',
       ball: { name: PL ? 'SERIA!' : 'VOLLEY!', item: 'kulka', gun: true, volley: 3, mp: 75, dmg: 18, fall: 28, speed: 840 },
       spin: { name: PL ? 'SZARŻA!' : 'SHOULDER CHARGE!', mp: 140, hits: 1, dmg: 55, fall: 95, dur: .5, vx: 430, front: true, reach: 60, hy: [10, 110], dvx: 300, knock: true },
+      power: { el: 'beam', name: 'KAMEHAMEHA!', color: '#6bd0ff' },
     },
     soltys: {
       name: 'SOŁTYS', atlas: 'soltys', color: '#b07d3a', hp: 520, walk: 145, run: 300, superFrame: 'super',
       start: 'teczka',
       ball: { name: PL ? 'TECZKA!' : 'BRIEFCASE!', item: 'teczka', mp: 75, dmg: 48, fall: 60, speed: 460 },
       spin: { name: PL ? 'PIECZĄTKA!' : 'OFFICIAL STAMP!', mp: 150, hits: 1, dmg: 80, fall: 100, dur: .62, vx: 60, front: true, reach: 85, hy: [0, 120], dvx: 120, knock: true, t0: .2 },
+      power: { el: 'fire', name: PL ? 'OGIEŃ Z KOMINA!' : 'CHIMNEY FIRE!', color: '#ff8c2a' },
     },
   };
   const STAGES = {
@@ -80,6 +91,12 @@ window.addEventListener('ark-ready', () => {
     w_thrust: { t0: .07, t1: .17, dur: .32, reach: 98, hy: [35, 85], dmg: 32, fall: 40, bdef: 20, dvx: 90 },
     w_swing: { t0: .10, t1: .22, dur: .40, reach: 94, hy: [20, 125], dmg: 42, fall: 70, bdef: 35, dvx: 230, dvy: 300 },
     w_jump: { t0: .03, t1: 9, dur: 9, reach: 92, hy: [0, 70], dmg: 42, fall: 70, bdef: 30, dvx: 230, dvy: 260 },
+  };
+  // Elemental powers shared by every fighter with that element (per-fighter name/colour in FIGHTERS[..].power).
+  const POWER = {
+    fire: { mp: 120, speed: 470, dmg: 40, fall: 90, bdef: 40, dvx: 230, dvy: 380, burn: 1.6, burnDmg: 5 },
+    ice: { mp: 120, speed: 540, dmg: 28, fall: 20, bdef: 30, dvx: 60, freeze: 1.7 },
+    beam: { mp: 200, charge: .4, end: 1.0, dur: 1.12, tick: .12, dmg: 14, fall: 24, bdef: 16, dvx: 170, hy: [45, 95] },
   };
   const ITEM_DEF = {
     // light = held weapon (drawn into the hands at the grip read from the cyan-marker poses): dmgK/reachK scale ATK.w_*
@@ -369,13 +386,22 @@ window.addEventListener('ark-ready', () => {
     } else {
       if (o.grabbedBy) releaseGrab(o.grabbedBy);
       if (o.grabbing) releaseGrab(o);
+      const wasFrozen = o.st === 'frozen';
+      if (wasFrozen) {   // LF2: hitting a frozen fighter shatters the ice for bonus damage and a knockdown
+        dmg = Math.round(dmg * 1.3) + 10; spark(o.x, gy(o.z) - o.y - 50, '#d8f4ff', 22); sfx('break'); popText(o, PL ? 'ROZBITY!' : 'SHATTER!', '#9fe3ff');
+      }
       o.fall += a.fall; o.flash = .1; o.running = 0;
-      spark(o.x - dir * 12, gy(o.z) - o.y - 62, '#fff3b0', 10);
-      const heavy = o.fall >= 60 || a.dvy || o.y > 0 || o.hp - dmg <= 0;
+      spark(o.x - dir * 12, gy(o.z) - o.y - 62, a.el === 'fire' ? '#ff9a2a' : a.el === 'ice' ? '#bfe8ff' : '#fff3b0', 10);
+      const freeze = a.el === 'ice' && !wasFrozen && o.hp - dmg > 0;
+      const heavy = !freeze && (o.fall >= 60 || a.dvy || o.y > 0 || o.hp - dmg <= 0 || wasFrozen);
       sfx(heavy ? 'heavy' : 'hit');
       stopV = heavy ? HITSTOP.heavyV : HITSTOP.lightV; stopA = heavy ? HITSTOP.heavyA : HITSTOP.lightA;
       fight.shake = Math.max(fight.shake, heavy ? .16 : .06);
-      if (heavy) {
+      if (a.el === 'fire') o.burn = Math.max(o.burn || 0, POWER.fire.burn);
+      if (freeze) {
+        if (o.hold) dropHold(o);
+        setSt(o, 'frozen'); o.vx = dir * (a.dvx || 60); o.fall = 0; o.burn = 0; o.frozenDur = POWER.ice.freeze;
+      } else if (heavy) {
         if (o.hold) dropHold(o);
         setSt(o, 'fall'); o.lieFront = !frontal; o.vx = dir * (Math.abs(a.dvx) || 220); o.vy = a.dvy || 360; o.y = Math.max(o.y, 1); o.fall = 0;
       } else if (o.fall >= 40) { setSt(o, 'dizzy'); o.vx = dir * 30; }
@@ -432,7 +458,15 @@ window.addEventListener('ark-ready', () => {
 
   /* -------------------------------------------- specials */
   function special(f, which) {
-    const sp = f.def[which]; if (!sp || f.mp < sp.mp) return false;
+    const sp = f.def[which], cost = which === 'power' && sp ? POWER[sp.el].mp : sp && sp.mp;
+    if (!sp || f.mp < cost) return false;
+    if (which === 'power') {
+      f.mp -= cost; f.stats.mpUsed += cost;
+      if (holdKind(f) === 'heavy') dropHold(f, false);   // Michał keeps his pistol, Sołtys his teczka
+      f.running = 0; f.vx = 0; setSt(f, 'power');
+      banner(sp.name, f.x, gy(f.z) - 130, sp.color); sfx('special');
+      return true;
+    }
     f.mp -= sp.mp; f.stats.mpUsed += sp.mp;
     if (f.hold && which === 'ball' && f.def.ball.item === f.hold.type) { f.hold.state = 'gone'; f.hold = null; }   // Sołtys throws the teczka he holds
     else if (f.hold && !(which === 'ball' && f.def.ball.gun && holdKind(f) === 'gun')) dropHold(f, false);
@@ -447,6 +481,7 @@ window.addEventListener('ark-ready', () => {
     const dir = h[n - 2][0];
     if (dir === 'left' || dir === 'right') return { which: 'ball', face: dir === 'left' ? -1 : 1 };
     if (dir === 'up') return { which: 'spin' };
+    if (dir === 'down') return { which: 'power' };
     return null;
   }
   const pressedHas = (f, a) => (f.input.pressed || []).includes(a);
@@ -475,6 +510,14 @@ window.addEventListener('ark-ready', () => {
     if (alive(f)) {
       f.mp = Math.min(f.mpMax, f.mp + DT * (18 + 30 * (1 - f.hp / f.hpMax)));
       if (f.hp < f.hpDark && f.hp > 0) f.hp = Math.min(f.hpDark, f.hp + DT * 4);
+    }
+    if (f.burn > 0) {   // fire damage over time; never the final blow
+      const before = Math.floor(f.burn / .3); f.burn = Math.max(0, f.burn - DT);
+      if (Math.floor(f.burn / .3) !== before && f.hp > 1 && alive(f)) {
+        const bd = Math.min(POWER.fire.burnDmg, f.hp - 1); f.hp -= bd; f.hpDark = Math.max(f.hp, f.hpDark - 2); f.stats.hpLost += bd;
+        if (f.burnBy) f.burnBy.stats.dealt += bd;
+      }
+      if (Math.random() < .5) fight.fx.push({ x: f.x + (Math.random() - .5) * 26, y: gy(f.z) - f.y - 20 - Math.random() * 60, vx: (Math.random() - .5) * 40, vy: -120 - Math.random() * 80, t: 0, life: .3, color: Math.random() < .5 ? '#ff7a1a' : '#ffd21f' });
     }
     if (f.hitstop > 0) {   // frozen on impact: remember what was pressed so a long pause never eats an input (LF2-style buffer)
       f.hitstop -= DT;
@@ -634,6 +677,44 @@ window.addEventListener('ark-ready', () => {
         if (f.t >= sp.dur && f.y <= 0) { setSt(f, 'stand'); f.vx = 0; }
         break;
       }
+      case 'power': {
+        const pw = f.def.power, P = POWER[pw.el];
+        if (pw.el !== 'beam') {
+          if (f.t > .18 && !f.released) {
+            f.released = true;
+            fight.balls.push({ owner: f, team: f.team, el: pw.el, color: pw.color, x: f.x + f.face * 46, z: f.z, y: 66, vx: f.face * P.speed, dmg: P.dmg, fall: P.fall, bdef: P.bdef, dvx: P.dvx, dvy: P.dvy, life: 1.9, spin: 0, nospin: true });
+            sfx('whoosh');
+          }
+          if (f.t > .44) setSt(f, 'stand');
+          break;
+        }
+        // kamehameha: charge, then a screen-long beam that hits every P.tick
+        f.beamLen = 0;
+        if (f.t >= P.charge && f.t < P.end) {
+          if (f.t - DT < P.charge) { sfx('special'); fight.shake = Math.max(fight.shake, .12); }
+          const x0 = f.x + f.face * 36, len = f.face > 0 ? viewHi() - x0 : x0 - viewLo();
+          f.beamLen = Math.max(0, len);
+          const slot = Math.floor((f.t - P.charge) / P.tick);
+          if (slot >= f.hitsDone) { f.hitSet = new Set(); f.hitsDone = slot + 1; }
+          for (const o of fight.fighters) {
+            if (o === f || o.team === f.team || f.hitSet.has(o) || !canBeHit(o)) continue;
+            const dx = (o.x - x0) * f.face;
+            if (dx < -14 || dx > f.beamLen || Math.abs(o.z - f.z) > 18) continue;
+            const hb = hurtBox(o); if (f.y + P.hy[1] < hb.y0 || f.y + P.hy[0] > hb.y1) continue;
+            f.hitSet.add(o); o.lastHitBy = f;
+            applyHit(f, o, { dmg: P.dmg, fall: P.fall, bdef: P.bdef, dvx: P.dvx, el: 'beam' }, f.x);
+          }
+          for (const b of fight.balls) if (b.team !== f.team && Math.abs(b.z - f.z) < 18 && (b.x - x0) * f.face > -10 && (b.x - x0) * f.face < f.beamLen) { b.life = 0; spark(b.x, gy(b.z) - b.y, pw.color, 10); }
+        }
+        if (f.t >= P.dur) setSt(f, 'stand');
+        break;
+      }
+      case 'frozen':
+        f.x += f.vx * DT; f.vx *= Math.pow(.05, DT);
+        if (f.y > 0 || f.vy) { f.vy -= GRAV * DT; f.y += f.vy * DT; if (f.y <= 0) { f.y = 0; f.vy = 0; } }
+        if (f.t > (f.frozenDur || 1.5) && f.y <= 0) { spark(f.x, gy(f.z) - 50, '#d8f4ff', 14); sfx('break'); setSt(f, 'stand'); f.inv = .25; f.fall = 0; }
+        clampPos(f);
+        break;
       case 'pick': {
         if (f.t > .14 && !f.released) {
           f.released = true; const it = f.pickItem; f.pickItem = null;
@@ -770,12 +851,15 @@ window.addEventListener('ark-ready', () => {
   function updateBalls() {
     for (const b of fight.balls) {
       b.x += b.vx * DT; b.life -= DT; b.spin += DT * 16;
+      if (b.el && Math.random() < .7) fight.fx.push({ x: b.x - Math.sign(b.vx) * 10, y: gy(b.z) - b.y + (Math.random() - .5) * 12, vx: -b.vx * .15, vy: b.el === 'fire' ? -90 : 30, t: 0, life: .25, color: b.el === 'fire' ? (Math.random() < .5 ? '#ff7a1a' : '#ffd21f') : (Math.random() < .5 ? '#bfe8ff' : '#ffffff') });
       if (b.x < viewLo() - 40 || b.x > viewHi() + 40) b.life = 0;
       for (const o of fight.fighters) {
         if (b.life <= 0 || o.team === b.team || !canBeHit(o)) continue;
         if (Math.abs(o.x - b.x) < 26 && Math.abs(o.z - b.z) < 18 && b.y > o.y - 10 && b.y < o.y + 100) {
-          applyHit(b.owner, o, { dmg: b.dmg, fall: b.fall, bdef: 30, dvx: 120 }, b.x - Math.sign(b.vx) * 30);
-          b.life = 0; spark(b.x, gy(b.z) - b.y, ({ apple: '#d8262c', vinyl: '#2a2a33', football: '#ffffff', hammer: '#a0a5af', rzutek: '#f07820', kulka: '#f07820', teczka: '#6b4226', szarlotka: '#e0b060', pieczarka: '#f4efe0' }[b.item] || '#8a5a2c'), 12);
+          if (b.el === 'fire') o.burnBy = b.owner;
+          applyHit(b.owner, o, b.el ? { dmg: b.dmg, fall: b.fall, bdef: b.bdef, dvx: b.dvx, dvy: b.dvy, el: b.el } : { dmg: b.dmg, fall: b.fall, bdef: 30, dvx: 120 }, b.x - Math.sign(b.vx) * 30);
+          if (o.hp <= 0) o.lastHitBy = b.owner;
+          b.life = 0; spark(b.x, gy(b.z) - b.y, b.el ? b.color : ({ apple: '#d8262c', vinyl: '#2a2a33', football: '#ffffff', hammer: '#a0a5af', rzutek: '#f07820', kulka: '#f07820', teczka: '#6b4226', szarlotka: '#e0b060', pieczarka: '#f4efe0' }[b.item] || '#8a5a2c'), 12);
         }
       }
       for (const c of fight.balls) if (c !== b && c.team !== b.team && c.life > 0 && b.life > 0 && Math.abs(c.x - b.x) < 24 && Math.abs(c.z - b.z) < 18) {
@@ -812,6 +896,8 @@ window.addEventListener('ark-ready', () => {
       else if (Math.random() < .2) press('jump');
     }
     if (ai.block > 0) { ai.block -= DT; out.held.defend = true; return out; }
+    const beamer = foes.find(o => o.st === 'power' && o.def.power.el === 'beam' && Math.abs(o.z - f.z) < 22 && (f.x - o.x) * o.face > 0);
+    if (beamer && FREE.has(f.st) && Math.random() < .3 + L.block) { move(0, f.z > depth() / 2 ? -1 : 1); return out; }   // side-step the kamehameha
     const ball = fight.balls.find(b => b.team !== f.team && Math.abs(b.z - f.z) < 20 && Math.sign(f.x - b.x) === Math.sign(b.vx) && Math.abs(f.x - b.x) < 170);
     if (ball && FREE.has(f.st) && ai.think <= 0) { ai.think = L.react; if (Math.random() < .5) press('jump'); else move(0, f.z > depth() / 2 ? -1 : 1); return out; }
     if (ai.wait > 0 || !FREE.has(f.st)) return out;
@@ -829,6 +915,9 @@ window.addEventListener('ark-ready', () => {
     if (holdKind(f) === 'light' && adx > 160 && adx < 420 && Math.abs(dz) < 12 && Math.random() < DT * .8) { f.face = dirX; out.held[dirX > 0 ? 'right' : 'left'] = true; press('attack'); ai.wait = .5; return out; }
     if (f.mp >= f.def.ball.mp && adx > 170 && adx < 560 && Math.abs(dz) < 14 && Math.random() < DT * 1.2 * L.special) {
       ai.queue.push(['defend'], [dx > 0 ? 'right' : 'left'], ['attack']); ai.wait = .6; return out;
+    }
+    if (f.def.power && f.mp >= POWER[f.def.power.el].mp && Math.abs(dz) < 14 && tgt.st !== 'frozen' && adx > (f.def.power.el === 'beam' ? 120 : 170) && adx < (f.def.power.el === 'beam' ? 700 : 560) && Math.random() < DT * .8 * L.special) {
+      f.face = dirX; ai.queue.push(['defend'], ['down'], ['attack']); ai.wait = f.def.power.el === 'beam' ? 1.3 : .7; return out;
     }
     if (f.mp >= f.def.spin.mp && adx < 70 && Math.abs(dz) < 14 && Math.random() < DT * .7 * L.special) { ai.queue.push(['defend'], ['up'], ['attack']); ai.wait = .9; return out; }
     if (holdKind(f) === 'gun' && adx < 520 && Math.abs(dz) < 12) { f.face = dirX; press('attack'); ai.wait = .25 + Math.random() * .2; return out; }
@@ -934,6 +1023,8 @@ window.addEventListener('ark-ready', () => {
       case 'cast': return d.ball.gun ? 'w_shoot' : f.released ? 'punch1' : 'cast';
       case 'toss': return f.released ? 'punch2' : 'stand';
       case 'spin': return d.spin.frame || 'special2';
+      case 'power': return d.power.el === 'beam' ? (f.t < POWER.beam.charge ? 'cast' : 'punch1') : (f.released ? 'punch1' : 'cast');
+      case 'frozen': return 'hurt';
       case 'pick': return 'pickup';
       case 'drink': return 'drink';
       case 'win': return 'win';
@@ -977,11 +1068,50 @@ window.addEventListener('ark-ready', () => {
     }
     if (!ok) { c.fillStyle = f.color; c.fillRect(x - 14, cy - 95, 28, 95); }
     c.globalAlpha = 1;
+    if (f.st === 'frozen') drawIce(f, x, cy);
+    if (f.burn > 0 && !dead) drawFlames(f, x, cy);
+    if (f.st === 'power' && f.def.power.el === 'beam') drawBeam(f, x, cy);
     if (!dead && fight.phase !== 'over') {
       const tag = f.cpu ? 'CPU' : `P${f.slot + 1}`;
       c.font = '11px PixelifySans'; c.textAlign = 'center'; c.fillStyle = '#10141f'; c.fillText(tag, x + 1, g - f.y - 109);
       c.fillStyle = f.color; c.fillText(tag, x, g - f.y - 110);
     }
+  }
+  function drawIce(f, x, cy) {   // translucent ice block around a frozen fighter
+    const c = cx, left = f.frozenDur - f.t, blink = left < .4 && Math.floor(f.t * 16) % 2;
+    c.save(); c.globalAlpha = blink ? .35 : .6;
+    c.fillStyle = '#9fe3ff'; c.fillRect(x - 30, cy - 108, 60, 110);
+    c.globalAlpha = blink ? .5 : .9; c.strokeStyle = '#e8faff'; c.lineWidth = 2; c.strokeRect(x - 30, cy - 108, 60, 110);
+    c.beginPath(); c.moveTo(x - 22, cy - 98); c.lineTo(x - 8, cy - 70); c.moveTo(x + 18, cy - 92); c.lineTo(x + 8, cy - 60); c.moveTo(x - 18, cy - 30); c.lineTo(x - 4, cy - 12); c.stroke();
+    c.restore();
+  }
+  function drawFlames(f, x, cy) {   // flickering flames while burning
+    const c = cx; c.save();
+    const lying = lyingSt(f.st) || f.st === 'fall', rows = lying ? [0] : [0, 1, 2];
+    for (const r of rows) for (let k = 0; k < 4; k++) {
+      const fx = x + (k - 1.5) * (lying ? 18 : 12) + Math.sin(fight.t * 20 + k + r) * 3, h = 34 + Math.sin(fight.t * 27 + k * 2 + r) * 12, fy = cy - 6 - r * 34;
+      c.globalAlpha = .8; c.fillStyle = '#ff4a10';
+      c.beginPath(); c.moveTo(fx - 11, fy); c.quadraticCurveTo(fx, fy - h * 1.3, fx + 11, fy); c.fill();
+      c.fillStyle = '#ffd21f'; c.beginPath(); c.moveTo(fx - 5, fy); c.quadraticCurveTo(fx, fy - h * .7, fx + 5, fy); c.fill();
+    }
+    c.restore();
+  }
+  function drawBeam(f, x, cy) {   // kamehameha: charge orb, then a long beam
+    const c = cx, P = POWER.beam, col = f.def.power.color, hx = x + f.face * 36, hy = cy - 70;
+    c.save();
+    if (f.t < P.charge) {
+      const r = 6 + 16 * (f.t / P.charge) + Math.sin(fight.t * 40) * 2;
+      c.globalAlpha = .55; c.fillStyle = col; c.beginPath(); c.arc(hx, hy, r + 6, 0, 7); c.fill();
+      c.globalAlpha = 1; c.fillStyle = '#ffffff'; c.beginPath(); c.arc(hx, hy, r * .55, 0, 7); c.fill();
+    } else if (f.beamLen > 0) {
+      const fade = f.t > P.end - .12 ? Math.max(0, (P.end - f.t) / .12) : 1, w = (22 + Math.sin(fight.t * 50) * 3) * fade;
+      const x1 = hx + f.face * f.beamLen, xa = Math.min(hx, x1), bw = Math.abs(x1 - hx);
+      c.globalAlpha = .55; c.fillStyle = col; c.fillRect(xa, hy - w, bw, w * 2);
+      c.beginPath(); c.arc(hx, hy, w * 1.25, 0, 7); c.fill();
+      c.globalAlpha = .95; c.fillStyle = '#ffffff'; c.fillRect(xa, hy - w * .45, bw, w * .9);
+      c.beginPath(); c.arc(hx, hy, w * .7, 0, 7); c.fill();
+    }
+    c.restore();
   }
   function drawWeapon(f, wpn, x, y, face) {   // weapon sprite at the grip of the current frame (see build_fight_sprites.take_grip)
     const a = ART[f.def.atlas], fr = a && a.meta && a.meta.frames[frameName(f)], g = fr && fr.grip;
@@ -1007,6 +1137,20 @@ window.addEventListener('ark-ready', () => {
   function drawBall(b) {
     const x = b.x, y = gy(b.z) - b.y;
     cx.fillStyle = 'rgba(10,30,10,.3)'; cx.beginPath(); cx.ellipse(x, gy(b.z), 12, 4, 0, 0, 7); cx.fill();
+    if (b.el === 'fire') {
+      const r = 13 + Math.sin(fight.t * 30) * 2, d = Math.sign(b.vx);
+      cx.save(); cx.globalAlpha = .6; cx.fillStyle = '#ff5a1a'; cx.beginPath(); cx.moveTo(x + d * r, y); cx.quadraticCurveTo(x - d * r * 2.6, y - r * 1.4, x - d * r * 3.2, y); cx.quadraticCurveTo(x - d * r * 2.6, y + r * 1.2, x + d * r, y); cx.fill();
+      cx.globalAlpha = 1; cx.fillStyle = b.color || '#ff7a1a'; cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.fill();
+      cx.fillStyle = '#ffe680'; cx.beginPath(); cx.arc(x + d * 2, y - 1, r * .55, 0, 7); cx.fill(); cx.restore();
+      return;
+    }
+    if (b.el === 'ice') {
+      const d = Math.sign(b.vx);
+      cx.save(); cx.fillStyle = 'rgba(191,232,255,.45)'; cx.fillRect(x - d * 40, y - 5, d * 30, 10);
+      cx.fillStyle = b.color || '#9fe3ff'; cx.strokeStyle = '#ffffff'; cx.lineWidth = 2;
+      cx.beginPath(); cx.moveTo(x + d * 18, y); cx.lineTo(x, y - 10); cx.lineTo(x - d * 14, y); cx.lineTo(x, y + 10); cx.closePath(); cx.fill(); cx.stroke(); cx.restore();
+      return;
+    }
     cx.fillStyle = 'rgba(255,255,255,.35)'; for (let k = 1; k < 4; k++) cx.fillRect(x - Math.sign(b.vx) * k * 13, y - 3, 7, 3);
     if (!drawSprite('items', b.item, x, y + (b.nospin ? 5 : 12), 1, { rot: b.nospin ? 0 : b.spin })) { cx.fillStyle = '#d8262c'; cx.beginPath(); cx.arc(x, y, 10, 0, 7); cx.fill(); }
   }
@@ -1135,7 +1279,7 @@ window.addEventListener('ark-ready', () => {
     type: { human: 'CZŁOWIEK', cpu: 'KOMPUTER', off: '—' }, team: { '': 'BEZ DRUŻYNY', A: 'DRUŻYNA A', B: 'DRUŻYNA B' },
     start: 'WALKA!', close: 'WYJDŹ', controls: 'STEROWANIE', reset: 'DOMYŚLNE KLAWISZE', press: 'naciśnij klawisz…',
     stage: 'PLANSZA', random: 'LOSOWA', itemsOpt: 'PRZEDMIOTY', level: 'KOMPUTER', levels: { easy: 'ŁATWY', normal: 'NORMALNY', hard: 'TRUDNY' }, sound: 'DŹWIĘK', effects: 'EFEKTY (TRZĘSIENIE, BŁYSK)',
-    moves: 'Bieg: 2× w bok · w biegu ATAK / SKOK / OBRONA = atak z rozpędu / długi skok / przewrót · Kopniak: SKOK + ATAK · Oszołomionego chwyć wchodząc w niego, rzut: kierunek + ATAK · Przedmiot: ATAK nad nim, widły rzucasz: do przodu + ATAK · W locie SKOK = przewrót · Specjalne: OBRONA, kierunek, ATAK oraz OBRONA, góra, ATAK',
+    moves: 'Bieg: 2× w bok · w biegu ATAK / SKOK / OBRONA = atak z rozpędu / długi skok / przewrót · Kopniak: SKOK + ATAK · Oszołomionego chwyć wchodząc w niego, rzut: kierunek + ATAK · Przedmiot: ATAK nad nim, widły rzucasz: do przodu + ATAK · W locie SKOK = przewrót · Specjalne: OBRONA, kierunek, ATAK oraz OBRONA, góra, ATAK · Moc (ogień / lód / kamehameha): OBRONA, dół, ATAK',
     pads: 'Pad: krzyżak/gałka, X/□ atak, A/✕ skok, B/○ lub RB obrona',
     errFew: 'Potrzeba co najmniej 2 zawodników.', errSame: 'Dwóch graczy ma to samo sterowanie: ', errTeam: 'Wszyscy są w jednej drużynie.', errHuman: 'Dodaj co najmniej jednego człowieka.',
   } : {
@@ -1143,7 +1287,7 @@ window.addEventListener('ark-ready', () => {
     type: { human: 'HUMAN', cpu: 'COMPUTER', off: '—' }, team: { '': 'NO TEAM', A: 'TEAM A', B: 'TEAM B' },
     start: 'FIGHT!', close: 'LEAVE', controls: 'CONTROLS', reset: 'DEFAULT KEYS', press: 'press a key…',
     stage: 'STAGE', random: 'RANDOM', itemsOpt: 'ITEMS', level: 'COMPUTER', levels: { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' }, sound: 'SOUND', effects: 'EFFECTS (SHAKE, FLASH)',
-    moves: 'Run: double-tap sideways · Run + ATTACK / JUMP / DEFEND = dash attack / dash jump / roll · Jump kick: JUMP + ATTACK · Walk into a dizzy enemy to grab, direction + ATTACK throws · Items: ATTACK on them, forward + ATTACK throws the pitchfork · JUMP while falling = flip · Specials: DEFEND, direction, ATTACK and DEFEND, up, ATTACK',
+    moves: 'Run: double-tap sideways · Run + ATTACK / JUMP / DEFEND = dash attack / dash jump / roll · Jump kick: JUMP + ATTACK · Walk into a dizzy enemy to grab, direction + ATTACK throws · Items: ATTACK on them, forward + ATTACK throws the pitchfork · JUMP while falling = flip · Specials: DEFEND, direction, ATTACK and DEFEND, up, ATTACK · Power (fire / ice / kamehameha): DEFEND, down, ATTACK',
     pads: 'Gamepad: d-pad/stick, X/□ attack, A/✕ jump, B/○ or RB defend',
     errFew: 'At least 2 fighters are needed.', errSame: 'Two players share the same controls: ', errTeam: 'Everyone is on one team.', errHuman: 'Add at least one human player.',
   };
@@ -1264,7 +1408,7 @@ window.addEventListener('ark-ready', () => {
   A.HOOKS.minimap.push(dot => { if (venue) dot(venue.x, venue.y, '#9b3fe0'); });
 
   A.brawl = {
-    FIGHTERS, ATK, STAGES, open: openBrawl, close: closeBrawl, start: startFight, end: endFight, validate,
+    FIGHTERS, ATK, STAGES, POWER, open: openBrawl, close: closeBrawl, start: startFight, end: endFight, validate,
     get venue() { return venue ? { ...venue } : null; }, get fight() { return fight; }, get ui() { return ui; },
     get keys() { return clone(KEYS); }, get slots() { return clone(SLOTS); }, get opts() { return { ...OPTS }; },
     setSlots(s) { SLOTS = s.map(x => ({ ...x })); writeLS(LS_SLOTS, SLOTS); renderLobby(); },
