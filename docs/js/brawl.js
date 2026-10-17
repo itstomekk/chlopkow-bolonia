@@ -250,7 +250,7 @@ window.addEventListener('ark-ready', () => {
   const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function loadOpts() {
     const o = readLS(LS_OPTS, {});
-    return { stage: STAGES[o.stage] || o.stage === 'random' ? o.stage : 'farmyard', items: o.items !== false, level: ['easy', 'normal', 'hard'].includes(o.level) ? o.level : 'normal', sound: o.sound !== false,
+    return { stage: STAGES[o.stage] || o.stage === 'random' ? o.stage : 'road', items: o.items !== false, level: ['easy', 'normal', 'hard'].includes(o.level) ? o.level : 'normal', sound: o.sound !== false,
       effects: o.effects === undefined ? !reducedMotion() : o.effects !== false };   // screen shake + white hit flash; off by default for people who ask their system for reduced motion
   }
   let KEYS = loadKeys(), SLOTS = loadSlots(), OPTS = loadOpts();
