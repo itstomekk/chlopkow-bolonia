@@ -127,6 +127,18 @@ with sync_playwright() as p:
     step(page, 700)
     t = target(page)
     check(blen > 500 and hp0 - t["hp"] >= 28 and t["st"] in ("fall", "lying"), f"beam reaches across the screen, hits several times and knocks down (len {blen}, {hp0}->{t['hp']}, {t['st']})")
+    # TOMEK: orange kamehameha (HODL-HAMEHA!) that hits and knocks down.
+    page.evaluate(RESET, "tomek")
+    page.evaluate(f"{F}.fighters[1].x = 800")
+    hp0 = target(page)["hp"]
+    power(page)
+    step(page, 400)
+    tp = page.evaluate(f"(() => {{ const d = {F}.fighters[0].def; return {{ el: d.power.el, color: d.power.color, name: d.power.name, len: {F}.fighters[0].beamLen }}; }})()")
+    r_, g_, b_ = (int(tp["color"][i:i + 2], 16) for i in (1, 3, 5))
+    check(tp["el"] == "beam" and r_ > 200 and 100 < g_ < 180 and b_ < 60, f"TOMEK's kamehameha is bitcoin orange ({tp})")
+    step(page, 700)
+    t = target(page)
+    check(tp["len"] > 500 and hp0 - t["hp"] >= 28 and t["st"] in ("fall", "lying"), f"TOMEK's orange beam hits several times and knocks down ({hp0}->{t['hp']}, {t['st']})")
     page.evaluate(RESET, "michal")
     page.evaluate(f"{F}.fighters[1].x = 700; {F}.fighters[1].z = 180")
     power(page)
