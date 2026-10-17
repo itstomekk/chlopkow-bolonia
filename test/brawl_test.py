@@ -248,7 +248,7 @@ with sync_playwright() as p:
     step(page, 500)
 
     # New fighters: atlases load, specials work.
-    for i, (fid, sp) in enumerate([("damian", "football"), ("wesoly", "hammer"), ("soltys", "teczka"), ("michal", "kulka"), ("ernest", "cytryna"), ("felcu", "kluczyk")]):
+    for i, (fid, sp) in enumerate([("damian", "football"), ("wesoly", "hammer"), ("soltys", "teczka"), ("michal", "kulka"), ("ernest", "cytryna"), ("felcu", "kluczyk"), ("artur", "smartfon"), ("urban", "deska")]):
         ev(page, RESET_PAIR)
         ev(page, f"const f = {F}.fighters[0]; f.def = window.ARK.brawl.FIGHTERS['{fid}']; f.key = '{fid}'; f.mp = 500; {F}.fighters[1].z = 230")
         for kk in ("KeyH", "KeyD", "KeyF"):
@@ -337,7 +337,7 @@ with sync_playwright() as p:
     ev(page, "window.ARK.brawl.setOpts({stage:'farmyard', items:true})")
     ev(page, "window.ARK.brawl.setSlots([{type:'human',fighter:'arek',ctrl:'kb1',team:'B'},{type:'cpu',fighter:'arek',ctrl:'kb2',team:''},{type:'cpu',fighter:'renik',ctrl:'kb3',team:''},{type:'off',fighter:'arek',ctrl:'pad1',team:''}])")
     page.locator("#brawl-start").click()
-    ev(page, f"{F}.fighters[0].hp = 1; {F}.fighters[0].x = 40; {F}.fighters[0].z = 0")
+    ev(page, f"{F}.fighters[0].hp = 1; {F}.fighters[0].hpDark = 1; {F}.fighters[0].x = {F}.fighters[1].x - 40; {F}.fighters[0].z = {F}.fighters[1].z")
     res = ev(page, """() => { const b = window.ARK.brawl; let n = 0;
         while (b.fight && b.fight.phase !== 'over' && n < 60 * 300) { b.step(60); n += 60; }
         b.step(80);

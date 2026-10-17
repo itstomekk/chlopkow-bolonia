@@ -410,7 +410,47 @@ def kluczyk():   # car key with a four-ring fob: FELCU's thrown special
     return im
 
 
-PROC_ITEMS = {"cytryna": cytryna, "kluczyk": kluczyk, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
+def smartfon():   # black smartphone seen from the side/top: ARTUR's thrown special
+    im, px = _canvas(18, 10)
+    for x in range(18):
+        for y in range(10):
+            edge = x in (0, 17) or y in (0, 9)
+            if (x in (0, 17)) and y in (0, 9):
+                continue
+            px[x, y] = (96, 100, 120, 255) if edge else (22, 22, 30, 255)
+    for x in range(2, 16):
+        for y in range(2, 8):
+            px[x, y] = (10, 10, 16, 255)
+    for i in range(5):   # screen glint
+        px[4 + i * 2, 7 - i // 2 - 1] = (74, 92, 150, 255)
+    px[1, 4] = px[1, 5] = (48, 52, 70, 255)   # camera / speaker end
+    return im
+
+
+def deska():   # skateboard seen from the side: URBAN's thrown special
+    im, px = _canvas(32, 10)
+    for x in range(32):
+        for y in (2, 3, 4):
+            kick = x < 3 or x > 28
+            yy = y - 1 if kick else y
+            if y == 4 and kick:
+                continue
+            edge = y == 2 or x in (0, 31) or y == 4
+            px[x, yy] = (60, 22, 18, 255) if edge else (222, 74, 56, 255) if x % 8 < 4 else (240, 188, 70, 255)
+    for x in range(3, 29):
+        px[x, 3] = (222, 74, 56, 255) if x % 8 < 4 else (240, 188, 70, 255)
+    for cx in (7, 24):
+        for x in range(cx - 2, cx + 3):
+            px[x, 5] = (150, 154, 166, 255)
+        for x in range(cx - 1, cx + 2):
+            for y in range(6, 9):
+                px[x, y] = (244, 238, 210, 255)
+        px[cx - 2, 7] = px[cx + 2, 7] = (60, 60, 68, 255)
+        px[cx, 8] = (60, 60, 68, 255)
+    return im
+
+
+PROC_ITEMS = {"cytryna": cytryna, "kluczyk": kluczyk, "smartfon": smartfon, "deska": deska, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
 
 
 def build_items():
@@ -456,7 +496,7 @@ def build_stages():
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "felcu"):
+    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "felcu", "urban", "artur"):
         build_fighter(fid)
     build_items()
     build_stages()

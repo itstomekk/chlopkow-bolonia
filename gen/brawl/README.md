@@ -12,6 +12,11 @@ Runtime: `docs/js/brawl.js`. Art: `docs/img/brawl/`. Test: `test/brawl_test.py`.
 3. Save as `raw/<name>_s1..s3.png`, add the name to the fighter loop in `build_fight_sprites.py`, run it, inspect `preview_<name>.png`.
 4. Add an entry to `FIGHTERS` in `brawl.js` (`atlas`, `ball`, `spin`), extend `test/brawl_test.py`.
 
+## Per-fighter beam look
+
+A fighter with `power.el === 'beam'` may add `core` (CSS colour of the beam centre and charge orb, default white) and `size` (width multiplier, default 1)
+to the `power` object in `brawl.js`. ARTUR uses `core: '#0b0b10', size: .6` for his thin black beam; damage and reach are unchanged.
+
 ## Frame overrides (later edits)
 
 - `raw/<name>_s3beer.png`: only its drinking cell is used (Łomża instead of milk).

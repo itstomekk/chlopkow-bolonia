@@ -133,6 +133,21 @@ with sync_playwright() as p:
     step(page, 1200)
     t = target(page)
     check(t["hp"] == t["max"], f"beam misses a fighter on a different depth line ({t})")
+    # ARTUR: black small kamehameha (same beam element, thinner, black core) still travels and hits.
+    page.evaluate(RESET, "artur")
+    page.evaluate(f"{F}.fighters[1].x = 800")
+    hp0 = target(page)["hp"]
+    pw = page.evaluate("(() => { const p = window.ARK.brawl.FIGHTERS.artur.power; return { el: p.el, size: p.size, core: p.core }; })()")
+    check(pw["el"] == "beam" and pw["size"] < 1 and pw["core"] == "#0b0b10", f"ARTUR power is a smaller black beam ({pw})")
+    power(page)
+    step(page, 400)
+    if SHOTS:
+        page.evaluate(f"(() => {{ const p = {F}.paused; {F}.paused = false; window.ARK.brawl.render(); {F}.paused = p; }})()")
+        page.screenshot(path=os.path.join(SHOTS, "brawl_power_artur_beam.png"))
+    blen = page.evaluate(f"{F}.fighters[0].beamLen")
+    step(page, 700)
+    t = target(page)
+    check(blen > 500 and hp0 - t["hp"] >= 28, f"ARTUR black beam renders and hits (len {blen}, {hp0}->{t['hp']}, {t['st']})")
 
     # Block: a defended fireball does chip damage only, no burn.
     page.evaluate(RESET, "arek")

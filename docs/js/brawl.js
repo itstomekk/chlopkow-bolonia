@@ -140,6 +140,18 @@ window.addEventListener('ark-ready', () => {
       spin: { name: PL ? 'SZARŻA BARKIEM!' : 'SHOULDER CHARGE!', mp: 140, hits: 1, dmg: 55, fall: 95, dur: .5, vx: 430, front: true, reach: 60, hy: [10, 110], dvx: 300, knock: true },
       power: { el: 'fire', name: PL ? 'TURBO PŁOMIEŃ!' : 'TURBO FLAME!', color: '#ff6a1a' },
     },
+    artur: {
+      name: 'ARTUR', atlas: 'artur', color: '#9aa3c0', hp: LF2.hp, superFrame: 'super',
+      ball: { name: PL ? 'SMARTFON!' : 'PHONE!', item: 'smartfon', mp: 75, dmg: 34, fall: 38, speed: 640 },
+      spin: { name: PL ? 'MŁYNEK PŁASZCZA!' : 'COAT WHIRL!', mp: 150, hits: 3, dmg: 28, fall: 30, dur: .7, vx: 100, flip: .1, hy: [0, 110], reach: 75, dvx: 200 },
+      power: { el: 'beam', name: PL ? 'CZARNA FALA!' : 'BLACK WAVE!', color: '#6a2aa0', core: '#0b0b10', size: .6 },
+    },
+    urban: {
+      name: 'URBAN', atlas: 'urban', color: '#ff7ab8', hp: LF2.hp, superFrame: 'super',
+      ball: { name: PL ? 'DESKA!' : 'SKATEBOARD!', item: 'deska', mp: 75, dmg: 36, fall: 40, speed: 600 },
+      spin: { name: PL ? 'NA DESCE!' : 'BOARD RIDE!', mp: 140, hits: 1, dmg: 55, fall: 95, dur: .5, vx: 430, front: true, reach: 60, hy: [10, 110], dvx: 300, knock: true },
+      power: { el: 'ice', name: PL ? 'ZIMNY FLIRT!' : 'COLD FLIRT!', color: '#9fe3ff' },
+    },
   };
   const STAGES = {
     farmyard: { name: PL ? 'PODWÓRKO' : 'FARMYARD', img: 'img/brawl/stage_farmyard.webp', top: .535 },
@@ -768,7 +780,7 @@ window.addEventListener('ark-ready', () => {
           const vx = f.vx ? Math.sign(f.vx) * LF2.flipDvx * PXTU : 0, vz = f.vz ? Math.sign(f.vz) * 2 * PXTU : 0;
           setSt(f, 'flip'); f.vx = vx; f.vz = vz; f.vy = 0; break;
         }
-        if (tu) airTU(f, true);
+        if (tu) { if (f.y <= 0 && f.vy === 0) f.vy = -1e-3; airTU(f, true); }   // a knock-down with no upward speed on the ground must still land (else the body stays in 'fall' forever)
         break;
       }
       case 'flip': if (tu) { if (f.t < LF2.flipHover * TUS) f.vy = 0; airTU(f); } break;   // frame 100 holds vy = 0 for 3 TU, then gravity
@@ -1008,7 +1020,7 @@ window.addEventListener('ark-ready', () => {
           if (b.el === 'fire') o.burnBy = b.owner;
           applyHit(b.owner, o, b.el ? { dmg: b.dmg, fall: b.fall, bdef: b.bdef, dvx: b.dvx, dvy: b.dvy, el: b.el } : { dmg: b.dmg, fall: b.fall, bdef: 30, dvx: 120 }, b.x - Math.sign(b.vx) * 30);
           if (o.hp <= 0) o.lastHitBy = b.owner;
-          b.life = 0; spark(b.x, gy(b.z) - b.y, b.el ? b.color : ({ apple: '#d8262c', vinyl: '#2a2a33', football: '#ffffff', hammer: '#a0a5af', rzutek: '#f07820', kulka: '#f07820', teczka: '#6b4226', szarlotka: '#e0b060', pieczarka: '#f4efe0' }[b.item] || '#8a5a2c'), 12);
+          b.life = 0; spark(b.x, gy(b.z) - b.y, b.el ? b.color : ({ apple: '#d8262c', vinyl: '#2a2a33', football: '#ffffff', hammer: '#a0a5af', rzutek: '#f07820', kulka: '#f07820', teczka: '#6b4226', szarlotka: '#e0b060', pieczarka: '#f4efe0', smartfon: '#4a4a70', deska: '#e0503a' }[b.item] || '#8a5a2c'), 12);
         }
       }
       for (const c of fight.balls) if (c !== b && c.team !== b.team && c.life > 0 && b.life > 0 && Math.abs(c.x - b.x) < 24 && Math.abs(c.z - b.z) < 18) {
@@ -1247,18 +1259,18 @@ window.addEventListener('ark-ready', () => {
     c.restore();
   }
   function drawBeam(f, x, cy) {   // kamehameha: charge orb, then a long beam
-    const c = cx, P = POWER.beam, col = f.def.power.color, hx = x + f.face * 36, hy = cy - 70;
+    const c = cx, P = POWER.beam, col = f.def.power.color, core = f.def.power.core || '#ffffff', sz = f.def.power.size || 1, hx = x + f.face * 36, hy = cy - 70;
     c.save();
     if (f.t < P.charge) {
-      const r = 6 + 16 * (f.t / P.charge) + Math.sin(fight.t * 40) * 2;
-      c.globalAlpha = .55; c.fillStyle = col; c.beginPath(); c.arc(hx, hy, r + 6, 0, 7); c.fill();
-      c.globalAlpha = 1; c.fillStyle = '#ffffff'; c.beginPath(); c.arc(hx, hy, r * .55, 0, 7); c.fill();
+      const r = (6 + 16 * (f.t / P.charge) + Math.sin(fight.t * 40) * 2) * sz;
+      c.globalAlpha = .55; c.fillStyle = col; c.beginPath(); c.arc(hx, hy, r + 6 * sz, 0, 7); c.fill();
+      c.globalAlpha = 1; c.fillStyle = core; c.beginPath(); c.arc(hx, hy, r * .55, 0, 7); c.fill();
     } else if (f.beamLen > 0) {
-      const fade = f.t > P.end - .12 ? Math.max(0, (P.end - f.t) / .12) : 1, w = (22 + Math.sin(fight.t * 50) * 3) * fade;
+      const fade = f.t > P.end - .12 ? Math.max(0, (P.end - f.t) / .12) : 1, w = (22 + Math.sin(fight.t * 50) * 3) * fade * sz;
       const x1 = hx + f.face * f.beamLen, xa = Math.min(hx, x1), bw = Math.abs(x1 - hx);
       c.globalAlpha = .55; c.fillStyle = col; c.fillRect(xa, hy - w, bw, w * 2);
       c.beginPath(); c.arc(hx, hy, w * 1.25, 0, 7); c.fill();
-      c.globalAlpha = .95; c.fillStyle = '#ffffff'; c.fillRect(xa, hy - w * .45, bw, w * .9);
+      c.globalAlpha = .95; c.fillStyle = core; c.fillRect(xa, hy - w * .45, bw, w * .9);
       c.beginPath(); c.arc(hx, hy, w * .7, 0, 7); c.fill();
     }
     c.restore();
