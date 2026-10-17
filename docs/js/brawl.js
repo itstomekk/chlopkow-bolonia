@@ -18,6 +18,8 @@
                fire = fireball that knocks down and sets the target burning,
                ice = ice shard that freezes the target in a block (next hit shatters it for bonus damage),
                beam = kamehameha: short charge, then a screen-long multi-hit beam (dodge it up/down).
+   LF2 physics: movement, jump/dash arcs, gravity, friction, fall/guard meters, hit stop, regen and the Davis attacks use
+     original LF2 numbers (F.LF global.js + stock davis.dat) in the LF2 block below, scaled by S = 100/62 and stepped per 1/30 s time unit.
    Art: docs/img/brawl/<fighter>.webp/.json, items.webp/.json, stage_*.webp, built by
    gen/brawl/build_fight_sprites.py from generated sheets. Settings/results in localStorage. */
 'use strict';
@@ -26,47 +28,86 @@ window.addEventListener('ark-ready', () => {
   if (A.__brawlInstalled) return; A.__brawlInstalled = true;
   const PL = A.LANG === 'pl';
 
+  /* ================================================================== LF2 reference numbers
+     Original Little Fighter 2 is the rulebook. Every value in this block is an LF2 value in LF2 units
+     (px, 30 time units (TU) per second) taken from F.LF LF/global.js (GC.*), LF/mechanics.js, LF/character.js
+     (rules and numbers only, no code) and the stock davis.dat (header + frames). LF2 / F.LF global.js.
+     S scales LF2 lengths to this view: our standing hurtbox (100 px) / Davis bdy height (62 LF2 px), so motion
+     relative to the body equals LF2. Velocities in the game are px/s; PXTU turns "1 LF2 px per TU" into px/s.
+     The simulation steps at 60 Hz; fighter physics and fall/guard meters advance once per TU (every 2nd tick),
+     exactly LF2's order (state sets velocity, move, ground friction or gravity), so heights and distances equal LF2. */
+  const LF2 = {
+    TU: 30, S: 100 / 62, hp: 500, mp: 500, mpStart: 200,         // GC.framerate, hp_full, mp_full, mp_start
+    gravity: 1.7, friction: 1, minSpeed: 1,                      // GC.gravity, ground friction 1 px/TU^2, GC.min_speed
+    walk: 5, walkz: 2.5, run: 10, runz: 1.6, hWalk: 3.7, hWalkz: 1.85, hRun: 6.2, hRunz: 1,   // davis.dat header
+    jumpH: 16.3, jumpDist: 10, jumpDistZ: 3.75, dashH: 10, dashDist: 18, dashDistZ: 5, rowDist: 5, rollSpeed: 9,   // roll = frames 102-105 dvx 9
+    diagWalk: 2 / 7, diagRun: 1 / 7,                             // x speed lost while also moving in z (state 1 / 2)
+    squat: 5,                  // jump press -> launch: frames 210 + 211 (wait 1 = 2 TU each) + entry TU of 212
+    hurt: 7, dizzy: 28, broken: 9, crouch: 3, lying: 31, lieInv: 30, roll: 12, skid: 6,   // frames 220-225 (3+4 TU), 226-229 (4x7), 112-114, 215/219, 230/231, invulnerable 30 TU after lying, 102-105, 218
+    freeze: 91, shatter: { vx: 4, vy: 3 }, flipHover: 3, flipDvx: 5,   // frame 201 wait 90, frame 202 dvx -4 dvy -3, rowing frame 100, rowing speed 5
+    fall: { value: 20, dvy: 6.9, ko: 60, dizzy: 40, recover: .45, juggle: 40 },   // GC.default.fall.*, GC.fall.KO, GC.recover.fall, itr table: falling targets only take fall > 40
+    bounce: { xy: 13.4, y: 11, up: 4.25, absorb: { 9: 1, 14: 4, 20: 10, 40: 20, 60: 30 } },   // GC.character.bounceup
+    fell: { 2: 0, 3: 1, 5: 2, 6: 4, 9: 5, 13: 7, 25: 9 },        // GC.friction.fell (landing friction by speed)
+    bdef: { limit: 30, ignore: 60, hit: 45, recover: .5, absorb: { 5: 0, 15: 5 } },   // block while total <= 30 (itr docs), >60 ignores guard, counter 45 after a normal hit, GC.recover.bdefend
+    defendFactor: .1, hitStop: 3, hitStopBlock: 4, hitStopBroken: 5,   // GC.defend.injury.factor, GC.default.itr.hit_stop, victim effect 111 / 112
+    zwidth: 12, body: [-18, 25], bodyH: 61, catchBox: [-33, 52],        // itr zwidth, Davis bdy x/h, kind-6 box of dizzy/broken frames
+    hpRegen: 12, mpRegen: 3,                                     // +1 hp every 12 TU up to the dark bound; +1+floor(lost/100) mp every 3 TU
+    // Davis itr in LF2 units: t0/t1/dur in TU from the first frame, x forward from the body centre, y height above the feet,
+    // injury / fall (default 20) / bdefend / dvx / dvy (negative = up) per the stock davis.dat. adv = [from TU, to TU, dvx] frame pushes.
+    atk: {
+      punch: { t0: 2, t1: 4, dur: 8, x: [-18, 25], y: [30, 48], injury: 20, fall: 20, bdef: 16, dvx: 2, adv: [[4, 8, 2]] },
+      super: { t0: 5, t1: 8, dur: 15, x: [1, 36], y: [29, 74], injury: 50, fall: 70, bdef: 60, dvx: 13, dvy: -6, adv: [[8, 10, 5], [13, 15, 6]] },
+      runatk: { t0: 5, t1: 11, dur: 19, x: [-57, 31], y: [25, 55], injury: 50, fall: 70, bdef: 16, dvx: 10, adv: [[3, 5, 16]] },
+      jkick: { t0: 6, t1: 12, dur: 16, x: [-22, 30], y: [25, 42], injury: 35, fall: 20, bdef: 16, dvx: 2 },
+      dashkick: { t0: 6, t1: 16, dur: 16, x: [-22, 30], y: [25, 42], injury: 70, fall: 70, bdef: 60, dvx: 12 },
+    },
+  };
+  const TUS = 1 / LF2.TU, PXTU = LF2.S * LF2.TU;      // seconds per TU; px/s of 1 LF2 px per TU
+  const lookupAbs = (tab, v) => { v = Math.abs(v); let last; for (const k of Object.keys(tab)) { last = tab[k]; if (v <= +k) return tab[k]; } return last; };   // F.LF util.lookup_abs
+  const lf2Atk = a => ({ t0: a.t0 * TUS, t1: a.t1 * TUS, dur: a.dur * TUS, bx: a.x.map(v => v * LF2.S), reach: a.x[1] * LF2.S, hy: a.y.map(v => v * LF2.S),
+    dmg: a.injury, fall: a.fall, bdef: a.bdef, dvx: a.dvx * PXTU, dvy: a.dvy === undefined ? undefined : -a.dvy * PXTU, adv: a.adv });
+
   /* ================================================================== data */
   const FIGHTERS = {
     arek: {
-      name: 'AREK', atlas: 'arek', color: '#e34c4c', hp: 500, walk: 150, run: 310, superFrame: 'super',
+      name: 'AREK', atlas: 'arek', color: '#e34c4c', hp: LF2.hp, superFrame: 'super',
       ball: { name: PL ? 'JABŁKO!' : 'APPLE!', item: 'apple', mp: 75, dmg: 45, fall: 45, speed: 520 },
       spin: { name: PL ? 'WIDŁY!' : 'PITCHFORK!', mp: 150, hits: 3, dmg: 30, fall: 30, dur: .6, vx: 330, frame: 'w_thrust', weapon: 'widly', front: true, reach: 120, dvx: 260 },
       power: { el: 'fire', name: PL ? 'OGNISKO!' : 'BONFIRE!', color: '#ff7a1a' },
     },
     edytka: {
-      name: 'EDYTKA', atlas: 'edytka', color: '#4aa8e8', hp: 480, walk: 160, run: 325, superFrame: 'kick',
+      name: 'EDYTKA', atlas: 'edytka', color: '#4aa8e8', hp: LF2.hp, superFrame: 'kick',
       ball: { name: PL ? 'BOROWIK!' : 'MUSHROOM!', item: 'mushroom', mp: 75, dmg: 45, fall: 45, speed: 470 },
       spin: { name: PL ? 'KOPNIAK Z OBROTU!' : 'SPIN KICK!', mp: 150, hits: 1, dmg: 80, fall: 90, dur: .62, vx: 200, flip: .12, dvy: 480 },
       power: { el: 'ice', name: PL ? 'LODOWY WIATR!' : 'ICE BLAST!', color: '#9fe3ff' },
     },
     renik: {
-      name: 'DJ RENIK', atlas: 'renik', color: '#ffd21f', hp: 540, walk: 140, run: 295, superFrame: 'super',
+      name: 'DJ RENIK', atlas: 'renik', color: '#ffd21f', hp: LF2.hp, superFrame: 'super',
       ball: { name: PL ? 'WINYL!' : 'VINYL!', item: 'vinyl', mp: 75, dmg: 40, fall: 40, speed: 600 },
       spin: { name: PL ? 'BREAKDANCE!' : 'BREAKDANCE!', mp: 150, hits: 3, dmg: 30, fall: 30, dur: .8, vx: 90, flip: .1, hy: [0, 50] },
       power: { el: 'beam', name: 'BASS-HAMEHA!', color: '#c86bff' },
     },
     damian: {
-      name: 'DAMIAN', atlas: 'damian', color: '#7cff6b', hp: 470, walk: 168, run: 345, superFrame: 'super',
+      name: 'DAMIAN', atlas: 'damian', color: '#7cff6b', hp: LF2.hp, superFrame: 'super',
       ball: { name: PL ? 'GOL!' : 'GOAL!', item: 'football', mp: 75, dmg: 42, fall: 45, speed: 640 },
       spin: { name: PL ? 'WŚLIZG!' : 'SLIDE TACKLE!', mp: 140, hits: 1, dmg: 55, fall: 90, dur: .55, vx: 460, front: true, reach: 70, hy: [0, 45], dvx: 240, knock: true },
       power: { el: 'fire', name: PL ? 'OGNISTA PIŁKA!' : 'FIREBALL!', color: '#ff5a1a' },
     },
     wesoly: {
-      name: 'WESOŁYCH ŚWIĄT', atlas: 'wesoly', color: '#c0392b', hp: 560, walk: 135, run: 285, superFrame: 'super',
+      name: 'WESOŁYCH ŚWIĄT', atlas: 'wesoly', color: '#c0392b', hp: LF2.hp, superFrame: 'super',
       ball: { name: PL ? 'MŁOTEK!' : 'HAMMER!', item: 'hammer', mp: 80, dmg: 55, fall: 60, speed: 470 },
       spin: { name: PL ? 'TRZĘSIENIE!' : 'GROUND POUND!', mp: 160, hits: 1, dmg: 60, fall: 100, dur: .6, vx: 0, reach: 115, hy: [0, 40], dvx: 160, knock: true, t0: .22 },
       power: { el: 'ice', name: PL ? 'ŚNIEŻYCA!' : 'BLIZZARD!', color: '#e8f6ff' },
     },
     michal: {
-      name: 'MICHAŁ', atlas: 'michal', color: '#8a9a3a', hp: 510, walk: 150, run: 315, superFrame: 'super',
+      name: 'MICHAŁ', atlas: 'michal', color: '#8a9a3a', hp: LF2.hp, superFrame: 'super',
       start: 'pistol',
       ball: { name: PL ? 'SERIA!' : 'VOLLEY!', item: 'kulka', gun: true, volley: 3, mp: 75, dmg: 18, fall: 28, speed: 840 },
       spin: { name: PL ? 'SZARŻA!' : 'SHOULDER CHARGE!', mp: 140, hits: 1, dmg: 55, fall: 95, dur: .5, vx: 430, front: true, reach: 60, hy: [10, 110], dvx: 300, knock: true },
       power: { el: 'beam', name: 'KAMEHAMEHA!', color: '#6bd0ff' },
     },
     soltys: {
-      name: 'SOŁTYS', atlas: 'soltys', color: '#b07d3a', hp: 520, walk: 145, run: 300, superFrame: 'super',
+      name: 'SOŁTYS', atlas: 'soltys', color: '#b07d3a', hp: LF2.hp, superFrame: 'super',
       start: 'teczka',
       ball: { name: PL ? 'TECZKA!' : 'BRIEFCASE!', item: 'teczka', mp: 75, dmg: 48, fall: 60, speed: 460 },
       spin: { name: PL ? 'PIECZĄTKA!' : 'OFFICIAL STAMP!', mp: 150, hits: 1, dmg: 80, fall: 100, dur: .62, vx: 60, front: true, reach: 85, hy: [0, 120], dvx: 120, knock: true, t0: .2 },
@@ -83,11 +124,11 @@ window.addEventListener('ark-ready', () => {
   // Attacks. t0..t1 active window (s), dur total; reach forward (px); hy band above the feet;
   // dmg = injury, fall = fall-meter, bdef = guard damage, dvx/dvy knock velocity.
   const ATK = {
-    punch: { t0: .05, t1: .13, dur: .25, reach: 58, hy: [40, 85], dmg: 20, fall: 25, bdef: 12, dvx: 50 },
-    super: { t0: .08, t1: .19, dur: .42, reach: 62, hy: [30, 110], dmg: 45, fall: 80, bdef: 60, dvx: 190, dvy: 430 },
-    runatk: { t0: .04, t1: .28, dur: .46, reach: 66, hy: [30, 85], dmg: 40, fall: 70, bdef: 30, dvx: 260, dvy: 300 },
-    jkick: { t0: .03, t1: 9, dur: 9, reach: 62, hy: [10, 75], dmg: 35, fall: 70, bdef: 25, dvx: 220, dvy: 260 },
-    dashkick: { t0: .03, t1: 9, dur: 9, reach: 66, hy: [10, 75], dmg: 48, fall: 80, bdef: 35, dvx: 300, dvy: 300 },
+    punch: lf2Atk(LF2.atk.punch),            // Davis punch / super_punch / run_attack / jump_attack / dash_attack (LF2 block above)
+    super: lf2Atk(LF2.atk.super),
+    runatk: lf2Atk(LF2.atk.runatk),
+    jkick: lf2Atk(LF2.atk.jkick),
+    dashkick: lf2Atk(LF2.atk.dashkick),
     w_thrust: { t0: .07, t1: .17, dur: .32, reach: 98, hy: [35, 85], dmg: 32, fall: 40, bdef: 20, dvx: 90 },
     w_swing: { t0: .10, t1: .22, dur: .40, reach: 94, hy: [20, 125], dmg: 42, fall: 70, bdef: 35, dvx: 230, dvy: 300 },
     w_jump: { t0: .03, t1: 9, dur: 9, reach: 92, hy: [0, 70], dmg: 42, fall: 70, bdef: 30, dvx: 230, dvy: 260 },
@@ -95,7 +136,7 @@ window.addEventListener('ark-ready', () => {
   // Elemental powers shared by every fighter with that element (per-fighter name/colour in FIGHTERS[..].power).
   const POWER = {
     fire: { mp: 120, speed: 470, dmg: 40, fall: 90, bdef: 40, dvx: 230, dvy: 380, burn: 1.6, burnDmg: 5 },
-    ice: { mp: 120, speed: 540, dmg: 28, fall: 20, bdef: 30, dvx: 60, freeze: 1.7 },
+    ice: { mp: 120, speed: 540, dmg: 28, fall: 20, bdef: 30, dvx: 60, freeze: LF2.freeze * TUS },   // frozen 91 TU = LF2 frame 201 (wait 90)
     beam: { mp: 200, charge: .4, end: 1.0, dur: 1.12, tick: .12, dmg: 14, fall: 24, bdef: 16, dvx: 170, hy: [45, 95] },
   };
   const ITEM_DEF = {
@@ -314,7 +355,7 @@ window.addEventListener('ark-ready', () => {
   }
 
   /* ================================================================== arena */
-  const W = 960, H = 540, X0 = 44, X1 = W - 44, Z1 = 532, GRAV = 1750, DT = 1 / 60;
+  const W = 960, H = 540, X0 = 44, X1 = W - 44, Z1 = 532, GRAV = LF2.gravity * LF2.S * LF2.TU * LF2.TU, DT = 1 / 60;   // 1.7 px/TU^2 in px/s^2 (items and special-move arcs use it directly)
   let Z0 = 286;
   const depth = () => Z1 - Z0;
   // Camera: stages with a `world` wider than the view scroll after the fighters (LF2 style). fight.cam = left edge of the view.
@@ -370,50 +411,64 @@ window.addEventListener('ark-ready', () => {
   /* -------------------------------------------- damage */
   const lyingSt = s => s === 'lying' || s === 'dead';
   function hurtBox(o) { return { y0: o.y, y1: o.y + (lyingSt(o.st) ? 25 : 100) }; }
-  function canBeHit(o) { return alive(o) && o.inv <= 0 && !['lying', 'dead', 'getup', 'roll', 'flip'].includes(o.st) && !(o.st === 'fall' && o.t < .12); }
+  // LF2: lying / getting up (30 TU invulnerable) / rolling (no bdy) cannot be hit; a falling body only takes hits with fall > 40 (itr table)
+  function canBeHit(o, fallV) { return alive(o) && o.inv <= 0 && !['lying', 'dead', 'getup', 'roll'].includes(o.st) && !(o.st === 'fall' && fallV !== undefined && fallV <= LF2.fall.juggle); }
+  const ZW = LF2.zwidth * LF2.S;
+  // horizontal span of an x-range [x0,x1] given relative to a facing-right body, mirrored for a fighter facing left
+  const xspan = (o, r) => o.face > 0 ? [o.x + r[0], o.x + r[1]] : [o.x - r[1], o.x - r[0]];
+  const BODY = LF2.body.map(v => v * LF2.S), CATCH = LF2.catchBox.map(v => v * LF2.S);
+  const overlapX = (a, b) => a[1] >= b[0] && a[0] <= b[1];
   // Hit-stop: the short freeze on impact that makes a punch feel like it landed. The victim freezes slightly longer than the attacker.
-  const HITSTOP = { block: .04, lightA: .07, lightV: .10, heavyA: .11, heavyV: .17, ko: .24 };
+  // LF2: the attacker stalls GC.default.itr.hit_stop = 3 TU, the victim's effect lasts 3 TU (hit), 4 TU (blocked, frame 111), 5 TU (guard broken, frame 112).
+  const HITSTOP = { block: LF2.hitStopBlock * TUS, broken: LF2.hitStopBroken * TUS, lightA: LF2.hitStop * TUS, lightV: LF2.hitStop * TUS, heavyA: LF2.hitStop * TUS, heavyV: LF2.hitStop * TUS, ko: LF2.hitStop * TUS };
+  // LF2 knock-down (character.js falldown): fall meter reset, launch with dvx and dvy (default 6.9 px/TU up), front/back fall family
+  function knockDown(o, dir, frontal, a, kx) {
+    if (o.hold) dropHold(o);
+    setSt(o, 'fall'); o.fall = 0; o.lieFront = !frontal;
+    o.vx = kx || dir * 30; o.vy = a.dvy === undefined ? LF2.fall.dvy * PXTU : a.dvy;
+  }
   function applyHit(att, o, a, srcX) {
-    let stopV = HITSTOP.block, stopA = HITSTOP.block;   // the pause both fighters feel on impact (seconds)
+    let stopV = HITSTOP.lightV, stopA = HITSTOP.lightA;   // the pause both fighters feel on impact (seconds)
     const dir = Math.sign(o.x - srcX) || (att ? att.face : 1);
-    const frontal = o.face === -dir;
-    let dmg = Math.round(a.dmg);
-    if (o.st === 'defend' && frontal && !a.unblockable) {
-      o.bdef += a.bdef; dmg = Math.max(1, Math.round(dmg * .1)); o.x += dir * 8;
+    const frontal = o.face === -dir, air = o.y > 0 || o.vy > 0;
+    let dmg = a.dmg;
+    // LF2: horizontal push is dvx - 1 px/TU on the ground; guard absorbs part of it (GC.defend.absorb)
+    let kx = a.dvx ? dir * Math.max(0, Math.abs(a.dvx) - (air ? 0 : PXTU)) : 0;
+    if (o.st === 'defend' && frontal && !a.unblockable && !(a.bdef > LF2.bdef.ignore)) {
+      dmg *= LF2.defendFactor; o.bdef += a.bdef;
+      kx = dir * Math.max(0, Math.abs(kx) - lookupAbs(LF2.bdef.absorb, kx / PXTU) * PXTU);
       spark(o.x - dir * 18, gy(o.z) - o.y - 60, '#9fd0f0', 6); sfx('block');
-      if (o.bdef >= 60) { o.bdef = 0; setSt(o, 'hurt'); o.vx = dir * 60; popText(o, PL ? 'PĘKŁO!' : 'BROKEN!', '#ff6b5e'); }
-      else popText(o, PL ? 'BLOK' : 'BLOCK', '#9fd0f0');
+      if (o.hp - dmg <= 0) { knockDown(o, dir, frontal, a, kx); stopV = HITSTOP.heavyV; }
+      else if (o.bdef > LF2.bdef.limit && !air) { setSt(o, 'brokendef'); o.vx = kx; stopV = HITSTOP.broken; popText(o, PL ? 'PĘKŁO!' : 'BROKEN!', '#ff6b5e'); }   // total guard > 30 breaks it
+      else { o.vx = kx; o.t = 0; stopV = HITSTOP.block; popText(o, PL ? 'BLOK' : 'BLOCK', '#9fd0f0'); }
     } else {
       if (o.grabbedBy) releaseGrab(o.grabbedBy);
       if (o.grabbing) releaseGrab(o);
       const wasFrozen = o.st === 'frozen';
-      if (wasFrozen) {   // LF2: hitting a frozen fighter shatters the ice for bonus damage and a knockdown
+      if (wasFrozen) {   // LF2: any hit on a frozen fighter knocks it down (state 13); the shatter bonus damage has no LF2 equivalent
         dmg = Math.round(dmg * 1.3) + 10; spark(o.x, gy(o.z) - o.y - 50, '#d8f4ff', 22); sfx('break'); popText(o, PL ? 'ROZBITY!' : 'SHATTER!', '#9fe3ff');
       }
-      o.fall += a.fall; o.flash = .1; o.running = 0;
+      o.bdef = LF2.bdef.hit;   // a hit outside the guard sets the guard counter to 45: no blocking for a while
+      o.fall += a.fall === undefined ? LF2.fall.value : a.fall; o.flash = .1; o.running = 0;
       spark(o.x - dir * 12, gy(o.z) - o.y - 62, a.el === 'fire' ? '#ff9a2a' : a.el === 'ice' ? '#bfe8ff' : '#fff3b0', 10);
       const freeze = a.el === 'ice' && !wasFrozen && o.hp - dmg > 0;
-      const heavy = !freeze && (o.fall >= 60 || a.dvy || o.y > 0 || o.hp - dmg <= 0 || wasFrozen);
-      sfx(heavy ? 'heavy' : 'hit');
-      stopV = heavy ? HITSTOP.heavyV : HITSTOP.lightV; stopA = heavy ? HITSTOP.heavyA : HITSTOP.lightA;
-      fight.shake = Math.max(fight.shake, heavy ? .16 : .06);
+      const down = !freeze && (wasFrozen || air || o.hp - dmg <= 0 || o.fall > LF2.fall.ko);   // LF2 fall(): frozen / airborne / dying / meter > 60
+      sfx(down ? 'heavy' : 'hit');
+      fight.shake = Math.max(fight.shake, down ? .16 : .06);
       if (a.el === 'fire') o.burn = Math.max(o.burn || 0, POWER.fire.burn);
       if (freeze) {
         if (o.hold) dropHold(o);
-        setSt(o, 'frozen'); o.vx = dir * (a.dvx || 60); o.fall = 0; o.burn = 0; o.frozenDur = POWER.ice.freeze;
-      } else if (heavy) {
-        if (o.hold) dropHold(o);
-        setSt(o, 'fall'); o.lieFront = !frontal; o.vx = dir * (Math.abs(a.dvx) || 220); o.vy = a.dvy || 360; o.y = Math.max(o.y, 1); o.fall = 0;
-      } else if (o.fall >= 40) { setSt(o, 'dizzy'); o.vx = dir * 30; }
-      else { setSt(o, 'hurt'); o.vx = dir * (Math.abs(a.dvx) || 50); }
-      popText(o, String(dmg), '#fff');
+        setSt(o, 'frozen'); o.vx = kx || dir * 60; o.fall = 0; o.burn = 0; o.frozenDur = POWER.ice.freeze;
+      } else if (down) knockDown(o, dir, frontal, a, kx);
+      else if (o.fall > LF2.fall.dizzy) { setSt(o, 'dizzy'); o.vx = kx; }   // 40 < fall <= 60: dance of pain (frames 226-229)
+      else { setSt(o, 'hurt'); o.vx = kx; }
+      popText(o, String(Math.round(dmg)), '#fff');
     }
-    o.hp = Math.max(0, o.hp - dmg); o.hpDark = Math.max(o.hp, o.hpDark - Math.round(dmg / 3));
+    o.hp = Math.max(0, o.hp - dmg); o.hpDark = Math.max(o.hp, o.hpDark - Math.ceil(dmg / 3));   // LF2 injury(): hp_bound -= ceil(inj / 3)
     o.stats.hpLost += dmg;
-    if (o.hp <= 0) stopV = stopA = HITSTOP.ko;   // the killing blow freezes the longest
     if (att) { att.stats.dealt += dmg; att.hitstop = Math.max(att.hitstop, stopA); }
     o.hitstop = Math.max(o.hitstop, stopV);
-    if (o.hp <= 0) { o.lastHitBy = att; if (o.st !== 'fall') { setSt(o, 'fall'); o.vx = dir * 200; o.vy = 400; o.y = 1; } }
+    if (o.hp <= 0) { o.lastHitBy = att; if (o.st !== 'fall') knockDown(o, dir, frontal, { dvy: 400 }, dir * 200); }
     return true;
   }
   const W_ATK = new Map();
@@ -427,16 +482,16 @@ window.addEventListener('ark-ready', () => {
     if (f.t < a.t0 || f.t > a.t1) return;
     const reach = a.reach;
     for (const o of fight.fighters) {
-      if (o === f || o.team === f.team || f.hitSet.has(o) || !canBeHit(o)) continue;
-      const dx = (o.x - f.x) * f.face, dz = Math.abs(o.z - f.z);
-      const inX = opts.both ? Math.abs(o.x - f.x) <= reach : (dx >= -10 && dx <= reach);
-      if (!inX || dz > 16) continue;
+      if (o === f || o.team === f.team || f.hitSet.has(o) || !canBeHit(o, a.fall === undefined ? LF2.fall.value : a.fall)) continue;
+      const dz = Math.abs(o.z - f.z);
+      // LF2: the itr rectangle must overlap the target's bdy rectangle (mirrored with facing); z within itr zwidth 12
+      const inX = opts.both ? Math.abs(o.x - f.x) <= reach : overlapX(xspan(f, a.bx || [-10, reach]), xspan(o, BODY));
+      if (!inX || dz > ZW) continue;
       const hy0 = f.y + a.hy[0], hy1 = f.y + a.hy[1], hb = hurtBox(o);
       if (hy1 < hb.y0 || hy0 > hb.y1) continue;
       f.hitSet.add(o);
       if (f.hold && holdKind(f) === 'light') wearItem(f);
-      const superHit = o.st === 'dizzy' && a === ATK.punch;
-      applyHit(f, o, superHit ? ATK.super : a, f.x);
+      applyHit(f, o, a, f.x);
       if (opts.once) return;
     }
     // LF2: attacks bat balls back
@@ -471,7 +526,7 @@ window.addEventListener('ark-ready', () => {
     if (f.hold && which === 'ball' && f.def.ball.item === f.hold.type) { f.hold.state = 'gone'; f.hold = null; }   // Sołtys throws the teczka he holds
     else if (f.hold && !(which === 'ball' && f.def.ball.gun && holdKind(f) === 'gun')) dropHold(f, false);
     f.running = 0;
-    if (which === 'ball') setSt(f, 'cast'); else { setSt(f, 'spin'); f.vx = f.face * sp.vx; if (sp.dvy) { f.vy = 380; f.y = 1; } }
+    if (which === 'ball') { setSt(f, 'cast'); f.vx = f.vz = 0; } else { setSt(f, 'spin'); f.vz = 0; f.vx = f.face * sp.vx; if (sp.dvy) { f.vy = 380; f.y = 1; } }
     banner(sp.name, f.x, gy(f.z) - 130, f.color); sfx('special');
     return true;
   }
@@ -506,10 +561,11 @@ window.addEventListener('ark-ready', () => {
   function updateFighter(f, now) {
     const inp = f.input, hd = inp.held || {};
     f.inv = Math.max(0, f.inv - DT); f.flash = Math.max(0, f.flash - DT);
-    f.fall = Math.max(0, f.fall - DT * 12); f.bdef = Math.max(0, f.bdef - DT * 10);
-    if (alive(f)) {
-      f.mp = Math.min(f.mpMax, f.mp + DT * (18 + 30 * (1 - f.hp / f.hpMax)));
-      if (f.hp < f.hpDark && f.hp > 0) f.hp = Math.min(f.hpDark, f.hp + DT * 4);
+    const tu = !!fight.tuEdge;   // true on the tick that completes one LF2 time unit (every 2nd tick)
+    f.fall = Math.max(0, f.fall - LF2.fall.recover * LF2.TU * DT); f.bdef = Math.max(0, f.bdef - LF2.bdef.recover * LF2.TU * DT);   // GC.recover.fall / .bdefend per TU
+    if (alive(f) && tu) {   // LF2 health regen: +1 hp / 12 TU (up to the dark bound); +1 + floor(lost hp / 100) mp / 3 TU
+      if (fight.tuN % LF2.hpRegen === 0 && f.hp > 0 && f.hp < f.hpDark) f.hp = Math.min(f.hpDark, f.hp + 1);
+      if (fight.tuN % LF2.mpRegen === 0 && f.mp < f.mpMax) f.mp = Math.min(f.mpMax, f.mp + 1 + Math.floor((f.hpMax - Math.min(f.hp, f.hpMax)) / 100));
     }
     if (f.burn > 0) {   // fire damage over time; never the final blow
       const before = Math.floor(f.burn / .3); f.burn = Math.max(0, f.burn - DT);
@@ -529,14 +585,13 @@ window.addEventListener('ark-ready', () => {
     f.t += DT; f.frameT += DT;
     const d = f.def, kind = holdKind(f);
     const mx = (hd.right ? 1 : 0) - (hd.left ? 1 : 0), mz = (hd.down ? 1 : 0) - (hd.up ? 1 : 0);
-    const walkV = d.walk * (kind === 'heavy' ? (ITEM_DEF[f.hold.type].speed || .6) : 1);
 
     if (f.ko) { physicsGround(f); f.deadT += DT; return; }
 
     if (FREE.has(f.st)) {
       for (const a of f.input.pressed || []) if ((a === 'left' || a === 'right') && kind !== 'heavy') {
         const dir = a === 'left' ? -1 : 1;
-        if (f.running && dir !== f.running) { f.running = 0; setSt(f, 'skid'); f.vx = f.face * d.run * .7; return; }
+        if (f.running && dir !== f.running) { f.running = 0; setSt(f, 'skid'); return; }   // LF2 frame 218 stop_running: keeps the speed, friction slides it out
         if (!f.running && now - f.tap[a] < .26) { f.running = dir; f.face = dir; }
         f.tap[a] = now;
       }
@@ -546,7 +601,7 @@ window.addEventListener('ark-ready', () => {
         if (sp) { if (sp.face) f.face = sp.face; f.hist.length = 0; if (special(f, sp.which)) return; }
         const it = !f.hold && nearItem(f);
         if (it) { setSt(f, 'pick'); f.pickItem = it; it.state = 'reserved'; f.running = 0; return; }
-        if (f.running) { f.running = 0; setSt(f, kind === 'light' ? 'w_atk2' : kind === 'heavy' ? 'heavy_throw' : 'runatk'); f.vx = f.face * d.run * (kind ? .5 : .9); return; }
+        if (f.running) { f.running = 0; setSt(f, kind === 'light' ? 'w_atk2' : kind === 'heavy' ? 'heavy_throw' : 'runatk'); return; }
         if (kind === 'heavy') { setSt(f, 'heavy_throw'); return; }
         if (kind === 'gun' && mx !== f.face) { setSt(f, 'shoot'); return; }
         if ((kind === 'light' || kind === 'gun') && mx === f.face) { setSt(f, 'w_throw'); return; }
@@ -554,28 +609,34 @@ window.addEventListener('ark-ready', () => {
         if (!kind && f.ammo > 0 && !fight.fighters.some(o => o !== f && o.team !== f.team && alive(o) && Math.abs(o.x - f.x) < 60 && Math.abs(o.z - f.z) < 16)) {
           f.ammo--; setSt(f, 'toss'); return;
         }
-        const dizzy = fight.fighters.find(o => o !== f && o.team !== f.team && o.st === 'dizzy' && Math.abs(o.z - f.z) < 16 && (o.x - f.x) * f.face > -5 && (o.x - f.x) * f.face < 64);
+        // LF2: ATTACK becomes the super punch when its itr box meets a kind-6 box (dizzy frames 226-229, broken defend 112-114)
+        const sbox = xspan(f, ATK.super.bx);
+        const dizzy = fight.fighters.find(o => o !== f && o.team !== f.team && (o.st === 'dizzy' || o.st === 'brokendef') && Math.abs(o.z - f.z) <= ZW && overlapX(sbox, xspan(o, CATCH)));
         if (dizzy) { setSt(f, 'super'); return; }
         f.punchAlt ^= 1; setSt(f, 'punch'); return;
       }
       if (pressedHas(f, 'jump') && kind !== 'heavy') {
-        if (f.running) { setSt(f, 'dash'); f.vx = f.running * d.run * 1.35; f.vz = mz * 60; f.vy = 470; f.y = 1; f.running = 0; sfx('whoosh'); return; }
-        setSt(f, 'jumpsquat'); f.vx = mx * walkV * 1.05; f.vz = mz * walkV * .5; return;
+        if (f.running) { setSt(f, 'dash'); f.vx = f.running * (LF2.dashDist - 1) * PXTU; f.vz = mz * (LF2.dashDistZ - 1) * PXTU; f.vy = LF2.dashH * PXTU; f.running = 0; sfx('whoosh'); if (tu) dynamics(f); return; }   // state 5 entry: dash_distance-1, dash_height
+        setSt(f, 'jumpsquat'); return;
       }
       if (hd.defend || pressedHas(f, 'defend')) {
-        if (f.running) { setSt(f, 'roll'); f.vx = f.running * d.run * .95; f.running = 0; f.inv = .35; sfx('whoosh'); return; }
+        if (f.running) { setSt(f, 'roll'); f.vx = f.running * LF2.rollSpeed * PXTU; f.running = 0; sfx('whoosh'); return; }   // frames 102-105: dvx 9, no bdy
         if (kind !== 'heavy') { setSt(f, 'defend'); return; }
       }
+      // LF2 states 1 / 2: the state sets vx / vz every TU (x speed reduced while moving in z), then mechanics adds friction
+      const heavy = kind === 'heavy';
       if (f.running) {
-        f.face = f.running; f.x += f.running * d.run * DT; f.z += mz * d.walk * .45 * DT;
+        f.face = f.running;
+        if (tu) { f.vx = f.running * LF2.run * (1 - (mz ? LF2.diagRun : 0)) * PXTU; f.vz = mz * LF2.runz * PXTU; }
         if (f.st !== 'run') { f.st = 'run'; f.frameT = 0; }
         tryGrab(f);
       } else if (mx || mz) {
         if (mx) f.face = mx;
-        f.x += mx * walkV * DT; f.z += mz * walkV * .62 * DT;
+        if (tu) { if (mx) f.vx = mx * (heavy ? LF2.hWalk : LF2.walk) * (1 - (mz ? LF2.diagWalk : 0)) * PXTU; f.vz = mz * (heavy ? LF2.hWalkz : LF2.walkz) * PXTU; }
         if (f.st !== 'walk') { f.st = 'walk'; f.frameT = 0; }
         if (mx) tryGrab(f);
       } else if (f.st !== 'stand') { f.st = 'stand'; f.frameT = 0; }
+      if (tu) dynamics(f);
       clampPos(f); return;
     }
 
@@ -589,14 +650,24 @@ window.addEventListener('ark-ready', () => {
       case 'punch': case 'super': case 'runatk': case 'w_atk1': case 'w_atk2': {
         const a = withWeapon(f, f.st === 'punch' ? ATK.punch : f.st === 'super' ? ATK.super : f.st === 'runatk' ? ATK.runatk : f.st === 'w_atk1' ? ATK.w_thrust : ATK.w_swing);
         if (f.t <= DT * 1.01 && f.st !== 'punch') sfx('whoosh');
-        if (f.vx) { f.x += f.vx * DT; f.vx *= Math.pow(.04, DT); }
+        if (tu) {   // frame pushes (dvx) then LF2 dynamics: friction slides the lunge out
+          for (const [t0, t1, dv] of a.adv || []) if (f.t >= t0 * TUS - 1e-6 && f.t < t1 * TUS - 1e-6 && Math.abs(f.vx) < dv * PXTU) f.vx = f.face * dv * PXTU;
+          dynamics(f);
+        }
         meleeCheck(f, a);
         if (pressedHas(f, 'attack') && f.t > a.t0) f.queueAtk = true;   // LF2-style input buffer: chain the next hit
-        if (f.t >= a.dur) { f.vx = 0; setSt(f, 'stand'); }
+        if (f.t >= a.dur - 1e-6) setSt(f, 'stand');
         break;
       }
-      case 'skid': f.x += f.vx * DT; f.vx *= Math.pow(.01, DT); if (f.t > .2) setSt(f, 'stand'); break;
-      case 'jumpsquat': if (f.t > .06) { const vx = f.vx, vz = f.vz; setSt(f, 'jump'); f.vx = vx; f.vz = vz; f.vy = 560; f.y = 1; sfx('whoosh'); } break;
+      case 'skid': if (tu) dynamics(f); if (f.t >= LF2.skid * TUS - 1e-6) setSt(f, 'stand'); break;
+      case 'jumpsquat':   // frames 210, 211, then at the first TU of 212: vx = dx * (jump_distance - 1), vz likewise, vy = jump_height
+        if (tu) {
+          if (f.t >= (LF2.squat - .5) * TUS) {
+            setSt(f, 'jump'); f.vx = mx * (LF2.jumpDist - 1) * PXTU; f.vz = mz * (LF2.jumpDistZ - 1) * PXTU; f.vy = LF2.jumpH * PXTU; sfx('whoosh');
+            airTU(f);
+          } else dynamics(f);
+        }
+        break;
       case 'jump': case 'dash': case 'jkick': case 'dashkick': case 'w_jump': {
         if (pressedHas(f, 'attack') && (f.st === 'jump' || f.st === 'dash')) {
           if (kind === 'light' && mx === f.face) { setSt(f, 'w_throw'); f.air = true; }
@@ -605,12 +676,17 @@ window.addEventListener('ark-ready', () => {
         if (f.st === 'jkick') meleeCheck(f, ATK.jkick, { once: true });
         if (f.st === 'dashkick') meleeCheck(f, ATK.dashkick, { once: true });
         if (f.st === 'w_jump') meleeCheck(f, withWeapon(f, ATK.w_jump), { once: true });
-        airPhysics(f);
+        if (f.st === 'jkick' && f.t >= ATK.jkick.dur) setSt(f, 'jump');   // frame 79 returns to the jump (212) while still airborne
+        if (tu) airTU(f);
         break;
       }
-      case 'roll': f.x += f.vx * DT; f.vx *= Math.pow(.3, DT); if (f.t > .42) { setSt(f, 'stand'); f.vx = 0; } break;
-      case 'hurt': f.x += f.vx * DT; f.vx *= Math.pow(.02, DT); if (f.t > .3) setSt(f, 'stand'); break;
-      case 'dizzy': f.x += f.vx * DT; f.vx *= Math.pow(.02, DT); if (f.t > 1.5) { setSt(f, 'stand'); f.fall = 0; } break;
+      case 'roll':   // frames 102-105: dvx 9 is re-applied every TU while friction eats 1; the frames have no bdy
+        if (tu) { if (Math.abs(f.vx) < LF2.rollSpeed * PXTU) f.vx = Math.sign(f.vx || f.face) * LF2.rollSpeed * PXTU; dynamics(f); }
+        if (f.t >= LF2.roll * TUS - 1e-6) setSt(f, 'land');
+        break;
+      case 'hurt': if (tu) dynamics(f); if (f.t >= LF2.hurt * TUS - 1e-6) setSt(f, 'stand'); break;
+      case 'dizzy': if (tu) dynamics(f); if (f.t >= LF2.dizzy * TUS - 1e-6) setSt(f, 'stand'); break;   // the fall meter keeps decaying, it is not reset
+      case 'brokendef': if (tu) dynamics(f); if (f.t >= LF2.broken * TUS - 1e-6) setSt(f, 'stand'); break;
       case 'held': {
         const g = f.grabbedBy;
         if (!g || g.grabbing !== f) { f.grabbedBy = null; setSt(f, 'dizzy'); f.t = .8; break; }
@@ -647,14 +723,23 @@ window.addEventListener('ark-ready', () => {
         if (f.t > .34) setSt(f, 'stand');
         break;
       }
-      case 'fall':
-        if (pressedHas(f, 'jump') && f.t > .12 && f.t < .55 && f.hp > 0 && !f.thrownBy && f.vy > -200) { const vx = f.vx * .4, vy = f.vy; setSt(f, 'flip'); f.vx = vx; f.vy = Math.max(vy, 200); break; }
-        airPhysics(f, true);
+      case 'fall': {
+        // LF2 rowing: JUMP during frame 182 (front fall) / 188 (back fall) of the falling animation; frame 182 starts 5 TU after the hit, 188 after 8, each lasts 4 TU
+        const w0 = (f.lieFront ? 8 : 5) * TUS;
+        if (pressedHas(f, 'jump') && f.t >= w0 - 1e-6 && f.t < w0 + 4 * TUS && f.hp > 0 && !f.thrownBy) {
+          const vx = f.vx ? Math.sign(f.vx) * LF2.flipDvx * PXTU : 0, vz = f.vz ? Math.sign(f.vz) * 2 * PXTU : 0;
+          setSt(f, 'flip'); f.vx = vx; f.vz = vz; f.vy = 0; break;
+        }
+        if (tu) airTU(f, true);
         break;
-      case 'flip': airPhysics(f); break;
-      case 'land': if (f.t > .09) setSt(f, 'stand'); break;
-      case 'lying': if (f.t > .85) { if (f.hp <= 0) { setSt(f, 'dead'); onKo(f); } else setSt(f, 'getup'); } break;
-      case 'getup': if (f.t > .25) { setSt(f, 'stand'); f.inv = .5; f.fall = 0; } break;
+      }
+      case 'flip': if (tu) { if (f.t < LF2.flipHover * TUS) f.vy = 0; airTU(f); } break;   // frame 100 holds vy = 0 for 3 TU, then gravity
+      case 'land': if (tu) dynamics(f); if (f.t >= LF2.crouch * TUS - 1e-6) setSt(f, 'stand'); break;   // crouch frames 215 / 219: 3 TU
+      case 'lying':   // frames 230 / 231: wait 30 = 31 TU, sliding with ground friction; the exit gives 30 TU of invulnerability (state_exit effect.super)
+        if (tu) dynamics(f);
+        if (f.t >= (f.hp <= 0 ? .85 : LF2.lying * TUS) - 1e-6) { if (f.hp <= 0) { setSt(f, 'dead'); onKo(f); } else { setSt(f, 'getup'); f.inv = LF2.lieInv * TUS; } }
+        break;
+      case 'getup': if (tu) dynamics(f); if (f.t >= LF2.crouch * TUS - 1e-6) { setSt(f, 'stand'); f.fall = 0; } break;
       case 'cast': {
         const sp = f.def.ball, times = sp.volley ? [.1, .19, .28] : [.15];
         if (f.t < DT * 1.5) f.shots = 0;
@@ -697,7 +782,7 @@ window.addEventListener('ark-ready', () => {
           const slot = Math.floor((f.t - P.charge) / P.tick);
           if (slot >= f.hitsDone) { f.hitSet = new Set(); f.hitsDone = slot + 1; }
           for (const o of fight.fighters) {
-            if (o === f || o.team === f.team || f.hitSet.has(o) || !canBeHit(o)) continue;
+            if (o === f || o.team === f.team || f.hitSet.has(o) || !canBeHit(o, P.fall)) continue;
             const dx = (o.x - x0) * f.face;
             if (dx < -14 || dx > f.beamLen || Math.abs(o.z - f.z) > 18) continue;
             const hb = hurtBox(o); if (f.y + P.hy[1] < hb.y0 || f.y + P.hy[0] > hb.y1) continue;
@@ -710,9 +795,9 @@ window.addEventListener('ark-ready', () => {
         break;
       }
       case 'frozen':
-        f.x += f.vx * DT; f.vx *= Math.pow(.05, DT);
-        if (f.y > 0 || f.vy) { f.vy -= GRAV * DT; f.y += f.vy * DT; if (f.y <= 0) { f.y = 0; f.vy = 0; } }
-        if (f.t > (f.frozenDur || 1.5) && f.y <= 0) { spark(f.x, gy(f.z) - 50, '#d8f4ff', 14); sfx('break'); setSt(f, 'stand'); f.inv = .25; f.fall = 0; }
+        if (tu) { dynamics(f); if (f.y <= 0) f.vy = 0; }
+        // LF2 frame 201 holds 91 TU, then frame 202 shatters the ice: dvx -4, dvy -3 and the fighter falls (frame 182)
+        if (f.t >= (f.frozenDur || LF2.freeze * TUS) && f.y <= 0) { spark(f.x, gy(f.z) - 50, '#d8f4ff', 14); sfx('break'); setSt(f, 'fall'); f.lieFront = false; f.fall = 0; f.vx = -f.face * LF2.shatter.vx * PXTU; f.vy = LF2.shatter.vy * PXTU; }
         clampPos(f);
         break;
       case 'pick': {
@@ -741,7 +826,7 @@ window.addEventListener('ark-ready', () => {
           Object.assign(it, { state: 'flying', owner: f, team: f.team, x: f.x + f.face * 40, z: f.z, y: f.y + 60, vx: f.face * 560, vy: 60, vz: 0, dmg: 45, fall: 70 });
           sfx('whoosh');
         }
-        if (f.air || f.y > 0) { airPhysics(f); if (f.st !== 'w_throw') f.air = false; break; }
+        if (f.air || f.y > 0) { if (tu) airTU(f); if (f.st !== 'w_throw') f.air = false; break; }
         if (f.t > .36) setSt(f, 'stand');
         break;
       }
@@ -752,8 +837,8 @@ window.addEventListener('ark-ready', () => {
           Object.assign(it, { state: 'flying', owner: f, team: f.team, x: f.x + f.face * 30, z: f.z, y: 95, vx: f.face * (idf.long ? 520 : 420), vy: idf.long ? 120 : 160, vz: 0, dmg: idf.dmg || 60, fall: 90 });
           sfx('whoosh');
         }
-        if (f.vx) { f.x += f.vx * DT; f.vx *= Math.pow(.05, DT); }
-        if (f.t > .4) { f.vx = 0; setSt(f, 'stand'); }
+        if (tu) dynamics(f);
+        if (f.t > .4) setSt(f, 'stand');
         break;
       }
       case 'shoot': {   // paintball pistol: one orange ball per ATTACK
@@ -781,19 +866,45 @@ window.addEventListener('ark-ready', () => {
     clampPos(f);
   }
   function clampPos(f) { f.x = Math.max(xLo(), Math.min(xHi(), f.x)); f.z = Math.max(0, Math.min(depth(), f.z)); }
-  function airPhysics(f, falling) {
-    f.x += f.vx * DT; f.z += f.vz * DT; f.vy -= GRAV * DT; f.y += f.vy * DT;
+  // LF2 mechanics.js dynamics(), once per TU: move by the velocity, clamp to the ground, then ground friction (1 px/TU^2, speeds under 1 stop)
+  // or gravity (1.7 px/TU^2). Returns true on the TU the fighter reaches the ground while moving down.
+  function dynamics(f) {
+    f.x += f.vx / LF2.TU; f.z += f.vz / LF2.TU; f.y += f.vy / LF2.TU;
+    let landed = false;
+    if (f.y <= 0) {
+      f.y = 0; landed = f.vy < 0;
+      const fr = LF2.friction * PXTU, mn = LF2.minSpeed * PXTU;
+      if (f.vx) f.vx -= Math.sign(f.vx) * fr;
+      if (f.vz) f.vz -= Math.sign(f.vz) * fr;
+      if (f.vx && Math.abs(f.vx) < mn) f.vx = 0;
+      if (f.vz && Math.abs(f.vz) < mn) f.vz = 0;
+    } else f.vy -= LF2.gravity * PXTU;
+    return landed;
+  }
+  // LF2 fall_onto_ground for a knocked-down body: a hard landing bounces (speed > 13.4 or vy > 11 px/TU), otherwise it lies down and slides
+  function landFall(f) {
+    const vyd = -f.vy / PXTU, speed = Math.hypot(f.vx, f.vy) / PXTU;
+    if (speed > LF2.bounce.xy || vyd > LF2.bounce.y) {
+      const ab = lookupAbs(LF2.bounce.absorb, f.vx / PXTU) * PXTU, abz = lookupAbs(LF2.bounce.absorb, f.vz / PXTU) * PXTU;
+      f.vx -= Math.sign(f.vx) * Math.min(Math.abs(f.vx), ab); f.vz -= Math.sign(f.vz) * Math.min(Math.abs(f.vz), abz);
+      f.vy = LF2.bounce.up * PXTU; sfx('land'); fight.shake = Math.max(fight.shake, .1);
+      return;
+    }
+    const fx = lookupAbs(LF2.fell, f.vx / PXTU) * PXTU, fz = lookupAbs(LF2.fell, f.vz / PXTU) * PXTU;   // GC.friction.fell at the moment of landing
+    f.vx -= Math.sign(f.vx) * Math.min(Math.abs(f.vx), fx); f.vz -= Math.sign(f.vz) * Math.min(Math.abs(f.vz), fz);
+    f.vy = 0; f.fall = 0; f.bdef = 0; setSt(f, 'lying'); sfx('land');   // state 14 entry resets both meters
+  }
+  function airTU(f, falling) {
+    const landed = dynamics(f);
     if (f.thrownBy && f.st === 'fall') for (const o of fight.fighters) {   // a thrown body knocks over whoever it flies into
-      if (o === f || o === f.thrownBy || o.team === f.thrownBy.team || !canBeHit(o) || f.hitSet.has(o)) continue;
+      if (o === f || o === f.thrownBy || o.team === f.thrownBy.team || !canBeHit(o, 80) || f.hitSet.has(o)) continue;
       if (Math.abs(o.x - f.x) < 36 && Math.abs(o.z - f.z) < 16 && f.y < 100) { f.hitSet.add(o); applyHit(f.thrownBy, o, { dmg: 35, fall: 80, bdef: 40, dvx: 240, dvy: 300 }, f.x); }
     }
-    if (f.y <= 0) {
-      f.y = 0;
+    if (landed) {
       if (falling) {
         if (f.thrownBy) { const t = f.thrownBy; f.thrownBy = null; applyLand(f, t); }
-        if (f.vy < -520) { f.vy = -f.vy * .3; f.vx *= .5; sfx('land'); fight.shake = Math.max(fight.shake, .1); return; }
-        f.vx = f.vy = f.vz = 0; setSt(f, 'lying'); sfx('land');
-      } else { f.vx = f.vy = f.vz = 0; f.air = false; setSt(f, 'land'); }
+        landFall(f);
+      } else { f.air = false; setSt(f, 'land'); }   // jump landing = crouch; the speed is kept and friction slides it out
     }
     clampPos(f);
   }
@@ -819,7 +930,7 @@ window.addEventListener('ark-ready', () => {
         it.x += it.vx * DT; it.z += it.vz * DT; it.vy -= GRAV * (flying ? (ITEM_DEF[it.type].grav || .35) : 1) * DT; it.y += it.vy * DT; it.spin += DT * (flying ? 14 : 0);
         if (it.x < X0 - 10 || it.x > worldHi() + 10) { it.vx = -it.vx * .4; it.x = Math.max(X0 - 10, Math.min(worldHi() + 10, it.x)); }
         if (flying) for (const o of fight.fighters) {
-          if (o.team === it.team || !canBeHit(o)) continue;
+          if (o.team === it.team || !canBeHit(o, it.fall)) continue;
           if (Math.abs(o.x - it.x) < 30 && Math.abs(o.z - it.z) < 16 && it.y < o.y + 100 && it.y > o.y - 10) {
             applyHit(it.owner, o, { dmg: it.dmg, fall: it.fall, bdef: 40, dvx: 240, dvy: 300 }, it.x - Math.sign(it.vx) * 30);
             it.state = 'free'; it.vx *= -.25; it.vy = 160;
@@ -854,7 +965,7 @@ window.addEventListener('ark-ready', () => {
       if (b.el && Math.random() < .7) fight.fx.push({ x: b.x - Math.sign(b.vx) * 10, y: gy(b.z) - b.y + (Math.random() - .5) * 12, vx: -b.vx * .15, vy: b.el === 'fire' ? -90 : 30, t: 0, life: .25, color: b.el === 'fire' ? (Math.random() < .5 ? '#ff7a1a' : '#ffd21f') : (Math.random() < .5 ? '#bfe8ff' : '#ffffff') });
       if (b.x < viewLo() - 40 || b.x > viewHi() + 40) b.life = 0;
       for (const o of fight.fighters) {
-        if (b.life <= 0 || o.team === b.team || !canBeHit(o)) continue;
+        if (b.life <= 0 || o.team === b.team || !canBeHit(o, b.fall)) continue;
         if (Math.abs(o.x - b.x) < 26 && Math.abs(o.z - b.z) < 18 && b.y > o.y - 10 && b.y < o.y + 100) {
           if (b.el === 'fire') o.burnBy = b.owner;
           applyHit(b.owner, o, b.el ? { dmg: b.dmg, fall: b.fall, bdef: b.bdef, dvx: b.dvx, dvy: b.dvy, el: b.el } : { dmg: b.dmg, fall: b.fall, bdef: 30, dvx: 120 }, b.x - Math.sign(b.vx) * 30);
@@ -968,6 +1079,7 @@ window.addEventListener('ark-ready', () => {
   function tick() {
     if (!fight || fight.paused) return;
     fight.t += DT; fight.shake = Math.max(0, fight.shake - DT);
+    fight.tuEdge = (fight.tickN = (fight.tickN || 0) + 1) % 2 === 0; if (fight.tuEdge) fight.tuN = (fight.tuN || 0) + 1;   // 60 Hz ticks -> 30 TU/s
     gatherInputs();
     if (fight.phase === 'intro') { if (fight.t > 1.6) { fight.phase = 'fight'; fight.t = 0; } }
     else {
@@ -1010,7 +1122,7 @@ window.addEventListener('ark-ready', () => {
       case 'jump': case 'dash': return k === 'light' ? 'w_jump' : 'jump';
       case 'jkick': case 'dashkick': return 'jkick';
       case 'defend': return 'defend';
-      case 'hurt': return 'hurt';
+      case 'hurt': case 'brokendef': return 'hurt';
       case 'dizzy': return 'dizzy';
       case 'held': return 'held';
       case 'grab': return 'grab';
@@ -1408,7 +1520,7 @@ window.addEventListener('ark-ready', () => {
   A.HOOKS.minimap.push(dot => { if (venue) dot(venue.x, venue.y, '#9b3fe0'); });
 
   A.brawl = {
-    FIGHTERS, ATK, STAGES, POWER, open: openBrawl, close: closeBrawl, start: startFight, end: endFight, validate,
+    FIGHTERS, ATK, STAGES, POWER, LF2, PXTU, applyHit, open: openBrawl, close: closeBrawl, start: startFight, end: endFight, validate,
     get venue() { return venue ? { ...venue } : null; }, get fight() { return fight; }, get ui() { return ui; },
     get keys() { return clone(KEYS); }, get slots() { return clone(SLOTS); }, get opts() { return { ...OPTS }; },
     setSlots(s) { SLOTS = s.map(x => ({ ...x })); writeLS(LS_SLOTS, SLOTS); renderLobby(); },

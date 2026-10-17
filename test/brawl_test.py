@@ -126,13 +126,14 @@ with sync_playwright() as p:
         step(page, 16)
         if ev(page, f"{F}.fighters[1].hp") < hp0: break
     hs = ev(page, f"[{F}.fighters[0].hitstop, {F}.fighters[1].hitstop]")
-    check(hs[1] >= 0.08 and hs[0] >= 0.06 and hs[1] >= hs[0], f"a light hit pauses attacker and victim, victim longer (attacker {hs[0]:.2f}s, victim {hs[1]:.2f}s)")
+    # LF2: the attacker stalls hit_stop = 3 TU (0.1 s) and the victim's effect also lasts 3 TU, so the pauses are equal (the victim is read one tick later)
+    check(abs(hs[0] - 0.1) < 0.001 and 0.08 <= hs[1] <= 0.1001, f"a light hit pauses attacker and victim 3 TU each (attacker {hs[0]:.3f}s, victim {hs[1]:.3f}s)")
     page.keyboard.press("KeyF"); step(page, 16)
     check(ev(page, f"{F}.fighters[0].hitstop") > 0 and ev(page, f"{F}.fighters[0].buf ? {F}.fighters[0].buf.has('attack') : false"), "a button pressed during the hit pause is buffered, not lost")
     step(page, 120)
     check(ev(page, f"{F}.fighters[0].buf ? {F}.fighters[0].buf.size : 0") == 0, "the buffer is empty again once the pause ends")
 
-    # Punch -> punch -> dizzy -> super punch knocks down.
+    # LF2 fall meter: punch fall 20 -> hurt, hurt, dizzy on the 3rd hit (40 < meter <= 60) -> super punch knocks down.
     ev(page, RESET_PAIR)
     hp = ev(page, f"{F}.fighters[1].hp")
     tap(page, "KeyF", 330)
@@ -141,9 +142,13 @@ with sync_playwright() as p:
     ev(page, f"{F}.fighters[1].x = {F}.fighters[0].x + 45")
     tap(page, "KeyF", 330)
     st2 = ev(page, f"{F}.fighters[1].st")
-    check(st2 == "dizzy", f"second punch makes the target dizzy (got {st2})")
+    check(st2 == "hurt", f"second punch only hurts (LF2 fall meter 20+20 <= 40; got {st2})")
     ev(page, f"{F}.fighters[1].x = {F}.fighters[0].x + 45")
-    tap(page, "KeyF", 130)   # the hit pause delays the previous punch's recovery a little; the press is buffered until then
+    tap(page, "KeyF", 330)
+    st3 = ev(page, f"{F}.fighters[1].st")
+    check(st3 == "dizzy", f"third punch makes the target dizzy (got {st3})")
+    ev(page, f"{F}.fighters[1].x = {F}.fighters[0].x + 45")
+    tap(page, "KeyF", 330)   # a punch lasts 8 TU plus the 3 TU hit pause (LF2), so the press is chained after the recovery
     check(ev(page, f"{F}.fighters[0].st") == "super", "punching a dizzy target becomes a super punch")
     step(page, 300)
     check(ev(page, f"{F}.fighters[1].st") in ("fall", "lying"), "super punch knocks down")

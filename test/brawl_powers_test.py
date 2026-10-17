@@ -109,7 +109,9 @@ with sync_playwright() as p:
         if target(page)["st"] == "frozen":
             break
     step(page, 2000)
-    check(target(page)["st"] in ("stand", "walk"), "ice thaws by itself")
+    check(target(page)["st"] == "frozen", "ice holds for 91 TU (3.03 s) in LF2: still frozen after 2 s")
+    step(page, 1300)
+    check(target(page)["st"] in ("fall", "lying", "getup", "stand"), "ice shatters by itself after 91 TU: the fighter is thrown back and falls (LF2 frame 202)")
 
     # BEAM: Renik kamehameha, long range, multi-hit, knocks down; z dodge avoids it.
     page.evaluate(RESET, "renik")

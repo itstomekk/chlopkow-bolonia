@@ -39,7 +39,7 @@ TESTS = [['music_test.py'], ['quest_test.py'], ['jump_test.py', str(jx), str(jy)
          ['character_selection_test.py'], ['player_identity_test.py'], ['inline_character_name_test.py'], ['loading_splash_test.py'], ['arrival_log_test.py'], ['bercik_test.py'], ['wiesio_test.py'], ['iwona_test.py'], ['bosiowa_test.py'], ['friends_test.py'], ['cast_selector_test.py'], ['eight_direction_test.py'], ['latest_world_requests_test.py'], ['sprite_background_test.py'],
          ['map_venues_test.py'], ['sept28_batch_test.py'], ['soltys_chat_test.py'], ['animals_test.py'], ['trees_test.py'], ['bukala_test.py'],
          ['forest_path_test.py'], ['duck_score_test.py'], ['mission_data_test.py'], ['mission_runtime_test.py'],
-         ['mission_pilot_test.py'], ['save_migration_test.py'], ['sprint_board_test.py'], ['liquid_board_test.py'], ['brawl_test.py'], ['brawl_powers_test.py'], ['districts_test.py'],
+         ['mission_pilot_test.py'], ['save_migration_test.py'], ['sprint_board_test.py'], ['liquid_board_test.py'], ['brawl_test.py'], ['brawl_powers_test.py'], ['brawl_lf2_physics_test.py'], ['districts_test.py'],
          ['save_name_test.py'], ['bison_test.py'], ['forest_styles_test.py'], ['forest_shade_test.py'], ['hud_corners_test.py'],
          ['branding_flow_test.py'], ['site_metadata_test.py'], ['splash_loading_test.py'], ['splash_timing_test.py'], ['splash_world_test.py'], ['splash_reduced_motion_test.py'], ['devtools_test.py']]
 results = []
