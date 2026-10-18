@@ -1,0 +1,640 @@
+{
+  "poses": 49,
+  "scales": {
+    "idle": 0.071942,
+    "yawn": 0.068493,
+    "fun": 0.070175,
+    "dig": 0.072464,
+    "run": 0.086957,
+    "sleep": 0.071174
+  },
+  "palette": [
+    [
+      241,
+      209,
+      138
+    ],
+    [
+      210,
+      178,
+      116
+    ],
+    [
+      185,
+      151,
+      102
+    ],
+    [
+      154,
+      129,
+      86
+    ],
+    [
+      137,
+      111,
+      75
+    ],
+    [
+      117,
+      99,
+      68
+    ],
+    [
+      98,
+      79,
+      60
+    ],
+    [
+      88,
+      61,
+      50
+    ],
+    [
+      70,
+      57,
+      46
+    ],
+    [
+      56,
+      52,
+      46
+    ],
+    [
+      48,
+      49,
+      46
+    ],
+    [
+      45,
+      48,
+      45
+    ],
+    [
+      44,
+      45,
+      43
+    ],
+    [
+      86,
+      34,
+      35
+    ],
+    [
+      48,
+      32,
+      32
+    ],
+    [
+      41,
+      42,
+      40
+    ],
+    [
+      41,
+      33,
+      33
+    ],
+    [
+      36,
+      38,
+      36
+    ],
+    [
+      34,
+      26,
+      32
+    ],
+    [
+      29,
+      33,
+      32
+    ],
+    [
+      27,
+      26,
+      27
+    ],
+    [
+      25,
+      21,
+      24
+    ],
+    [
+      22,
+      14,
+      22
+    ],
+    [
+      17,
+      5,
+      18
+    ],
+    [
+      180,
+      45,
+      48
+    ],
+    [
+      220,
+      135,
+      150
+    ],
+    [
+      245,
+      232,
+      204
+    ]
+  ],
+  "frames": {
+    "stand": {
+      "bbox": [
+        3,
+        9,
+        29,
+        29
+      ],
+      "tan_pixels": 49,
+      "red_pixels": 5
+    },
+    "pant1": {
+      "bbox": [
+        9,
+        8,
+        26,
+        29
+      ],
+      "tan_pixels": 34,
+      "red_pixels": 8
+    },
+    "pant2": {
+      "bbox": [
+        9,
+        8,
+        26,
+        29
+      ],
+      "tan_pixels": 33,
+      "red_pixels": 7
+    },
+    "pant3": {
+      "bbox": [
+        9,
+        8,
+        26,
+        29
+      ],
+      "tan_pixels": 33,
+      "red_pixels": 8
+    },
+    "pant4": {
+      "bbox": [
+        9,
+        8,
+        26,
+        29
+      ],
+      "tan_pixels": 33,
+      "red_pixels": 8
+    },
+    "scratch1": {
+      "bbox": [
+        9,
+        9,
+        26,
+        29
+      ],
+      "tan_pixels": 40,
+      "red_pixels": 9
+    },
+    "scratch2": {
+      "bbox": [
+        9,
+        9,
+        25,
+        29
+      ],
+      "tan_pixels": 35,
+      "red_pixels": 8
+    },
+    "sniff1": {
+      "bbox": [
+        7,
+        11,
+        27,
+        29
+      ],
+      "tan_pixels": 29,
+      "red_pixels": 6
+    },
+    "sniff2": {
+      "bbox": [
+        7,
+        11,
+        25,
+        29
+      ],
+      "tan_pixels": 27,
+      "red_pixels": 6
+    },
+    "yawn1": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 43,
+      "red_pixels": 7
+    },
+    "yawn2": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 42,
+      "red_pixels": 7
+    },
+    "yawn3": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 48,
+      "red_pixels": 6
+    },
+    "yawn4": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 42,
+      "red_pixels": 8
+    },
+    "tilt1": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 43,
+      "red_pixels": 8
+    },
+    "tilt2": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 42,
+      "red_pixels": 7
+    },
+    "tilt3": {
+      "bbox": [
+        9,
+        6,
+        25,
+        29
+      ],
+      "tan_pixels": 43,
+      "red_pixels": 8
+    },
+    "tilt4": {
+      "bbox": [
+        9,
+        6,
+        26,
+        29
+      ],
+      "tan_pixels": 40,
+      "red_pixels": 7
+    },
+    "shake1": {
+      "bbox": [
+        8,
+        10,
+        26,
+        29
+      ],
+      "tan_pixels": 46,
+      "red_pixels": 4
+    },
+    "shake2": {
+      "bbox": [
+        9,
+        10,
+        24,
+        29
+      ],
+      "tan_pixels": 46,
+      "red_pixels": 9
+    },
+    "shake3": {
+      "bbox": [
+        10,
+        10,
+        25,
+        29
+      ],
+      "tan_pixels": 48,
+      "red_pixels": 6
+    },
+    "shake4": {
+      "bbox": [
+        8,
+        9,
+        24,
+        29
+      ],
+      "tan_pixels": 48,
+      "red_pixels": 8
+    },
+    "bark1": {
+      "bbox": [
+        8,
+        9,
+        28,
+        29
+      ],
+      "tan_pixels": 42,
+      "red_pixels": 7
+    },
+    "bark2": {
+      "bbox": [
+        8,
+        10,
+        28,
+        29
+      ],
+      "tan_pixels": 46,
+      "red_pixels": 9
+    },
+    "howl1": {
+      "bbox": [
+        9,
+        7,
+        24,
+        29
+      ],
+      "tan_pixels": 39,
+      "red_pixels": 7
+    },
+    "howl2": {
+      "bbox": [
+        9,
+        6,
+        24,
+        29
+      ],
+      "tan_pixels": 39,
+      "red_pixels": 8
+    },
+    "dig1": {
+      "bbox": [
+        7,
+        9,
+        26,
+        29
+      ],
+      "tan_pixels": 40,
+      "red_pixels": 9
+    },
+    "dig2": {
+      "bbox": [
+        8,
+        9,
+        25,
+        29
+      ],
+      "tan_pixels": 35,
+      "red_pixels": 8
+    },
+    "dig3": {
+      "bbox": [
+        7,
+        9,
+        25,
+        29
+      ],
+      "tan_pixels": 46,
+      "red_pixels": 10
+    },
+    "dig4": {
+      "bbox": [
+        9,
+        9,
+        26,
+        29
+      ],
+      "tan_pixels": 38,
+      "red_pixels": 7
+    },
+    "playbow": {
+      "bbox": [
+        7,
+        12,
+        26,
+        29
+      ],
+      "tan_pixels": 31,
+      "red_pixels": 5
+    },
+    "lie": {
+      "bbox": [
+        7,
+        20,
+        26,
+        29
+      ],
+      "tan_pixels": 18,
+      "red_pixels": 4
+    },
+    "belly1": {
+      "bbox": [
+        7,
+        16,
+        27,
+        29
+      ],
+      "tan_pixels": 33,
+      "red_pixels": 6
+    },
+    "belly2": {
+      "bbox": [
+        7,
+        16,
+        26,
+        29
+      ],
+      "tan_pixels": 39,
+      "red_pixels": 5
+    },
+    "run1": {
+      "bbox": [
+        8,
+        10,
+        29,
+        29
+      ],
+      "tan_pixels": 36,
+      "red_pixels": 7
+    },
+    "run2": {
+      "bbox": [
+        3,
+        9,
+        29,
+        29
+      ],
+      "tan_pixels": 45,
+      "red_pixels": 6
+    },
+    "run3": {
+      "bbox": [
+        8,
+        8,
+        29,
+        29
+      ],
+      "tan_pixels": 40,
+      "red_pixels": 7
+    },
+    "run4": {
+      "bbox": [
+        4,
+        8,
+        30,
+        29
+      ],
+      "tan_pixels": 44,
+      "red_pixels": 6
+    },
+    "jump": {
+      "bbox": [
+        7,
+        6,
+        31,
+        29
+      ],
+      "tan_pixels": 53,
+      "red_pixels": 8
+    },
+    "beg": {
+      "bbox": [
+        8,
+        5,
+        24,
+        29
+      ],
+      "tan_pixels": 57,
+      "red_pixels": 11
+    },
+    "wag1": {
+      "bbox": [
+        7,
+        9,
+        31,
+        29
+      ],
+      "tan_pixels": 47,
+      "red_pixels": 6
+    },
+    "wag2": {
+      "bbox": [
+        8,
+        9,
+        31,
+        29
+      ],
+      "tan_pixels": 47,
+      "red_pixels": 7
+    },
+    "sleep1": {
+      "bbox": [
+        8,
+        16,
+        24,
+        29
+      ],
+      "tan_pixels": 12,
+      "red_pixels": 8
+    },
+    "sleep2": {
+      "bbox": [
+        8,
+        16,
+        24,
+        29
+      ],
+      "tan_pixels": 10,
+      "red_pixels": 8
+    },
+    "stretch1": {
+      "bbox": [
+        7,
+        8,
+        26,
+        29
+      ],
+      "tan_pixels": 38,
+      "red_pixels": 9
+    },
+    "stretch2": {
+      "bbox": [
+        7,
+        10,
+        28,
+        29
+      ],
+      "tan_pixels": 35,
+      "red_pixels": 6
+    },
+    "lick1": {
+      "bbox": [
+        8,
+        8,
+        25,
+        29
+      ],
+      "tan_pixels": 52,
+      "red_pixels": 6
+    },
+    "lick2": {
+      "bbox": [
+        8,
+        8,
+        25,
+        29
+      ],
+      "tan_pixels": 55,
+      "red_pixels": 7
+    },
+    "lickpaw1": {
+      "bbox": [
+        9,
+        9,
+        26,
+        29
+      ],
+      "tan_pixels": 49,
+      "red_pixels": 7
+    },
+    "lickpaw2": {
+      "bbox": [
+        9,
+        9,
+        26,
+        29
+      ],
+      "tan_pixels": 47,
+      "red_pixels": 6
+    }
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "cell": 32,
+  "facing": "right",
+  "poses": [
+    "stand",
+    "pant1",
+    "pant2",
+    "pant3",
+    "pant4",
+    "scratch1",
+    "scratch2",
+    "sniff1",
+    "sniff2",
+    "yawn1",
+    "yawn2",
+    "yawn3",
+    "yawn4",
+    "tilt1",
+    "tilt2",
+    "tilt3",
+    "tilt4",
+    "shake1",
+    "shake2",
+    "shake3",
+    "shake4",
+    "bark1",
+    "bark2",
+    "howl1",
+    "howl2",
+    "dig1",
+    "dig2",
+    "dig3",
+    "dig4",
+    "playbow",
+    "lie",
+    "belly1",
+    "belly2",
+    "run1",
+    "run2",
+    "run3",
+    "run4",
+    "jump",
+    "beg",
+    "wag1",
+    "wag2",
+    "sleep1",
+    "sleep2",
+    "stretch1",
+    "stretch2",
+    "lick1",
+    "lick2",
+    "lickpaw1",
+    "lickpaw2"
+  ],
+  "anims": {
+    "stand": [
+      "stand"
+    ],
+    "pant": [
+      "pant1",
+      "pant2",
+      "pant3",
+      "pant4"
+    ],
+    "scratch": [
+      "scratch1",
+      "scratch2"
+    ],
+    "sniff": [
+      "sniff1",
+      "sniff2"
+    ],
+    "yawn": [
+      "yawn1",
+      "yawn2",
+      "yawn3",
+      "yawn3",
+      "yawn4",
+      "yawn1"
+    ],
+    "tilt": [
+      "tilt1",
+      "tilt2",
+      "tilt2",
+      "tilt3",
+      "tilt4",
+      "tilt4"
+    ],
+    "shake": [
+      "shake1",
+      "shake2",
+      "shake3",
+      "shake4"
+    ],
+    "bark": [
+      "bark1",
+      "bark2"
+    ],
+    "howl": [
+      "howl1",
+      "howl2",
+      "howl2"
+    ],
+    "dig": [
+      "dig1",
+      "dig2",
+      "dig3",
+      "dig4"
+    ],
+    "playbow": [
+      "playbow"
+    ],
+    "lie": [
+      "lie"
+    ],
+    "belly": [
+      "belly1",
+      "belly2"
+    ],
+    "run": [
+      "run1",
+      "run2",
+      "run3",
+      "run4"
+    ],
+    "jump": [
+      "jump"
+    ],
+    "beg": [
+      "beg"
+    ],
+    "wag": [
+      "wag1",
+      "wag2"
+    ],
+    "sleep": [
+      "sleep1",
+      "sleep1",
+      "sleep2",
+      "sleep2"
+    ],
+    "stretch": [
+      "stretch1",
+      "stretch2"
+    ],
+    "lick": [
+      "lick1",
+      "lick2",
+      "lick1",
+      "lick2"
+    ],
+    "lickpaw": [
+      "lickpaw1",
+      "lickpaw2"
+    ],
+    "sit": [
+      "yawn1"
+    ]
+  }
+}
