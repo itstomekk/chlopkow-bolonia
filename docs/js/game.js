@@ -17,7 +17,9 @@
   // Hard-alpha pixel sheets: draw the player without smoothing.
   const PIXEL_CHARACTERS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'kasia', 'grandpa', 'halina', 'kuba', 'soltys', 'michal', 'mateusz', 'patryk', 'wesoly_swiat']);
   // NPCs drawn from their own walk sheet in the world (the older cast keeps docs/img/npcs.png and quest markers).
-  const PIXEL_NPCS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa']);
+  const PIXEL_NPCS = new Set(['bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'zosia']);
+  // NPC-only pixel sheets are loaded for drawNpc, without adding selector cards.
+  const NPC_ONLY_SHEETS = ['zosia'];
   let selectedCharacter = localStorage.getItem(CHARACTER_KEY) || 'arek';
   // Hidden/retired choices (e.g. 'patryk', now NPC-only) fall back to Arek and the stale stored value is dropped.
   if (!PLAYABLE_CHARACTERS.includes(selectedCharacter)) { selectedCharacter = 'arek'; try { localStorage.setItem(CHARACTER_KEY, 'arek'); } catch (e) { } }
@@ -27,7 +29,7 @@
     pl: {
       title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { szept: 'SZEPT', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
+      names: { szept: 'SZEPT', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA', zosia: 'ZOSIA' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -125,7 +127,7 @@
     en: {
       title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { szept: 'WHISPER', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA' },
+      names: { szept: 'WHISPER', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA', zosia: 'ZOSIA' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -486,7 +488,7 @@
     return { x: npc.x, y: npc.y };
   }
   // These roles live at a fixed spot of the level (items.json) and are never shuffled; old saves are pulled back to it.
-  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa']);
+  const NPC_FIXED = new Set(['damian', 'marcin', 'kuba', 'michal', 'mateusz', 'patryk', 'wesoly_swiat', 'edytka', 'renik', 'soltys', 'bercik', 'wiesio', 'kostek', 'pawel', 'darek', 'iwona', 'piekarz', 'marek', 'waldek', 'bosiowa', 'zosia']);
   function randomizeNpcPositions() {
     if (!MAP || !ITEMS || !SOLID) return;
     buildReachableMask();
@@ -502,12 +504,13 @@
     grandpa: { r: 34, speed: 16 }, halina: { r: 42, speed: 18 }, edytka: { r: 54, speed: 24 },
     kuba: { r: 36, speed: 18 }, michal: { r: 38, speed: 20 }, mateusz: { r: 44, speed: 20 }, patryk: { r: 44, speed: 20 },
     wesoly_swiat: { r: 72, speed: 20 }, renik: { r: 56, speed: 24 },
+    zosia: { r: 120, speed: 22 },   // pushes her bike north of the cemetery, near JAZZ W STODOLE
   };
   const wanderState = {};
   function updateWanderers(dt) {
     if (!ITEMS || ROOM) return;
     for (const n of ITEMS.npcs) {
-      const cfg = WANDER[n.id], home = NPC_HOME[n.id]; if (!cfg || !home) continue;
+      const cfg = WANDER[n.id], home = NPC_HOME[n.id] || n.home; if (!cfg || !home) continue;   // late-installed NPCs supply their home
       const w = wanderState[n.id] || (wanderState[n.id] = { tx: n.x, ty: n.y, wait: 1 + Math.random() * 2, moving: false });
       if (n.id === 'edytka' && Q.edytka === 1) continue; // keep the quest anchor stable while Frodo visits
       if (talk && Math.hypot(P.x - n.x, P.y - n.y) < 70) { w.moving = false; continue; }
@@ -2086,7 +2089,7 @@ function drawFrodo(sx, sy, s) {
     BALES.splice(0, BALES.length, ...(MAP.bales || []).filter(b => Number.isFinite(b.x) && Number.isFinite(b.y)).map(b => ({
       x: b.x, y: b.y, hx: b.x, hy: b.y, vx: 0, vy: 0, angle: 0, roll: 0,
     })));
-    PLAYER_SHEETS = Object.fromEntries(await Promise.all(PLAYABLE_CHARACTERS.map(async character => {
+    PLAYER_SHEETS = Object.fromEntries(await Promise.all([...PLAYABLE_CHARACTERS, ...NPC_ONLY_SHEETS].map(async character => {
       const sheetName = character === 'arek' ? 'arek_sheet_8dir' : `${character}_sheet`;   // Arek: only the 8-direction sheet
       const [sheet, meta] = await Promise.all([load(`img/${sheetName}.png`), fetch(`img/${sheetName}.json`).then(r => r.json())]);
       return [character, { sheet, meta, sheetName }];
