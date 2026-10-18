@@ -1,7 +1,6 @@
 # WAJPER (selectable starting dog)
 
-Tomek, 2026-10-17: new dog WAJPER, chosen at the start of the game (dog-companion start, see
-`plans/2026-10-17-kierunek-gry-legends.md` section 3). Real dog: small Skye-terrier-type (Tomek's call), shaggy,
+Tomek, 2026-10-17: new dog WAJPER. A start-of-game companion choice is planned; the current implementation uses a URL parameter (see below). Real dog: small Skye-terrier-type (Tomek's call), shaggy,
 COOL silver-white lights (not cream), charcoal drop ears and saddle, plumed tail curled over the back, no collar.
 Fringe sometimes over the eyes, sometimes parted. Slightly smaller than Frodo.
 
@@ -15,6 +14,6 @@ Fringe sometimes over the eyes, sometimes parted. Slightly smaller than Frodo.
 - Round 1 (rejected: warm cream colours, yawn/tilt zoomed because their frames came from different sheets):
   `gen_wajper_r1.sh`, `build_wajper_r1.py`, `raw/`, `out_r1/`.
 
-Status: round 2 wired into the game as a second dog (docs/js/dogs.js, ?dog=wajper). Not live.
+Status: round 2 is integrated as a second companion (`docs/js/dogs.js`, `?dog=wajper` or `?dog=frodo`, remembered locally). Frodo remains the default. There is no dog-choice screen yet; release evidence is recorded in `HANDOFF.md`.
 
 Repo note: only this README and the round-2 scripts are tracked. `raw/`, `raw2/`, `out/`, `out_r1/` (generated candidates) and the round-1 scripts stay local; the shipped assets are `docs/img/wajper*.png/.json`.

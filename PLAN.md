@@ -10,6 +10,14 @@ The previous phase's plan (village assets + cemetery archive) is in `_archive/20
 
 ## Active phase: Chłopków Bolonia, staged local integration
 
+### Safe release batch (2026-10-18)
+
+- [x] Separate the completed ZOSIA, WAJPER/Frodo companion, ERNEST captain-cap and church-stage changes from the dirty canonical checkout into a clean worktree based on `origin/main` (`f713a98`). Preserve local work and exclude private reference photos, SANKI, map tiling, unfinished parallax and promotional experiments.
+- [x] Register all six new ZOSIA/dog regressions without dropping the existing Liquid War, devtools or LF2 tests.
+- [x] Pass the integrated 66-test suite and independent code review. Full `run_all` 66/66 on 2026-10-18 against the local server of this worktree (including new ZOSIA/dog tests, Liquid War, devtools and LF2 physics). Review found one real bug (inherited object keys accepted as `?dog=` values); fixed test-first in `ce68531`.
+- [ ] Publish the verified batch and confirm the exact GitHub Pages build and live asset bytes.
+
+
 - [x] Add a public arrival log alongside Nostr chat (2026-10-05): five varied Polish greetings, turquoise timestamped single-line notices, one event per document visit, minimized-panel publication, bounded stable-event retries, and public-name disclosure. Focused arrival/chat/branding/selector/Sołtys/save-migration tests passed; real pinned nostr-tools signing and delivery between two isolated browsers verified with zero public test writes. `run_all.py` now isolates public Nostr for all regression browsers. `save_name_test.py` still reproduces its pre-existing save/load race, observed before feature changes; no full-suite green claimed. Tomek authorized narrow commit/push. Design: `plans/2026-10-05-arrival-log.md`. Published feature commit `296701c`; GitHub Pages exact-head build succeeded and both live scripts match the tested source. Focused arrival and real-signature/two-client controlled-transport tests passed against the live site as well.
 
 The complete requested roadmap, coordinates, prerequisites and release gates are in
