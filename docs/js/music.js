@@ -557,13 +557,13 @@ window.MUSIC = { renderWav, SONGS: Object.keys(SONGS), TITLE_TRACKS: [...TITLE_T
       return VILLAGE;
     };
     ACTIVITY = () => A.scene === 'play' ? { moving: !!A.P.moving, running: A.keys.has('ShiftLeft') || A.keys.has('ShiftRight') } : A.scene === 'end' ? { moving: false } : null;
-    // Frodo answers Arek with short, slightly overconfident dog thoughts.
+    // The selected companion answers Arek with short, slightly overconfident thoughts.
     let dogLine = null, touching = false;
     const DOG_LINES = ['WĘSZĘ KŁOPOTY.', 'AREK, ZA MNĄ. MAM PLAN.', 'DOBRY CZŁOWIEK. SŁABY NOS.', 'KTO MA KIEŁBASĘ?', 'SZYBCIEJ. ŁAPA ZA ŁAPĄ.'];
     setInterval(() => {
       const F = A.FRODO; if (A.scene !== 'play' || !F) { touching = false; return; }
       const d = Math.hypot(A.P.x - F.x, A.P.y - F.y);
-      if (!touching && d < 18 && (!dogLine || performance.now() - dogLine.t > 1800)) { touching = true; bark(); const raw = DOG_LINES[(Math.random() * DOG_LINES.length) | 0]; dogLine = { t: performance.now(), text: A.heroText ? A.heroText(raw) : raw }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
+      if (!touching && d < 18 && (!dogLine || performance.now() - dogLine.t > 1800)) { touching = true; bark(); const raw = DOG_LINES[(Math.random() * DOG_LINES.length) | 0], caption = `${(A.dogName || 'Frodo').toLocaleUpperCase('pl')}: ${raw}`; dogLine = { t: performance.now(), text: A.heroText ? A.heroText(caption) : caption }; window.MUSIC.barks = (window.MUSIC.barks || 0) + 1; }
       else if (touching && d > 28) touching = false;
     }, 50);
     HOOKS.hud.push(U => {

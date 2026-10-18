@@ -33,9 +33,9 @@
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
       edytkaWait: ['Ciii... Frodo jest teraz u mnie.'],
       edytkaDone: ['Trzy razy! Frodo chyba jednak woli ciebie. Ale i tak go kocham.', 'Dziękuję, Arek.'],
-      edytkaAfter: ['Pozdrów Frodo. I podrap go za uchem ode mnie.'],
+      edytkaAfter: ['Pozdrów Froda. I podrap go za uchem ode mnie.'],
       edytkaBack: 'AREK, FRODO WRÓCIŁ DO CIEBIE!',
-      edytkaQuest: 'Przyprowadź Frodo do Edytki',
+      edytkaQuest: 'Przyprowadź Froda do Edytki',
       wesoly0: ['Ho ho... spokojnie, to nie kolęda, tylko mój marsz przez las.', 'Widziałeś gdzieś renifera? Albo chociaż żabę w czapce?', 'Idę dalej. Jak się zgubię, będę udawał, że to plan.'],
       renik: [
         ['Siema! DJ Renik, do usług. Dziś na boisku gram tylko disco polo.', 'Techno? Techno jest dla ludzi, którzy nie umieją tańczyć w parach.'],
@@ -257,6 +257,14 @@
 
   /* ---------- state ---------- */
   const P = { x: 0, y: 0, dir: 'down', moving: false, step: 0, z: 0, air: false, jt: 0, jx: 0, jy: 0, ox: 0, oy: 0, land: 1 };
+  // Which companion dog follows the hero (docs/js/dogs.js; the FRODO object below is the dog, whatever its name).
+  const DOG = window.CHLOPKOW_DOG || { id: 'frodo', name: 'FRODO', walk: 'img/frodo.png', cols: 2, poses: 'img/frodo_idle.png',
+    anims: { sit: ['sit'], pant: ['pant1', 'pant2'], scratch: ['scratch', 'sit'], sniff: ['sniff'], lie: ['lie'], lick: ['lick0', 'lick1', 'lick2', 'lick1', 'lick2', 'lickpaw'] },
+    rates: { lick: 5, scratch: 9 }, routine: ['sit', 'pant', 'lick', 'lick', 'scratch', 'sniff', 'lie'] };
+  const DOG_NAME = DOG.id === 'frodo' ? 'Frodo' : (DOG.name || DOG.id).toLowerCase().replace(/(^|\s)\p{L}/gu, c => c.toUpperCase());
+  const DOG_GENITIVE = DOG.id === 'frodo' ? 'Froda' : DOG.id === 'wajper' ? 'Wajpera' : `${DOG_NAME}a`;
+  const DOG_NAME_UPPER = DOG_NAME.toLocaleUpperCase('pl');
+  let DOG_POSE = null;   // pose name -> index in DOG.poses, from its json
   const FRODO = { x: 0, y: 0, dir: 'down', moving: false, step: 0, stuck: 0, idleAnim: 0, action: 'idle', wander: 0, wanderX: 0, wanderY: 0, wanderWait: 4, returning: false, returningT: 0, trailI: -1, chase: null };
   const BALES = [];
   const BALE_ACTORS = [P, FRODO];
@@ -739,7 +747,7 @@
   function mapHoverLabel(x, y, pickR) {
     const near = (px, py) => Math.hypot(x - px, y - py) <= pickR;
     if (near(P.x, P.y)) return heroName().toUpperCase();
-    if (near(FRODO.x, FRODO.y)) return 'FRODO';
+    if (near(FRODO.x, FRODO.y)) return DOG.name;
     let best = null, bd = pickR;
     for (const n of ITEMS.npcs || []) if (!n.secret && T.names[n.id]) { const d = Math.hypot(x - n.x, y - n.y); if (d <= bd) { bd = d; best = T.names[n.id]; } }
     if (best) return String(best).toUpperCase();
@@ -817,7 +825,7 @@
       if (hit(Object.assign({ x: n.x, y: n.y }, EXTENT_NPC))) take({ label: String(T.names[n.id]).toUpperCase(), kind: 'npc', x: n.x, y: n.y, base: n.y });
     }
     if (hit(Object.assign({ x: P.x, y: P.y }, EXTENT_HERO))) take({ label: heroName().toUpperCase(), kind: 'hero', x: P.x, y: P.y, base: P.y });
-    if (hit(Object.assign({ x: FRODO.x, y: FRODO.y }, EXTENT_FRODO))) take({ label: 'FRODO', kind: 'frodo', x: FRODO.x, y: FRODO.y, base: FRODO.y });
+    if (hit(Object.assign({ x: FRODO.x, y: FRODO.y }, EXTENT_FRODO))) take({ label: DOG.name, kind: 'frodo', x: FRODO.x, y: FRODO.y, base: FRODO.y });
     if (window.__worldLife && typeof window.__worldLife.hitShapes === 'function') {
       for (const s of window.__worldLife.hitShapes()) {
         if (!hit(s)) continue;
@@ -1038,7 +1046,12 @@
   // The hero is whoever the player named: every "Arek" in dialogue/toasts (incl. Polish forms Areka/Arkowi/Arkiem/Arku) becomes that name.
   function heroText(value) {
     const name = heroName();
-    return String(value).replace(/(?<![\p{L}\-_])(arek|areka|arkowi|arkiem|arku)(?![\p{L}\-_])/giu, m => m === m.toUpperCase() ? name.toUpperCase() : name);
+    return String(value)
+      .replace(/(?<![\p{L}\-_])(frodo|froda)(?![\p{L}\-_])/giu, m => {
+        const form = m.toLowerCase() === 'froda' ? DOG_GENITIVE : DOG_NAME;
+        return m === m.toUpperCase() ? form.toLocaleUpperCase('pl') : m[0] === m[0].toUpperCase() ? form : form.toLowerCase();
+      })
+      .replace(/(?<![\p{L}\-_])(arek|areka|arkowi|arkiem|arku)(?![\p{L}\-_])/giu, m => m === m.toUpperCase() ? name.toUpperCase() : name);
   }
   function say(who, lines, after) { talk = { who, lines: lines.map(heroText), i: 0, after }; talkT = 0; }
   function nearThing() {
@@ -1099,7 +1112,7 @@
     FRODO.visitReady = false;
     Q.edytkaN = (Q.edytkaN || 0) + 1;
     FRODO.visit = { t: 0, n: Q.edytkaN };
-    say('edytka', T.edytkaVisit(Q.edytkaN)); popToast(`FRODO ${Q.edytkaN}/${EDYTKA_TIMES}`); save();
+    say('edytka', T.edytkaVisit(Q.edytkaN)); popToast(`${DOG_NAME_UPPER} ${Q.edytkaN}/${EDYTKA_TIMES}`); save();
   }
   // Frodo sits at Edytka's feet during a visit; when it ends he runs back to Arek (the normal follow logic).
   function updateFrodoVisit(dt) {
@@ -1290,9 +1303,9 @@
       FRODO.stuck = 0; FRODO.idleAnim += dt;
       // random idle routine while Arek stands still: sit / pant, lick himself, scratch, sniff around, lie down
       if (!FRODO.routine || (FRODO.routineT -= dt) <= 0) {
-        const opts = ['sit', 'pant', 'lick', 'lick', 'scratch', 'sniff', 'lie'].filter(a => a !== FRODO.routine);
+        const opts = DOG.routine.filter(a => a !== FRODO.routine);
         FRODO.routine = opts[(Math.random() * opts.length) | 0];
-        FRODO.routineT = { sit: 2.5, pant: 3, lick: 3.2, scratch: 2.2, sniff: 2.6, lie: 4.5 }[FRODO.routine] * (.8 + Math.random() * .5);
+        FRODO.routineT = (({ sit: 2.5, pant: 3, lick: 3.2, scratch: 2.2, sniff: 2.6, lie: 4.5, ...DOG.times })[FRODO.routine] || 3) * (.8 + Math.random() * .5);
         if (FRODO.dir === 'up' || FRODO.dir === 'down') FRODO.dir = Math.random() < .5 ? 'left' : 'right';
       }
       FRODO.action = FRODO.idleAnim < .6 ? 'idle' : FRODO.routine;
@@ -1621,13 +1634,13 @@
 function drawFrodo(sx, sy, s) {
     shadow(sx, sy, s * .78, 6);
     const row = { down: 0, up: 1, right: 2, left: 3 }[FRODO.dir] || 0;
-    const col = FRODO.moving ? Math.floor(FRODO.step) % 2 : 0;
-    const lickScale = FRODO.action === 'lick' ? .8 : 1, size = 27 * s * lickScale, top = sy - size * 29 / 32;
+    const col = FRODO.moving ? Math.floor(FRODO.step) % (DOG.cols || 2) : 0;
+    const lickScale = 1, size = 27 * s * lickScale, top = sy - size * 29 / 32;
     ctx.imageSmoothingEnabled = false;
-    const IDLE_POSE = { sit: [0], pant: [1, 2], scratch: [3, 0], sniff: [4], lie: [5], lick: [6, 7, 8, 7, 8, 9] };
-    const poses = FRODO_IDLE && !FRODO.moving && IDLE_POSE[FRODO.action];
-    if (poses) {   // idle poses from img/frodo_idle.png (drawn facing right; mirrored for left)
-      const rate = FRODO.action === 'lick' ? 5 : FRODO.action === 'scratch' ? 9 : 3, f = poses[Math.floor(FRODO.idleAnim * rate) % poses.length];
+    const seq = !FRODO.moving && DOG_POSE && DOG.anims[FRODO.action];
+    const poses = FRODO_IDLE && seq && seq.map(p => DOG_POSE[p]).filter(i => i !== undefined);
+    if (poses && poses.length) {   // idle poses (drawn facing right; mirrored for left), see docs/js/dogs.js
+      const rate = (DOG.rates || {})[FRODO.action] || 3, f = poses[Math.floor(FRODO.idleAnim * rate) % poses.length];
       ctx.save(); ctx.translate(sx, 0); if (FRODO.dir === 'left') ctx.scale(-1, 1);
       ctx.drawImage(FRODO_IDLE, f * 32, 0, 32, 32, -size / 2, top, size, size); ctx.restore();
       return;
@@ -1953,7 +1966,7 @@ function drawFrodo(sx, sy, s) {
       if (Q.kasia) lines.push([`${T.quests[0]} (${Math.min(mushroomCount(), MUSHROOMS_NEEDED)}/${MUSHROOMS_NEEDED})`, Q.kasia === 2]);
       if (Q.damian) lines.push([T.quests[1], Q.damian === 2]);
       if (Q.marcin) lines.push([T.quests[2], Q.marcin === 2]);
-      if (Q.edytka) lines.push([`${T.edytkaQuest} (${Math.min(Q.edytkaN || 0, EDYTKA_TIMES)}/${EDYTKA_TIMES})`, Q.edytka === 2]);
+      if (Q.edytka) lines.push([`${heroText(T.edytkaQuest)} (${Math.min(Q.edytkaN || 0, EDYTKA_TIMES)}/${EDYTKA_TIMES})`, Q.edytka === 2]);
       if (Q.grandpa || questsDone() >= 3) lines.push([T.quests[3], Q.grandpa === 2]);
       lines.push([`${T.trash} (${trashCount()}/${TRASH_TOTAL})`, trashCount() >= TRASH_TOTAL]);   // A04: trash is a quest-list row, not a primary-HUD counter
       HOOKS.questLog.forEach(f => f(lines));
@@ -2094,7 +2107,7 @@ function drawFrodo(sx, sy, s) {
     const loaded = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
       load('img/map_terrain.png'),
-      load('img/npcs.png'), load('img/frodo.png'),
+      load('img/npcs.png'), load(DOG.walk),
       document.fonts.load('20px PixelifySans', 'ŁŚĆŻ'),
       // optional AI art for the church; a missing file just keeps the hand-drawn piece
       fetch('img/church/manifest.json').then(r => r.json()).catch(() => [])
@@ -2104,7 +2117,9 @@ function drawFrodo(sx, sy, s) {
     const [g, o, c, terrainImg, npcs, dog, _font, _churchArt, memories] = loaded;
     MEMORY_ART = memories;
     GROUND = g; OBJ = o; SPR = PLAYER_SHEETS[selectedCharacter] || PLAYER_SHEETS.arek; NPCIMG = npcs; DOGIMG = dog;
-    load('img/frodo_idle.png').then(img => { FRODO_IDLE = img; }, () => { });   // optional idle poses (sit, lick...)
+    Promise.all([load(DOG.poses), fetch(DOG.poses.replace(/\.png$/, '.json')).then(r => r.json())]).then(([img, meta]) => {   // optional idle poses (sit, lick...)
+      DOG_POSE = Object.fromEntries(meta.poses.map((p, i) => [p, i])); FRODO_IDLE = img;
+    }, () => { });
     load('img/trash.png').then(img => { TRASH_IMG = img; }, () => { });   // trash bag pickup art (pixel fallback until loaded)
     {   // walking speed and mushroom placement use the same terrain classification
       const t = document.createElement('canvas'); t.width = terrainImg.width; t.height = terrainImg.height;
@@ -2209,7 +2224,7 @@ function drawFrodo(sx, sy, s) {
     resize(); requestAnimationFrame(loop);
     // API for features.js
     window.ARK = {
-      HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED,
+      HOOKS, P, MAP, ITEMS, LANG, ctx, keys, joy, T, CHAR_H, SPEED, dogName: DOG_NAME,
       get saveVersion() { return SAVE_VERSION; }, get saveFrozen() { return saveFrozen; },
       get Q() { return Q; }, get FRODO() { return FRODO; }, get time() { return time; }, get zoom() { return zoom; }, get talk() { return talk; }, get scene() { return scene; }, get room() { return ROOM; },
       pointer, clickTarget, mapCursor, copyMapCoordinates, get camera() { return lastCam; },
