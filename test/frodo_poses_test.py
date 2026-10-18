@@ -42,6 +42,34 @@ class FrodoPoses(unittest.TestCase):
         before=subprocess.check_output(['git','show','HEAD:docs/img/frodo.png'],cwd=ROOT)
         self.assertEqual(current,before)
 
+    def test_dog_choice_rejects_prototype_names(self):
+        script = r"""const fs = require('fs'), vm = require('vm'), assert = require('assert');
+        const source = fs.readFileSync('docs/js/dogs.js', 'utf8');
+        function boot(search, stored = null) {
+          const window = {}, values = new Map(stored === null ? [] : [['chlopkow_dog', stored]]);
+          const localStorage = { getItem(k) { return values.get(k) || null; }, setItem(k, v) { values.set(k, v); } };
+          vm.runInNewContext(source, { window, localStorage, location: { search }, URLSearchParams });
+          return { window, values };
+        }
+        for (const bad of ['__proto__', 'constructor', 'toString', 'hasOwnProperty', 'unknown']) {
+          let state = boot('?dog=' + encodeURIComponent(bad));
+          assert.equal(state.window.CHLOPKOW_DOG.id, 'frodo', 'invalid query ' + bad);
+          assert.equal(state.values.has('chlopkow_dog'), false, 'invalid query persisted ' + bad);
+          state = boot('', bad);
+          assert.equal(state.window.CHLOPKOW_DOG.id, 'frodo', 'invalid stored dog ' + bad);
+          assert.equal(state.window.chlopkowSetDog(bad), false, 'invalid setter ' + bad);
+        }
+        for (const id of ['frodo', 'wajper']) {
+          const state = boot('?dog=' + id);
+          assert.equal(state.window.CHLOPKOW_DOG.id, id);
+          assert.equal(state.values.get('chlopkow_dog'), id);
+          assert.equal(boot('', id).window.CHLOPKOW_DOG.id, id);
+          assert.equal(state.window.chlopkowSetDog(id), true);
+        }
+        console.log('Dog choice accepts only registered own keys');"""
+        out = subprocess.check_output(['node', '-e', script], cwd=ROOT, text=True)
+        self.assertIn('only registered own keys', out)
+
     def test_runtime_uses_complete_poses(self):
         script="""const fs=require('fs'),vm=require('vm'); const window={};
         const localStorage={getItem(){return null},setItem(){}};

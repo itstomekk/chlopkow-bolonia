@@ -32,15 +32,16 @@
       times: { yawn: 2.2, tilt: 2.4, shake: 1.4, wag: 2.5, dig: 2.6, sleep: 6, belly: 3, stretch: 2 },
     },
   };
+  const validDog = value => typeof value === 'string' && Object.prototype.hasOwnProperty.call(DOGS, value);
   let id = 'frodo';
   try {
     const q = new URLSearchParams(location.search).get('dog');
-    if (q && DOGS[q]) localStorage.setItem(KEY, q);
+    if (validDog(q)) localStorage.setItem(KEY, q);
     const stored = localStorage.getItem(KEY);
-    if (stored && DOGS[stored]) id = stored;
+    if (validDog(stored)) id = stored;
   } catch (e) { }
   window.CHLOPKOW_DOGS = DOGS;
   window.CHLOPKOW_DOG = DOGS[id];
   // Takes effect on the next page load (sprites are loaded once with the map).
-  window.chlopkowSetDog = d => { if (!DOGS[d]) return false; try { localStorage.setItem(KEY, d); } catch (e) { } return true; };
+  window.chlopkowSetDog = d => { if (!validDog(d)) return false; try { localStorage.setItem(KEY, d); } catch (e) { } return true; };
 })();
