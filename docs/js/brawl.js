@@ -17,7 +17,9 @@
      Powers (LF2 Firen / Freeze / Davis style): DEFEND, down, ATTACK = each fighter's element:
                fire = fireball that knocks down and sets the target burning,
                ice = ice shard that freezes the target in a block (next hit shatters it for bonus damage),
-               beam = kamehameha: short charge, then a screen-long multi-hit beam (dodge it up/down).
+               beam = kamehameha: short charge, then a screen-long multi-hit beam (dodge it up/down),
+               cap = Ernest's captain's cap: a spinning boomerang that hits on the way out and on the way back; until he
+                     catches it he is bald (atlas ernest_bald) and cannot throw it again.
    LF2 physics: movement, jump/dash arcs, gravity, friction, fall/guard meters, hit stop, regen and the Davis attacks use
      original LF2 numbers (F.LF global.js + stock davis.dat) in the LF2 block below, scaled by S = 100/62 and stepped per 1/30 s time unit.
    Art: docs/img/brawl/<fighter>.webp/.json, items.webp/.json, stage_*.webp, built by
@@ -129,10 +131,10 @@ window.addEventListener('ark-ready', () => {
       power: { el: 'fire', name: PL ? 'OGIEŃ Z KOMINA!' : 'CHIMNEY FIRE!', color: '#ff8c2a' },
     },
     ernest: {
-      name: 'ERNEST', atlas: 'ernest', color: '#2ec4b6', hp: LF2.hp, superFrame: 'super',
+      name: 'ERNEST', atlas: 'ernest', bald: 'ernest_bald', color: '#2ec4b6', hp: LF2.hp, superFrame: 'super',
       ball: { name: PL ? 'CYTRYNA!' : 'LEMON!', item: 'cytryna', mp: 75, dmg: 38, fall: 40, speed: 500 },
       spin: { name: PL ? 'MŁYNEK KAPITANA!' : 'CAPTAIN WINDMILL!', mp: 150, hits: 3, dmg: 28, fall: 30, dur: .6, vx: 110, hy: [0, 100], reach: 70, dvx: 200 },
-      power: { el: 'ice', name: PL ? 'ZIMNY REJS!' : 'COLD CRUISE!', color: '#9fe3ff' },
+      power: { el: 'cap', name: PL ? 'CZAPKA KAPITANA!' : "CAPTAIN'S CAP!", color: '#f4f1e6' },
     },
     felcu: {
       name: 'FELCU', atlas: 'felcu', color: '#5b6cff', hp: LF2.hp, superFrame: 'super',
@@ -184,6 +186,10 @@ window.addEventListener('ark-ready', () => {
     fire: { mp: 120, speed: 470, dmg: 40, fall: 90, bdef: 40, dvx: 230, dvy: 380, burn: 1.6, burnDmg: 5 },
     ice: { mp: 120, speed: 540, dmg: 28, fall: 20, bdef: 30, dvx: 60, freeze: LF2.freeze * TUS },   // frozen 91 TU = LF2 frame 201 (wait 90)
     beam: { mp: 200, charge: .4, end: 1.0, dur: 1.12, tick: .12, dmg: 14, fall: 24, bdef: 16, dvx: 170, hy: [45, 95] },
+    // Ernest's captain's cap = boomerang (LF2 Henry-style). Speeds in LF2 px/TU like the rest of the LF2 block: leaves the hand at 11.2 px/TU
+    // (~540 px/s, the ice shard's speed), slows down by .3 px/TU^2 (stops after ~330 px), then homes in on Ernest accelerating .45 px/TU^2 up to 12.5 px/TU.
+    // Hits knock down (fall 70 > 60 = LF2 KO value); each target once per direction (out 40, back 30). After 2.5 s it drops and he picks it up.
+    cap: { mp: 100, v0: 11.2 * PXTU, decel: .3 * LF2.S * LF2.TU * LF2.TU, accel: .45 * LF2.S * LF2.TU * LF2.TU, vmax: 12.5 * PXTU, dmg: 40, dmgBack: 30, fall: 70, bdef: 40, dvx: 200, dvy: 260, life: 2.5, catchX: 30, catchZ: 18, pick: .45 },
   };
   const ITEM_DEF = {
     // light = held weapon (drawn into the hands at the grip read from the cyan-marker poses): dmgK/reachK scale ATK.w_*
@@ -250,7 +256,7 @@ window.addEventListener('ark-ready', () => {
   const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function loadOpts() {
     const o = readLS(LS_OPTS, {});
-    return { stage: STAGES[o.stage] || o.stage === 'random' ? o.stage : 'farmyard', items: o.items !== false, level: ['easy', 'normal', 'hard'].includes(o.level) ? o.level : 'normal', sound: o.sound !== false,
+    return { stage: STAGES[o.stage] || o.stage === 'random' ? o.stage : 'road', items: o.items !== false, level: ['easy', 'normal', 'hard'].includes(o.level) ? o.level : 'normal', sound: o.sound !== false,
       effects: o.effects === undefined ? !reducedMotion() : o.effects !== false };   // screen shake + white hit flash; off by default for people who ask their system for reduced motion
   }
   let KEYS = loadKeys(), SLOTS = loadSlots(), OPTS = loadOpts();
@@ -282,7 +288,7 @@ window.addEventListener('ark-ready', () => {
     s.ready = A.load(STAGES[id].img).then(img => { s.img = img; return img; }).catch(() => null);
     return s.ready;
   }
-  const loadAll = () => Promise.all([...Object.values(FIGHTERS).map(f => loadAtlas(f.atlas)), loadAtlas('items'), ...Object.keys(STAGES).filter(id => !STAGES[id].lazy || (fight && fight.stage === id)).map(loadStage)]);
+  const loadAll = () => Promise.all([...Object.values(FIGHTERS).map(f => loadAtlas(f.atlas)), ...Object.values(FIGHTERS).filter(f => f.bald).map(f => loadAtlas(f.bald)), loadAtlas('items'), ...Object.keys(STAGES).filter(id => !STAGES[id].lazy || (fight && fight.stage === id)).map(loadStage)]);
 
   /* ================================================================== sound (tiny WebAudio synth) */
   let AC = null;
@@ -549,7 +555,7 @@ window.addEventListener('ark-ready', () => {
       if (a.arest) break;   // one victim per arest window
     }
     // LF2: attacks bat balls back
-    for (const b of fight.balls) if (b.team !== f.team && Math.abs(b.z - f.z) < 18) {
+    for (const b of fight.balls) if (b.team !== f.team && b.el !== 'cap' && Math.abs(b.z - f.z) < 18) {
       const dx = (b.x - f.x) * f.face;
       if (dx > -10 && dx < reach + 10) { b.vx = f.face * Math.abs(b.vx) * 1.1; b.team = f.team; b.owner = f; sfx('block'); spark(b.x, gy(b.z) - b.y, '#ffd21f', 8); }
     }
@@ -569,6 +575,7 @@ window.addEventListener('ark-ready', () => {
   function special(f, which) {
     const sp = f.def[which], cost = which === 'power' && sp ? POWER[sp.el].mp : sp && sp.mp;
     if (!sp || f.mp < cost) return false;
+    if (which === 'power' && f.capless) return false;   // the cap is still away: nothing to throw
     if (which === 'power') {
       f.mp -= cost; f.stats.mpUsed += cost;
       if (holdKind(f) === 'heavy') dropHold(f, false);   // Michał keeps his pistol, Sołtys his teczka
@@ -821,7 +828,10 @@ window.addEventListener('ark-ready', () => {
       case 'power': {
         const pw = f.def.power, P = POWER[pw.el];
         if (pw.el !== 'beam') {
-          if (f.t > .18 && !f.released) {
+          if (f.t > .18 && !f.released && pw.el === 'cap') {
+            f.released = true; throwCap(f);
+            sfx('whoosh');
+          } else if (f.t > .18 && !f.released) {
             f.released = true;
             fight.balls.push({ owner: f, team: f.team, el: pw.el, color: pw.color, x: f.x + f.face * 46, z: f.z, y: 66, vx: f.face * P.speed, dmg: P.dmg, fall: P.fall, bdef: P.bdef, dvx: P.dvx, dvy: P.dvy, life: 1.9, spin: 0, nospin: true });
             sfx('whoosh');
@@ -845,7 +855,7 @@ window.addEventListener('ark-ready', () => {
             f.hitSet.add(o); o.lastHitBy = f;
             applyHit(f, o, { dmg: P.dmg, fall: P.fall, bdef: P.bdef, dvx: P.dvx, el: 'beam' }, f.x);
           }
-          for (const b of fight.balls) if (b.team !== f.team && Math.abs(b.z - f.z) < 18 && (b.x - x0) * f.face > -10 && (b.x - x0) * f.face < f.beamLen) { b.life = 0; spark(b.x, gy(b.z) - b.y, pw.color, 10); }
+          for (const b of fight.balls) if (b.team !== f.team && b.el !== 'cap' && Math.abs(b.z - f.z) < 18 && (b.x - x0) * f.face > -10 && (b.x - x0) * f.face < f.beamLen) { b.life = 0; spark(b.x, gy(b.z) - b.y, pw.color, 10); }
         }
         if (f.t >= P.dur) setSt(f, 'stand');
         break;
@@ -1015,8 +1025,53 @@ window.addEventListener('ark-ready', () => {
       }
     }
   }
+  /* -------------------------------------------- captain's cap (Ernest's power): a boomerang ball */
+  function throwCap(f) {
+    const P = POWER.cap;
+    const b = { owner: f, team: f.team, el: 'cap', item: 'czapka', color: f.def.power.color, x: f.x + f.face * 46, z: f.z, y: 66 + f.y, vx: f.face * P.v0, vy: 0, dir: f.face,
+      dmg: P.dmg, fall: P.fall, life: 99, t: 0, rot: 0, spin: 0, phase: 'out', hits: new Set(), sp: 0, rest: 0, nospin: false };
+    f.cap = b; f.capless = true; fight.balls.push(b);
+  }
+  function capHome(b, caught) {   // the cap leaves the game; its owner is no longer bald
+    b.life = 0; const o = b.owner;
+    if (o.cap === b) { o.cap = null; o.capless = false; }
+    if (caught && alive(o)) { spark(o.x + o.face * 6, gy(o.z) - o.y - 100, '#fff6c8', 8); sfx('pick'); }
+  }
+  function updateCap(b) {
+    const P = POWER.cap, o = b.owner;
+    if (!alive(o)) { capHome(b, false); return; }
+    b.t += DT; b.rot += DT * 22; b.spin = b.rot;
+    if (b.phase !== 'drop' && b.t > P.life) { b.phase = 'drop'; b.vx = 0; b.vy = 0; b.rest = 0; }
+    if (b.phase === 'out') {
+      const v0 = b.vx; b.vx -= b.dir * P.decel * DT;
+      if (v0 * b.vx <= 0 || b.x < viewLo() + 12 || b.x > viewHi() - 12) { b.phase = 'back'; b.vx = 0; b.sp = 0; b.hits = new Set(); }   // stopped (or reached the screen edge): turn round
+      b.x += b.vx * DT;
+    } else if (b.phase === 'back') {
+      const tx = o.x, tz = o.z, ty = o.y + 66, dx = tx - b.x, dz = tz - b.z, dy = ty - b.y, d = Math.hypot(dx, dz, dy) || 1;
+      b.sp = Math.min(P.vmax, b.sp + P.accel * DT);
+      const stp = Math.min(d, b.sp * DT);
+      b.x += dx / d * stp; b.z += dz / d * stp; b.y += dy / d * stp; b.vx = dx / d * b.sp; b.dir = Math.sign(dx) || b.dir;
+      if (Math.abs(b.x - o.x) < P.catchX && Math.abs(b.z - o.z) < P.catchZ) { capHome(b, true); return; }
+    } else {   // drop: falls to the ground, then he picks it up by himself
+      b.vy -= GRAV * DT; b.y += b.vy * DT; b.x += b.vx * DT; b.vx *= Math.pow(.05, DT);
+      if (b.y <= 0) { b.y = 0; b.vy = 0; b.rest += DT; if (b.rest >= P.pick) capHome(b, true); }
+      return;
+    }
+    if (Math.random() < .5) fight.fx.push({ x: b.x - b.dir * 10, y: gy(b.z) - b.y + (Math.random() - .5) * 10, vx: -b.vx * .1, vy: 20, t: 0, life: .2, color: Math.random() < .5 ? '#ffffff' : '#c8d4ff' });
+    for (const t of fight.fighters) {
+      if (t.team === b.team || b.hits.has(t) || !canBeHit(t, P.fall)) continue;
+      if (Math.abs(t.x - b.x) < 26 && Math.abs(t.z - b.z) < 18 && b.y > t.y - 10 && b.y < t.y + 100) {
+        b.hits.add(t);
+        applyHit(o, t, { dmg: b.phase === 'out' ? P.dmg : P.dmgBack, fall: P.fall, bdef: P.bdef, dvx: P.dvx, dvy: P.dvy, el: 'cap' }, b.x - b.dir * 30);
+        if (t.hp <= 0) t.lastHitBy = o;
+        spark(b.x, gy(b.z) - b.y, '#f4f1e6', 10);
+      }
+    }
+  }
   function updateBalls() {
+    for (const f of fight.fighters) if (f.capless && !(f.cap && f.cap.life > 0 && fight.balls.includes(f.cap))) { f.capless = false; f.cap = null; }   // the cap is gone (ball list reset): he is capped again
     for (const b of fight.balls) {
+      if (b.el === 'cap') { updateCap(b); continue; }
       b.x += b.vx * DT; b.life -= DT; b.spin += DT * 16;
       if (b.el && Math.random() < .7) fight.fx.push({ x: b.x - Math.sign(b.vx) * 10, y: gy(b.z) - b.y + (Math.random() - .5) * 12, vx: -b.vx * .15, vy: b.el === 'fire' ? -90 : 30, t: 0, life: .25, color: b.el === 'fire' ? (Math.random() < .5 ? '#ff7a1a' : '#ffd21f') : (Math.random() < .5 ? '#bfe8ff' : '#ffffff') });
       if (b.x < viewLo() - 40 || b.x > viewHi() + 40) b.life = 0;
@@ -1029,7 +1084,7 @@ window.addEventListener('ark-ready', () => {
           b.life = 0; spark(b.x, gy(b.z) - b.y, b.el ? b.color : ({ apple: '#d8262c', vinyl: '#2a2a33', football: '#ffffff', hammer: '#a0a5af', rzutek: '#f07820', kulka: '#f07820', teczka: '#6b4226', szarlotka: '#e0b060', pieczarka: '#f4efe0', smartfon: '#4a4a70', deska: '#e0503a' }[b.item] || '#8a5a2c'), 12);
         }
       }
-      for (const c of fight.balls) if (c !== b && c.team !== b.team && c.life > 0 && b.life > 0 && Math.abs(c.x - b.x) < 24 && Math.abs(c.z - b.z) < 18) {
+      for (const c of fight.balls) if (c !== b && c.el !== 'cap' && c.team !== b.team && c.life > 0 && b.life > 0 && Math.abs(c.x - b.x) < 24 && Math.abs(c.z - b.z) < 18) {
         c.life = b.life = 0; spark(b.x, gy(b.z) - b.y, '#ffd21f', 16); sfx('heavy');
       }
     }
@@ -1083,7 +1138,7 @@ window.addEventListener('ark-ready', () => {
     if (f.mp >= f.def.ball.mp && adx > 170 && adx < 560 && Math.abs(dz) < 14 && Math.random() < DT * 1.2 * L.special) {
       ai.queue.push(['defend'], [dx > 0 ? 'right' : 'left'], ['attack']); ai.wait = .6; return out;
     }
-    if (f.def.power && f.mp >= POWER[f.def.power.el].mp && Math.abs(dz) < 14 && tgt.st !== 'frozen' && adx > (f.def.power.el === 'beam' ? 120 : 170) && adx < (f.def.power.el === 'beam' ? 700 : 560) && Math.random() < DT * .8 * L.special) {
+    if (f.def.power && !f.capless && f.mp >= POWER[f.def.power.el].mp && Math.abs(dz) < 14 && tgt.st !== 'frozen' && adx > (f.def.power.el === 'beam' ? 120 : 170) && adx < (f.def.power.el === 'beam' ? 700 : f.def.power.el === 'cap' ? 330 : 560) && Math.random() < DT * .8 * L.special) {
       f.face = dirX; ai.queue.push(['defend'], ['down'], ['attack']); ai.wait = f.def.power.el === 'beam' ? 1.3 : .7; return out;
     }
     if (f.mp >= f.def.spin.mp && adx < 70 && Math.abs(dz) < 14 && Math.random() < DT * .7 * L.special) { ai.queue.push(['defend'], ['up'], ['attack']); ai.wait = .9; return out; }
@@ -1199,6 +1254,8 @@ window.addEventListener('ark-ready', () => {
       default: return 'stand';
     }
   }
+  // capless ERNEST is drawn from the bald atlas (same frame names and foot anchors as the capped one, so swapping never makes him jump)
+  const atlasOf = f => f.capless && f.def.bald && ART[f.def.bald] && ART[f.def.bald].img ? f.def.bald : f.def.atlas;
   function drawSprite(atlasId, name, x, y, face, opts = {}) {
     const a = ART[atlasId]; if (!a || !a.img || !a.meta) return false;
     const fr = a.meta.frames[name]; if (!fr) return false;
@@ -1223,12 +1280,12 @@ window.addEventListener('ark-ready', () => {
     if (f.inv > 0 && FREE.has(f.st) && Math.floor(f.inv * 20) % 2) c.globalAlpha = .5;
     const wob = f.st === 'dizzy' ? Math.sin(fight.t * 18) * 2 : f.st === 'held' ? Math.sin(fight.t * 30) : 0;
     if (f.st === 'flip') { c.save(); c.translate(x, cy); c.rotate(rot); c.translate(-x, -cy); }
-    const ok = drawSprite(f.def.atlas, frameName(f), x + wob, f.st === 'flip' ? cy + 40 : cy, face, { rot: f.st === 'fall' ? rot : 0, flash: f.flash });
+    const ok = drawSprite(atlasOf(f), frameName(f), x + wob, f.st === 'flip' ? cy + 40 : cy, face, { rot: f.st === 'fall' ? rot : 0, flash: f.flash });
     if (f.st === 'flip') c.restore();
     const wpn = f.hold && ['light', 'gun'].includes(holdKind(f)) ? f.hold.type : f.st === 'cast' && f.def.ball.gun ? 'pistol' : f.st === 'spin' && f.def.spin.weapon ? f.def.spin.weapon : null;
     if (ok && wpn && f.st !== 'flip' && f.st !== 'fall') drawWeapon(f, wpn, x + wob, cy, face);
     if (ok && f.hold && holdKind(f) === 'heavy' && ['stand', 'walk', 'run', 'carry'].includes(f.st) || (ok && f.hold && f.st === 'heavy_throw' && !f.released)) {
-      const a = ART[f.def.atlas], fr = a.meta.frames[frameName(f)], sc = a.meta.scale || .5;
+      const a = ART[atlasOf(f)], fr = a.meta.frames[frameName(f)], sc = a.meta.scale || .5;
       const top = cy - fr.ay * sc, it = f.hold.type, im = ART.items && ART.items.meta && ART.items.meta.frames[it];
       if (im) {
         drawSprite('items', it, x + (fr.w / 2 - fr.ax) * sc * f.face, top + im.h * .5 * .3, f.face);
@@ -1282,7 +1339,7 @@ window.addEventListener('ark-ready', () => {
     c.restore();
   }
   function drawWeapon(f, wpn, x, y, face) {   // weapon sprite at the grip of the current frame (see build_fight_sprites.take_grip)
-    const a = ART[f.def.atlas], fr = a && a.meta && a.meta.frames[frameName(f)], g = fr && fr.grip;
+    const a = ART[atlasOf(f)], fr = a && a.meta && a.meta.frames[frameName(f)], g = fr && fr.grip;
     const ia = ART.items, im = ia && ia.meta && ia.meta.frames[wpn];
     if (!g || !im || !ia.img) return;
     const s = a.meta.scale || .5, is = ia.meta.scale || .5, gp = WGRIP[wpn] || [.3, .5];
@@ -1317,6 +1374,10 @@ window.addEventListener('ark-ready', () => {
       cx.save(); cx.fillStyle = 'rgba(191,232,255,.45)'; cx.fillRect(x - d * 40, y - 5, d * 30, 10);
       cx.fillStyle = b.color || '#9fe3ff'; cx.strokeStyle = '#ffffff'; cx.lineWidth = 2;
       cx.beginPath(); cx.moveTo(x + d * 18, y); cx.lineTo(x, y - 10); cx.lineTo(x - d * 14, y); cx.lineTo(x, y + 10); cx.closePath(); cx.fill(); cx.stroke(); cx.restore();
+      return;
+    }
+    if (b.el === 'cap') {   // spinning white captain's cap (items atlas 'czapka'), a little larger than its stored size so it reads
+      drawSprite('items', 'czapka', x, y, 1, { rot: b.rot, scale: 1.35 });
       return;
     }
     cx.fillStyle = 'rgba(255,255,255,.35)'; for (let k = 1; k < 4; k++) cx.fillRect(x - Math.sign(b.vx) * k * 13, y - 3, 7, 3);
@@ -1447,7 +1508,7 @@ window.addEventListener('ark-ready', () => {
     type: { human: 'CZŁOWIEK', cpu: 'KOMPUTER', off: '—' }, team: { '': 'BEZ DRUŻYNY', A: 'DRUŻYNA A', B: 'DRUŻYNA B' },
     start: 'WALKA!', close: 'WYJDŹ', controls: 'STEROWANIE', reset: 'DOMYŚLNE KLAWISZE', press: 'naciśnij klawisz…',
     stage: 'PLANSZA', random: 'LOSOWA', itemsOpt: 'PRZEDMIOTY', level: 'KOMPUTER', levels: { easy: 'ŁATWY', normal: 'NORMALNY', hard: 'TRUDNY' }, sound: 'DŹWIĘK', effects: 'EFEKTY (TRZĘSIENIE, BŁYSK)',
-    moves: 'Bieg: 2× w bok · w biegu ATAK / SKOK / OBRONA = atak z rozpędu / długi skok / przewrót · Kopniak: SKOK + ATAK · Oszołomionego chwyć wchodząc w niego, rzut: kierunek + ATAK · Przedmiot: ATAK nad nim, widły rzucasz: do przodu + ATAK · W locie SKOK = przewrót · Specjalne: OBRONA, kierunek, ATAK oraz OBRONA, góra, ATAK · Moc (ogień / lód / kamehameha): OBRONA, dół, ATAK',
+    moves: 'Bieg: 2× w bok · w biegu ATAK / SKOK / OBRONA = atak z rozpędu / długi skok / przewrót · Kopniak: SKOK + ATAK · Oszołomionego chwyć wchodząc w niego, rzut: kierunek + ATAK · Przedmiot: ATAK nad nim, widły rzucasz: do przodu + ATAK · W locie SKOK = przewrót · Specjalne: OBRONA, kierunek, ATAK oraz OBRONA, góra, ATAK · Moc (ogień / lód / kamehameha / czapka): OBRONA, dół, ATAK',
     pads: 'Pad: krzyżak/gałka, X/□ atak, A/✕ skok, B/○ lub RB obrona',
     errFew: 'Potrzeba co najmniej 2 zawodników.', errSame: 'Dwóch graczy ma to samo sterowanie: ', errTeam: 'Wszyscy są w jednej drużynie.', errHuman: 'Dodaj co najmniej jednego człowieka.',
   } : {
@@ -1455,7 +1516,7 @@ window.addEventListener('ark-ready', () => {
     type: { human: 'HUMAN', cpu: 'COMPUTER', off: '—' }, team: { '': 'NO TEAM', A: 'TEAM A', B: 'TEAM B' },
     start: 'FIGHT!', close: 'LEAVE', controls: 'CONTROLS', reset: 'DEFAULT KEYS', press: 'press a key…',
     stage: 'STAGE', random: 'RANDOM', itemsOpt: 'ITEMS', level: 'COMPUTER', levels: { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' }, sound: 'SOUND', effects: 'EFFECTS (SHAKE, FLASH)',
-    moves: 'Run: double-tap sideways · Run + ATTACK / JUMP / DEFEND = dash attack / dash jump / roll · Jump kick: JUMP + ATTACK · Walk into a dizzy enemy to grab, direction + ATTACK throws · Items: ATTACK on them, forward + ATTACK throws the pitchfork · JUMP while falling = flip · Specials: DEFEND, direction, ATTACK and DEFEND, up, ATTACK · Power (fire / ice / kamehameha): DEFEND, down, ATTACK',
+    moves: 'Run: double-tap sideways · Run + ATTACK / JUMP / DEFEND = dash attack / dash jump / roll · Jump kick: JUMP + ATTACK · Walk into a dizzy enemy to grab, direction + ATTACK throws · Items: ATTACK on them, forward + ATTACK throws the pitchfork · JUMP while falling = flip · Specials: DEFEND, direction, ATTACK and DEFEND, up, ATTACK · Power (fire / ice / kamehameha / cap throw): DEFEND, down, ATTACK',
     pads: 'Gamepad: d-pad/stick, X/□ attack, A/✕ jump, B/○ or RB defend',
     errFew: 'At least 2 fighters are needed.', errSame: 'Two players share the same controls: ', errTeam: 'Everyone is on one team.', errHuman: 'Add at least one human player.',
   };
@@ -1585,6 +1646,6 @@ window.addEventListener('ark-ready', () => {
     spawnItem: (type, x, z) => spawnItem(type, x, z, false),
     step(n = 1) { const p = fight && fight.paused; if (fight) fight.paused = false; for (let i = 0; i < n && fight; i++) tick(); if (fight) fight.paused = p; render(); },
     render: () => render(),
-    frameName, loaded: loadAll,
+    frameName, atlasOf, loaded: loadAll,
   };
 });

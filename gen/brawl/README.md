@@ -17,6 +17,14 @@ Runtime: `docs/js/brawl.js`. Art: `docs/img/brawl/`. Test: `test/brawl_test.py`.
 A fighter with `power.el === 'beam'` may add `core` (CSS colour of the beam centre and charge orb, default white) and `size` (width multiplier, default 1)
 to the `power` object in `brawl.js`. ARTUR uses `core: '#0b0b10', size: .6` for his thin black beam; damage and reach are unchanged.
 
+## ERNEST's captain's cap (bald atlas)
+
+ERNEST's power (`power.el === 'cap'`) throws his cap as a boomerang; while it is away he is drawn from the second atlas `ernest_bald` (`FIGHTERS.ernest.bald`).
+`ernest_bald` is built by `build_fight_sprites.py ernest_bald` from `gen/brawl/raw/ernest_bald_s1..s4.png`, which are image edits of the four `ernest_s*` sheets
+(same grid and poses, cap removed, bald scalp with ginger tufts; recipe: `image-gen/2026-10-17-brawl-ernest-cap/gen_bald.py`). It reuses the capped `stand` height for the scale
+(`VARIANTS`), so frame names and foot anchors match `ernest` and swapping atlases mid-animation does not jump. The cap in flight is the procedural `czapka` item.
+`python gen/brawl/build_fight_sprites.py ernest ernest_bald items` rebuilds just these atlases.
+
 ## Frame overrides (later edits)
 
 - `raw/<name>_s3beer.png`: only its drinking cell is used (Łomża instead of milk).

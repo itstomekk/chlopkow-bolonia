@@ -21,7 +21,11 @@ OUT = ROOT / "docs" / "img" / "brawl"
 PREV = ROOT / "gen" / "brawl"
 VERBOSE = True
 FIG_H = 200          # standing figure height in stored pixels (= 100 logical arena px)
-FIG_H_BY = {"ernest": 184}   # per-fighter standing height (ERNEST is short: 184/200 = 0.92)
+FIG_H_BY = {"ernest": 184, "ernest_bald": 184}   # per-fighter standing height (ERNEST is short: 184/200 = 0.92)
+# variant atlases: id -> (raw file prefix, fighter whose capped 'stand' frame defines the scale)
+# ernest_bald = ERNEST without his cap (thrown away by his CAPTAIN'S CAP power); it must share ernest's scale so that
+# swapping atlases mid-animation does not make him grow or shrink (the bald stand frame is a little lower than the capped one)
+VARIANTS = {"ernest_bald": ("ernest_bald", "ernest")}
 
 SHEETS = {
     "s1": ["stand", "walk1", "run1", "punch1", "punch2", "kick", "jump", "jkick", "defend", "hurt", "lying_back", "cast"],
@@ -279,19 +283,22 @@ def preview(frames, path, bg=(40, 60, 40)):
 
 
 def build_fighter(fid):
+    src, scale_fid = VARIANTS.get(fid, (fid, fid))
     raw = {}
     for s, names in SHEETS.items():
-        raw.update(slice_grid(RAW / f"{fid}_{s}.png", 4, 3, names))
-    beer = RAW / f"{fid}_s3beer.png"   # later edit: only its drinking cell (beer instead of milk) is used
+        raw.update(slice_grid(RAW / f"{src}_{s}.png", 4, 3, names))
+    beer = RAW / f"{src}_s3beer.png"   # later edit: only its drinking cell (beer instead of milk) is used
     if beer.exists():
         raw["drink"] = slice_grid(beer, 4, 3, SHEETS["s3"])["drink"]
-    carry = RAW / f"{fid}_s3carry.png"   # later edit: empty raised hands; the game draws the carried item
+    carry = RAW / f"{src}_s3carry.png"   # later edit: empty raised hands; the game draws the carried item
     if carry.exists():
         raw["carry"] = slice_grid(carry, 4, 3, SHEETS["s3"])["carry"]
-    s4 = RAW / f"{fid}_s4.png"   # weapon poses with the cyan grip marker (replace the pitchfork poses of s3)
+    s4 = RAW / f"{src}_s4.png"   # weapon poses with the cyan grip marker (replace the pitchfork poses of s3)
     if s4.exists():
         raw.update(slice_grid(s4, 4, 2, S4))
     stand_h = raw["stand"]["img"].height
+    if scale_fid != fid:
+        stand_h = slice_grid(RAW / f"{scale_fid}_s1.png", 4, 3, SHEETS["s1"])["stand"]["img"].height
     s = FIG_H_BY.get(fid, FIG_H) / stand_h
     frames = {}
     for n, f in raw.items():
@@ -472,7 +479,47 @@ def bitcoin():   # gold Bitcoin coin: TOMEK's thrown special
     return im
 
 
-PROC_ITEMS = {"bitcoin": bitcoin, "cytryna": cytryna, "kluczyk": kluczyk, "smartfon": smartfon, "deska": deska, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
+def czapka():   # white captain's peaked cap, side view facing right: ERNEST's thrown special
+    im, px = _canvas(28, 18)
+    W, W2, NV, NV2, DK, GD, OUT = (250, 250, 244, 255), (206, 210, 218, 255), (22, 34, 84, 255), (12, 20, 56, 255), (24, 22, 30, 255), (255, 208, 56, 255), (28, 30, 44, 255)
+    # crown: a flattened dome (x 3..21, y 2..10), brim-less top overhangs the band a little
+    for y in range(2, 11):
+        for x in range(2, 22):
+            cx = (x - 11.5) / 9.5
+            top = 2 + 3.2 * cx * cx           # dome edge
+            if y >= top:
+                px[x, y] = W if (x + y) % 9 else W2 if y > 7 else W
+    for x in range(3, 22):                     # shading on the underside of the crown
+        px[x, 8] = W2
+    for y in range(9, 13):                     # navy band
+        for x in range(3, 21):
+            px[x, y] = NV if y < 12 else NV2
+    for x in range(3, 5):                      # crown rim overhang left
+        px[x, 7] = W2
+    for y in range(13, 16):                    # dark glossy visor sticking out to the right
+        for x in range(8, 28):
+            if x < 8 + (y - 12) * 1 or x > 27 - (y - 13) * 2:
+                continue
+            px[x, y] = DK
+    for x in range(17, 26):
+        px[x, 13] = (62, 60, 74, 255)
+    for dy, dx in ((0, 0), (0, 1), (1, 0), (1, 1), (-1, 0), (0, -1), (2, 0), (0, 2)):   # gold badge on the band
+        px[17 + dx, 10 + dy] = GD
+    px[17, 10] = (255, 244, 170, 255)
+    # outline
+    out = im.copy(); o = out.load()
+    for y in range(18):
+        for x in range(28):
+            if px[x, y][3] == 0:
+                for ddx, ddy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = x + ddx, y + ddy
+                    if 0 <= nx < 28 and 0 <= ny < 18 and px[nx, ny][3]:
+                        o[x, y] = OUT
+                        break
+    return out
+
+
+PROC_ITEMS = {"czapka": czapka, "bitcoin": bitcoin, "cytryna": cytryna, "kluczyk": kluczyk, "smartfon": smartfon, "deska": deska, "rzutek": rzutek, "football": football, "hammer": hammer, "szarlotka": szarlotka, "pieczarka": pieczarka}
 
 
 def build_items():
@@ -500,6 +547,7 @@ def build_items():
         im = im.resize((im.width * 2, im.height * 2), Image.NEAREST)
         frames[name] = {"img": im, "ax": im.width / 2, "ay": float(im.height)}
     frames["bitcoin"]["ay"] = frames["bitcoin"]["img"].height * .62   # spins about its centre, not its bottom edge
+    frames["czapka"]["ay"] = frames["czapka"]["img"].height * .55   # spins about its centre too
     pack(frames, OUT / "items.png", OUT / "items.json")
     preview(frames, PREV / "preview_items.png")
     print("items", {n: frames[n]["img"].size for n in frames})
@@ -518,8 +566,13 @@ def build_stages():
 
 
 if __name__ == "__main__":
+    import sys
     OUT.mkdir(parents=True, exist_ok=True)
-    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "felcu", "urban", "artur", "tomek"):
-        build_fighter(fid)
-    build_items()
-    build_stages()
+    only = sys.argv[1:]   # optional: build just these atlas ids (fighter ids, "items", "stages"); default = everything
+    for fid in ("arek", "edytka", "renik", "damian", "wesoly", "soltys", "michal", "ernest", "ernest_bald", "felcu", "urban", "artur", "tomek"):
+        if not only or fid in only:
+            build_fighter(fid)
+    if not only or "items" in only:
+        build_items()
+    if not only or "stages" in only:
+        build_stages()
