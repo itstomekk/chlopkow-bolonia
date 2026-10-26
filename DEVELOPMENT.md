@@ -151,6 +151,24 @@ A *passage* links two places and is data, not code in `game.js`. Everything live
 - **Reachability:** roads and tracks are walkable across the river called Melioranka in-game; garden fences have gates, and `place_items.py` flood-fills from the spawn to check quest items.
 - **Map size vs. phones:** current map width is 3896 px, height 5860 px. The 256-colour ground PNG exceeds 10 MB; tiling and mobile load-time checks remain future work.
 
+## Quick test access (URL parameters)
+
+Moved here from the README. Parameters handled by `docs/js/devtools.js` (inert without them) and `game.js`:
+
+| Parameter | What it does |
+|---|---|
+| `?dev=1` | Dev panel (F2 or the DEV badge): search of places, districts, NPCs, minigames and interiors; click = teleport, a minigame starts. Clicking the minimap or the M map teleports. Throwaway save. |
+| `?play=<id>` | Go straight to the world and a minigame: `pig`, `dogs`, `skeet`, `ducks`, `mowing`, `brawl`, any board from `ARK_BOARDS` (e.g. `sprint`), or `world`. Throwaway save. |
+| `?go=<place>` | Teleport by place name, without Polish diacritics (`?go=kosciol`). Real save, like `?x=&y=`. |
+| `?save=real` | With `?dev=1` / `?play=`, use the real save instead of the throwaway one. |
+| `?x=1243&y=901` | Teleport to map coordinates. Takes precedence over `?go`. |
+| `?debug=1`, `?bison=1`, `?lang=en`, `?music=0` | Place circles, bison visit, English version, no music. |
+| `?dog=wajper` | Alternative companion dog (default Frodo). |
+
+A throwaway save lives only in the tab's memory: the real browser save stays untouched, scores do not go to the global board, and the entry is not announced on Nostr.
+
+The brand sign and wordmark are built by `gen/brand/build_brand_assets.py`; usage rules: [brand guide](https://itstomekk.github.io/chlopkow-bolonia/brand-guidelines.html).
+
 ## Wanted: reference photos
 
 See [PHOTOS-WANTED.md](PHOTOS-WANTED.md). Real photos make the landmarks and characters look like the real thing.
