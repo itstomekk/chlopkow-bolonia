@@ -1,0 +1,139 @@
+{
+ "cell": [
+  130,
+  190
+ ],
+ "facing": "right",
+ "poses": [
+  "stand",
+  "talk1",
+  "talk2",
+  "talk3",
+  "talk4",
+  "wave1",
+  "wave2",
+  "wave3",
+  "wave4",
+  "laugh1",
+  "laugh2",
+  "laugh3",
+  "laugh4",
+  "think",
+  "surprised",
+  "sad",
+  "angry",
+  "point",
+  "pointup",
+  "cheer1",
+  "cheer2",
+  "sit1",
+  "sit2",
+  "sleep1",
+  "sleep2",
+  "run1",
+  "run2",
+  "run3",
+  "run4",
+  "jump",
+  "hurt1",
+  "hurt2",
+  "ko",
+  "dig1",
+  "dig2",
+  "dig3",
+  "dig4",
+  "crouch",
+  "pickup",
+  "throw1",
+  "throw2"
+ ],
+ "anims": {
+  "stand": [
+   "stand"
+  ],
+  "talk": [
+   "talk1",
+   "talk2",
+   "talk3",
+   "talk2"
+  ],
+  "wave": [
+   "wave1",
+   "wave2",
+   "wave3",
+   "wave4",
+   "wave3",
+   "wave2"
+  ],
+  "laugh": [
+   "laugh1",
+   "laugh2",
+   "laugh3",
+   "laugh4"
+  ],
+  "think": [
+   "think"
+  ],
+  "surprised": [
+   "surprised"
+  ],
+  "sad": [
+   "sad"
+  ],
+  "angry": [
+   "angry"
+  ],
+  "point": [
+   "point"
+  ],
+  "pointup": [
+   "pointup"
+  ],
+  "cheer": [
+   "cheer1",
+   "cheer2"
+  ],
+  "sit": [
+   "sit1",
+   "sit2"
+  ],
+  "sleep": [
+   "sleep1",
+   "sleep1",
+   "sleep2",
+   "sleep2"
+  ],
+  "run": [
+   "run1",
+   "run2",
+   "run3",
+   "run4"
+  ],
+  "jump": [
+   "jump"
+  ],
+  "hurt": [
+   "hurt1",
+   "hurt2"
+  ],
+  "ko": [
+   "ko"
+  ],
+  "dig": [
+   "dig1",
+   "dig2",
+   "dig3",
+   "dig4"
+  ],
+  "crouch": [
+   "crouch"
+  ],
+  "pickup": [
+   "pickup"
+  ],
+  "throw": [
+   "throw1",
+   "throw2"
+  ]
+ }
+}

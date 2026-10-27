@@ -1,0 +1,8 @@
+{
+ "stand_h": 150,
+ "talk_scale": 0.384,
+ "emote_scale": 0.411,
+ "act_scale": 0.437,
+ "move_scale": 0.44,
+ "work_scale": 0.489
+}
