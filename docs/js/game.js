@@ -612,6 +612,7 @@
   // Character selector layout. The 24 cards use the whole board; Start + the Nostr disclosure (DOM, see
   // placeNameForm) sit directly under the grid and the whole block is centred, always inside the viewport.
   // A saved game reserves a short header strip above the grid for the hero name and the ENTER / N hint.
+  const PORTRAITS = {};   // id -> Image, filled lazily after the sheets load (optional art)
   let selectorCache = null;
   function selectorLayout() {
     const W = cvs.width, H = cvs.height, U = Math.min(W, H * 1.6) / 100;
@@ -1847,7 +1848,13 @@ function drawFrodo(sx, sy, s) {
       const player = PLAYER_SHEETS[button.id];
       const anim = player && (player.meta.anims.walk_down || player.meta.anims.idle_down);
       const frame = anim && anim.frames[0];
-      if (frame) {
+      const portrait = PORTRAITS[button.id];   // select-screen portrait (img/poses/<id>_portrait.png); falls back to the walk frame while it loads
+      if (portrait) {
+        const s = Math.min(button.w * .8 / portrait.width, button.h * .74 / portrait.height);
+        const w = portrait.width * s, h = portrait.height * s;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(portrait, button.x + (button.w - w) / 2, button.y + button.h * .03 + (button.h * .74 - h) / 2, w, h);
+      } else if (frame) {
         // Crop the transparent cell margin so the figure, not the cell, fills the card.
         const cropTop = frame.h * .08, fh = frame.h - cropTop;
         const s = Math.min(button.w * .8 / frame.w, button.h * .74 / fh);
@@ -2107,6 +2114,7 @@ function drawFrodo(sx, sy, s) {
       const [sheet, meta] = await Promise.all([load(`img/${sheetName}.png`), fetch(`img/${sheetName}.json`).then(r => r.json())]);
       return [character, { sheet, meta, sheetName }];
     })));
+    PLAYABLE_CHARACTERS.forEach(id => load(`img/poses/${id}_portrait.png`).then(img => { PORTRAITS[id] = img; }, () => { }));   // non-blocking; a missing portrait keeps the walk frame
     const loaded = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
       load('img/map_terrain.png'),
