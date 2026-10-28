@@ -613,6 +613,25 @@
   // placeNameForm) sit directly under the grid and the whole block is centred, always inside the viewport.
   // A saved game reserves a short header strip above the grid for the hero name and the ENTER / N hint.
   const PORTRAITS = {};   // id -> Image, filled lazily after the sheets load (optional art)
+  const POSES = {};       // id -> { img, idx (pose name -> cell), anims }, lazily loaded from img/poses/<id>_poses.png/.json (optional art; 130x190 cells facing right)
+  function loadPoses(id) {
+    if (POSES[id] !== undefined) return; POSES[id] = null;
+    const img = new Image(); img.onload = () => fetch(`img/poses/${id}_poses.json`).then(r => r.json()).then(m => { POSES[id] = { img, idx: Object.fromEntries(m.poses.map((n, i) => [n, i])), anims: m.anims }; }, () => { });
+    img.src = `img/poses/${id}_poses.png`;
+  }
+  // Which pose the hero plays right now: null = normal walk/idle frame. Talking while a dialogue is open, a jump frame in the air,
+  // and an idle routine (think, wave, sit, sleep) after standing still for a while.
+  function heroPose() {
+    const pd = POSES[selectedCharacter]; if (!pd) return null;
+    if (P.moving || P.air || P.z > 0.5) { P.idleSince = time; return P.air ? { pd, name: 'jump', t: 0 } : null; }
+    if (talk) { P.idleSince = time; return (P.dir === 'left' || P.dir === 'right') && !talk.noPose ? { pd, name: 'talk', t: talkT * 6 } : null; }
+    if (P.idleSince === undefined) P.idleSince = time;
+    const idle = time - P.idleSince;
+    if (idle < 5) return null;
+    const ROUTINE = [[5, 'think', 2], [9, 'wave', 7], [15, 'sit', 1.2], [40, 'sleep', 1]];   // [starts at idle seconds, anim, frames per second]
+    let r = null; for (const x of ROUTINE) if (idle >= x[0]) r = x;
+    return r ? { pd, name: r[1], t: (idle - r[0]) * r[2] } : null;
+  }
   let selectorCache = null;
   function selectorLayout() {
     const W = cvs.width, H = cvs.height, U = Math.min(W, H * 1.6) / 100;
@@ -1469,6 +1488,15 @@
     ctx.globalAlpha = zk; shadow(sx, sy, s * zk); ctx.globalAlpha = 1;
     sy -= P.z * s;
     const { meta, sheet } = SPR;
+    const hp = heroPose(), seq = hp && hp.pd.anims[hp.name];
+    if (seq) {   // pose cell: 130x190, facing right, feet 7 px above the bottom; same pixel scale as the walk frame
+      const sc = h / 150, f = { x: hp.pd.idx[seq[Math.floor(hp.t) % seq.length]] * 130, y: 0, w: 130, h: 190 };
+      ctx.save(); ctx.translate(sx, sy + meta.foot * sc); if (P.dir === 'left') ctx.scale(-1, 1);
+      ctx.imageSmoothingEnabled = false;
+      if (shade > .01) ctx.drawImage(shadedFrame(hp.pd.img, f, shade), 0, 0, f.w, f.h, -f.w * sc / 2, -f.h * sc, f.w * sc, f.h * sc);
+      else ctx.drawImage(hp.pd.img, f.x, 0, f.w, f.h, -f.w * sc / 2, -f.h * sc, f.w * sc, f.h * sc);
+      ctx.restore(); return;
+    }
     const anim = spriteAnim(meta, P.moving || P.air ? 'walk_' : 'idle_', P.dir) || spriteAnim(meta, 'walk_', P.dir);
     const f = anim.frames[P.air ? 2 % anim.frames.length : P.moving ? Math.floor(P.step) % anim.frames.length : 0];
     const scale = h / (f.h - meta.foot - 14), w = f.w * scale, hh = f.h * scale;
@@ -2114,6 +2142,7 @@ function drawFrodo(sx, sy, s) {
       const [sheet, meta] = await Promise.all([load(`img/${sheetName}.png`), fetch(`img/${sheetName}.json`).then(r => r.json())]);
       return [character, { sheet, meta, sheetName }];
     })));
+    PLAYABLE_CHARACTERS.forEach(loadPoses);
     PLAYABLE_CHARACTERS.forEach(id => load(`img/poses/${id}_portrait.png`).then(img => { PORTRAITS[id] = img; }, () => { }));   // non-blocking; a missing portrait keeps the walk frame
     const loaded = await Promise.all([
       load('img/map_ground.png'), load('img/map_objects.png'), load('img/map_collide.png'),
@@ -2246,7 +2275,7 @@ function drawFrodo(sx, sy, s) {
       load,
     };
     window.dispatchEvent(new Event('ark-ready'));
-    window.__game = { P, get openingStage() { return openingStage(); }, get heroShade() { return heroShade; }, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
+    window.__game = { P, get heroPoseName() { const h = heroPose(); return h ? h.name : null; }, posesLoaded() { return Object.keys(POSES).filter(k => POSES[k]); }, get openingStage() { return openingStage(); }, get heroShade() { return heroShade; }, get playerCharacter() { return selectedCharacter; }, get playerSheetName() { return SPR ? `${SPR.sheetName}.png` : null; }, get cloudCount() { return CLOUDS.length; }, characterButtonCenter(id) {   // CSS-pixel centre of a selector button (tests)
       const b = characterButtonBounds().find(x => x.id === id), k = cvs.width / Math.max(1, innerWidth);
       return b ? [(b.x + b.w / 2) / k, (b.y + b.h / 2) / k] : null;
     }, get playableCharacters() { return PLAYABLE_CHARACTERS.slice(); }, characterButtonRects() {   // CSS-pixel card rects (tests)
