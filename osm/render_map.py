@@ -775,6 +775,31 @@ if OAK_SPRITE is not None:
     OAK_FOOT = (int(round(np.nonzero(_oa[_oy])[0].mean())), _oy)
 
 
+# Pixel-art village deciduous trees (Tomek 2026-10-27: 'more like a tree, less like a ball'): birch, linden, maple, ash.
+# Variant is picked from a hash of the foot point, so the renderer RNG stream is untouched.
+DECID_SPRITES = []
+for _i in range(4):
+    _p = f'gen/trees_src/decid_{_i}.png'
+    if os.path.exists(_p):
+        _im = Image.open(_p).convert('RGBA'); _a = np.array(_im)[..., 3] > 0; _y = int(np.nonzero(_a.any(1))[0].max())
+        DECID_SPRITES.append((_im, (int(round(np.nonzero(_a[_y])[0].mean())), _y)))
+DECID_WEIGHTS = [1, 3, 3, 2]
+
+
+def decid_sprite(x, y, r):
+    """Paste one pixel-art deciduous tree on the foot point; consumes the same RNG draws as the procedural tree."""
+    pool = [i for i, w in enumerate(DECID_WEIGHTS[:len(DECID_SPRITES)]) for _ in range(w)]
+    im, (fx, fy) = DECID_SPRITES[pool[((int(x) * 73856093) ^ (int(y) * 83492791)) % len(pool)]]
+    sw, sh = im.size
+    gd.ellipse([x - sw * .38, y - 3, x + sw * .38, y + 4], fill=(52, 80, 36))
+    objects_img.alpha_composite(im, (x - fx, y - fy))
+    cy = y - r * 1.25
+    [(x + rnd.uniform(-r * .6, r * .5), cy + rnd.uniform(-r * .7, r * .5)) for _ in range(4)]
+    tree_stats['deciduous'] += 1
+    objects.append(dict(x=int(x - fx - 2), y=int(y - fy - 2), w=sw + 4, h=fy + 8, base=float(y), kind='tree', species='deciduous'))
+    collide[max(0, y - 3):y + 1, max(0, x - 3):x + 4] = True
+
+
 def oak_sprite(x, y, r):
     """Paste the approved oak sprite; consumes the same renderer RNG draws as the procedural tree."""
     sw, sh = OAK_SPRITE.size
@@ -793,6 +818,8 @@ def tree(x, y, r, kind='deciduous'):
     x, y, r = int(x), int(y), int(r)
     if kind == 'oak' and OAK_SPRITE is not None:
         return oak_sprite(x, y, r)
+    if kind == 'deciduous' and DECID_SPRITES:
+        return decid_sprite(x, y, r)
     if kind == 'oak':
         # Oaks are broad-canopied hardwoods; scale the crown and trunk, not the foot.
         r = int(r * 1.25)
@@ -1014,9 +1041,14 @@ for x, y in cand:
             gd.rectangle([ax_ - 2, ay_ - 2, ax_ + 2, ay_], fill=(74, 54, 31))
     else:
         base = hexc(rnd.choice(['#5ca04a', '#519343', '#68ad52', '#478a3e']))
-        gd.ellipse([x - r, y - r, x + r, y + r], fill=shade(base, .75), outline=(20, 44, 22))
-        gd.ellipse([x - int(.8 * r), y - int(.9 * r), x + int(.6 * r), y + int(.5 * r)], fill=base)
-        gd.ellipse([x - int(.55 * r), y - int(.75 * r), x + int(.1 * r), y - int(.15 * r)], fill=shade(base, 1.3))
+        if DECID_SPRITES:   # forest broadleaf trees use the same pixel-art sprites as the village (no RNG draws)
+            _pool = [i for i, w in enumerate(DECID_WEIGHTS[:len(DECID_SPRITES)]) for _ in range(w)]
+            _im, (_fx, _fy) = DECID_SPRITES[_pool[((int(x) * 73856093) ^ (int(y) * 83492791)) % len(_pool)]]
+            ground.paste(_im.convert('RGB'), (int(x) - _fx, int(y) - _fy), _im)
+        else:
+            gd.ellipse([x - r, y - r, x + r, y + r], fill=shade(base, .75), outline=(20, 44, 22))
+            gd.ellipse([x - int(.8 * r), y - int(.9 * r), x + int(.6 * r), y + int(.5 * r)], fill=base)
+            gd.ellipse([x - int(.55 * r), y - int(.75 * r), x + int(.1 * r), y - int(.15 * r)], fill=shade(base, 1.3))
     tree_stats[kind] += 1
     forest_tree_stats[kind] += 1
 

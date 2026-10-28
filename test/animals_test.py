@@ -338,13 +338,15 @@ with sync_playwright() as p:
     # 4) visible footprint: pixel bbox around the isolated mouse must match the
     #    atlas art inside the quarter-size cell (25% of baseline, not 50%).
     px_mouse = page.evaluate(B03_PIXEL_JS, "mouse")
-    atlas_art = Image.open(ROOT / "docs/img/critters.png").convert("RGBA").crop((0, 6 * 64, 64, 7 * 64)).getchannel("A").getbbox()
-    cell_w = atlas_art[2] - atlas_art[0] + 1
-    cell_h = atlas_art[3] - atlas_art[1] + 1
-    exp_px_w = cell_w / 64 * mouse_r["dw"]
-    exp_px_h = cell_h / 64 * mouse_r["dh"]
-    assert abs(px_mouse["w"] - exp_px_w) <= 3, ("B03 pixel width mismatch", px_mouse, "expected", exp_px_w)
-    assert abs(px_mouse["h"] - exp_px_h) <= 3, ("B03 pixel height mismatch", px_mouse, "expected", exp_px_h)
+    # An idle mouse draws frame 2 or 3 (critterFrame), so accept the bbox of either idle frame.
+    row_img = Image.open(ROOT / "docs/img/critters.png").convert("RGBA").crop((0, 6 * 64, 256, 7 * 64)).getchannel("A")
+    ok_w = ok_h = False
+    for fi in (2, 3):
+        art = row_img.crop((fi * 64, 0, fi * 64 + 64, 64)).getbbox()
+        exp_px_w = (art[2] - art[0] + 1) / 64 * mouse_r["dw"]; exp_px_h = (art[3] - art[1] + 1) / 64 * mouse_r["dh"]
+        ok_w |= abs(px_mouse["w"] - exp_px_w) <= 3; ok_h |= abs(px_mouse["h"] - exp_px_h) <= 3
+    assert ok_w, ("B03 pixel width mismatch", px_mouse)
+    assert ok_h, ("B03 pixel height mismatch", px_mouse)
 
     facts = page.evaluate("""async () => {
       const A = window.ARK, W = window.__worldLife, kinds = ['mouse','hare','chicken','dog','pig','boar','fox','stork','bird','butterfly'];
