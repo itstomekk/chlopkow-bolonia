@@ -23,7 +23,7 @@ window.addEventListener('ark-ready', () => {
   const L = PL ? {
     flag: { pig: 'ŚWINKA', dogs: 'PSY', skeet: 'TARCZA', ducks: 'KACZKI', mowing: 'KOSZENIE' },
     intro: {
-      pig: ['Dziadek Zdzisiek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
+      pig: ['Dziadek Gienek: „Świnka Pepa znowu uciekła z chlewika! Złap ją w 30 sekund.”', 'Dziadek: „Na początku jest szybka jak zając, ale szybko się męczy. Zapędź ją pod płot.”'],
       dogs: ['Marcin: „Kury pana Stefana zniosły na pastwisku 6 jajek, ale pilnują ich psy.”', 'Marcin: „Kiedy pies warknie „!”, zaraz skoczy. Wtedy przeskocz go albo uciekaj w bok!”'],
       skeet: ['Bukała: „Tu jest tarcza, nie gra w kurki. Sprawdź oko na PPM Strzelectwie.”', !coarse() ? 'Bukała: „Celuj myszką albo strzałkami, strzelaj SPACJĄ lub kliknięciem. Dwie lufy, potem przeładowanie. Traf 10 z 15!”' : 'Bukała: „Dotknij tarczy, żeby strzelić. Dwie lufy, potem przeładowanie. Traf 10 z 15!”'],
       ducks: ['Bukała: „Grę w kaczki przeniosłem na południowy wschód, nad mokradła.”', 'Bukała: „Kaczki lecą łukiem nad polami. Traf 10 z 15, ale nie strzelaj w nic poza tarczą.”'],
@@ -39,7 +39,7 @@ window.addEventListener('ark-ready', () => {
   } : {
     flag: { pig: 'PIGGY', dogs: 'DOGS', skeet: 'TARGET', ducks: 'DUCKS', mowing: 'MOWING' },
     intro: {
-      pig: ['Grandpa Zdzisiek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
+      pig: ['Grandpa Gienek: "Pepa the piglet escaped again! Catch her in 30 seconds."', 'Grandpa: "She\'s quick as a hare at first but tires fast. Corner her against the fence."'],
       dogs: ['Marcin: "Mr Stefan\'s hens laid 6 eggs on the meadow, but his dogs guard them."', 'Marcin: "When a dog growls "!", it is about to lunge. Jump over it or dodge sideways!"'],
       skeet: ['Bukała: "This is a target, not a moorhen game. Test your aim at Bukała\'s PPM range."', !coarse() ? 'Bukała: "Aim with the mouse or arrows, shoot with SPACE or a click. Two barrels, then reload. Hit 10 of 15!"' : 'Bukała: "Tap the target to shoot. Two barrels, then reload. Hit 10 of 15!"'],
       ducks: ['Bukała: "The duck game moved south-east, out by the wetlands."', 'Bukała: "Ducks fly in arcs over the fields. Hit 10 of 15, and keep your aim on the targets."'],

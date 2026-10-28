@@ -80,7 +80,7 @@ with sync_playwright() as p:
 
     # Every card has a default name: Arek/Marcin/... keep person casing, the rest use their selector label.
     expected = {"arek": "Arek", "marcin": "Marcin", "damian": "Damian", "edytka": "Edytka", "renik": "DJ Renik", "bercik": "BERCIK",
-                "grandpa": "DZIADEK ZDZISIEK", "halina": "BABCIA IRENKA", "michal": "BUKAŁA", "wesoly_swiat": "WESOŁYCH ŚWIĄT"}
+                "grandpa": "DZIADEK GIENEK", "halina": "BABCIA IRENKA", "michal": "BUKAŁA", "wesoly_swiat": "WESOŁYCH ŚWIĄT"}
     for cid in page.evaluate("__game.playableCharacters"):
         page.mouse.click(*page.evaluate("id => __game.characterButtonCenter(id)", cid))
         placeholder = page.locator("#player-name-input").get_attribute("placeholder")

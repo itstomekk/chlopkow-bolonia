@@ -29,7 +29,7 @@
     pl: {
       title: 'CHŁOPKÓW POLONIA', start: 'NACIŚNIJ ENTER / DOTKNIJ', cont: 'KONTYNUUJ: ENTER · NOWA GRA: N',
       help: 'STRZAŁKI / WASD — CHODZENIE · SHIFT — BIEG · SPACJA — ROZMOWA / SKOK · M — MAPA · K — MUZYKA',
-      names: { szept: 'SZEPT', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK ZDZISIEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA', zosia: 'ZOSIA' },
+      names: { szept: 'SZEPT', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'DZIADEK GIENEK', halina: 'BABCIA IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA', zosia: 'ZOSIA' },
       edytka0: ['Frodo! Tęskniłam za nim! Przyprowadzisz go do mnie?', 'Tylko on nigdy nie wytrzyma długo. Po paru chwilach i tak ucieka do ciebie.', 'Przyprowadź mi go trzy razy, dobrze?'],
       edytkaNoDog: ['A gdzie Frodo? Przyprowadź go tu, blisko mnie.'],
       edytkaVisit: n => [`Frodo! Chodź tu, piesku! (${n}/3)`],
@@ -127,7 +127,7 @@
     en: {
       title: 'CHŁOPKÓW POLONIA', start: 'PRESS ENTER / TAP', cont: 'CONTINUE: ENTER · NEW GAME: N',
       help: 'ARROWS / WASD — WALK · SHIFT — RUN · SPACE — TALK / JUMP · M — MAP · K — MUSIC',
-      names: { szept: 'WHISPER', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA ZDZISIEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA', zosia: 'ZOSIA' },
+      names: { szept: 'WHISPER', arek: 'AREK', kasia: 'KASIA', marcin: 'MARCIN', damian: 'DAMIAN', grandpa: 'GRANDPA GIENEK', halina: 'GRANNY IRENKA', kuba: 'KUBA', soltys: 'SOŁTYS (VILLAGE HEAD)', michal: 'BUKAŁA', mateusz: 'MATEUSZ', patryk: 'PATRYK', edytka: 'EDYTKA', wesoly_swiat: 'WESOŁYCH ŚWIĄT', renik: 'DJ RENIK', bercik: 'BERCIK', wiesio: 'WIESIO', kostek: 'KOSTEK', pawel: 'PAWEŁ', darek: 'DAREK', iwona: 'IWONA', piekarz: 'PIEKARZ', marek: 'MAREK', waldek: 'WALDEK', bosiowa: 'BOSIOWA', zosia: 'ZOSIA' },
       edytka0: ['Frodo! I missed him so much! Will you bring him to me?', "He never stays long, though. After a little while he runs back to you anyway.", 'Bring him to me three times, okay?'],
       edytkaNoDog: ["Where's Frodo? Bring him here, close to me."],
       edytkaVisit: n => [`Frodo! Come here, doggy! (${n}/3)`],
@@ -169,7 +169,7 @@
       grandpa1: n => [`You've helped ${n} of 3 friends. Come back when you're done.`],
       grandpa2: ['You helped the whole crew. Good job, Arek.', 'Here are the keys to my Ursus. Sundays only, and only to the hill.', "And don't tell Granny Irenka."],
       apple: 'APPLE', mushroom: 'MUSHROOM', trash: 'TRASH BAG', cap: "DAMIAN'S CAP", gotCap: ["Damian's cap! A bit dusty, but in one piece."],
-      quests: ['10 mushrooms for Kasia', "Damian's cap", 'Orangeade for Marcin', 'Talk to Grandpa Zdzisiek'],
+      quests: ['10 mushrooms for Kasia', "Damian's cap", 'Orangeade for Marcin', 'Talk to Grandpa Gienek'],
       candles: ['Gold candles on a stand by the altar. It smells of wax and silence.'],
       confessionHint: ['The confessional. A quiet whisper comes through the grille. Probably. Or it is the wind in the organ.', 'WHISPER: "Who seeks, shall find. But first, count. What burns. What sits. What shines in colour. What one climbs."', 'Under the grille someone carved four little rings with digits. A cipher! Time to look around the church and count.'],
       clue: {
@@ -1863,7 +1863,7 @@ function drawFrodo(sx, sy, s) {
         ctx.drawImage(player.sheet, frame.x, frame.y + cropTop, frame.w, fh,
           button.x + (button.w - w) / 2, button.y + button.h * .03, w, h);
       }
-      // Name: one line, or two lines for long names (DZIADEK ZDZISIEK, WESOŁYCH ŚWIĄT) instead of a tiny font.
+      // Name: one line, or two lines for long names (DZIADEK GIENEK, WESOŁYCH ŚWIĄT) instead of a tiny font.
       const label = T.names[button.id] || button.id.toUpperCase();
       const maxW = button.w * .92, stripH = button.h * .21, minPx = 9 * (cvs.width / Math.max(1, innerWidth));
       let fontPx = Math.max(minPx, button.w * .12), lines = [label];
