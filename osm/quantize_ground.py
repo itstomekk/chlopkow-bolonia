@@ -43,7 +43,9 @@ def quantize(ground, region):
     base = baseline() if region else None
     if base is None or base.size != ground.size:
         return plain(ground)
-    x0, y0, x1, y1 = region
+    rects = [region] if isinstance(region[0], int) else list(region)   # one rect, or a list of rects (Wapnica + forest sprites)
+    R = np.zeros((ground.height, ground.width), bool)
+    for x0, y0, x1, y1 in rects: R[y0:y1, x0:x1] = True
     idx = np.array(base)                                   # released indices
     pal = np.array(base.getpalette()[:768], np.int32).reshape(-1, 3)
     pal = np.concatenate([pal, np.zeros((256 - len(pal), 3), np.int32)])
@@ -58,13 +60,13 @@ def quantize(ground, region):
         c = arr[ys:ys + 512].astype(np.int64)
         k = (c[..., 0] << 16) | (c[..., 1] << 8) | c[..., 2]
         m = np.ones(k.shape, bool)
-        if ys < y1 and ys + 512 > y0: m[max(0, y0 - ys):y1 - ys, x0:x1] = False
+        m &= ~R[ys:ys + 512]
         pairs.update(np.unique((k[m] << 8) | idx[ys:ys + 512][m]).tolist())
     pairs = np.array(sorted(pairs), np.int64)
     pk, pi = pairs >> 8, (pairs & 255).astype(np.uint8)
     uniq, first = np.unique(pk, return_index=True)
     print(f'quantize_ground: {len(uniq)} colours known outside the region, {len(pk) - len(uniq)} of them with a second index')
-    c = arr[y0:y1, x0:x1].astype(np.int64)
+    c = arr[R].astype(np.int64)
     key = (c[..., 0] << 16) | (c[..., 1] << 8) | c[..., 2]
     uk, inv, cnt = np.unique(key.ravel(), return_inverse=True, return_counts=True)
     pos = np.searchsorted(uniq, uk); pos[pos == len(uniq)] = 0
@@ -78,9 +80,9 @@ def quantize(ground, region):
     cand = np.nonzero(used)[0]
     for j in left:
         lut[j] = cand[int(np.argmin(((pal[cand] - ucol[j]) ** 2).sum(1)))]
-    print(f'quantize_ground: region {region}: {len(uk)} colours, {len(new)} new (exact slots: {len(new) - len(left)}, nearest: '
+    print(f'quantize_ground: {len(rects)} region(s): {len(uk)} colours, {len(new)} new (exact slots: {len(new) - len(left)}, nearest: '
           f'{len(left)} = {int(cnt[left].sum()) if len(left) else 0} px)')
-    idx[y0:y1, x0:x1] = lut[inv].reshape(key.shape).astype(np.uint8)
+    idx[R] = lut[inv].reshape(key.shape).astype(np.uint8)
     out = Image.fromarray(idx, 'P'); out.putpalette(pal.astype(np.uint8).ravel().tolist())
     return out
 

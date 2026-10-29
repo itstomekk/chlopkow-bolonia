@@ -986,6 +986,7 @@ for x, y, r, kind in kept:
 fy, fx = np.nonzero(forest_mask)
 g2 = np.array(ground).astype(np.float32); g2[forest_mask] = hexc('#1f4f24'); ground = Image.fromarray(g2.astype(np.uint8)); gd = ImageDraw.Draw(ground)
 cand = list(zip(fx[::37], fy[::37])); rnd.shuffle(cand); cand = sorted(cand[:2600], key=lambda v: v[1])
+FOREST_SPRITE_RECTS = []
 forest_tree_stats = {'conifer': 0, 'oak': 0, 'deciduous': 0}
 for x, y in cand:
     r = int(rnd.uniform(7, 12))
@@ -1045,6 +1046,7 @@ for x, y in cand:
             _pool = [i for i, w in enumerate(DECID_WEIGHTS[:len(DECID_SPRITES)]) for _ in range(w)]
             _im, (_fx, _fy) = DECID_SPRITES[_pool[((int(x) * 73856093) ^ (int(y) * 83492791)) % len(_pool)]]
             ground.paste(_im.convert('RGB'), (int(x) - _fx, int(y) - _fy), _im)
+            FOREST_SPRITE_RECTS.append((max(0, int(x) - _fx - 1), max(0, int(y) - _fy - 1), min(W, int(x) - _fx + _im.width + 1), min(H, int(y) - _fy + _im.height + 1)))
         else:
             gd.ellipse([x - r, y - r, x + r, y + r], fill=shade(base, .75), outline=(20, 44, 22))
             gd.ellipse([x - int(.8 * r), y - int(.9 * r), x + int(.6 * r), y + int(.5 * r)], fill=base)
@@ -1111,7 +1113,7 @@ pois.append(dict(key='bus', x=_budka_x, y=_budka_y, name='BUDKA'))
 _ry, _rx = np.nonzero(WAP_ZONE | PIT_OLD_MASK)
 WAP_REGION = (max(0, int(_rx.min()) - 90), max(0, int(_ry.min()) - 90), min(W, int(_rx.max()) + 91), min(H, int(_ry.max()) + 91))
 print('wapnica region', WAP_REGION)
-quantize_ground.save(ground, 'docs/img/map_ground.png', WAP_REGION)
+quantize_ground.save(ground, 'docs/img/map_ground.png', [WAP_REGION] + FOREST_SPRITE_RECTS)
 objects_img.save('docs/img/map_objects.png')
 low &= ~(pm | dm)   # roads and tracks cross the Białka on bridges: walkable, not a jump
 collide &= ~(pm | dm)   # nothing solid on roads/tracks (woods and bridges included)
